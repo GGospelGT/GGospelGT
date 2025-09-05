@@ -214,3 +214,27 @@ class Category(BaseModel):
     color: str
     tradesperson_count: int = 0
     avg_price_range: str = ""
+
+# Portfolio Models
+class PortfolioItemCreate(BaseModel):
+    title: str = Field(..., min_length=3, max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+    category: PortfolioItemCategory
+    image_url: str
+    image_filename: str
+
+class PortfolioItem(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    tradesperson_id: str
+    title: str
+    description: Optional[str] = None
+    category: PortfolioItemCategory
+    image_url: str
+    image_filename: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    is_public: bool = True
+
+class PortfolioResponse(BaseModel):
+    items: List[PortfolioItem]
+    total: int
