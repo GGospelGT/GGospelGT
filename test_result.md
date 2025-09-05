@@ -118,17 +118,17 @@ backend:
         comment: "✅ Complete interest-based lead generation backend implemented: Interest models (InterestCreate, Interest, InterestResponse, InterestStatus), comprehensive API endpoints (/show-interest, /job/{job_id}, /share-contact/{interest_id}, /my-interests, /pay-access/{interest_id}, /contact-details/{job_id}), database methods for interest CRUD operations, job-based authorization system, payment integration placeholder for Paystack. Full workflow: tradesperson shows interest → homeowner reviews → contact sharing → payment for access."
 
 frontend:
-  - task: "Quote Components (QuoteForm, QuotesList)"
+  - task: "Show Interest Frontend Integration - BrowseJobsPage"
     implemented: true
-    working: true
-    file: "/app/frontend/src/components/quotes/"
+    working: "NA"
+    file: "/app/frontend/src/pages/BrowseJobsPage.jsx"
     stuck_count: 0
     priority: "high" 
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
+      - working: "NA"
         agent: "main"
-        comment: "QuoteForm and QuotesList components are fully implemented with Nigerian branding"
+        comment: "✅ Updated BrowseJobsPage to implement Show Interest functionality: Replaced quote submission with 'Show Interest' button using HandHeart icon, integrated interestsAPI.showInterest() for backend communication, updated job display to show interests_count instead of quotes_count, updated page description to reflect lead generation model, removed all quote-related functions and QuoteForm references, added proper authentication checks for tradesperson-only access. Complete pivot from quote system to interest-based lead generation."
 
   - task: "My Jobs & Quotes Page for Homeowners"
     implemented: true
