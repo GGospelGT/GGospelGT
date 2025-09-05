@@ -69,6 +69,38 @@ const ProfilePage = () => {
     }
   }, [user, isAuthenticated, isTradesperson]);
 
+  const loadPortfolio = async () => {
+    try {
+      setPortfolioLoading(true);
+      const response = await portfolioAPI.getMyPortfolio();
+      setPortfolioItems(response.items || []);
+    } catch (error) {
+      console.error('Failed to load portfolio:', error);
+      toast({
+        title: "Failed to load portfolio",
+        description: "There was an error loading your portfolio items.",
+        variant: "destructive",
+      });
+    } finally {
+      setPortfolioLoading(false);
+    }
+  };
+
+  const handlePortfolioUploadSuccess = (newItem) => {
+    setPortfolioItems(prev => [newItem, ...prev]);
+    setShowUploadForm(false);
+  };
+
+  const handlePortfolioUpdate = (updatedItem) => {
+    setPortfolioItems(prev => 
+      prev.map(item => item.id === updatedItem.id ? updatedItem : item)
+    );
+  };
+
+  const handlePortfolioDelete = (deletedItemId) => {
+    setPortfolioItems(prev => prev.filter(item => item.id !== deletedItemId));
+  };
+
   const handleEditToggle = () => {
     if (isEditing) {
       // Reset edit data to original values
