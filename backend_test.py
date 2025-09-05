@@ -739,20 +739,20 @@ class BackendTester:
         if 'portfolio_item' in self.test_data:
             item_id = self.test_data['portfolio_item']['id']
             
-            # Test updating portfolio item details
-            update_data = {
+            # Test updating portfolio item details using query parameters
+            params = {
                 'title': 'Updated Bathroom Installation Project',
                 'description': 'Updated description with more details about the modern bathroom renovation project.',
                 'category': 'plumbing',
-                'is_public': False
+                'is_public': 'false'
             }
             
             response = self.make_request("PUT", f"/portfolio/{item_id}", 
-                                       json=update_data, auth_token=tradesperson_token)
+                                       params=params, auth_token=tradesperson_token)
             if response.status_code == 200:
                 updated_item = response.json()
-                if (updated_item['title'] == update_data['title'] and 
-                    updated_item['is_public'] == update_data['is_public']):
+                if (updated_item['title'] == params['title'] and 
+                    updated_item['is_public'] == False):
                     self.log_result("Portfolio item update", True, "All fields updated correctly")
                 else:
                     self.log_result("Portfolio item update", False, "Fields not updated correctly")
@@ -762,7 +762,7 @@ class BackendTester:
             # Test unauthorized update (homeowner trying to update)
             if 'homeowner' in self.auth_tokens:
                 response = self.make_request("PUT", f"/portfolio/{item_id}", 
-                                           json={'title': 'Hacked'}, 
+                                           params={'title': 'Hacked'}, 
                                            auth_token=self.auth_tokens['homeowner'])
                 if response.status_code == 403:
                     self.log_result("Unauthorized portfolio update prevention", True, 
