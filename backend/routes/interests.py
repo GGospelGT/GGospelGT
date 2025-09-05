@@ -20,6 +20,7 @@ router = APIRouter(prefix="/api/interests", tags=["interests"])
 @router.post("/show-interest", response_model=Interest)
 async def show_interest(
     interest_data: InterestCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_tradesperson)
 ):
     """Tradesperson shows interest in a job"""
@@ -33,32 +34,41 @@ async def show_interest(
         if job.get("status") != "active":
             raise HTTPException(status_code=400, detail="Job is no longer active")
         
+        # Check if tradesperson has already shown interest
+        existing_interest = await database.get_interest_by_job_and_tradesperson(
+            interest_data.job_id, current_user.id
+        )
+        if existing_interest:
+            raise HTTPException(status_code=400, detail="You have already shown interest in this job")
+        
         # Create interest record
-        interest_record = {
-            "id": str(uuid.uuid4()),
-            "job_id": interest_data.job_id,
-            "tradesperson_id": current_user.id,
-            "status": InterestStatus.INTERESTED,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
-            "contact_shared_at": None,
-            "payment_made_at": None,
-            "access_fee": None
-        }
+        interest = Interest(
+            id=str(uuid.uuid4()),
+            job_id=interest_data.job_id,
+            tradesperson_id=current_user.id,
+            status=InterestStatus.INTERESTED,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
         
-        created_interest = await database.create_interest(interest_record)
+        # Save to database
+        result = await database.create_interest(interest)
         
-        return Interest(**created_interest)
+        # Add background task to send notification to homeowner
+        background_tasks.add_task(
+            _notify_homeowner_new_interest,
+            job=job,
+            tradesperson=current_user.dict(),
+            interest_id=interest.id
+        )
+        
+        return result
         
     except HTTPException:
         raise
     except Exception as e:
-        if "Already showed interest" in str(e):
-            raise HTTPException(status_code=400, detail="You have already shown interest in this job")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to show interest: {str(e)}"
-        )
+        logger.error(f"Error showing interest: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to show interest")
 
 @router.get("/job/{job_id}", response_model=InterestResponse)
 async def get_job_interested_tradespeople(
