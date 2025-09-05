@@ -678,5 +678,163 @@ class Database:
         from datetime import datetime
         return datetime.utcnow()
 
+    # Message Management Methods
+    async def create_message(self, message_data: dict) -> dict:
+        """Create a new message"""
+        await self.messages_collection.insert_one(message_data)
+        return message_data
+
+    async def get_message_by_id(self, message_id: str) -> dict:
+        """Get message by ID"""
+        return await self.messages_collection.find_one({"id": message_id})
+
+    async def get_job_messages(self, job_id: str, user_id: str, skip: int = 0, limit: int = 50) -> List[dict]:
+        """Get messages for a specific job conversation"""
+        # Get messages where user is either sender or recipient
+        cursor = self.messages_collection.find({
+            "job_id": job_id,
+            "$or": [
+                {"sender_id": user_id},
+                {"recipient_id": user_id}
+            ]
+        }).sort("created_at", 1).skip(skip).limit(limit)
+        
+        messages = await cursor.to_list(length=None)
+        
+        # Convert ObjectId to string
+        for message in messages:
+            if '_id' in message:
+                message['_id'] = str(message['_id'])
+        
+        return messages
+
+    async def get_job_messages_count(self, job_id: str) -> int:
+        """Get total count of messages for a job"""
+        return await self.messages_collection.count_documents({"job_id": job_id})
+
+    async def get_conversation_summary(self, job_id: str, user_id: str) -> dict:
+        """Get conversation summary for a job"""
+        # Get the job details
+        job = await self.get_job_by_id(job_id)
+        if not job:
+            raise Exception("Job not found")
+        
+        # Determine the other user in the conversation
+        is_homeowner = job.get("homeowner", {}).get("email") == (await self.get_user_by_id(user_id))["email"]
+        
+        if is_homeowner:
+            # For homeowner, find the tradesperson they're talking to
+            # Get the latest message to determine the other party
+            latest_message = await self.messages_collection.find_one(
+                {
+                    "job_id": job_id,
+                    "$or": [{"sender_id": user_id}, {"recipient_id": user_id}]
+                },
+                sort=[("created_at", -1)]
+            )
+            
+            if latest_message:
+                other_user_id = latest_message["sender_id"] if latest_message["recipient_id"] == user_id else latest_message["recipient_id"]
+                other_user = await self.get_user_by_id(other_user_id)
+            else:
+                # No messages yet, use the job owner for now
+                other_user = await self.get_user_by_id(user_id)
+                other_user_id = user_id
+        else:
+            # For tradesperson, the other user is always the homeowner
+            homeowner_email = job.get("homeowner", {}).get("email")
+            other_user = await self.get_user_by_email(homeowner_email)
+            other_user_id = other_user["id"]
+        
+        # Get last message
+        last_message = await self.messages_collection.find_one(
+            {
+                "job_id": job_id,
+                "$or": [{"sender_id": user_id}, {"recipient_id": user_id}]
+            },
+            sort=[("created_at", -1)]
+        )
+        
+        # Get unread count
+        unread_count = await self.messages_collection.count_documents({
+            "job_id": job_id,
+            "recipient_id": user_id,
+            "read_at": None
+        })
+        
+        return {
+            "job_id": job_id,
+            "job_title": job.get("title", ""),
+            "other_user_id": other_user_id,
+            "other_user_name": other_user.get("name", ""),
+            "other_user_role": other_user.get("role", ""),
+            "last_message": last_message,
+            "unread_count": unread_count,
+            "created_at": job.get("created_at"),
+            "updated_at": last_message.get("created_at") if last_message else job.get("created_at")
+        }
+
+    async def get_user_conversations(self, user_id: str) -> List[dict]:
+        """Get all conversations for a user"""
+        # Get all jobs where user has sent or received messages
+        pipeline = [
+            {
+                "$match": {
+                    "$or": [
+                        {"sender_id": user_id},
+                        {"recipient_id": user_id}
+                    ]
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$job_id",
+                    "last_message_time": {"$max": "$created_at"},
+                    "message_count": {"$sum": 1}
+                }
+            },
+            {"$sort": {"last_message_time": -1}}
+        ]
+        
+        conversation_jobs = await self.messages_collection.aggregate(pipeline).to_list(length=None)
+        
+        conversations = []
+        for conv in conversation_jobs:
+            try:
+                job_id = conv["_id"]
+                summary = await self.get_conversation_summary(job_id, user_id)
+                conversations.append(summary)
+            except Exception as e:
+                print(f"Error getting conversation summary for job {job_id}: {e}")
+                continue
+        
+        return conversations
+
+    async def mark_message_as_read(self, message_id: str) -> bool:
+        """Mark a message as read"""
+        result = await self.messages_collection.update_one(
+            {"id": message_id},
+            {
+                "$set": {
+                    "status": "read",
+                    "read_at": datetime.utcnow(),
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        return result.modified_count > 0
+
+    async def get_unread_messages_count(self, user_id: str) -> int:
+        """Get total unread messages count for user"""
+        return await self.messages_collection.count_documents({
+            "recipient_id": user_id,
+            "read_at": None
+        })
+
+    @property
+    def messages_collection(self):
+        """Access to messages collection"""
+        return self.database.messages
+
 # Global database instance
 database = Database()
