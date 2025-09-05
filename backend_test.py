@@ -874,6 +874,375 @@ class BackendTester:
             self.log_result("Missing required fields handling", False, 
                            f"Expected 400/422, got {response.status_code}")
 
+    def test_communication_system(self):
+        """Test comprehensive messaging system for job-based communication"""
+        print("\n=== Testing Communication System ===")
+        
+        if 'homeowner' not in self.auth_tokens or 'tradesperson' not in self.auth_tokens:
+            self.log_result("Communication system tests", False, "Missing authentication tokens")
+            return
+        
+        if 'homeowner_job' not in self.test_data:
+            self.log_result("Communication system tests", False, "No job available for testing")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        job_id = self.test_data['homeowner_job']['id']
+        homeowner_id = self.test_data['homeowner_user']['id']
+        tradesperson_id = self.test_data['tradesperson_user']['id']
+        
+        # Test 1: Send text message from homeowner to tradesperson
+        message_data = {
+            'job_id': job_id,
+            'recipient_id': tradesperson_id,
+            'content': 'Hello! I saw your quote for my bathroom plumbing project. I have a few questions about the timeline and materials you plan to use. When would be a good time to discuss the details?',
+            'message_type': 'text'
+        }
+        
+        response = self.session.post(
+            f"{self.base_url}/messages/send",
+            data=message_data,
+            headers={'Authorization': f'Bearer {homeowner_token}'}
+        )
+        
+        if response.status_code == 200:
+            sent_message = response.json()
+            required_fields = ['id', 'job_id', 'sender_id', 'recipient_id', 'content', 
+                             'message_type', 'status', 'created_at']
+            missing_fields = [field for field in required_fields if field not in sent_message]
+            
+            if not missing_fields and sent_message['sender_id'] == homeowner_id:
+                self.log_result("Send text message (homeowner to tradesperson)", True, 
+                               f"Message ID: {sent_message['id']}")
+                self.test_data['homeowner_message'] = sent_message
+            else:
+                self.log_result("Send text message (homeowner to tradesperson)", False, 
+                               f"Missing fields: {missing_fields} or wrong sender")
+        else:
+            self.log_result("Send text message (homeowner to tradesperson)", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 2: Send reply message from tradesperson to homeowner
+        reply_data = {
+            'job_id': job_id,
+            'recipient_id': homeowner_id,
+            'content': 'Thank you for your interest! I would be happy to discuss the project details. I am available for a call tomorrow afternoon or this weekend. For materials, I use high-quality fixtures and all work comes with a 2-year warranty.',
+            'message_type': 'text'
+        }
+        
+        response = self.session.post(
+            f"{self.base_url}/messages/send",
+            data=reply_data,
+            headers={'Authorization': f'Bearer {tradesperson_token}'}
+        )
+        
+        if response.status_code == 200:
+            reply_message = response.json()
+            if reply_message['sender_id'] == tradesperson_id and reply_message['recipient_id'] == homeowner_id:
+                self.log_result("Send reply message (tradesperson to homeowner)", True, 
+                               f"Message ID: {reply_message['id']}")
+                self.test_data['tradesperson_message'] = reply_message
+            else:
+                self.log_result("Send reply message (tradesperson to homeowner)", False, 
+                               "Wrong sender or recipient")
+        else:
+            self.log_result("Send reply message (tradesperson to homeowner)", False, 
+                           f"Status: {response.status_code}")
+        
+        # Test 3: Send image message with file upload
+        import io
+        from PIL import Image
+        
+        # Create a test image
+        test_image = Image.new('RGB', (200, 150), color='blue')
+        img_buffer = io.BytesIO()
+        test_image.save(img_buffer, format='JPEG')
+        img_buffer.seek(0)
+        
+        files = {'file': ('bathroom_plan.jpg', img_buffer, 'image/jpeg')}
+        data = {
+            'job_id': job_id,
+            'recipient_id': tradesperson_id,
+            'content': 'Here is the current bathroom layout. As you can see, we need to relocate the plumbing for the new shower installation.',
+            'message_type': 'image'
+        }
+        
+        response = self.session.post(
+            f"{self.base_url}/messages/send",
+            files=files,
+            data=data,
+            headers={'Authorization': f'Bearer {homeowner_token}'}
+        )
+        
+        if response.status_code == 200:
+            image_message = response.json()
+            if (image_message['message_type'] == 'image' and 
+                image_message['image_url'] and 
+                image_message['image_filename']):
+                self.log_result("Send image message", True, 
+                               f"Image URL: {image_message['image_url']}")
+                self.test_data['image_message'] = image_message
+            else:
+                self.log_result("Send image message", False, "Missing image data")
+        else:
+            self.log_result("Send image message", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 4: Test unauthorized messaging (user without quote trying to message)
+        # Create another tradesperson who hasn't quoted
+        other_tradesperson_data = {
+            "name": "Chidi Okwu",
+            "email": f"chidi.okwu.{uuid.uuid4().hex[:8]}@tradework.com",
+            "password": "SecurePass123",
+            "phone": "08198765432",
+            "location": "Port Harcourt, Rivers State",
+            "postcode": "500001",
+            "trade_categories": ["Electrical"],
+            "experience_years": 5,
+            "company_name": "Okwu Electrical Services",
+            "description": "Professional electrician with 5 years experience.",
+            "certifications": ["Licensed Electrician"]
+        }
+        
+        response = self.make_request("POST", "/auth/register/tradesperson", json=other_tradesperson_data)
+        if response.status_code == 200:
+            # Login the other tradesperson
+            login_response = self.make_request("POST", "/auth/login", 
+                                             json={"email": other_tradesperson_data["email"], 
+                                                  "password": other_tradesperson_data["password"]})
+            if login_response.status_code == 200:
+                other_tradesperson_token = login_response.json()['access_token']
+                
+                # Try to send message without having quoted
+                unauthorized_data = {
+                    'job_id': job_id,
+                    'recipient_id': homeowner_id,
+                    'content': 'I would like to work on this project.',
+                    'message_type': 'text'
+                }
+                
+                response = self.session.post(
+                    f"{self.base_url}/messages/send",
+                    data=unauthorized_data,
+                    headers={'Authorization': f'Bearer {other_tradesperson_token}'}
+                )
+                
+                if response.status_code == 403:
+                    self.log_result("Unauthorized messaging prevention", True, 
+                                   "Correctly denied access to non-quoted tradesperson")
+                else:
+                    self.log_result("Unauthorized messaging prevention", False, 
+                                   f"Expected 403, got {response.status_code}")
+        
+        # Test 5: Get job conversation messages
+        response = self.make_request("GET", f"/messages/job/{job_id}", 
+                                   auth_token=homeowner_token)
+        if response.status_code == 200:
+            conversation_data = response.json()
+            required_fields = ['messages', 'conversation', 'pagination']
+            missing_fields = [field for field in required_fields if field not in conversation_data]
+            
+            if not missing_fields:
+                messages = conversation_data['messages']
+                if len(messages) >= 2:  # Should have at least 2 messages we sent
+                    self.log_result("Get job conversation messages", True, 
+                                   f"Found {len(messages)} messages")
+                    
+                    # Verify message ordering (chronological)
+                    if len(messages) > 1:
+                        first_msg_time = messages[0]['created_at']
+                        last_msg_time = messages[-1]['created_at']
+                        if first_msg_time <= last_msg_time:
+                            self.log_result("Message chronological ordering", True, 
+                                           "Messages ordered correctly by time")
+                        else:
+                            self.log_result("Message chronological ordering", False, 
+                                           "Messages not in chronological order")
+                else:
+                    self.log_result("Get job conversation messages", False, 
+                                   f"Expected at least 2 messages, found {len(messages)}")
+            else:
+                self.log_result("Get job conversation messages", False, 
+                               f"Missing fields: {missing_fields}")
+        else:
+            self.log_result("Get job conversation messages", False, 
+                           f"Status: {response.status_code}")
+        
+        # Test 6: Test pagination for messages
+        response = self.make_request("GET", f"/messages/job/{job_id}", 
+                                   params={"page": 1, "limit": 1},
+                                   auth_token=homeowner_token)
+        if response.status_code == 200:
+            paginated_data = response.json()
+            pagination = paginated_data.get('pagination', {})
+            if pagination.get('limit') == 1 and len(paginated_data['messages']) <= 1:
+                self.log_result("Message pagination", True, "Pagination working correctly")
+            else:
+                self.log_result("Message pagination", False, "Pagination not working")
+        else:
+            self.log_result("Message pagination", False, f"Status: {response.status_code}")
+        
+        # Test 7: Test unauthorized access to job messages
+        if 'other_tradesperson_token' in locals():
+            response = self.make_request("GET", f"/messages/job/{job_id}", 
+                                       auth_token=other_tradesperson_token)
+            if response.status_code == 403:
+                self.log_result("Unauthorized message access prevention", True, 
+                               "Correctly denied access to non-authorized user")
+            else:
+                self.log_result("Unauthorized message access prevention", False, 
+                               f"Expected 403, got {response.status_code}")
+        
+        # Test 8: Mark message as read
+        if 'homeowner_message' in self.test_data:
+            message_id = self.test_data['homeowner_message']['id']
+            
+            # Tradesperson marks homeowner's message as read
+            response = self.make_request("PUT", f"/messages/{message_id}/read", 
+                                       auth_token=tradesperson_token)
+            if response.status_code == 200:
+                result = response.json()
+                if "marked as read" in result.get('message', '').lower():
+                    self.log_result("Mark message as read", True, "Message marked as read successfully")
+                else:
+                    self.log_result("Mark message as read", False, "Unexpected response")
+            else:
+                self.log_result("Mark message as read", False, f"Status: {response.status_code}")
+            
+            # Test unauthorized read marking (homeowner trying to mark their own message as read)
+            response = self.make_request("PUT", f"/messages/{message_id}/read", 
+                                       auth_token=homeowner_token)
+            if response.status_code == 403:
+                self.log_result("Unauthorized read marking prevention", True, 
+                               "Correctly prevented sender from marking own message as read")
+            else:
+                self.log_result("Unauthorized read marking prevention", False, 
+                               f"Expected 403, got {response.status_code}")
+        
+        # Test 9: Get unread messages count
+        response = self.make_request("GET", "/messages/unread-count", 
+                                   auth_token=tradesperson_token)
+        if response.status_code == 200:
+            unread_data = response.json()
+            if 'unread_count' in unread_data and isinstance(unread_data['unread_count'], int):
+                self.log_result("Get unread messages count", True, 
+                               f"Unread count: {unread_data['unread_count']}")
+            else:
+                self.log_result("Get unread messages count", False, "Invalid response format")
+        else:
+            self.log_result("Get unread messages count", False, f"Status: {response.status_code}")
+        
+        # Test 10: Get user conversations
+        response = self.make_request("GET", "/messages/conversations", 
+                                   auth_token=homeowner_token)
+        if response.status_code == 200:
+            conversations = response.json()
+            if isinstance(conversations, list) and len(conversations) > 0:
+                conversation = conversations[0]
+                required_fields = ['job_id', 'job_title', 'other_user_id', 'other_user_name', 
+                                 'other_user_role', 'unread_count']
+                missing_fields = [field for field in required_fields if field not in conversation]
+                
+                if not missing_fields:
+                    self.log_result("Get user conversations", True, 
+                                   f"Found {len(conversations)} conversations")
+                else:
+                    self.log_result("Get user conversations", False, 
+                                   f"Missing fields: {missing_fields}")
+            else:
+                self.log_result("Get user conversations", True, "No conversations found (expected for new account)")
+        else:
+            self.log_result("Get user conversations", False, f"Status: {response.status_code}")
+        
+        # Test 11: Image serving endpoint
+        if 'image_message' in self.test_data:
+            image_filename = self.test_data['image_message']['image_filename']
+            response = self.make_request("GET", f"/messages/images/{image_filename}")
+            if response.status_code == 200:
+                content_type = response.headers.get('content-type', '')
+                if content_type.startswith('image/'):
+                    self.log_result("Message image serving", True, "Image served correctly")
+                else:
+                    self.log_result("Message image serving", False, f"Wrong content type: {content_type}")
+            else:
+                self.log_result("Message image serving", False, f"Status: {response.status_code}")
+        
+        # Test 12: Invalid image upload (wrong format)
+        text_buffer = io.BytesIO(b"This is not an image file")
+        files = {'file': ('not_image.txt', text_buffer, 'text/plain')}
+        data = {
+            'job_id': job_id,
+            'recipient_id': tradesperson_id,
+            'content': 'Test invalid file',
+            'message_type': 'image'
+        }
+        
+        response = self.session.post(
+            f"{self.base_url}/messages/send",
+            files=files,
+            data=data,
+            headers={'Authorization': f'Bearer {homeowner_token}'}
+        )
+        
+        if response.status_code == 400:
+            self.log_result("Invalid image format rejection", True, "Correctly rejected non-image file")
+        else:
+            self.log_result("Invalid image format rejection", False, 
+                           f"Expected 400, got {response.status_code}")
+        
+        # Test 13: Message with invalid job ID
+        invalid_message_data = {
+            'job_id': 'invalid-job-id',
+            'recipient_id': tradesperson_id,
+            'content': 'Test message',
+            'message_type': 'text'
+        }
+        
+        response = self.session.post(
+            f"{self.base_url}/messages/send",
+            data=invalid_message_data,
+            headers={'Authorization': f'Bearer {homeowner_token}'}
+        )
+        
+        if response.status_code == 404:
+            self.log_result("Invalid job ID handling", True, "Correctly rejected invalid job ID")
+        else:
+            self.log_result("Invalid job ID handling", False, 
+                           f"Expected 404, got {response.status_code}")
+        
+        # Test 14: Message with invalid recipient ID
+        invalid_recipient_data = {
+            'job_id': job_id,
+            'recipient_id': 'invalid-user-id',
+            'content': 'Test message',
+            'message_type': 'text'
+        }
+        
+        response = self.session.post(
+            f"{self.base_url}/messages/send",
+            data=invalid_recipient_data,
+            headers={'Authorization': f'Bearer {homeowner_token}'}
+        )
+        
+        if response.status_code == 404:
+            self.log_result("Invalid recipient ID handling", True, "Correctly rejected invalid recipient")
+        else:
+            self.log_result("Invalid recipient ID handling", False, 
+                           f"Expected 404, got {response.status_code}")
+        
+        # Test 15: Unauthenticated message sending
+        response = self.session.post(
+            f"{self.base_url}/messages/send",
+            data=message_data
+        )
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Unauthenticated messaging prevention", True, "Correctly requires authentication")
+        else:
+            self.log_result("Unauthenticated messaging prevention", False, 
+                           f"Expected 401/403, got {response.status_code}")
+
     def test_error_handling_and_edge_cases(self):
         """Test error handling scenarios for job and quote management"""
         print("\n=== Testing Error Handling & Edge Cases ===")
