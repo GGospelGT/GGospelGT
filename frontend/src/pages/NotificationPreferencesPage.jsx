@@ -31,7 +31,7 @@ const NotificationPreferencesPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated()) {
       navigate('/');
       return;
     }
