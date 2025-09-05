@@ -71,6 +71,7 @@ class Job(BaseModel):
     homeowner: Homeowner
     status: JobStatus = JobStatus.ACTIVE
     quotes_count: int = 0
+    interests_count: int = 0  # Add interests count field
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     expires_at: datetime
