@@ -20,6 +20,7 @@ import {
 import { jobsAPI, quotesAPI } from '../api/services';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const MyJobsPage = () => {
   const [jobs, setJobs] = useState([]);
