@@ -1,11 +1,16 @@
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends, BackgroundTasks
 from typing import Optional, List
 from models import JobCreate, Job, JobsResponse
 from models.auth import User
+from models.notifications import NotificationType
 from auth.dependencies import get_current_active_user, get_current_homeowner
 from database import database
+from services.notifications import notification_service
 from datetime import datetime, timedelta
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
