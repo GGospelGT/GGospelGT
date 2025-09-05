@@ -40,7 +40,7 @@ async def create_quote(quote_data: QuoteCreate):
         
         # Convert to dict and prepare for database
         quote_dict = quote_data.dict()
-        quote_dict['id'] = Quote().id  # Generate new ID
+        quote_dict['id'] = str(uuid.uuid4())  # Generate new ID
         quote_dict['status'] = 'pending'
         quote_dict['created_at'] = datetime.utcnow()
         quote_dict['updated_at'] = datetime.utcnow()
