@@ -63,7 +63,7 @@ async def fund_wallet(
     
     # Generate unique filename
     file_extension = proof_image.filename.split(".")[-1].lower()
-    filename = f"{current_user['id']}_{uuid.uuid4().hex}.{file_extension}"
+    filename = f"{current_user.id}_{uuid.uuid4().hex}.{file_extension}"
     file_path = os.path.join(upload_dir, filename)
     
     # Save and optimize image
