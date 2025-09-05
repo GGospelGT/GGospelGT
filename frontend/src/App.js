@@ -7,6 +7,8 @@ import MyJobsPage from "./pages/MyJobsPage";
 import BrowseJobsPage from "./pages/BrowseJobsPage";
 import ProfilePage from "./pages/ProfilePage";
 import TradespersonPortfolioPage from "./pages/TradespersonPortfolioPage";
+import NotificationPreferencesPage from "./pages/NotificationPreferencesPage";
+import NotificationHistoryPage from "./pages/NotificationHistoryPage";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 
