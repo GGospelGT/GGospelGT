@@ -38,6 +38,11 @@ const ProfilePage = () => {
   const [profileData, setProfileData] = useState(null);
   const [editData, setEditData] = useState({});
   
+  // Portfolio states
+  const [portfolioItems, setPortfolioItems] = useState([]);
+  const [portfolioLoading, setPortfolioLoading] = useState(false);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  
   const { user, isAuthenticated, isHomeowner, isTradesperson, updateUser } = useAuth();
   const { toast } = useToast();
 
