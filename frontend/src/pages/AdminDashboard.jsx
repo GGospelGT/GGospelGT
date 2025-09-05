@@ -35,6 +35,9 @@ const AdminDashboard = () => {
       } else if (activeTab === 'jobs') {
         const data = await adminAPI.getJobsWithFees();
         setJobs(data.jobs || []);
+      } else if (activeTab === 'verifications') {
+        const data = await adminReferralsAPI.getPendingVerifications();
+        setVerifications(data.verifications || []);
       } else if (activeTab === 'stats') {
         const data = await adminAPI.getDashboardStats();
         setStats(data);
