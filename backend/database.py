@@ -597,5 +597,81 @@ class Database:
         
         return reviews
 
+    # Portfolio Management Methods
+    async def create_portfolio_item(self, portfolio_data: dict) -> dict:
+        """Create a new portfolio item"""
+        await self.portfolio_collection.insert_one(portfolio_data)
+        return portfolio_data
+
+    async def get_portfolio_item_by_id(self, item_id: str) -> dict:
+        """Get portfolio item by ID"""
+        return await self.portfolio_collection.find_one({"id": item_id})
+
+    async def get_portfolio_items_by_tradesperson(self, tradesperson_id: str) -> List[dict]:
+        """Get all portfolio items for a specific tradesperson"""
+        cursor = self.portfolio_collection.find(
+            {"tradesperson_id": tradesperson_id}
+        ).sort("created_at", -1)
+        
+        items = await cursor.to_list(length=None)
+        
+        # Convert ObjectId to string
+        for item in items:
+            if '_id' in item:
+                item['_id'] = str(item['_id'])
+        
+        return items
+
+    async def get_public_portfolio_items_by_tradesperson(self, tradesperson_id: str) -> List[dict]:
+        """Get public portfolio items for a specific tradesperson"""
+        cursor = self.portfolio_collection.find({
+            "tradesperson_id": tradesperson_id,
+            "is_public": True
+        }).sort("created_at", -1)
+        
+        items = await cursor.to_list(length=None)
+        
+        # Convert ObjectId to string
+        for item in items:
+            if '_id' in item:
+                item['_id'] = str(item['_id'])
+        
+        return items
+
+    async def get_public_portfolio_items(self, category: str = None, limit: int = 20, offset: int = 0) -> List[dict]:
+        """Get all public portfolio items with optional filtering"""
+        filters = {"is_public": True}
+        if category:
+            filters["category"] = category
+        
+        cursor = self.portfolio_collection.find(filters).sort("created_at", -1).skip(offset).limit(limit)
+        
+        items = await cursor.to_list(length=None)
+        
+        # Convert ObjectId to string
+        for item in items:
+            if '_id' in item:
+                item['_id'] = str(item['_id'])
+        
+        return items
+
+    async def update_portfolio_item(self, item_id: str, update_data: dict) -> dict:
+        """Update portfolio item"""
+        await self.portfolio_collection.update_one(
+            {"id": item_id},
+            {"$set": update_data}
+        )
+        return await self.get_portfolio_item_by_id(item_id)
+
+    async def delete_portfolio_item(self, item_id: str) -> bool:
+        """Delete portfolio item"""
+        result = await self.portfolio_collection.delete_one({"id": item_id})
+        return result.deleted_count > 0
+
+    def get_current_time(self):
+        """Get current UTC time for timestamps"""
+        from datetime import datetime
+        return datetime.utcnow()
+
 # Global database instance
 database = Database()
