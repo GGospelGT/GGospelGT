@@ -73,6 +73,11 @@ export const jobsAPI = {
     return response.data;
   },
 
+  getMyJobs: async (params = {}) => {
+    const response = await apiClient.get('/jobs/my-jobs', { params });
+    return response.data;
+  },
+
   searchJobs: async (params = {}) => {
     const response = await apiClient.get('/jobs/search', { params });
     return response.data;
