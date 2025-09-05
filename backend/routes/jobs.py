@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional, List
 from models import JobCreate, Job, JobsResponse
+from models.auth import User
+from auth.dependencies import get_current_active_user, get_current_homeowner
 from database import database
 from datetime import datetime, timedelta
 import uuid
