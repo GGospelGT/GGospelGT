@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Create a page for homeowners to view and manage quotes on their jobs."
+user_problem_statement: "Pivot from direct messaging system to lead generation marketplace where tradespeople show interest in jobs, homeowners review interested tradespeople, and payment system controls access to contact details."
 
 backend:
   - task: "Quote Management API Endpoints"
