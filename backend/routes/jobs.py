@@ -15,23 +15,34 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
 @router.post("/", response_model=Job)
-async def create_job(job_data: JobCreate):
+async def create_job(
+    job_data: JobCreate,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_homeowner)
+):
     """Create a new job posting"""
     try:
         # Convert to dict and prepare for database
         job_dict = job_data.dict()
         
-        # Create homeowner object
+        # Create homeowner object using current user data
         job_dict['homeowner'] = {
-            'name': job_dict.pop('homeowner_name'),
-            'email': job_dict.pop('homeowner_email'),
-            'phone': job_dict.pop('homeowner_phone')
+            'id': current_user.id,
+            'name': current_user.name,
+            'email': current_user.email,
+            'phone': current_user.phone
         }
         
+        # Remove homeowner fields from job_data if they exist
+        for field in ['homeowner_name', 'homeowner_email', 'homeowner_phone']:
+            if field in job_dict:
+                del job_dict[field]
+        
         # Add default values
-        job_dict['id'] = str(uuid.uuid4())  # Generate new ID
+        job_dict['id'] = str(uuid.uuid4())
         job_dict['status'] = 'active'
         job_dict['quotes_count'] = 0
+        job_dict['interests_count'] = 0  # Add interests count
         job_dict['created_at'] = datetime.utcnow()
         job_dict['updated_at'] = datetime.utcnow()
         job_dict['expires_at'] = datetime.utcnow() + timedelta(days=30)
@@ -39,9 +50,17 @@ async def create_job(job_data: JobCreate):
         # Save to database
         created_job = await database.create_job(job_dict)
         
+        # Add background task to send job posted notification
+        background_tasks.add_task(
+            _notify_job_posted_successfully,
+            homeowner=current_user.dict(),
+            job=created_job
+        )
+        
         return Job(**created_job)
         
     except Exception as e:
+        logger.error(f"Error creating job: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/", response_model=JobsResponse)
