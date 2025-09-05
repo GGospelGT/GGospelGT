@@ -3234,6 +3234,527 @@ class BackendTester:
                 print(f"   • {error}")
         
         return self.results
+
+    # ==========================================
+    # REFERRAL SYSTEM TEST METHODS
+    # ==========================================
+    
+    def _test_referral_code_generation(self):
+        """Step 1: Test referral code generation during registration"""
+        print("\n=== Step 1: Referral Code Generation Testing ===")
+        
+        # Test 1: Homeowner registration with referral code generation
+        homeowner_data = {
+            "name": "Adunni Olatunji",
+            "email": f"adunni.olatunji.{uuid.uuid4().hex[:8]}@email.com",
+            "password": "SecurePass123",
+            "phone": "08123456789",
+            "location": "Victoria Island, Lagos State",
+            "postcode": "101001"
+        }
+        
+        response = self.make_request("POST", "/auth/register/homeowner", json=homeowner_data)
+        if response.status_code == 200:
+            homeowner_profile = response.json()
+            self.log_result("Homeowner registration with referral code generation", True, 
+                           f"ID: {homeowner_profile['user']['id']}")
+            self.test_data['referral_homeowner'] = homeowner_profile['user']
+            self.auth_tokens['referral_homeowner'] = homeowner_profile['access_token']
+        else:
+            self.log_result("Homeowner registration with referral code generation", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+            return
+        
+        # Test 2: Verify referral code was generated
+        response = self.make_request("GET", "/referrals/my-stats", 
+                                   auth_token=self.auth_tokens['referral_homeowner'])
+        if response.status_code == 200:
+            stats = response.json()
+            if stats.get('referral_code') and len(stats['referral_code']) >= 6:
+                self.log_result("Referral code generation verification", True, 
+                               f"Code: {stats['referral_code']}, Format: {len(stats['referral_code'])} chars")
+                self.test_data['homeowner_referral_code'] = stats['referral_code']
+            else:
+                self.log_result("Referral code generation verification", False, 
+                               f"Invalid referral code: {stats.get('referral_code')}")
+        else:
+            self.log_result("Referral code generation verification", False, 
+                           f"Status: {response.status_code}")
+        
+        # Test 3: Tradesperson registration with referral code generation
+        tradesperson_data = {
+            "name": "Chinedu Okoro",
+            "email": f"chinedu.okoro.{uuid.uuid4().hex[:8]}@tradework.com",
+            "password": "SecurePass123",
+            "phone": "08187654321",
+            "location": "Ikeja, Lagos State",
+            "postcode": "100001",
+            "trade_categories": ["Plumbing", "Heating & Gas"],
+            "experience_years": 7,
+            "company_name": "Okoro Professional Plumbing",
+            "description": "Expert plumber specializing in residential and commercial installations across Lagos. 7 years experience with modern plumbing systems.",
+            "certifications": ["Licensed Plumber", "Gas Safety Certificate"]
+        }
+        
+        response = self.make_request("POST", "/auth/register/tradesperson", json=tradesperson_data)
+        if response.status_code == 200:
+            tradesperson_profile = response.json()
+            self.log_result("Tradesperson registration with referral code generation", True, 
+                           f"ID: {tradesperson_profile['id']}")
+            self.test_data['referral_tradesperson'] = tradesperson_profile
+            
+            # Login tradesperson
+            login_response = self.make_request("POST", "/auth/login", 
+                                             json={"email": tradesperson_data["email"], 
+                                                  "password": tradesperson_data["password"]})
+            if login_response.status_code == 200:
+                self.auth_tokens['referral_tradesperson'] = login_response.json()['access_token']
+        else:
+            self.log_result("Tradesperson registration with referral code generation", False, 
+                           f"Status: {response.status_code}")
+    
+    def _test_referral_tracking_system(self):
+        """Step 2: Test referral tracking and validation"""
+        print("\n=== Step 2: Referral Tracking System Testing ===")
+        
+        if 'homeowner_referral_code' not in self.test_data:
+            self.log_result("Referral tracking tests", False, "No referral code available")
+            return
+        
+        referral_code = self.test_data['homeowner_referral_code']
+        
+        # Test 1: Register new user with referral code
+        referred_user_data = {
+            "name": "Kemi Adebayo",
+            "email": f"kemi.adebayo.{uuid.uuid4().hex[:8]}@email.com",
+            "password": "SecurePass123",
+            "phone": "08198765432",
+            "location": "Lekki, Lagos State",
+            "postcode": "101001",
+            "referral_code": referral_code
+        }
+        
+        response = self.make_request("POST", "/auth/register/homeowner", json=referred_user_data)
+        if response.status_code == 200:
+            referred_user = response.json()
+            self.log_result("Registration with valid referral code", True, 
+                           f"Referred user ID: {referred_user['user']['id']}")
+            self.test_data['referred_user'] = referred_user['user']
+            self.auth_tokens['referred_user'] = referred_user['access_token']
+        else:
+            self.log_result("Registration with valid referral code", False, 
+                           f"Status: {response.status_code}")
+            return
+        
+        # Test 2: Verify referral was recorded
+        response = self.make_request("GET", "/referrals/my-referrals", 
+                                   auth_token=self.auth_tokens['referral_homeowner'])
+        if response.status_code == 200:
+            referrals_data = response.json()
+            referrals = referrals_data.get('referrals', [])
+            if len(referrals) > 0:
+                referral = referrals[0]
+                if referral.get('referred_user_id') == self.test_data['referred_user']['id']:
+                    self.log_result("Referral tracking verification", True, 
+                                   f"Referral recorded with status: {referral.get('status')}")
+                    self.test_data['recorded_referral'] = referral
+                else:
+                    self.log_result("Referral tracking verification", False, "Wrong referred user ID")
+            else:
+                self.log_result("Referral tracking verification", False, "No referrals found")
+        else:
+            self.log_result("Referral tracking verification", False, f"Status: {response.status_code}")
+        
+        # Test 3: Test invalid referral code
+        invalid_referral_data = {
+            "name": "Test User",
+            "email": f"test.invalid.{uuid.uuid4().hex[:8]}@email.com",
+            "password": "SecurePass123",
+            "phone": "08123456789",
+            "location": "Lagos, Lagos State",
+            "postcode": "100001",
+            "referral_code": "INVALID2024"
+        }
+        
+        response = self.make_request("POST", "/auth/register/homeowner", json=invalid_referral_data)
+        if response.status_code == 200:
+            # Registration should succeed but referral should not be recorded
+            self.log_result("Invalid referral code handling", True, 
+                           "Registration succeeded with invalid code (referral not recorded)")
+        else:
+            self.log_result("Invalid referral code handling", False, 
+                           f"Registration failed: {response.status_code}")
+    
+    def _test_document_verification_system(self):
+        """Step 3: Test document verification system"""
+        print("\n=== Step 3: Document Verification System Testing ===")
+        
+        if 'referred_user' not in self.test_data:
+            self.log_result("Document verification tests", False, "No referred user available")
+            return
+        
+        # Test 1: Submit verification documents
+        import io
+        from PIL import Image
+        
+        # Create a test document image
+        test_document = Image.new('RGB', (800, 600), color='white')
+        img_buffer = io.BytesIO()
+        test_document.save(img_buffer, format='JPEG')
+        img_buffer.seek(0)
+        
+        files = {'document_image': ('national_id.jpg', img_buffer, 'image/jpeg')}
+        data = {
+            'document_type': 'national_id',
+            'full_name': 'Kemi Adebayo',
+            'document_number': 'NIN12345678901'
+        }
+        
+        response = self.session.post(
+            f"{self.base_url}/referrals/verify-documents",
+            files=files,
+            data=data,
+            headers={'Authorization': f'Bearer {self.auth_tokens["referred_user"]}'}
+        )
+        
+        if response.status_code == 200:
+            verification_result = response.json()
+            if verification_result.get('verification_id') and verification_result.get('status') == 'pending':
+                self.log_result("Document verification submission", True, 
+                               f"Verification ID: {verification_result['verification_id']}")
+                self.test_data['verification_submission'] = verification_result
+            else:
+                self.log_result("Document verification submission", False, "Missing verification_id or wrong status")
+        else:
+            self.log_result("Document verification submission", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 2: Test duplicate verification prevention
+        img_buffer.seek(0)
+        files = {'document_image': ('national_id2.jpg', img_buffer, 'image/jpeg')}
+        
+        response = self.session.post(
+            f"{self.base_url}/referrals/verify-documents",
+            files=files,
+            data=data,
+            headers={'Authorization': f'Bearer {self.auth_tokens["referred_user"]}'}
+        )
+        
+        if response.status_code == 400:
+            self.log_result("Duplicate verification prevention", True, 
+                           "Correctly rejected duplicate verification submission")
+        else:
+            self.log_result("Duplicate verification prevention", False, 
+                           f"Expected 400, got {response.status_code}")
+        
+        # Test 3: Test invalid file type
+        text_buffer = io.BytesIO(b"This is not an image")
+        files = {'document_image': ('document.txt', text_buffer, 'text/plain')}
+        
+        response = self.session.post(
+            f"{self.base_url}/referrals/verify-documents",
+            files=files,
+            data=data,
+            headers={'Authorization': f'Bearer {self.auth_tokens["referral_homeowner"]}'}
+        )
+        
+        if response.status_code == 400:
+            self.log_result("Invalid file type rejection", True, 
+                           "Correctly rejected non-image file")
+        else:
+            self.log_result("Invalid file type rejection", False, 
+                           f"Expected 400, got {response.status_code}")
+    
+    def _test_admin_verification_management(self):
+        """Step 4: Test admin verification management"""
+        print("\n=== Step 4: Admin Verification Management Testing ===")
+        
+        # Test 1: Admin login
+        admin_credentials = {"username": "admin", "password": "servicehub2024"}
+        response = self.session.post(f"{self.base_url}/admin/login", data=admin_credentials)
+        
+        if response.status_code == 200:
+            admin_result = response.json()
+            self.log_result("Admin login", True, f"Admin: {admin_result.get('admin', {}).get('username')}")
+            self.test_data['admin_logged_in'] = True
+        else:
+            self.log_result("Admin login", False, f"Status: {response.status_code}")
+            return
+        
+        # Test 2: Get pending verifications
+        response = self.make_request("GET", "/admin/verifications/pending")
+        if response.status_code == 200:
+            verifications_data = response.json()
+            verifications = verifications_data.get('verifications', [])
+            if len(verifications) > 0:
+                verification = verifications[0]
+                self.log_result("Get pending verifications", True, 
+                               f"Found {len(verifications)} pending verifications")
+                self.test_data['pending_verification'] = verification
+            else:
+                self.log_result("Get pending verifications", True, 
+                               "No pending verifications found (expected if none submitted)")
+        else:
+            self.log_result("Get pending verifications", False, f"Status: {response.status_code}")
+        
+        # Test 3: Approve verification (if we have one)
+        if 'verification_submission' in self.test_data:
+            verification_id = self.test_data['verification_submission']['verification_id']
+            
+            approval_data = {"admin_notes": "Document verified successfully. Valid Nigerian National ID."}
+            response = self.session.post(
+                f"{self.base_url}/admin/verifications/{verification_id}/approve",
+                data=approval_data
+            )
+            
+            if response.status_code == 200:
+                approval_result = response.json()
+                if approval_result.get('status') == 'verified':
+                    self.log_result("Admin verification approval", True, 
+                                   f"Verification approved: {verification_id}")
+                    self.test_data['verification_approved'] = True
+                else:
+                    self.log_result("Admin verification approval", False, "Wrong status in response")
+            else:
+                self.log_result("Admin verification approval", False, 
+                               f"Status: {response.status_code}, Response: {response.text}")
+    
+    def _test_referral_rewards_distribution(self):
+        """Step 5: Test referral rewards distribution"""
+        print("\n=== Step 5: Referral Rewards Distribution Testing ===")
+        
+        if not self.test_data.get('verification_approved'):
+            self.log_result("Referral rewards tests", False, "No approved verification available")
+            return
+        
+        # Test 1: Check referrer's updated stats after verification
+        response = self.make_request("GET", "/referrals/my-stats", 
+                                   auth_token=self.auth_tokens['referral_homeowner'])
+        if response.status_code == 200:
+            updated_stats = response.json()
+            if updated_stats.get('verified_referrals', 0) > 0 and updated_stats.get('total_coins_earned', 0) >= 5:
+                self.log_result("Referral rewards distribution", True, 
+                               f"Coins earned: {updated_stats['total_coins_earned']}, Verified referrals: {updated_stats['verified_referrals']}")
+            else:
+                self.log_result("Referral rewards distribution", False, 
+                               f"Expected coins >= 5, got {updated_stats.get('total_coins_earned', 0)}")
+        else:
+            self.log_result("Referral rewards distribution", False, f"Status: {response.status_code}")
+        
+        # Test 2: Check referral status update
+        response = self.make_request("GET", "/referrals/my-referrals", 
+                                   auth_token=self.auth_tokens['referral_homeowner'])
+        if response.status_code == 200:
+            referrals_data = response.json()
+            referrals = referrals_data.get('referrals', [])
+            if len(referrals) > 0:
+                referral = referrals[0]
+                if referral.get('status') == 'verified' and referral.get('coins_earned', 0) == 5:
+                    self.log_result("Referral status update verification", True, 
+                                   f"Status: {referral['status']}, Coins: {referral['coins_earned']}")
+                else:
+                    self.log_result("Referral status update verification", False, 
+                                   f"Expected verified status and 5 coins, got {referral.get('status')} and {referral.get('coins_earned')}")
+            else:
+                self.log_result("Referral status update verification", False, "No referrals found")
+        else:
+            self.log_result("Referral status update verification", False, f"Status: {response.status_code}")
+    
+    def _test_wallet_referral_integration(self):
+        """Step 6: Test wallet integration with referrals"""
+        print("\n=== Step 6: Wallet Referral Integration Testing ===")
+        
+        # Test 1: Get wallet with referral information
+        response = self.make_request("GET", "/referrals/wallet-with-referrals", 
+                                   auth_token=self.auth_tokens['referral_homeowner'])
+        if response.status_code == 200:
+            wallet_data = response.json()
+            required_fields = ['balance_coins', 'balance_naira', 'referral_coins', 'referral_coins_naira', 'can_withdraw_referrals']
+            missing_fields = [field for field in required_fields if field not in wallet_data]
+            
+            if not missing_fields:
+                self.log_result("Wallet with referral info", True, 
+                               f"Referral coins: {wallet_data['referral_coins']}, Can withdraw: {wallet_data['can_withdraw_referrals']}")
+            else:
+                self.log_result("Wallet with referral info", False, f"Missing fields: {missing_fields}")
+        else:
+            self.log_result("Wallet with referral info", False, f"Status: {response.status_code}")
+        
+        # Test 2: Check withdrawal eligibility
+        response = self.make_request("GET", "/referrals/withdrawal-eligibility", 
+                                   auth_token=self.auth_tokens['referral_homeowner'])
+        if response.status_code == 200:
+            eligibility_data = response.json()
+            required_fields = ['referral_coins', 'can_withdraw_referrals', 'message']
+            missing_fields = [field for field in required_fields if field not in eligibility_data]
+            
+            if not missing_fields:
+                self.log_result("Withdrawal eligibility check", True, 
+                               f"Eligible: {eligibility_data['can_withdraw_referrals']}, Message: {eligibility_data['message'][:50]}...")
+            else:
+                self.log_result("Withdrawal eligibility check", False, f"Missing fields: {missing_fields}")
+        else:
+            self.log_result("Withdrawal eligibility check", False, f"Status: {response.status_code}")
+        
+        # Test 3: Test with user who has insufficient coins
+        response = self.make_request("GET", "/referrals/withdrawal-eligibility", 
+                                   auth_token=self.auth_tokens['referred_user'])
+        if response.status_code == 200:
+            eligibility_data = response.json()
+            if not eligibility_data.get('can_withdraw_referrals', True):
+                self.log_result("Insufficient coins withdrawal prevention", True, 
+                               "Correctly prevented withdrawal with insufficient coins")
+            else:
+                self.log_result("Insufficient coins withdrawal prevention", False, 
+                               "Should not allow withdrawal with insufficient coins")
+        else:
+            self.log_result("Insufficient coins withdrawal prevention", False, f"Status: {response.status_code}")
+    
+    def _test_complete_referral_journey(self):
+        """Step 7: Test complete referral journey end-to-end"""
+        print("\n=== Step 7: Complete Referral Journey Testing ===")
+        
+        # Test complete flow: User A registers → gets code → User B signs up → User B verifies → User A gets coins
+        
+        # Step 1: Create User A (referrer)
+        user_a_data = {
+            "name": "Folake Adeyemi",
+            "email": f"folake.adeyemi.{uuid.uuid4().hex[:8]}@email.com",
+            "password": "SecurePass123",
+            "phone": "08123456789",
+            "location": "Surulere, Lagos State",
+            "postcode": "100001"
+        }
+        
+        response = self.make_request("POST", "/auth/register/homeowner", json=user_a_data)
+        if response.status_code == 200:
+            user_a = response.json()
+            user_a_token = user_a['access_token']
+            self.log_result("Complete journey - User A registration", True, f"User A ID: {user_a['user']['id']}")
+        else:
+            self.log_result("Complete journey - User A registration", False, f"Status: {response.status_code}")
+            return
+        
+        # Step 2: Get User A's referral code
+        response = self.make_request("GET", "/referrals/my-stats", auth_token=user_a_token)
+        if response.status_code == 200:
+            stats = response.json()
+            user_a_code = stats.get('referral_code')
+            if user_a_code:
+                self.log_result("Complete journey - Get referral code", True, f"Code: {user_a_code}")
+            else:
+                self.log_result("Complete journey - Get referral code", False, "No referral code found")
+                return
+        else:
+            self.log_result("Complete journey - Get referral code", False, f"Status: {response.status_code}")
+            return
+        
+        # Step 3: User B signs up with referral code
+        user_b_data = {
+            "name": "Emeka Nwosu",
+            "email": f"emeka.nwosu.{uuid.uuid4().hex[:8]}@tradework.com",
+            "password": "SecurePass123",
+            "phone": "08187654321",
+            "location": "Enugu, Enugu State",
+            "postcode": "400001",
+            "trade_categories": ["Electrical", "Solar Installation"],
+            "experience_years": 5,
+            "company_name": "Nwosu Electrical Solutions",
+            "description": "Professional electrician specializing in residential and solar installations. 5 years experience across Southeast Nigeria.",
+            "certifications": ["Licensed Electrician", "Solar Installation Certificate"],
+            "referral_code": user_a_code
+        }
+        
+        response = self.make_request("POST", "/auth/register/tradesperson", json=user_b_data)
+        if response.status_code == 200:
+            user_b = response.json()
+            # Login User B
+            login_response = self.make_request("POST", "/auth/login", 
+                                             json={"email": user_b_data["email"], 
+                                                  "password": user_b_data["password"]})
+            if login_response.status_code == 200:
+                user_b_token = login_response.json()['access_token']
+                self.log_result("Complete journey - User B registration with referral", True, 
+                               f"User B ID: {user_b['id']}")
+            else:
+                self.log_result("Complete journey - User B registration with referral", False, "Login failed")
+                return
+        else:
+            self.log_result("Complete journey - User B registration with referral", False, 
+                           f"Status: {response.status_code}")
+            return
+        
+        # Step 4: User B submits verification documents
+        img_buffer = io.BytesIO()
+        verification_doc = Image.new('RGB', (1000, 700), color='blue')
+        verification_doc.save(img_buffer, format='JPEG')
+        img_buffer.seek(0)
+        
+        files = {'document_image': ('passport.jpg', img_buffer, 'image/jpeg')}
+        data = {
+            'document_type': 'passport',
+            'full_name': 'Emeka Nwosu',
+            'document_number': 'A12345678'
+        }
+        
+        response = self.session.post(
+            f"{self.base_url}/referrals/verify-documents",
+            files=files,
+            data=data,
+            headers={'Authorization': f'Bearer {user_b_token}'}
+        )
+        
+        if response.status_code == 200:
+            verification = response.json()
+            verification_id = verification['verification_id']
+            self.log_result("Complete journey - User B document submission", True, 
+                           f"Verification ID: {verification_id}")
+        else:
+            self.log_result("Complete journey - User B document submission", False, 
+                           f"Status: {response.status_code}")
+            return
+        
+        # Step 5: Admin approves verification
+        approval_data = {"admin_notes": "Valid passport document. User verified successfully."}
+        response = self.session.post(
+            f"{self.base_url}/admin/verifications/{verification_id}/approve",
+            data=approval_data
+        )
+        
+        if response.status_code == 200:
+            self.log_result("Complete journey - Admin approval", True, "Verification approved")
+        else:
+            self.log_result("Complete journey - Admin approval", False, f"Status: {response.status_code}")
+            return
+        
+        # Step 6: Verify User A received coins
+        response = self.make_request("GET", "/referrals/my-stats", auth_token=user_a_token)
+        if response.status_code == 200:
+            final_stats = response.json()
+            if final_stats.get('total_coins_earned', 0) >= 5 and final_stats.get('verified_referrals', 0) >= 1:
+                self.log_result("Complete journey - Referral reward verification", True, 
+                               f"User A earned {final_stats['total_coins_earned']} coins from {final_stats['verified_referrals']} verified referrals")
+            else:
+                self.log_result("Complete journey - Referral reward verification", False, 
+                               f"Expected >= 5 coins and >= 1 verified referral, got {final_stats.get('total_coins_earned', 0)} coins and {final_stats.get('verified_referrals', 0)} referrals")
+        else:
+            self.log_result("Complete journey - Referral reward verification", False, 
+                           f"Status: {response.status_code}")
+        
+        # Step 7: Test admin dashboard stats include verification count
+        response = self.make_request("GET", "/admin/dashboard/stats")
+        if response.status_code == 200:
+            dashboard_stats = response.json()
+            verification_stats = dashboard_stats.get('verification_stats', {})
+            if 'pending_verifications' in verification_stats:
+                self.log_result("Complete journey - Admin dashboard stats", True, 
+                               f"Pending verifications: {verification_stats['pending_verifications']}")
+            else:
+                self.log_result("Complete journey - Admin dashboard stats", False, 
+                               "Missing verification stats in dashboard")
+        else:
+            self.log_result("Complete journey - Admin dashboard stats", False, 
+                           f"Status: {response.status_code}")
     
 if __name__ == "__main__":
     tester = BackendTester()
