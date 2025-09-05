@@ -352,31 +352,15 @@ const BrowseJobsPage = () => {
                           Match: {user?.trade_categories?.includes(job.category) ? '✅ Your skill' : '⚠️ Different category'}
                         </div>
                         
-                        <div className="flex space-x-3">
-                          <Button
-                            variant="outline"
-                            onClick={() => navigate('/messages', { 
-                              state: { 
-                                selectedJobId: job.id, 
-                                selectedUserId: job.homeowner?.id,
-                                selectedUserName: job.homeowner?.name
-                              } 
-                            })}
-                            className="font-lato"
-                          >
-                            <MessageCircle size={16} className="mr-2" />
-                            Message Homeowner
-                          </Button>
-                          
-                          <Button
-                            onClick={() => handleQuoteJob(job)}
-                            className="text-white font-lato"
-                            style={{backgroundColor: '#2F8140'}}
-                          >
-                            Submit Quote
-                            <ArrowRight size={16} className="ml-2" />
-                          </Button>
-                        </div>
+                        <Button
+                          onClick={() => handleShowInterest(job)}
+                          disabled={showingInterest === job.id}
+                          className="text-white font-lato"
+                          style={{backgroundColor: '#2F8140'}}
+                        >
+                          <HandHeart size={16} className="mr-2" />
+                          {showingInterest === job.id ? 'Showing Interest...' : 'Show Interest'}
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
