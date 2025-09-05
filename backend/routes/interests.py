@@ -54,11 +54,14 @@ async def show_interest(
         # Save to database
         result = await database.create_interest(interest)
         
+        # Get full tradesperson data for notification
+        tradesperson_data = await database.get_user_by_id(current_user.id)
+        
         # Add background task to send notification to homeowner
         background_tasks.add_task(
             _notify_homeowner_new_interest,
             job=job,
-            tradesperson=current_user.dict(),
+            tradesperson=tradesperson_data,
             interest_id=interest.id
         )
         
