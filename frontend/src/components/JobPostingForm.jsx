@@ -656,6 +656,55 @@ const JobPostingForm = ({ onComplete }) => {
           </Button>
         )}
       </div>
+
+      {/* Account Creation Message Modal */}
+      {showAccountCreation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="text-center">
+              <CheckCircle size={48} className="mx-auto mb-4 text-green-600" />
+              <h3 className="text-xl font-semibold font-montserrat mb-2" style={{color: '#121E3C'}}>
+                Almost Done!
+              </h3>
+              <p className="text-gray-600 font-lato mb-6">
+                Create an account to track your job leads and interested tradespeople. This helps you manage responses and review tradespeople after job completion.
+              </p>
+              
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center text-left">
+                  <CheckCircle size={16} className="mr-3 text-green-600 flex-shrink-0" />
+                  <span className="text-sm font-lato">Track interested tradespeople</span>
+                </div>
+                <div className="flex items-center text-left">
+                  <CheckCircle size={16} className="mr-3 text-green-600 flex-shrink-0" />
+                  <span className="text-sm font-lato">Get notifications about your job</span>
+                </div>
+                <div className="flex items-center text-left">
+                  <CheckCircle size={16} className="mr-3 text-green-600 flex-shrink-0" />
+                  <span className="text-sm font-lato">Rate and review tradespeople</span>
+                </div>
+              </div>
+
+              <div className="flex space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAccountCreation(false)}
+                  className="flex-1 font-lato"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={proceedToAccountCreation}
+                  className="flex-1 text-white font-lato"
+                  style={{backgroundColor: '#2F8140'}}
+                >
+                  Continue
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
