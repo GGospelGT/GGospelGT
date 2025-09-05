@@ -116,8 +116,30 @@ const NotificationHistoryPage = () => {
 
   const totalPages = Math.ceil(pagination.total / limit);
 
-  if (!isAuthenticated) {
-    return null;
+  if (!isAuthenticated()) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto text-center">
+            <h1 className="text-2xl font-bold font-montserrat mb-4" style={{color: '#121E3C'}}>
+              Sign In Required
+            </h1>
+            <p className="text-gray-600 font-lato mb-6">
+              Please sign in to view your notification history.
+            </p>
+            <Button 
+              onClick={() => navigate('/')}
+              className="text-white font-lato"
+              style={{backgroundColor: '#2F8140'}}
+            >
+              Go to Homepage
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   if (loading && notifications.length === 0) {
