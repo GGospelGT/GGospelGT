@@ -351,7 +351,7 @@ const MyJobsPage = () => {
               My Jobs
             </h1>
             <p className="text-lg text-gray-600 font-lato">
-              Manage your posted jobs and review quotes from tradespeople.
+              Manage your posted jobs and review interested tradespeople.
             </p>
           </div>
         </div>
