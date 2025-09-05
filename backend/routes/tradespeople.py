@@ -2,16 +2,17 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from models import TradespersonCreate, Tradesperson, TradespeopleResponse
+backend_dir = os.path.dirname(os.path.dirname(__file__))
+sys.path.insert(0, backend_dir)
+import models
 from database import database
 from datetime import datetime
 import uuid
 
 router = APIRouter(prefix="/api/tradespeople", tags=["tradespeople"])
 
-@router.post("/", response_model=Tradesperson)
-async def create_tradesperson(tradesperson_data: TradespersonCreate):
+@router.post("/", response_model=models.Tradesperson)
+async def create_tradesperson(tradesperson_data: models.TradespersonCreate):
     """Register a new tradesperson"""
     try:
         # Check if email already exists
@@ -32,14 +33,14 @@ async def create_tradesperson(tradesperson_data: TradespersonCreate):
         # Save to database
         created_tradesperson = await database.create_tradesperson(tradesperson_dict)
         
-        return Tradesperson(**created_tradesperson)
+        return models.Tradesperson(**created_tradesperson)
         
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/", response_model=TradespeopleResponse)
+@router.get("/", response_model=models.TradespeopleResponse)
 async def get_tradespeople(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=50),
@@ -68,9 +69,9 @@ async def get_tradespeople(
         total_tradespeople = await database.get_tradespeople_count(filters=filters)
         
         # Convert to Tradesperson objects
-        tradesperson_objects = [Tradesperson(**tp) for tp in tradespeople]
+        tradesperson_objects = [models.Tradesperson(**tp) for tp in tradespeople]
         
-        return TradespeopleResponse(
+        return models.TradespeopleResponse(
             tradespeople=tradesperson_objects,
             total=total_tradespeople
         )
@@ -78,7 +79,7 @@ async def get_tradespeople(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{tradesperson_id}", response_model=Tradesperson)
+@router.get("/{tradesperson_id}", response_model=models.Tradesperson)
 async def get_tradesperson(tradesperson_id: str):
     """Get a specific tradesperson by ID"""
     try:
@@ -86,7 +87,7 @@ async def get_tradesperson(tradesperson_id: str):
         if not tradesperson:
             raise HTTPException(status_code=404, detail="Tradesperson not found")
         
-        return Tradesperson(**tradesperson)
+        return models.Tradesperson(**tradesperson)
         
     except HTTPException:
         raise
