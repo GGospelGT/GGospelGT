@@ -58,37 +58,54 @@ const MyJobsPage = () => {
     }
   };
 
-  const loadJobQuotes = async (jobId) => {
+  const loadJobInterests = async (jobId) => {
     try {
-      setQuotesLoading(true);
-      const [quotesResponse, summaryResponse] = await Promise.all([
-        quotesAPI.getJobQuotes(jobId),
-        quotesAPI.getQuoteSummary(jobId)
-      ]);
-      
-      setQuotes(quotesResponse.quotes || []);
-      setQuoteSummary(summaryResponse);
+      setInterestsLoading(true);
+      const response = await interestsAPI.getJobInterestedTradespeople(jobId);
+      setInterestedTradespeople(response.interested_tradespeople || []);
     } catch (error) {
-      console.error('Failed to load quotes:', error);
+      console.error('Failed to load interested tradespeople:', error);
       toast({
-        title: "Failed to load quotes",
-        description: "There was an error loading quotes for this job.",
+        title: "Failed to load interested tradespeople",
+        description: "There was an error loading interested tradespeople for this job.",
         variant: "destructive",
       });
     } finally {
-      setQuotesLoading(false);
+      setInterestsLoading(false);
     }
   };
 
-  const handleViewQuotes = (job) => {
+  const handleViewInterestedTradespeople = (job) => {
     setSelectedJob(job);
-    loadJobQuotes(job.id);
+    setShowInterestedModal(true);
+    loadJobInterests(job.id);
   };
 
-  const handleBackToJobs = () => {
+  const handleCloseInterestedModal = () => {
+    setShowInterestedModal(false);
     setSelectedJob(null);
-    setQuotes([]);
-    setQuoteSummary(null);
+    setInterestedTradespeople([]);
+  };
+
+  const handleShareContact = async (interestId) => {
+    try {
+      await interestsAPI.shareContactDetails(interestId);
+      toast({
+        title: "Contact details shared!",
+        description: "The tradesperson will be notified and can now pay to access your contact details.",
+      });
+      // Reload interests to update status
+      if (selectedJob) {
+        loadJobInterests(selectedJob.id);
+      }
+    } catch (error) {
+      console.error('Failed to share contact details:', error);
+      toast({
+        title: "Failed to share contact details",
+        description: error.response?.data?.detail || "There was an error sharing contact details.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatCurrency = (value) => {
