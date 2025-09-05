@@ -3688,6 +3688,9 @@ class BackendTester:
             return
         
         # Step 4: User B submits verification documents
+        import io
+        from PIL import Image
+        
         img_buffer = io.BytesIO()
         verification_doc = Image.new('RGB', (1000, 700), color='blue')
         verification_doc.save(img_buffer, format='JPEG')
