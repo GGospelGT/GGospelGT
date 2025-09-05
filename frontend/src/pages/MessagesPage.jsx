@@ -24,6 +24,7 @@ const MessagesPage = () => {
 
   const { user, isAuthenticated, authLoading } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
 
   // Check for mobile view
   useEffect(() => {
