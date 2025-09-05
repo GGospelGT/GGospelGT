@@ -864,7 +864,6 @@ class Database:
         return None
 
     @property
-    @property
     def interests_collection(self):
         """Access to interests collection"""
         return self.database.interests
