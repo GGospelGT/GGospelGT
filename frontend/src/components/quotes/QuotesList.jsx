@@ -15,10 +15,12 @@ import {
   XCircle,
   MessageSquare,
   Phone,
-  Mail
+  Mail,
+  MessageCircle
 } from 'lucide-react';
 import { quotesAPI } from '../../api/services';
 import { useToast } from '../../hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const QuotesList = ({ jobId, quotes: initialQuotes, onQuoteUpdate }) => {
   const [quotes, setQuotes] = useState(initialQuotes || []);
