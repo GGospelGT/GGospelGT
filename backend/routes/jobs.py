@@ -3,6 +3,7 @@ from typing import Optional, List
 from models import JobCreate, Job, JobsResponse
 from database import database
 from datetime import datetime, timedelta
+import uuid
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
