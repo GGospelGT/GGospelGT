@@ -3,6 +3,7 @@ from typing import Optional, List
 from models import TradespersonCreate, Tradesperson, TradespeopleResponse
 from database import database
 from datetime import datetime
+import uuid
 
 router = APIRouter(prefix="/api/tradespeople", tags=["tradespeople"])
 
