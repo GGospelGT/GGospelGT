@@ -316,10 +316,10 @@ class BackendTester:
         # Test quote creation by tradesperson
         quote_data = {
             "job_id": job_id,
-            "price": 650000,
-            "message": "I can complete your kitchen renovation project within your budget and timeline. I have 8 years of experience with similar projects in Lagos and can provide references. The work includes full installation of cabinets, granite countertops, and appliance connections. I guarantee all work and provide a 2-year warranty on installations.",
-            "estimated_duration": "4-5 weeks",
-            "start_date": (datetime.utcnow() + timedelta(days=14)).isoformat()
+            "price": 300000,
+            "message": "I can complete your bathroom plumbing installation project within your budget and timeline. I have 8 years of experience with similar projects in Lagos and can provide references. The work includes full installation of toilet, sink, shower and all water connections. I guarantee all work and provide a 2-year warranty on installations.",
+            "estimated_duration": "2-3 weeks",
+            "start_date": (datetime.utcnow() + timedelta(days=7)).isoformat()
         }
         
         response = self.make_request("POST", "/quotes/", json=quote_data, auth_token=tradesperson_token)
