@@ -230,18 +230,46 @@ async def get_contact_details(
 async def _notify_homeowner_new_interest(job: dict, tradesperson: dict, interest_id: str):
     """Background task to notify homeowner of new interest"""
     try:
-        # Create notification for homeowner
-        await notification_service.create_notification(
-            user_id=job.get("homeowner", {}).get("id"),
+        # Get homeowner details
+        homeowner_id = job.get("homeowner", {}).get("id")
+        if not homeowner_id:
+            logger.warning("No homeowner ID found in job data")
+            return
+        
+        # Get homeowner preferences
+        preferences = await database.get_user_notification_preferences(homeowner_id)
+        
+        # Get homeowner user details for contact info
+        homeowner = await database.get_user_by_id(homeowner_id)
+        if not homeowner:
+            logger.warning(f"Homeowner {homeowner_id} not found")
+            return
+        
+        # Prepare template data
+        template_data = {
+            "homeowner_name": homeowner.get("name", "Homeowner"),
+            "job_title": job.get("title", "Untitled Job"),
+            "job_location": job.get("location", ""),
+            "tradesperson_name": tradesperson.get("business_name") or tradesperson.get("name", "A tradesperson"),
+            "tradesperson_experience": str(tradesperson.get("experience_years", "N/A")),
+            "tradesperson_email": tradesperson.get("email", ""),
+            "view_url": f"https://servicehub.ng/my-jobs"
+        }
+        
+        # Send notification
+        notification = await notification_service.send_notification(
+            user_id=homeowner_id,
             notification_type=NotificationType.NEW_INTEREST,
-            title="New Interest in Your Job",
-            message=f"{tradesperson.get('business_name', tradesperson.get('name', 'A tradesperson'))} has shown interest in your job: {job.get('title', 'Untitled Job')}",
-            data={
-                "job_id": job.get("id"),
-                "tradesperson_id": tradesperson.get("id"),
-                "interest_id": interest_id
-            }
+            template_data=template_data,
+            user_preferences=preferences,
+            recipient_email=homeowner.get("email"),
+            recipient_phone=homeowner.get("phone")
         )
-        logger.info(f"Notification sent to homeowner {job.get('homeowner', {}).get('id')} for new interest {interest_id}")
+        
+        # Save notification to database
+        await database.create_notification(notification)
+        
+        logger.info(f"✅ New interest notification sent to homeowner {homeowner_id} for interest {interest_id}")
+        
     except Exception as e:
-        logger.error(f"Failed to send notification for new interest {interest_id}: {str(e)}")
+        logger.error(f"❌ Failed to send new interest notification for {interest_id}: {str(e)}")
