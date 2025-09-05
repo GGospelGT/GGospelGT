@@ -238,3 +238,53 @@ class PortfolioItem(BaseModel):
 class PortfolioResponse(BaseModel):
     items: List[PortfolioItem]
     total: int
+
+# Interest Models (Lead Generation System)
+class InterestStatus(str, Enum):
+    INTERESTED = "interested"
+    CONTACT_SHARED = "contact_shared"
+    PAID_ACCESS = "paid_access"
+    CANCELLED = "cancelled"
+
+class InterestCreate(BaseModel):
+    job_id: str
+
+class Interest(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    job_id: str
+    tradesperson_id: str
+    status: InterestStatus = InterestStatus.INTERESTED
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    contact_shared_at: Optional[datetime] = None
+    payment_made_at: Optional[datetime] = None
+    access_fee: Optional[float] = None
+
+class InterestedTradesperson(BaseModel):
+    interest_id: str
+    tradesperson_id: str
+    tradesperson_name: str
+    tradesperson_email: str
+    company_name: Optional[str] = None
+    trade_categories: List[str]
+    experience_years: int
+    average_rating: float
+    total_reviews: int
+    portfolio_count: Optional[int] = 0
+    status: InterestStatus
+    created_at: datetime
+    contact_shared: bool = False
+    payment_made: bool = False
+
+class InterestResponse(BaseModel):
+    interested_tradespeople: List[InterestedTradesperson]
+    total: int
+
+class ContactDetails(BaseModel):
+    homeowner_name: str
+    homeowner_email: str
+    homeowner_phone: str
+    job_title: str
+    job_description: str
+    job_location: str
+    budget_range: Optional[str] = None
