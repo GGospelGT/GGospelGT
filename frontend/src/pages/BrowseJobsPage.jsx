@@ -116,22 +116,7 @@ const BrowseJobsPage = () => {
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
-  const handleQuoteJob = (job) => {
-    setSelectedJob(job);
-    setShowQuoteForm(true);
-  };
 
-  const handleQuoteSubmitted = () => {
-    setShowQuoteForm(false);
-    setSelectedJob(null);
-    // Refresh jobs list to remove the job we just quoted on
-    loadAvailableJobs();
-  };
-
-  const handleCancelQuote = () => {
-    setShowQuoteForm(false);
-    setSelectedJob(null);
-  };
 
   if (!isAuthenticated()) {
     return (
