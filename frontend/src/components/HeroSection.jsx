@@ -115,9 +115,22 @@ const HeroSection = () => {
             </div>
           </form>
 
-          <p className="text-gray-500 text-sm font-lato">
+          <p className="text-gray-500 text-sm font-lato mb-6">
             Posting is free and only takes a couple of minutes
           </p>
+
+          {/* Alternative CTA */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button 
+              onClick={() => navigate('/post-job')}
+              className="text-white px-8 py-3 text-lg font-lato font-semibold hover:opacity-90"
+              style={{backgroundColor: '#2F8140'}}
+            >
+              <Plus size={20} className="mr-2" />
+              Post a Job Now
+            </Button>
+            <span className="text-gray-500 font-lato">or use the search above to find existing jobs</span>
+          </div>
         </div>
       </div>
     </section>
