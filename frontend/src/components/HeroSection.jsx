@@ -75,7 +75,7 @@ const HeroSection = () => {
             <span className="text-green-600">tradesperson</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Post your job for free and connect with vetted, local tradespeople. 
+            Post your job for free and connect with vetted, local tradespeople across Nigeria. 
             Read genuine reviews from homeowners like you.
           </p>
 
