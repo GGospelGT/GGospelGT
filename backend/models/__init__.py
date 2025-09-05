@@ -5,7 +5,8 @@ from .base import (
     QuoteCreate, Quote, QuotesResponse, QuoteStatus,
     ReviewCreate, Review, ReviewsResponse,
     StatsResponse, Category,
-    Homeowner, Location
+    Homeowner, Location,
+    PortfolioItemCreate, PortfolioItem, PortfolioResponse, PortfolioItemCategory
 )
 
 from .auth import (
@@ -26,6 +27,7 @@ __all__ = [
     'ReviewCreate', 'Review', 'ReviewsResponse',
     'StatsResponse', 'Category',
     'Homeowner', 'Location',
+    'PortfolioItemCreate', 'PortfolioItem', 'PortfolioResponse', 'PortfolioItemCategory',
     # Auth models
     'User', 'UserRole', 'UserStatus',
     'HomeownerRegistration', 'TradespersonRegistration',
