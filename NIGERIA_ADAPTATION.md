@@ -1,6 +1,6 @@
-# MyBuilder Nigeria - Localization Summary
+# serviceHub Nigeria - Localization Summary
 
-## ✅ Successfully Adapted MyBuilder Clone for Nigerian Market
+## ✅ Successfully Adapted serviceHub for Nigerian Market
 
 ### 🌍 **Geographic Localization**
 - **Cities**: Updated from UK cities to 20 major Nigerian cities
