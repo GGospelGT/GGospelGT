@@ -339,8 +339,8 @@ test_plan:
     - "Phase 4: Mock Notifications System - Backend"
     - "Phase 4: Frontend Notification System Integration"
     - "Minor Issues Fix - Phase 7 Remaining Issues"
-  stuck_tasks:
-    - "Show Interest Frontend Integration - BrowseJobsPage"
+    - "Phase 8: Rating & Review System - Backend"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
