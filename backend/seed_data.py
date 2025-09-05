@@ -171,7 +171,7 @@ async def seed_jobs(count: int = 50):
             "homeowner": {
                 "name": homeowner_name,
                 "email": f"{homeowner_first.lower()}.{homeowner_last.lower()}{i}@gmail.com",
-                "phone": f"07{random.randint(100000000, 999999999)}"
+                "phone": f"+234{random.randint(7000000000, 9099999999)}"
             },
             "status": status,
             "quotes_count": random.randint(0, 5),
