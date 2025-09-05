@@ -89,8 +89,8 @@ async def seed_tradespeople(count: int = 100):
         trade_cats = random.sample(TRADE_CATEGORIES, num_categories)
         
         # Random location
-        location = random.choice(UK_CITIES)
-        postcode = random.choice(POSTCODES)
+        location = random.choice(NIGERIAN_CITIES)
+        postcode = random.choice(NIGERIAN_POSTCODES)
         
         # Random certifications (0-3)
         num_certs = random.randint(0, 3)
