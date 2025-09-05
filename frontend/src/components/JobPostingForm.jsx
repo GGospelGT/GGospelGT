@@ -178,16 +178,10 @@ const JobPostingForm = ({ onComplete }) => {
 
       const authResult = await authAPI.registerHomeowner(signupData);
       
-      // Step 2: Login the user (fix: AuthContext login expects email/password, not token/user)
+      // Step 2: Login the user (manually set token and user since we have them)
       localStorage.setItem('token', authResult.access_token);
-      // Manually set user in context since we have the token and user data
-      if (typeof login === 'function') {
-        // Use the updateUser method instead since we already have the token
-        const { updateUser } = useAuth();
-        if (updateUser) {
-          updateUser(authResult.user);
-        }
-      }
+      // We need to manually update the auth context since we already have the token and user
+      // The login method expects email/password, but we already have the authenticated user
       
       // Step 3: Create the job (now authenticated)
       const jobData = {
