@@ -3128,6 +3128,7 @@ class BackendTester:
         print("   • Communication System: Job-based messaging, image sharing, real-time features")
         print("   • Interest System: Lead generation marketplace, contact sharing, payment workflow")
         print("   • Notification System: Mock email/SMS services, preferences, history, workflow integration")
+        print("   • Rating & Review System: 5-star ratings, category ratings, mutual reviews, platform stats")
         
         return self.results['failed'] == 0
 
