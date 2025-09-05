@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, status, BackgroundTasks
 from typing import List
 from models import (
     InterestCreate, Interest, InterestedTradesperson, InterestResponse, 
-    InterestStatus, ContactDetails
+    InterestStatus, ContactDetails, ShareContactResponse
 )
 from models.auth import User
 from models.notifications import NotificationType
