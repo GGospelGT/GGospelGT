@@ -40,6 +40,8 @@ async def update_notification_preferences(
         
         preferences = await database.update_notification_preferences(current_user.id, update_data)
         return preferences
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error updating notification preferences: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update notification preferences")
