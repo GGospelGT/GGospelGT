@@ -25,10 +25,10 @@ import { useNavigate } from 'react-router-dom';
 const MyJobsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
-  const [quotes, setQuotes] = useState([]);
-  const [quoteSummary, setQuoteSummary] = useState(null);
+  const [interestedTradespeople, setInterestedTradespeople] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [quotesLoading, setQuotesLoading] = useState(false);
+  const [interestsLoading, setInterestsLoading] = useState(false);
+  const [showInterestedModal, setShowInterestedModal] = useState(false);
 
   const { user, isAuthenticated, isHomeowner } = useAuth();
   const { toast } = useToast();
