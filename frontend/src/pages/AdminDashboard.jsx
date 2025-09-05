@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../api/wallet';
+import { adminReferralsAPI } from '../api/referrals';
 import { useToast } from '../hooks/use-toast';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
