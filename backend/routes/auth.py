@@ -163,6 +163,13 @@ async def register_tradesperson(registration_data: TradespersonRegistration):
         # Save to database
         created_user = await database.create_user(user_data)
         
+        # Generate referral code for new user
+        referral_code = await database.generate_referral_code(created_user["id"])
+        
+        # Process referral if provided
+        if registration_data.referral_code:
+            await database.record_referral(registration_data.referral_code, created_user["id"])
+        
         # Remove password hash from response
         user_response = User(**created_user)
         return UserProfile(**user_response.dict())
