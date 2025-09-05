@@ -136,8 +136,18 @@ const JobPostingForm = ({ onComplete }) => {
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
+      if (currentStep === 4) {
+        // Show account creation message before moving to step 5
+        setShowAccountCreation(true);
+      } else {
+        setCurrentStep(prev => Math.min(prev + 1, 5));
+      }
     }
+  };
+
+  const proceedToAccountCreation = () => {
+    setShowAccountCreation(false);
+    setCurrentStep(5);
   };
 
   const prevStep = () => {
