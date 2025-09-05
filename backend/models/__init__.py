@@ -7,7 +7,7 @@ from .base import (
     StatsResponse, Category,
     Homeowner, Location,
     PortfolioItemCreate, PortfolioItem, PortfolioResponse, PortfolioItemCategory,
-    InterestCreate, Interest, InterestedTradesperson, InterestResponse, InterestStatus, ContactDetails
+    InterestCreate, Interest, InterestedTradesperson, InterestResponse, InterestStatus, ContactDetails, ShareContactResponse
 )
 
 from .auth import (
