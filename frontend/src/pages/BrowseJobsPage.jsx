@@ -60,6 +60,46 @@ const BrowseJobsPage = () => {
     }
   };
 
+  const handleShowInterest = async (job) => {
+    if (!isAuthenticated()) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to show interest in jobs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isTradesperson()) {
+      toast({
+        title: "Tradesperson account required",
+        description: "Only tradespeople can show interest in jobs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setShowingInterest(job.id);
+      await interestsAPI.showInterest(job.id);
+      
+      toast({
+        title: "Interest registered!",
+        description: "The homeowner will review your profile and may share their contact details.",
+      });
+
+    } catch (error) {
+      console.error('Failed to show interest:', error);
+      toast({
+        title: "Failed to show interest",
+        description: error.response?.data?.detail || "There was an error showing interest. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setShowingInterest(null);
+    }
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
