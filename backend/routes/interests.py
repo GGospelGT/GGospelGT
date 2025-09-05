@@ -110,7 +110,7 @@ async def get_job_interested_tradespeople(
             detail=f"Failed to get interested tradespeople: {str(e)}"
         )
 
-@router.put("/share-contact/{interest_id}", response_model=InterestResponse)
+@router.put("/share-contact/{interest_id}", response_model=ShareContactResponse)
 async def share_contact_details(
     interest_id: str,
     background_tasks: BackgroundTasks,
@@ -133,13 +133,16 @@ async def share_contact_details(
             raise HTTPException(status_code=400, detail="Contact details can only be shared for interested tradespeople")
         
         # Update interest status
+        contact_shared_at = datetime.utcnow()
         update_data = {
             "status": InterestStatus.CONTACT_SHARED,
-            "contact_shared_at": datetime.utcnow(),
+            "contact_shared_at": contact_shared_at,
             "updated_at": datetime.utcnow()
         }
         
         updated_interest = await database.update_interest_status(interest_id, update_data)
+        if not updated_interest:
+            raise HTTPException(status_code=500, detail="Failed to update interest status")
         
         # Add background task to notify tradesperson
         background_tasks.add_task(
@@ -149,10 +152,11 @@ async def share_contact_details(
             interest_id=interest_id
         )
         
-        return InterestResponse(
-            interest_id=updated_interest["id"],
-            status=updated_interest["status"],
-            message="Contact details shared successfully"
+        return ShareContactResponse(
+            interest_id=interest_id,
+            status=InterestStatus.CONTACT_SHARED,
+            message="Contact details shared successfully",
+            contact_shared_at=contact_shared_at
         )
         
     except HTTPException:
