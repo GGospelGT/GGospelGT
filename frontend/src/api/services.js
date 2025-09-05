@@ -113,6 +113,26 @@ export const quotesAPI = {
     const response = await apiClient.get(`/quotes/job/${jobId}`);
     return response.data;
   },
+
+  getMyQuotes: async (params = {}) => {
+    const response = await apiClient.get('/quotes/my-quotes', { params });
+    return response.data;
+  },
+
+  updateQuoteStatus: async (quoteId, status) => {
+    const response = await apiClient.put(`/quotes/${quoteId}/status`, { status });
+    return response.data;
+  },
+
+  getQuoteSummary: async (jobId) => {
+    const response = await apiClient.get(`/quotes/job/${jobId}/summary`);
+    return response.data;
+  },
+
+  getAvailableJobs: async (params = {}) => {
+    const response = await apiClient.get('/quotes/available-jobs', { params });
+    return response.data;
+  },
 };
 
 // Reviews API
