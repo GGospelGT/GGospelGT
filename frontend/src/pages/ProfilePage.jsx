@@ -579,6 +579,52 @@ const ProfilePage = () => {
                 )}
               </TabsContent>
 
+              {/* Portfolio Tab - Only for Tradespeople */}
+              {isTradesperson() && (
+                <TabsContent value="portfolio" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
+                          <Camera size={20} className="mr-2" style={{color: '#2F8140'}} />
+                          My Portfolio
+                        </CardTitle>
+                        
+                        <Button
+                          onClick={() => setShowUploadForm(!showUploadForm)}
+                          className="text-white font-lato"
+                          style={{backgroundColor: '#2F8140'}}
+                        >
+                          <Plus size={16} className="mr-2" />
+                          Add Portfolio Item
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      {showUploadForm && (
+                        <div className="mb-6">
+                          <ImageUpload
+                            onUploadSuccess={handlePortfolioUploadSuccess}
+                            onCancel={() => setShowUploadForm(false)}
+                          />
+                        </div>
+                      )}
+                      
+                      <PortfolioGallery
+                        items={portfolioItems}
+                        isOwner={true}
+                        loading={portfolioLoading}
+                        onUpdate={handlePortfolioUpdate}
+                        onDelete={handlePortfolioDelete}
+                        emptyMessage="Start building your portfolio"
+                        emptyDescription="Showcase your best work to attract more clients. Upload photos of your completed projects."
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
+
               {/* Account Settings Tab */}
               <TabsContent value="account" className="space-y-6">
                 <Card>
