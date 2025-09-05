@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from typing import List, Dict, Any
 from auth.dependencies import get_current_user
+from models.auth import User
 from database import database
 from models.notifications import (
     NotificationPreferences, UpdatePreferencesRequest,
@@ -15,10 +16,10 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.get("/preferences", response_model=NotificationPreferences)
-async def get_notification_preferences(current_user: dict = Depends(get_current_user)):
+async def get_notification_preferences(current_user: User = Depends(get_current_user)):
     """Get current user's notification preferences"""
     try:
-        preferences = await database.get_user_notification_preferences(current_user["id"])
+        preferences = await database.get_user_notification_preferences(current_user.id)
         return preferences
     except Exception as e:
         logger.error(f"Error getting notification preferences: {str(e)}")
@@ -27,7 +28,7 @@ async def get_notification_preferences(current_user: dict = Depends(get_current_
 @router.put("/preferences", response_model=NotificationPreferences)
 async def update_notification_preferences(
     updates: UpdatePreferencesRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Update user's notification preferences"""
     try:
@@ -37,7 +38,7 @@ async def update_notification_preferences(
         if not update_data:
             raise HTTPException(status_code=400, detail="No updates provided")
         
-        preferences = await database.update_notification_preferences(current_user["id"], update_data)
+        preferences = await database.update_notification_preferences(current_user.id, update_data)
         return preferences
     except Exception as e:
         logger.error(f"Error updating notification preferences: {str(e)}")
@@ -47,16 +48,16 @@ async def update_notification_preferences(
 async def get_notification_history(
     limit: int = 50,
     offset: int = 0,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Get user's notification history with pagination"""
     try:
         notifications = await database.get_user_notifications(
-            current_user["id"], limit=limit, offset=offset
+            current_user.id, limit=limit, offset=offset
         )
         
         # Count unread notifications (assuming notifications are "unread" until explicitly marked)
-        all_notifications = await database.get_user_notifications(current_user["id"], limit=1000)
+        all_notifications = await database.get_user_notifications(current_user.id, limit=1000)
         unread_count = len([n for n in all_notifications if n.status == "sent"])
         
         return NotificationHistory(
@@ -72,7 +73,7 @@ async def get_notification_history(
 async def send_notification(
     request: NotificationRequest,
     background_tasks: BackgroundTasks,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Send a notification (admin/system use)"""
     try:
@@ -106,11 +107,11 @@ async def send_notification(
         raise HTTPException(status_code=500, detail="Failed to send notification")
 
 @router.get("/stats", response_model=NotificationStatsResponse)
-async def get_notification_stats(current_user: dict = Depends(get_current_user)):
+async def get_notification_stats(current_user: User = Depends(get_current_user)):
     """Get notification delivery statistics (admin only)"""
     try:
         # Basic admin check (you might want to implement proper role-based access)
-        if current_user.get("role") != "admin":
+        if current_user.role != "admin":
             raise HTTPException(status_code=403, detail="Admin access required")
         
         stats = await database.get_notification_stats()
@@ -122,24 +123,24 @@ async def get_notification_stats(current_user: dict = Depends(get_current_user))
 @router.post("/test/{notification_type}")
 async def test_notification(
     notification_type: NotificationType,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Test notification delivery (development only)"""
     try:
         # Get user preferences
-        preferences = await database.get_user_notification_preferences(current_user["id"])
+        preferences = await database.get_user_notification_preferences(current_user.id)
         
         # Create test template data
         test_data = _get_test_template_data(notification_type, current_user)
         
         # Send test notification
         notification = await notification_service.send_notification(
-            user_id=current_user["id"],
+            user_id=current_user.id,
             notification_type=notification_type,
             template_data=test_data,
             user_preferences=preferences,
-            recipient_email=current_user.get("email"),
-            recipient_phone=current_user.get("phone")
+            recipient_email=current_user.email,
+            recipient_phone=current_user.phone
         )
         
         # Save to database
@@ -190,11 +191,11 @@ async def _send_notification_background(
     except Exception as e:
         logger.error(f"❌ Background notification failed: {str(e)}")
 
-def _get_test_template_data(notification_type: NotificationType, user: dict) -> Dict[str, Any]:
+def _get_test_template_data(notification_type: NotificationType, user: User) -> Dict[str, Any]:
     """Generate test template data for different notification types"""
     base_data = {
-        "homeowner_name": user.get("name", "Test User"),
-        "tradesperson_name": user.get("name", "Test Tradesperson"),
+        "homeowner_name": user.name,
+        "tradesperson_name": user.name,
         "job_title": "Test Plumbing Job",
         "job_location": "Lagos, Nigeria",
         "job_budget": "₦50,000 - ₦100,000",
@@ -203,7 +204,7 @@ def _get_test_template_data(notification_type: NotificationType, user: dict) -> 
         "payment_url": "https://servicehub.ng/payments",
         "post_date": "Today",
         "tradesperson_experience": "5",
-        "tradesperson_email": user.get("email", "test@example.com"),
+        "tradesperson_email": user.email,
         "homeowner_email": "homeowner@example.com",
         "homeowner_phone": "+2348123456789"
     }
