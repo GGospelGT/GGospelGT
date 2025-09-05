@@ -179,6 +179,12 @@ class Database:
         quote_data['_id'] = str(result.inserted_id)
         return quote_data
 
+    async def get_quote_by_id(self, quote_id: str) -> Optional[dict]:
+        quote = await self.database.quotes.find_one({"id": quote_id})
+        if quote:
+            quote['_id'] = str(quote['_id'])
+        return quote
+
     async def get_quotes_by_job(self, job_id: str) -> List[dict]:
         cursor = self.database.quotes.find({"job_id": job_id}).sort("created_at", -1)
         quotes = await cursor.to_list(length=None)
@@ -186,6 +192,260 @@ class Database:
         for quote in quotes:
             quote['_id'] = str(quote['_id'])
         return quotes
+
+    async def get_quotes_with_tradesperson_details(self, job_id: str) -> List[dict]:
+        """Get quotes with full tradesperson details"""
+        pipeline = [
+            {"$match": {"job_id": job_id}},
+            {"$lookup": {
+                "from": "users",
+                "localField": "tradesperson_id",
+                "foreignField": "id",
+                "as": "tradesperson"
+            }},
+            {"$unwind": "$tradesperson"},
+            {"$sort": {"created_at": -1}},
+            {"$project": {
+                "id": 1,
+                "job_id": 1,
+                "price": 1,
+                "message": 1,
+                "estimated_duration": 1,
+                "start_date": 1,
+                "status": 1,
+                "created_at": 1,
+                "tradesperson": {
+                    "id": "$tradesperson.id",
+                    "name": "$tradesperson.name",
+                    "company_name": "$tradesperson.company_name",
+                    "experience_years": "$tradesperson.experience_years",
+                    "average_rating": "$tradesperson.average_rating",
+                    "total_reviews": "$tradesperson.total_reviews",
+                    "trade_categories": "$tradesperson.trade_categories",
+                    "location": "$tradesperson.location",
+                    "verified_tradesperson": "$tradesperson.verified_tradesperson"
+                }
+            }}
+        ]
+        
+        quotes = await self.database.quotes.aggregate(pipeline).to_list(None)
+        return quotes
+
+    async def get_tradesperson_quotes_with_job_details(self, tradesperson_id: str, filters: dict = None, skip: int = 0, limit: int = 10) -> List[dict]:
+        """Get tradesperson's quotes with job details"""
+        match_query = {"tradesperson_id": tradesperson_id}
+        if filters:
+            match_query.update(filters)
+        
+        pipeline = [
+            {"$match": match_query},
+            {"$lookup": {
+                "from": "jobs",
+                "localField": "job_id",
+                "foreignField": "id",
+                "as": "job"
+            }},
+            {"$unwind": "$job"},
+            {"$sort": {"created_at": -1}},
+            {"$skip": skip},
+            {"$limit": limit},
+            {"$project": {
+                "id": 1,
+                "price": 1,
+                "message": 1,
+                "estimated_duration": 1,
+                "start_date": 1,
+                "status": 1,
+                "created_at": 1,
+                "job": {
+                    "id": "$job.id",
+                    "title": "$job.title",
+                    "category": "$job.category",
+                    "location": "$job.location",
+                    "status": "$job.status",
+                    "homeowner": "$job.homeowner",
+                    "budget_min": "$job.budget_min",
+                    "budget_max": "$job.budget_max"
+                }
+            }}
+        ]
+        
+        quotes = await self.database.quotes.aggregate(pipeline).to_list(None)
+        return quotes
+
+    async def get_tradesperson_quotes_count(self, tradesperson_id: str, filters: dict = None) -> int:
+        match_query = {"tradesperson_id": tradesperson_id}
+        if filters:
+            match_query.update(filters)
+        return await self.database.quotes.count_documents(match_query)
+
+    async def update_quote_status(self, quote_id: str, status: str):
+        await self.database.quotes.update_one(
+            {"id": quote_id},
+            {"$set": {"status": status, "updated_at": datetime.utcnow()}}
+        )
+
+    async def reject_other_quotes(self, job_id: str, accepted_quote_id: str):
+        """Reject all other quotes when one is accepted"""
+        await self.database.quotes.update_many(
+            {"job_id": job_id, "id": {"$ne": accepted_quote_id}, "status": "pending"},
+            {"$set": {"status": "rejected", "updated_at": datetime.utcnow()}}
+        )
+
+    async def get_quote_statistics(self, job_id: str) -> dict:
+        """Get statistics for quotes on a job"""
+        pipeline = [
+            {"$match": {"job_id": job_id}},
+            {"$group": {
+                "_id": None,
+                "total_quotes": {"$sum": 1},
+                "pending_quotes": {"$sum": {"$cond": [{"$eq": ["$status", "pending"]}, 1, 0]}},
+                "accepted_quotes": {"$sum": {"$cond": [{"$eq": ["$status", "accepted"]}, 1, 0]}},
+                "rejected_quotes": {"$sum": {"$cond": [{"$eq": ["$status", "rejected"]}, 1, 0]}},
+                "average_price": {"$avg": "$price"},
+                "min_price": {"$min": "$price"},
+                "max_price": {"$max": "$price"}
+            }}
+        ]
+        
+        result = await self.database.quotes.aggregate(pipeline).to_list(1)
+        
+        if result:
+            return {
+                "total_quotes": result[0]["total_quotes"],
+                "pending_quotes": result[0]["pending_quotes"],
+                "accepted_quotes": result[0]["accepted_quotes"],
+                "rejected_quotes": result[0]["rejected_quotes"],
+                "average_price": result[0]["average_price"] or 0,
+                "min_price": result[0]["min_price"] or 0,
+                "max_price": result[0]["max_price"] or 0
+            }
+        else:
+            return {
+                "total_quotes": 0,
+                "pending_quotes": 0,
+                "accepted_quotes": 0,
+                "rejected_quotes": 0,
+                "average_price": 0,
+                "min_price": 0,
+                "max_price": 0
+            }
+
+    async def get_jobs_for_tradesperson(self, tradesperson_id: str, trade_categories: List[str], skip: int = 0, limit: int = 10) -> List[dict]:
+        """Get jobs available for a tradesperson to quote on"""
+        # Build query for jobs in tradesperson's categories
+        match_query = {
+            "status": "active",
+            "expires_at": {"$gt": datetime.utcnow()}
+        }
+        
+        if trade_categories:
+            match_query["category"] = {"$in": trade_categories}
+        
+        # Get jobs and exclude ones already quoted on
+        pipeline = [
+            {"$match": match_query},
+            {"$lookup": {
+                "from": "quotes",
+                "let": {"job_id": "$id"},
+                "pipeline": [
+                    {"$match": {
+                        "$expr": {
+                            "$and": [
+                                {"$eq": ["$job_id", "$$job_id"]},
+                                {"$eq": ["$tradesperson_id", tradesperson_id]}
+                            ]
+                        }
+                    }}
+                ],
+                "as": "existing_quotes"
+            }},
+            {"$match": {"existing_quotes": {"$size": 0}}},  # Exclude jobs already quoted on
+            {"$lookup": {
+                "from": "quotes",
+                "localField": "id",
+                "foreignField": "job_id",
+                "as": "all_quotes"
+            }},
+            {"$addFields": {
+                "quotes_count": {"$size": "$all_quotes"}
+            }},
+            {"$match": {"quotes_count": {"$lt": 5}}},  # Exclude jobs with 5+ quotes
+            {"$sort": {"created_at": -1}},
+            {"$skip": skip},
+            {"$limit": limit},
+            {"$project": {
+                "id": 1,
+                "title": 1,
+                "description": 1,
+                "category": 1,
+                "location": 1,
+                "budget_min": 1,
+                "budget_max": 1,
+                "timeline": 1,
+                "created_at": 1,
+                "expires_at": 1,
+                "quotes_count": 1,
+                "homeowner": {
+                    "name": "$homeowner.name",
+                    "location": "$location"
+                }
+            }}
+        ]
+        
+        jobs = await self.database.jobs.aggregate(pipeline).to_list(None)
+        return jobs
+
+    async def get_available_jobs_count_for_tradesperson(self, tradesperson_id: str, trade_categories: List[str]) -> int:
+        """Count available jobs for a tradesperson"""
+        match_query = {
+            "status": "active",
+            "expires_at": {"$gt": datetime.utcnow()}
+        }
+        
+        if trade_categories:
+            match_query["category"] = {"$in": trade_categories}
+        
+        pipeline = [
+            {"$match": match_query},
+            {"$lookup": {
+                "from": "quotes",
+                "let": {"job_id": "$id"},
+                "pipeline": [
+                    {"$match": {
+                        "$expr": {
+                            "$and": [
+                                {"$eq": ["$job_id", "$$job_id"]},
+                                {"$eq": ["$tradesperson_id", tradesperson_id]}
+                            ]
+                        }
+                    }}
+                ],
+                "as": "existing_quotes"
+            }},
+            {"$match": {"existing_quotes": {"$size": 0}}},
+            {"$lookup": {
+                "from": "quotes",
+                "localField": "id",
+                "foreignField": "job_id",
+                "as": "all_quotes"
+            }},
+            {"$addFields": {
+                "quotes_count": {"$size": "$all_quotes"}
+            }},
+            {"$match": {"quotes_count": {"$lt": 5}}},
+            {"$count": "total"}
+        ]
+        
+        result = await self.database.jobs.aggregate(pipeline).to_list(1)
+        return result[0]["total"] if result else 0
+
+    async def update_job_status(self, job_id: str, status: str):
+        """Update job status"""
+        await self.database.jobs.update_one(
+            {"id": job_id},
+            {"$set": {"status": status, "updated_at": datetime.utcnow()}}
+        )
 
     async def get_quotes_count_by_job(self, job_id: str) -> int:
         return await self.database.quotes.count_documents({"job_id": job_id})
