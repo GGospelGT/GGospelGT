@@ -134,7 +134,7 @@ const Footer = () => {
           <div className="border-t border-gray-800 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               <div className="flex flex-wrap items-center space-x-6 text-sm text-gray-400">
-                <span>© 2025 MyBuilder Ltd. All rights reserved.</span>
+                <span>© 2025 serviceHub Ltd. All rights reserved.</span>
                 <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
                 <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
                 <a href="#" className="hover:text-white transition-colors">Cookie Policy</a>
