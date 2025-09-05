@@ -140,10 +140,10 @@ async def get_wallet_with_referral_info(current_user = Depends(get_current_user)
     )
 
 @router.get("/withdrawal-eligibility")
-async def check_withdrawal_eligibility(current_user: dict = Depends(get_current_user)):
+async def check_withdrawal_eligibility(current_user = Depends(get_current_user)):
     """Check if user can withdraw referral coins"""
     
-    eligibility = await database.check_withdrawal_eligibility(current_user["id"])
+    eligibility = await database.check_withdrawal_eligibility(current_user.id)
     
     return {
         **eligibility,
