@@ -93,6 +93,16 @@ const Header = () => {
                   </>
                 )}
                 
+                {/* Profile Link for all authenticated users */}
+                <Button 
+                  variant="ghost"
+                  onClick={() => navigate('/profile')}
+                  className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                >
+                  <User size={16} />
+                  <span>Profile</span>
+                </Button>
+                
                 <Button
                   variant="ghost"
                   onClick={handleLogout}
