@@ -18,7 +18,7 @@ async def create_tradesperson(tradesperson_data: TradespersonCreate):
         
         # Convert to dict and prepare for database
         tradesperson_dict = tradesperson_data.dict()
-        tradesperson_dict['id'] = Tradesperson().id  # Generate new ID
+        tradesperson_dict['id'] = str(uuid.uuid4())  # Generate new ID
         tradesperson_dict['average_rating'] = 0.0
         tradesperson_dict['total_reviews'] = 0
         tradesperson_dict['total_jobs'] = 0
