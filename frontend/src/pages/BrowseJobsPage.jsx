@@ -38,7 +38,17 @@ const BrowseJobsPage = () => {
       return;
     }
     loadAvailableJobs();
+    loadWalletBalance();
   }, []);
+
+  const loadWalletBalance = async () => {
+    try {
+      const data = await walletAPI.getBalance();
+      setWalletBalance(data);
+    } catch (error) {
+      console.error('Failed to load wallet balance:', error);
+    }
+  };
 
   const loadAvailableJobs = async (page = 1) => {
     try {
