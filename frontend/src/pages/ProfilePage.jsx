@@ -43,7 +43,7 @@ const ProfilePage = () => {
   const [portfolioLoading, setPortfolioLoading] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   
-  const { user, isAuthenticated, isHomeowner, isTradesperson, updateUser } = useAuth();
+  const { user, loading: authLoading, isAuthenticated, isHomeowner, isTradesperson, updateUser } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
