@@ -307,6 +307,7 @@ class ContactDetails(BaseModel):
 class TransactionType(str, Enum):
     WALLET_FUNDING = "wallet_funding"
     ACCESS_FEE_DEDUCTION = "access_fee_deduction"
+    REFERRAL_REWARD = "referral_reward"
     REFUND = "refund"
 
 class TransactionStatus(str, Enum):
