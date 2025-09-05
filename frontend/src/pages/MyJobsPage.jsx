@@ -15,7 +15,8 @@ import {
   Clock,
   Briefcase,
   TrendingUp,
-  Users
+  Users,
+  MessageCircle
 } from 'lucide-react';
 import { jobsAPI, interestsAPI } from '../api/services';
 import { useAuth } from '../contexts/AuthContext';
