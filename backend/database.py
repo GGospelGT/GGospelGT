@@ -843,11 +843,10 @@ class Database:
 
     async def get_interest_by_id(self, interest_id: str) -> Optional[dict]:
         """Get interest by ID"""
-        interest = await self.interests_collection.find_one({"_id": interest_id})
+        interest = await self.interests_collection.find_one({"id": interest_id})
         
         if interest:
-            interest["id"] = str(interest["_id"])
-            del interest["_id"]
+            interest['_id'] = str(interest['_id'])
         
         return interest
 
