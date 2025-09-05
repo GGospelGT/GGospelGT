@@ -136,23 +136,17 @@ frontend:
         agent: "testing"
         comment: "❌ CRITICAL INFRASTRUCTURE ISSUE: Mixed Content Security Error prevents Show Interest system from functioning. Frontend correctly configured with HTTPS URLs (REACT_APP_BACKEND_URL=https://skillhub-ng.preview.emergentagent.com), but actual API requests are being redirected to HTTP causing browser security blocks. Testing results: ✅ Unauthenticated access shows 'Sign In Required' message correctly, ✅ BrowseJobsPage component properly implemented with Show Interest button, HandHeart icon, and interests_count display, ✅ Authentication checks working (tradesperson-only access), ❌ API calls fail due to Mixed Content error: 'HTTPS page making HTTP XMLHttpRequest blocked by browser security'. Root cause: Server-side redirect or proxy configuration forcing HTTPS→HTTP redirect. Frontend implementation is correct but cannot function due to infrastructure issue."
 
-  - task: "My Jobs & Quotes Page for Homeowners"
+  - task: "Homeowner Interest Review System - MyJobsPage Enhancement"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/frontend/src/pages/MyJobsPage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Updated MyJobsPage to use proper backend endpoint /my-jobs instead of client-side filtering"
-      - working: false
-        agent: "testing"
-        comment: "❌ CRITICAL ISSUES FOUND: 1) Mixed Content Error - HTTPS page making HTTP API requests blocked by browser security. 2) Backend API errors: 'Database object has no attribute get_featured_reviews' causing 500 errors. 3) Page loading timeouts due to API failures. Frontend components are implemented correctly but cannot function due to infrastructure issues."
-      - working: true
-        agent: "main"
-        comment: "✅ FIXED ALL ISSUES: 1) Updated frontend .env to use HTTP localhost for development. 2) Added missing get_featured_reviews method to database class. 3) Frontend now loads successfully with proper authentication modals and My Jobs page accessible."
+        comment: "✅ PHASE 2 COMPLETE: Enhanced MyJobsPage with comprehensive homeowner interest review system. Key features: 1) Updated job cards to show interests_count instead of quotes_count with Heart icon, 2) Replaced 'View Quotes' button with 'View Interested' button (disabled when no interests), 3) Created InterestedTradespeopleModal displaying interested parties with profiles, experience, specialties, and contact sharing functionality, 4) Implemented handleShareContact function for homeowners to share contact details, 5) Added proper loading states and empty states for interested tradespeople, 6) Removed messaging navigation and QuotesList dependencies, 7) Updated page description to reflect lead generation model. Complete workflow: homeowner views job → sees X interested → clicks to view detailed list → reviews tradesperson profiles → shares contact details with selected parties."
 
   - task: "Navigation Integration"
     implemented: true
