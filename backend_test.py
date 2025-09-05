@@ -717,11 +717,11 @@ class BackendTester:
     
 if __name__ == "__main__":
     tester = BackendTester()
-    results = tester.run_homeowner_quote_tests()
+    results = tester.run_profile_management_tests()
     
     # Exit with error code if tests failed
     if results['failed'] > 0:
         exit(1)
     else:
-        print(f"\n🎉 All homeowner and quote management tests passed successfully!")
+        print(f"\n🎉 All profile management tests passed successfully!")
         exit(0)
