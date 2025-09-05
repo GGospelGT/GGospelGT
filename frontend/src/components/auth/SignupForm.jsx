@@ -16,6 +16,7 @@ const SignupForm = ({ onClose, onSwitchToLogin }) => {
     phone: '',
     location: '',
     postcode: '',
+    referral_code: new URLSearchParams(window.location.search).get('ref') || '', // Auto-fill from URL
     // Tradesperson specific
     trade_categories: [],
     experience_years: '',
