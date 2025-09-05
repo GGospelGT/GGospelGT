@@ -68,6 +68,7 @@ class HomeownerRegistration(BaseModel):
     password: str = Field(..., min_length=8)
     location: str
     postcode: str
+    referral_code: Optional[str] = None  # Optional referral code
 
 class TradespersonRegistration(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
