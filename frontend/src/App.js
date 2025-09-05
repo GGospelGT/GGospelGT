@@ -21,6 +21,7 @@ function App() {
             <Route path="/my-jobs" element={<MyJobsPage />} />
             <Route path="/browse-jobs" element={<BrowseJobsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/tradesperson/:tradespersonId/portfolio" element={<TradespersonPortfolioPage />} />
           </Routes>
           <Toaster />
         </BrowserRouter>
