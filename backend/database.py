@@ -198,6 +198,10 @@ class Database:
             quote['_id'] = str(quote['_id'])
         return quotes
 
+    async def get_quotes_by_job_id(self, job_id: str) -> List[dict]:
+        """Alias for get_quotes_by_job for messaging system compatibility"""
+        return await self.get_quotes_by_job(job_id)
+
     async def get_quotes_with_tradesperson_details(self, job_id: str) -> List[dict]:
         """Get quotes with full tradesperson details"""
         pipeline = [
