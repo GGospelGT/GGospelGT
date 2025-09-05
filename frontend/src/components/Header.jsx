@@ -94,6 +94,9 @@ const Header = () => {
                   </>
                 )}
                 
+                {/* Notification Indicator for all authenticated users */}
+                <NotificationIndicator />
+                
                 {/* Profile Link for all authenticated users */}
                 <Button 
                   variant="ghost"
