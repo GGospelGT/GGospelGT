@@ -1,12 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional, List
-import sys
-import os
-# Add parent directory to path to import models.py directly
-backend_dir = os.path.dirname(os.path.dirname(__file__))
-sys.path.insert(0, backend_dir)
 from models import JobCreate, Job, JobsResponse
-from models_package.auth import User
+from models.auth import User
 from auth.dependencies import get_current_active_user, get_current_homeowner
 from database import database
 from datetime import datetime, timedelta
