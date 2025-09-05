@@ -177,7 +177,7 @@ const BrowseJobsPage = () => {
               Available Jobs
             </h1>
             <p className="text-lg text-gray-600 font-lato">
-              Browse jobs that match your skills and submit competitive quotes.
+              Browse jobs that match your skills and show your interest to homeowners.
             </p>
             
             {/* User skills display */}
