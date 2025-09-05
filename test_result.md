@@ -225,15 +225,18 @@ frontend:
 
   - task: "Portfolio System - Frontend"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/frontend/src/components/portfolio/, /app/frontend/src/pages/ProfilePage.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "✅ Created comprehensive portfolio frontend system: ImageUpload component with drag-and-drop functionality and file validation, PortfolioGallery component with image grid display and management features, Portfolio tab integrated into ProfilePage for tradespeople, TradespersonPortfolioPage for public portfolio viewing, portfolio API methods added to services. Complete portfolio management UI with CRUD operations and ServiceHub branding."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL ISSUE FOUND: Portfolio tab is not visible even for authenticated tradesperson users. Testing revealed: 1) ✅ Frontend components are properly implemented (ImageUpload, PortfolioGallery), 2) ✅ Authentication system works (registration/login functional), 3) ✅ Role-based registration works (tradesperson vs homeowner tabs), 4) ❌ Portfolio tab not showing in ProfilePage even for tradesperson role, 5) ❌ Authentication state not persisting on profile page (shows 'Sign In Required'). Root cause appears to be authentication context issue or role detection problem in ProfilePage component."
 
 metadata:
   created_by: "main_agent"
