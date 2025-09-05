@@ -1,4 +1,4 @@
-# 🚀 MyBuilder Nigeria - Development Roadmap
+# 🚀 serviceHub Nigeria - Development Roadmap
 
 ## 📋 **Phase 1: Core Functionality (Week 1-2)**
 
