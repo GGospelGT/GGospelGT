@@ -822,7 +822,7 @@ class Database:
         if not job:
             raise Exception("Job not found")
         
-        homeowner = await self.get_user_by_email(job["homeower"]["email"])
+        homeowner = await self.get_user_by_email(job["homeowner"]["email"])
         if not homeowner:
             raise Exception("Homeowner not found")
         
