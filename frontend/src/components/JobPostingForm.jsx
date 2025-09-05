@@ -636,13 +636,13 @@ const JobPostingForm = ({ onComplete }) => {
           Previous
         </Button>
 
-        {currentStep < 4 ? (
+        {currentStep < 5 ? (
           <Button
             onClick={nextStep}
             className="text-white font-lato"
             style={{backgroundColor: '#2F8140'}}
           >
-            Next
+            {currentStep === 4 ? 'Create Account' : 'Next'}
             <ArrowRight size={16} className="ml-2" />
           </Button>
         ) : (
@@ -652,7 +652,7 @@ const JobPostingForm = ({ onComplete }) => {
             className="text-white font-lato"
             style={{backgroundColor: '#121E3C'}}
           >
-            {isSubmitting ? 'Posting Job...' : 'Post Job'}
+            {isSubmitting ? 'Creating Account & Posting Job...' : 'Create Account & Post Job'}
           </Button>
         )}
       </div>
