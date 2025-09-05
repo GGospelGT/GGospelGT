@@ -2,8 +2,10 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from models import QuoteCreate, Quote, QuotesResponse, Job
+# Add parent directory to path to import models.py directly
+backend_dir = os.path.dirname(os.path.dirname(__file__))
+sys.path.insert(0, backend_dir)
+import models
 from models.auth import User
 from auth.dependencies import get_current_active_user, get_current_tradesperson, get_current_homeowner
 from database import database
@@ -12,9 +14,9 @@ import uuid
 
 router = APIRouter(prefix="/api/quotes", tags=["quotes"])
 
-@router.post("/", response_model=Quote)
+@router.post("/", response_model=models.Quote)
 async def create_quote(
-    quote_data: QuoteCreate, 
+    quote_data: models.QuoteCreate, 
     current_user: User = Depends(get_current_tradesperson)
 ):
     """Submit a quote for a job (tradesperson only)"""
@@ -69,14 +71,14 @@ async def create_quote(
         # Update job quotes count
         await database.update_job_quotes_count(quote_data.job_id)
         
-        return Quote(**created_quote)
+        return models.Quote(**created_quote)
         
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/job/{job_id}", response_model=QuotesResponse)
+@router.get("/job/{job_id}", response_model=models.QuotesResponse)
 async def get_job_quotes(
     job_id: str,
     current_user: User = Depends(get_current_homeowner)
