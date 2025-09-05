@@ -75,13 +75,16 @@ class BackendTester:
         response = self.make_request("POST", "/auth/register/homeowner", json=homeowner_data)
         if response.status_code == 200:
             homeowner_profile = response.json()
-            if homeowner_profile.get('role') == 'homeowner':
-                self.log_result("Homeowner registration", True, f"ID: {homeowner_profile['id']}")
-                self.test_data['homeowner_profile'] = homeowner_profile
+            if homeowner_profile.get('user', {}).get('role') == 'homeowner':
+                self.log_result("Homeowner registration", True, f"ID: {homeowner_profile['user']['id']}")
+                self.test_data['homeowner_profile'] = homeowner_profile['user']
                 self.test_data['homeowner_credentials'] = {
                     'email': homeowner_data['email'],
                     'password': homeowner_data['password']
                 }
+                # Store access token for immediate use
+                self.auth_tokens['homeowner'] = homeowner_profile['access_token']
+                self.test_data['homeowner_user'] = homeowner_profile['user']
             else:
                 self.log_result("Homeowner registration", False, "Invalid role in response")
         else:
