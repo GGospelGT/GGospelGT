@@ -11,7 +11,7 @@ const Header = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isHomeowner, isTradesperson, logout } = useAuth();
 
   const handleAuthClick = (mode) => {
     setAuthMode(mode);
