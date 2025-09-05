@@ -87,6 +87,18 @@ const BrowseJobsPage = () => {
       return;
     }
 
+    // Check wallet balance for potential access fee
+    const accessFeeCoins = job.access_fee_coins || 15;
+    if (walletBalance && walletBalance.balance_coins < accessFeeCoins) {
+      toast({
+        title: "Insufficient wallet balance",
+        description: `You need at least ${accessFeeCoins} coins (₦${(accessFeeCoins * 100).toLocaleString()}) to pay for contact details. Please fund your wallet.`,
+        variant: "destructive",
+      });
+      navigate('/wallet');
+      return;
+    }
+
     try {
       setShowingInterest(job.id);
       await interestsAPI.showInterest(job.id);
