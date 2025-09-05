@@ -2,52 +2,64 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { ArrowRight } from 'lucide-react';
+import { statsAPI } from '../api/services';
+import { useAPI } from '../hooks/useAPI';
 
 const PopularTrades = () => {
-  const trades = [
+  const { data: categoriesData, loading, error } = useAPI(() => statsAPI.getCategories());
+
+  // Fallback data while loading or on error
+  const defaultTrades = [
     {
       title: 'Gardening & Landscaping',
       description: 'Dreaming of a garden that captivates and soothes? Our detailed guides will provide pricing info and help you find the perfect gardener.',
-      tradespeople: '12,543',
-      image: '🌿',
+      tradesperson_count: '12,543',
+      icon: '🌿',
       color: 'from-green-400 to-green-600'
     },
     {
       title: 'Painting & Decorating',
       description: 'Thinking about giving your space a fresh, new look? Our guides will not only provide pricing info but also connect you with skilled painters.',
-      tradespeople: '18,721',
-      image: '🎨',
+      tradesperson_count: '18,721',
+      icon: '🎨',
       color: 'from-blue-400 to-blue-600'
     },
     {
       title: 'Plastering & Rendering',
       description: 'Are you interested in price information about a job in this service category? To give you an idea of costs, here are some recent projects.',
-      tradespeople: '8,934',
-      image: '🏗️',
+      tradesperson_count: '8,934',
+      icon: '🏗️',
       color: 'from-orange-400 to-orange-600'
     },
     {
       title: 'Plumbing',
       description: 'From leaky taps to full bathroom installations, find qualified plumbers for any job. Get quotes and compare reviews.',
-      tradespeople: '15,678',
-      image: '🔧',
+      tradesperson_count: '15,678',
+      icon: '🔧',
       color: 'from-indigo-400 to-indigo-600'
     },
     {
       title: 'Electrical Work',
       description: 'Safe, certified electrical work from qualified electricians. From socket installations to full rewiring projects.',
-      tradespeople: '11,234',
-      image: '⚡',
+      tradesperson_count: '11,234',
+      icon: '⚡',
       color: 'from-yellow-400 to-yellow-600'
     },
     {
       title: 'Carpentry & Joinery',
       description: 'Custom woodwork, fitted wardrobes, kitchen installations and more from skilled carpenters and joiners.',
-      tradespeople: '9,876',
-      image: '🪚',
+      tradesperson_count: '9,876',
+      icon: '🪚',
       color: 'from-amber-400 to-amber-600'
     }
   ];
+
+  // Use real categories if available, otherwise use defaults
+  const displayTrades = categoriesData?.categories || defaultTrades;
+
+  if (error) {
+    console.warn('Failed to load categories, using defaults:', error);
+  }
 
   return (
     <section className="py-16 bg-white">
@@ -63,11 +75,11 @@ const PopularTrades = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trades.map((trade, index) => (
+            {displayTrades.slice(0, 6).map((trade, index) => (
               <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
                 <CardContent className="p-6">
                   <div className={`w-16 h-16 rounded-lg bg-gradient-to-r ${trade.color} flex items-center justify-center mb-4 text-2xl`}>
-                    {trade.image}
+                    {trade.icon}
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">
                     {trade.title}
@@ -77,7 +89,13 @@ const PopularTrades = () => {
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500">
-                      {trade.tradespeople} tradespeople in UK
+                      {loading ? (
+                        <div className="animate-pulse bg-gray-200 h-4 w-24 rounded"></div>
+                      ) : (
+                        `${typeof trade.tradesperson_count === 'number' 
+                          ? trade.tradesperson_count.toLocaleString() 
+                          : trade.tradesperson_count} tradespeople in UK`
+                      )}
                     </span>
                     <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700 p-0">
                       View all <ArrowRight size={16} className="ml-1" />
