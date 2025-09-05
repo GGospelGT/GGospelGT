@@ -1,5 +1,10 @@
 # Models package
-from ..models import (
+import sys
+import os
+# Add parent directory to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+from models import (
     JobCreate, Job, JobsResponse, JobStatus,
     TradespersonCreate, Tradesperson, TradespeopleResponse,
     QuoteCreate, Quote, QuotesResponse, QuoteStatus,
