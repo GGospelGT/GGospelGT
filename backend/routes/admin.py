@@ -186,6 +186,10 @@ async def get_admin_dashboard_stats():
     access_fees = [job.get("access_fee_naira", 1500) for job in jobs]
     avg_access_fee = sum(access_fees) / len(access_fees) if access_fees else 1500
     
+    # Get pending verifications count
+    pending_verifications = await database.get_pending_verifications(limit=1000)
+    pending_verifications_count = len(pending_verifications)
+    
     return {
         "wallet_stats": {
             "pending_funding_requests": pending_count,
@@ -198,11 +202,15 @@ async def get_admin_dashboard_stats():
             "average_access_fee_naira": round(avg_access_fee, 0),
             "average_access_fee_coins": round(avg_access_fee / 100, 0)
         },
+        "verification_stats": {
+            "pending_verifications": pending_verifications_count
+        },
         "system_stats": {
             "coin_conversion_rate": "1 coin = ₦100",
             "min_access_fee": "₦1,500 (15 coins)",
             "max_access_fee": "₦5,000 (50 coins)",
-            "min_funding_amount": "₦1,500 (15 coins)"
+            "min_funding_amount": "₦1,500 (15 coins)",
+            "referral_reward": "5 coins per verified referral"
         }
     }
 
