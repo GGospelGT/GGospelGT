@@ -141,11 +141,11 @@ async def get_wallet_transactions(
 @router.post("/check-balance/{access_fee_coins}")
 async def check_sufficient_balance(
     access_fee_coins: int,
-    current_user: dict = Depends(get_current_tradesperson)
+    current_user: User = Depends(get_current_tradesperson)
 ):
     """Check if tradesperson has sufficient balance for access fee"""
     
-    wallet = await database.get_wallet_by_user_id(current_user["id"])
+    wallet = await database.get_wallet_by_user_id(current_user.id)
     
     sufficient = wallet["balance_coins"] >= access_fee_coins
     
