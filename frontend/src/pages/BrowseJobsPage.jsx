@@ -15,11 +15,13 @@ import {
   Search,
   Filter,
   ArrowRight,
-  Briefcase
+  Briefcase,
+  MessageCircle
 } from 'lucide-react';
 import { quotesAPI } from '../api/services';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const BrowseJobsPage = () => {
   const [jobs, setJobs] = useState([]);
