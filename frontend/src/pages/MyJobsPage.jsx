@@ -420,14 +420,27 @@ const MyJobsPage = () => {
                                 }
                               </div>
                               
-                              <Button
-                                onClick={() => handleViewQuotes(job)}
-                                className="text-white font-lato"
-                                style={{backgroundColor: '#2F8140'}}
-                              >
-                                <Eye size={16} className="mr-2" />
-                                View Quotes
-                              </Button>
+                              <div className="flex space-x-3">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => navigate('/messages', { 
+                                    state: { selectedJobId: job.id } 
+                                  })}
+                                  className="font-lato"
+                                >
+                                  <MessageCircle size={16} className="mr-2" />
+                                  Messages
+                                </Button>
+                                
+                                <Button
+                                  onClick={() => handleViewQuotes(job)}
+                                  className="text-white font-lato"
+                                  style={{backgroundColor: '#2F8140'}}
+                                >
+                                  <Eye size={16} className="mr-2" />
+                                  View Quotes
+                                </Button>
+                              </div>
                             </div>
                           </CardContent>
                         </Card>
