@@ -758,26 +758,6 @@ class Database:
         
         return interested
 
-    async def update_interest_status(self, interest_id: str, status: str, additional_data: dict = None) -> bool:
-        """Update interest status"""
-        update_data = {
-            "status": status,
-            "updated_at": datetime.utcnow()
-        }
-        
-        if status == "contact_shared":
-            update_data["contact_shared_at"] = datetime.utcnow()
-        elif status == "paid_access":
-            update_data["payment_made_at"] = datetime.utcnow()
-            if additional_data and "access_fee" in additional_data:
-                update_data["access_fee"] = additional_data["access_fee"]
-        
-        result = await self.interests_collection.update_one(
-            {"id": interest_id},
-            {"$set": update_data}
-        )
-        return result.modified_count > 0
-
     async def get_tradesperson_interests(self, tradesperson_id: str) -> List[dict]:
         """Get all interests for a tradesperson"""
         pipeline = [
