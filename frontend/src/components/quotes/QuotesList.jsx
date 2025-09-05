@@ -119,6 +119,17 @@ const QuotesList = ({ jobId, quotes: initialQuotes, onQuoteUpdate }) => {
     ));
   };
 
+  const handleMessageTradesperson = (tradespersonId, tradespersonName) => {
+    // Navigate to messages page with job context
+    navigate('/messages', { 
+      state: { 
+        selectedJobId: jobId,
+        selectedUserId: tradespersonId,
+        selectedUserName: tradespersonName
+      } 
+    });
+  };
+
   if (!quotes || quotes.length === 0) {
     return (
       <Card>
