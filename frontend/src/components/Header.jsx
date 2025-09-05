@@ -13,7 +13,9 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Logo size="medium" variant="light" />
+          <div onClick={() => navigate('/')} className="cursor-pointer">
+            <Logo size="medium" variant="light" />
+          </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
