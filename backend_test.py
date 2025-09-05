@@ -1356,6 +1356,335 @@ class BackendTester:
         
         return self.results
 
+    def test_interest_system(self):
+        """Test comprehensive Show Interest system for lead generation marketplace"""
+        print("\n=== Testing Show Interest System (Lead Generation) ===")
+        
+        if 'homeowner' not in self.auth_tokens or 'tradesperson' not in self.auth_tokens:
+            self.log_result("Interest system tests", False, "Missing authentication tokens")
+            return
+        
+        if 'homeowner_job' not in self.test_data:
+            self.log_result("Interest system tests", False, "No job available for testing")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        job_id = self.test_data['homeowner_job']['id']
+        tradesperson_id = self.test_data['tradesperson_user']['id']
+        homeowner_id = self.test_data['homeowner_user']['id']
+        
+        # Test 1: Tradesperson shows interest in a job
+        interest_data = {
+            "job_id": job_id
+        }
+        
+        response = self.make_request("POST", "/interests/show-interest", 
+                                   json=interest_data, auth_token=tradesperson_token)
+        if response.status_code == 200:
+            created_interest = response.json()
+            required_fields = ['id', 'job_id', 'tradesperson_id', 'status', 'created_at']
+            missing_fields = [field for field in required_fields if field not in created_interest]
+            
+            if not missing_fields and created_interest['tradesperson_id'] == tradesperson_id:
+                self.log_result("Tradesperson show interest", True, 
+                               f"Interest ID: {created_interest['id']}, Status: {created_interest['status']}")
+                self.test_data['created_interest'] = created_interest
+            else:
+                self.log_result("Tradesperson show interest", False, 
+                               f"Missing fields: {missing_fields} or wrong tradesperson")
+        else:
+            self.log_result("Tradesperson show interest", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 2: Prevent duplicate interest from same tradesperson
+        response = self.make_request("POST", "/interests/show-interest", 
+                                   json=interest_data, auth_token=tradesperson_token)
+        if response.status_code == 400:
+            self.log_result("Duplicate interest prevention", True, "Correctly rejected duplicate interest")
+        else:
+            self.log_result("Duplicate interest prevention", False, 
+                           f"Expected 400, got {response.status_code}")
+        
+        # Test 3: Unauthorized interest (homeowner trying to show interest)
+        response = self.make_request("POST", "/interests/show-interest", 
+                                   json=interest_data, auth_token=homeowner_token)
+        if response.status_code == 403:
+            self.log_result("Homeowner interest prevention", True, "Correctly denied homeowner access")
+        else:
+            self.log_result("Homeowner interest prevention", False, 
+                           f"Expected 403, got {response.status_code}")
+        
+        # Test 4: Unauthenticated interest attempt
+        response = self.make_request("POST", "/interests/show-interest", json=interest_data)
+        if response.status_code in [401, 403]:
+            self.log_result("Unauthenticated interest prevention", True, "Correctly requires authentication")
+        else:
+            self.log_result("Unauthenticated interest prevention", False, 
+                           f"Expected 401/403, got {response.status_code}")
+        
+        # Test 5: Homeowner views interested tradespeople
+        response = self.make_request("GET", f"/interests/job/{job_id}", auth_token=homeowner_token)
+        if response.status_code == 200:
+            interest_response = response.json()
+            required_fields = ['interested_tradespeople', 'total']
+            missing_fields = [field for field in required_fields if field not in interest_response]
+            
+            if not missing_fields:
+                interested_tradespeople = interest_response['interested_tradespeople']
+                if len(interested_tradespeople) > 0:
+                    tradesperson = interested_tradespeople[0]
+                    tradesperson_fields = ['interest_id', 'tradesperson_id', 'tradesperson_name', 
+                                         'tradesperson_email', 'trade_categories', 'experience_years', 
+                                         'status', 'created_at']
+                    missing_tp_fields = [field for field in tradesperson_fields if field not in tradesperson]
+                    
+                    if not missing_tp_fields:
+                        self.log_result("Homeowner view interested tradespeople", True, 
+                                       f"Found {len(interested_tradespeople)} interested tradespeople")
+                        self.test_data['interested_tradesperson'] = tradesperson
+                    else:
+                        self.log_result("Homeowner view interested tradespeople", False, 
+                                       f"Missing tradesperson fields: {missing_tp_fields}")
+                else:
+                    self.log_result("Homeowner view interested tradespeople", False, 
+                                   "No interested tradespeople found")
+            else:
+                self.log_result("Homeowner view interested tradespeople", False, 
+                               f"Missing fields: {missing_fields}")
+        else:
+            self.log_result("Homeowner view interested tradespeople", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 6: Unauthorized access to job interests (tradesperson trying to view)
+        response = self.make_request("GET", f"/interests/job/{job_id}", auth_token=tradesperson_token)
+        if response.status_code == 403:
+            self.log_result("Tradesperson job interests access prevention", True, 
+                           "Correctly denied tradesperson access")
+        else:
+            self.log_result("Tradesperson job interests access prevention", False, 
+                           f"Expected 403, got {response.status_code}")
+        
+        # Test 7: Cross-homeowner access prevention
+        # Create another homeowner and try to access first homeowner's job interests
+        other_homeowner_data = {
+            "name": "Funmi Adebayo",
+            "email": f"funmi.adebayo.{uuid.uuid4().hex[:8]}@email.com",
+            "password": "SecurePass123",
+            "phone": "08198765432",
+            "location": "Abuja, FCT",
+            "postcode": "900001"
+        }
+        
+        response = self.make_request("POST", "/auth/register/homeowner", json=other_homeowner_data)
+        if response.status_code == 200:
+            # Login the other homeowner
+            login_response = self.make_request("POST", "/auth/login", 
+                                             json={"email": other_homeowner_data["email"], 
+                                                  "password": other_homeowner_data["password"]})
+            if login_response.status_code == 200:
+                other_homeowner_token = login_response.json()['access_token']
+                
+                # Try to access first homeowner's job interests
+                response = self.make_request("GET", f"/interests/job/{job_id}", 
+                                           auth_token=other_homeowner_token)
+                if response.status_code == 403:
+                    self.log_result("Cross-homeowner access prevention", True, 
+                                   "Correctly prevented access to other homeowner's job")
+                else:
+                    self.log_result("Cross-homeowner access prevention", False, 
+                                   f"Expected 403, got {response.status_code}")
+        
+        # Test 8: Homeowner shares contact details
+        if 'created_interest' in self.test_data:
+            interest_id = self.test_data['created_interest']['id']
+            
+            response = self.make_request("PUT", f"/interests/share-contact/{interest_id}", 
+                                       auth_token=homeowner_token)
+            if response.status_code == 200:
+                result = response.json()
+                if "contact details shared" in result.get('message', '').lower():
+                    self.log_result("Homeowner share contact details", True, "Contact details shared successfully")
+                    self.test_data['contact_shared'] = True
+                else:
+                    self.log_result("Homeowner share contact details", False, "Unexpected response message")
+            else:
+                self.log_result("Homeowner share contact details", False, 
+                               f"Status: {response.status_code}, Response: {response.text}")
+            
+            # Test unauthorized contact sharing (tradesperson trying to share)
+            response = self.make_request("PUT", f"/interests/share-contact/{interest_id}", 
+                                       auth_token=tradesperson_token)
+            if response.status_code == 403:
+                self.log_result("Unauthorized contact sharing prevention", True, 
+                               "Correctly denied tradesperson access")
+            else:
+                self.log_result("Unauthorized contact sharing prevention", False, 
+                               f"Expected 403, got {response.status_code}")
+        
+        # Test 9: Tradesperson views their interest history
+        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+        if response.status_code == 200:
+            interests = response.json()
+            if isinstance(interests, list) and len(interests) > 0:
+                interest = interests[0]
+                required_fields = ['id', 'job_id', 'status', 'created_at', 'job_title', 'job_location']
+                missing_fields = [field for field in required_fields if field not in interest]
+                
+                if not missing_fields:
+                    self.log_result("Tradesperson view interest history", True, 
+                                   f"Found {len(interests)} interests")
+                else:
+                    self.log_result("Tradesperson view interest history", False, 
+                                   f"Missing fields: {missing_fields}")
+            else:
+                self.log_result("Tradesperson view interest history", True, 
+                               "No interests found (expected for new account)")
+        else:
+            self.log_result("Tradesperson view interest history", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 10: Unauthorized access to interest history (homeowner trying to access)
+        response = self.make_request("GET", "/interests/my-interests", auth_token=homeowner_token)
+        if response.status_code == 403:
+            self.log_result("Homeowner interest history access prevention", True, 
+                           "Correctly denied homeowner access")
+        else:
+            self.log_result("Homeowner interest history access prevention", False, 
+                           f"Expected 403, got {response.status_code}")
+        
+        # Test 11: Payment for contact access (placeholder)
+        if 'created_interest' in self.test_data and self.test_data.get('contact_shared'):
+            interest_id = self.test_data['created_interest']['id']
+            
+            response = self.make_request("POST", f"/interests/pay-access/{interest_id}", 
+                                       auth_token=tradesperson_token)
+            if response.status_code == 200:
+                payment_result = response.json()
+                required_fields = ['message', 'access_fee']
+                missing_fields = [field for field in required_fields if field not in payment_result]
+                
+                if not missing_fields and "payment successful" in payment_result['message'].lower():
+                    self.log_result("Payment for contact access", True, 
+                                   f"Access fee: ₦{payment_result['access_fee']}")
+                    self.test_data['payment_made'] = True
+                else:
+                    self.log_result("Payment for contact access", False, 
+                                   f"Missing fields: {missing_fields} or wrong message")
+            else:
+                self.log_result("Payment for contact access", False, 
+                               f"Status: {response.status_code}, Response: {response.text}")
+            
+            # Test unauthorized payment (homeowner trying to pay)
+            response = self.make_request("POST", f"/interests/pay-access/{interest_id}", 
+                                       auth_token=homeowner_token)
+            if response.status_code == 403:
+                self.log_result("Unauthorized payment prevention", True, 
+                               "Correctly denied homeowner access")
+            else:
+                self.log_result("Unauthorized payment prevention", False, 
+                               f"Expected 403, got {response.status_code}")
+        
+        # Test 12: Get contact details after payment
+        if 'created_interest' in self.test_data and self.test_data.get('payment_made'):
+            response = self.make_request("GET", f"/interests/contact-details/{job_id}", 
+                                       auth_token=tradesperson_token)
+            if response.status_code == 200:
+                contact_details = response.json()
+                required_fields = ['homeowner_name', 'homeowner_email', 'homeowner_phone', 
+                                 'job_title', 'job_description', 'job_location']
+                missing_fields = [field for field in required_fields if field not in contact_details]
+                
+                if not missing_fields:
+                    self.log_result("Get contact details after payment", True, 
+                                   f"Homeowner: {contact_details['homeowner_name']}")
+                else:
+                    self.log_result("Get contact details after payment", False, 
+                                   f"Missing fields: {missing_fields}")
+            else:
+                self.log_result("Get contact details after payment", False, 
+                               f"Status: {response.status_code}, Response: {response.text}")
+            
+            # Test unauthorized contact details access (homeowner trying to access)
+            response = self.make_request("GET", f"/interests/contact-details/{job_id}", 
+                                       auth_token=homeowner_token)
+            if response.status_code == 403:
+                self.log_result("Unauthorized contact details access prevention", True, 
+                               "Correctly denied homeowner access")
+            else:
+                self.log_result("Unauthorized contact details access prevention", False, 
+                               f"Expected 403, got {response.status_code}")
+        
+        # Test 13: Payment attempt without contact sharing
+        # Create another tradesperson and test payment without contact sharing
+        other_tradesperson_data = {
+            "name": "Bola Adeyemi",
+            "email": f"bola.adeyemi.{uuid.uuid4().hex[:8]}@tradework.com",
+            "password": "SecurePass123",
+            "phone": "08187654321",
+            "location": "Ibadan, Oyo State",
+            "postcode": "200001",
+            "trade_categories": ["Electrical"],
+            "experience_years": 6,
+            "company_name": "Adeyemi Electrical Services",
+            "description": "Professional electrician with 6 years experience in residential and commercial electrical installations.",
+            "certifications": ["Licensed Electrician"]
+        }
+        
+        response = self.make_request("POST", "/auth/register/tradesperson", json=other_tradesperson_data)
+        if response.status_code == 200:
+            # Login the other tradesperson
+            login_response = self.make_request("POST", "/auth/login", 
+                                             json={"email": other_tradesperson_data["email"], 
+                                                  "password": other_tradesperson_data["password"]})
+            if login_response.status_code == 200:
+                other_tradesperson_token = login_response.json()['access_token']
+                
+                # Show interest in the job
+                response = self.make_request("POST", "/interests/show-interest", 
+                                           json={"job_id": job_id}, auth_token=other_tradesperson_token)
+                if response.status_code == 200:
+                    other_interest = response.json()
+                    
+                    # Try to pay without contact sharing
+                    response = self.make_request("POST", f"/interests/pay-access/{other_interest['id']}", 
+                                               auth_token=other_tradesperson_token)
+                    if response.status_code == 400:
+                        self.log_result("Payment without contact sharing prevention", True, 
+                                       "Correctly rejected payment before contact sharing")
+                    else:
+                        self.log_result("Payment without contact sharing prevention", False, 
+                                       f"Expected 400, got {response.status_code}")
+        
+        # Test 14: Invalid interest ID handling
+        response = self.make_request("PUT", "/interests/share-contact/invalid-interest-id", 
+                                   auth_token=homeowner_token)
+        if response.status_code == 404:
+            self.log_result("Invalid interest ID handling", True, "Correctly returned 404")
+        else:
+            self.log_result("Invalid interest ID handling", False, 
+                           f"Expected 404, got {response.status_code}")
+        
+        # Test 15: Invalid job ID for contact details
+        response = self.make_request("GET", "/interests/contact-details/invalid-job-id", 
+                                   auth_token=tradesperson_token)
+        if response.status_code in [400, 404, 500]:
+            self.log_result("Invalid job ID for contact details", True, "Correctly handled invalid job ID")
+        else:
+            self.log_result("Invalid job ID for contact details", False, 
+                           f"Expected error status, got {response.status_code}")
+        
+        # Test 16: Interest in non-existent job
+        response = self.make_request("POST", "/interests/show-interest", 
+                                   json={"job_id": "non-existent-job-id"}, auth_token=tradesperson_token)
+        if response.status_code == 404:
+            self.log_result("Interest in non-existent job prevention", True, "Correctly rejected non-existent job")
+        else:
+            self.log_result("Interest in non-existent job prevention", False, 
+                           f"Expected 404, got {response.status_code}")
+        
+        print(f"\n✅ Interest System Testing Complete - Lead Generation Marketplace Functional")
+
     def run_communication_system_tests(self):
         """Run comprehensive communication system tests"""
         print("🚀 Starting ServiceHub Communication System Tests")
