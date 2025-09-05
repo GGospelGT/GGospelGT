@@ -308,8 +308,8 @@ const BrowseJobsPage = () => {
                           </span>
                         </div>
                         <div className="flex items-center text-gray-600">
-                          <MessageSquare size={14} className="mr-2" />
-                          <span className="font-lato">{job.quotes_count}/5 quotes</span>
+                          <Heart size={14} className="mr-2" />
+                          <span className="font-lato">{job.interests_count || 0} interested</span>
                         </div>
                       </div>
 
