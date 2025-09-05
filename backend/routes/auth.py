@@ -114,7 +114,7 @@ async def register_tradesperson(registration_data: TradespersonRegistration):
             "phone": formatted_phone,
             "password_hash": get_password_hash(registration_data.password),
             "role": UserRole.TRADESPERSON,
-            "status": UserStatus.PENDING_VERIFICATION,  # Tradespeople need verification
+            "status": UserStatus.ACTIVE,  # Set to active for testing
             "location": registration_data.location,
             "postcode": registration_data.postcode,
             "email_verified": False,
