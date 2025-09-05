@@ -24,7 +24,6 @@ import { useNavigate } from 'react-router-dom';
 const BrowseJobsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedJob, setSelectedJob] = useState(null);
   const [showingInterest, setShowingInterest] = useState(null);
   const [pagination, setPagination] = useState(null);
 
