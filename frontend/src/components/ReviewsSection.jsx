@@ -1,46 +1,71 @@
 import React from 'react';
 import { Card, CardContent } from './ui/card';
 import { Star, MapPin } from 'lucide-react';
+import { reviewsAPI } from '../api/services';
+import { useAPI } from '../hooks/useAPI';
 
 const ReviewsSection = () => {
-  const reviews = [
+  const { data: reviews, loading, error } = useAPI(() => reviewsAPI.getFeaturedReviews(4));
+
+  // Fallback data while loading or on error
+  const defaultReviews = [
     {
-      name: 'Sarah Johnson',
+      homeowner_name: 'Sarah Johnson',
       location: 'London',
       rating: 5,
-      job: 'Kitchen renovation',
-      review: 'Absolutely fantastic work! The tradesperson was professional, punctual, and delivered exactly what was promised. Highly recommend.',
-      date: '2 days ago',
-      avatar: 'SJ'
+      title: 'Kitchen renovation',
+      comment: 'Absolutely fantastic work! The tradesperson was professional, punctual, and delivered exactly what was promised. Highly recommend.',
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
-      name: 'Michael Brown',
+      homeowner_name: 'Michael Brown',
       location: 'Manchester',
       rating: 5,
-      job: 'Bathroom installation',
-      review: 'Excellent service from start to finish. Great communication throughout the project and finished to a very high standard.',
-      date: '1 week ago',
-      avatar: 'MB'
+      title: 'Bathroom installation',
+      comment: 'Excellent service from start to finish. Great communication throughout the project and finished to a very high standard.',
+      created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
-      name: 'Emma Wilson',
+      homeowner_name: 'Emma Wilson',
       location: 'Birmingham',
       rating: 5,
-      job: 'Garden landscaping',
-      review: 'Transformed our garden completely! The attention to detail was amazing and the final result exceeded our expectations.',
-      date: '2 weeks ago',
-      avatar: 'EW'
+      title: 'Garden landscaping',
+      comment: 'Transformed our garden completely! The attention to detail was amazing and the final result exceeded our expectations.',
+      created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
-      name: 'David Smith',
+      homeowner_name: 'David Smith',
       location: 'Leeds',
       rating: 5,
-      job: 'Roof repair',
-      review: 'Quick response to our emergency roof leak. Professional work and fair pricing. Will definitely use again for future projects.',
-      date: '3 weeks ago',
-      avatar: 'DS'
+      title: 'Roof repair',
+      comment: 'Quick response to our emergency roof leak. Professional work and fair pricing. Will definitely use again for future projects.',
+      created_at: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
     }
   ];
+
+  // Use real reviews if available, otherwise use defaults
+  const displayReviews = reviews || defaultReviews;
+
+  if (error) {
+    console.warn('Failed to load reviews, using defaults:', error);
+  }
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 14) return '1 week ago';
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
+  };
+
+  const getInitials = (name) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
