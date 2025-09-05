@@ -12,20 +12,24 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# Sample data
-UK_CITIES = [
-    "London", "Manchester", "Birmingham", "Leeds", "Glasgow", 
-    "Sheffield", "Bradford", "Liverpool", "Edinburgh", "Bristol",
-    "Cardiff", "Coventry", "Leicester", "Sunderland", "Belfast",
-    "Newcastle", "Brighton", "Hull", "Plymouth", "Stoke-on-Trent"
+# Sample data for Nigeria
+NIGERIAN_CITIES = [
+    "Lagos", "Abuja", "Kano", "Ibadan", "Port Harcourt", 
+    "Benin City", "Kaduna", "Enugu", "Jos", "Ilorin",
+    "Onitsha", "Aba", "Warri", "Calabar", "Akure",
+    "Osogbo", "Bauchi", "Minna", "Sokoto", "Uyo"
 ]
 
-POSTCODES = [
-    "SW1A 1AA", "M1 1AA", "B1 1AA", "LS1 1AA", "G1 1AA",
-    "S1 1AA", "BD1 1AA", "L1 1AA", "EH1 1AA", "BS1 1AA",
-    "CF1 1AA", "CV1 1AA", "LE1 1AA", "SR1 1AA", "BT1 1AA",
-    "NE1 1AA", "BN1 1AA", "HU1 1AA", "PL1 1AA", "ST1 1AA"
+NIGERIAN_POSTCODES = [
+    "100001", "900001", "700001", "200001", "500001",
+    "300001", "800001", "400001", "930001", "240001",
+    "434001", "450001", "332001", "540001", "340001",
+    "230001", "740001", "920001", "840001", "520001"
 ]
+
+# Legacy variables for compatibility (will be removed)
+UK_CITIES = NIGERIAN_CITIES
+POSTCODES = NIGERIAN_POSTCODES
 
 TRADE_CATEGORIES = [
     "Gardening & Landscaping", "Painting & Decorating", "Plastering & Rendering",
