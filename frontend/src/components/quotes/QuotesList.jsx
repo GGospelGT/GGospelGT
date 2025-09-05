@@ -299,29 +299,54 @@ const QuotesList = ({ jobId, quotes: initialQuotes, onQuoteUpdate }) => {
             )}
 
             {/* Action Buttons */}
-            {quote.status === 'pending' && (
-              <div className="flex space-x-3 pt-4 border-t">
-                <Button
-                  onClick={() => handleQuoteAction(quote.id, 'accepted')}
-                  disabled={processingQuote === quote.id}
-                  className="text-white font-lato flex-1"
-                  style={{backgroundColor: '#2F8140'}}
-                >
-                  <CheckCircle size={16} className="mr-2" />
-                  {processingQuote === quote.id ? 'Processing...' : 'Accept Quote'}
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => handleQuoteAction(quote.id, 'rejected')}
-                  disabled={processingQuote === quote.id}
-                  className="font-lato flex-1 border-red-300 text-red-600 hover:bg-red-50"
-                >
-                  <XCircle size={16} className="mr-2" />
-                  Reject
-                </Button>
-              </div>
-            )}
+            <div className="flex space-x-3 pt-4 border-t">
+              {/* Message Button - Always Available */}
+              <Button
+                variant="outline"
+                onClick={() => handleMessageTradesperson(
+                  quote.tradesperson?.id, 
+                  quote.tradesperson?.name
+                )}
+                className="font-lato flex items-center space-x-2"
+              >
+                <MessageCircle size={16} />
+                <span>Message</span>
+              </Button>
+
+              {/* Quote Action Buttons */}
+              {quote.status === 'pending' && (
+                <>
+                  <Button
+                    onClick={() => handleQuoteAction(quote.id, 'accepted')}
+                    disabled={processingQuote === quote.id}
+                    className="text-white font-lato flex-1"
+                    style={{backgroundColor: '#2F8140'}}
+                  >
+                    <CheckCircle size={16} className="mr-2" />
+                    {processingQuote === quote.id ? 'Processing...' : 'Accept Quote'}
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => handleQuoteAction(quote.id, 'rejected')}
+                    disabled={processingQuote === quote.id}
+                    className="font-lato flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <XCircle size={16} className="mr-2" />
+                    Reject
+                  </Button>
+                </>
+              )}
+
+              {/* For accepted/rejected quotes, show different layout */}
+              {quote.status !== 'pending' && (
+                <div className="flex-1 flex justify-end">
+                  <Badge className={getStatusColor(quote.status)}>
+                    {quote.status === 'accepted' ? 'Accepted' : 'Rejected'}
+                  </Badge>
+                </div>
+              )}
+            </div>
 
             {/* Contact Info for Accepted Quotes */}
             {quote.status === 'accepted' && (
