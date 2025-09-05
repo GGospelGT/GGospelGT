@@ -1,14 +1,19 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, BackgroundTasks
 from typing import List
 from models import (
     InterestCreate, Interest, InterestedTradesperson, InterestResponse, 
     InterestStatus, ContactDetails
 )
 from models.auth import User
+from models.notifications import NotificationType
 from auth.dependencies import get_current_tradesperson, get_current_homeowner, get_current_active_user
 from database import database
+from services.notifications import notification_service
 from datetime import datetime
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/interests", tags=["interests"])
 
