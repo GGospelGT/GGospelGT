@@ -3,6 +3,8 @@ import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import PostJobPage from "./pages/PostJobPage";
+import MyJobsPage from "./pages/MyJobsPage";
+import BrowseJobsPage from "./pages/BrowseJobsPage";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 
