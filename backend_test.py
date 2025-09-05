@@ -2628,13 +2628,48 @@ class BackendTester:
 if __name__ == "__main__":
     tester = BackendTester()
     
-    # Run notification system tests as requested for Phase 4
-    results = tester.run_notification_system_tests()
+    print("🚀 Starting PHASE 7: End-to-End System Testing")
+    print("=" * 80)
+    print("Testing complete serviceHub lead generation marketplace backend workflow")
+    print("=" * 80)
     
-    # Exit with error code if tests failed
-    if results['failed'] > 0:
-        print(f"\n⚠️  Notification system tests completed with {results['failed']} failures")
+    try:
+        # Run the comprehensive end-to-end workflow test
+        tester.test_end_to_end_lead_generation_workflow()
+        
+        # Print final results
+        print(f"\n{'='*80}")
+        print("📊 FINAL TEST RESULTS")
+        print(f"{'='*80}")
+        print(f"✅ PASSED: {tester.results['passed']}")
+        print(f"❌ FAILED: {tester.results['failed']}")
+        print(f"📈 SUCCESS RATE: {(tester.results['passed'] / (tester.results['passed'] + tester.results['failed']) * 100):.1f}%")
+        
+        if tester.results['errors']:
+            print(f"\n🚨 FAILED TESTS:")
+            for error in tester.results['errors']:
+                print(f"   • {error}")
+        
+        print(f"\n{'='*80}")
+        print("🎯 END-TO-END TESTING SUMMARY")
+        print(f"{'='*80}")
+        
+        if tester.results['failed'] == 0:
+            print("🎉 ALL TESTS PASSED! The complete lead generation marketplace workflow is functional.")
+            print("✅ User Management & Authentication: Working")
+            print("✅ Job Lifecycle Management: Working") 
+            print("✅ Interest & Lead Generation Workflow: Working")
+            print("✅ Contact Sharing & Payment Flow: Working")
+            print("✅ Notification System Integration: Working")
+            print("✅ Database Consistency: Working")
+            print("✅ Security & Authorization: Working")
+            exit(0)
+        else:
+            print("⚠️  Some tests failed. Review the errors above for details.")
+            exit(1)
+            
+    except Exception as e:
+        print(f"❌ Testing failed with error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         exit(1)
-    else:
-        print(f"\n🎉 All notification system tests passed successfully!")
-        exit(0)
