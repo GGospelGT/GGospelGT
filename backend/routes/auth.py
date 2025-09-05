@@ -164,7 +164,7 @@ async def register_tradesperson(registration_data: TradespersonRegistration):
         created_user = await database.create_user(user_data)
         
         # Generate referral code for new user
-        referral_code = await database.generate_referral_code(created_user["id"])
+        await database.generate_referral_code(created_user["id"])
         
         # Process referral if provided
         if registration_data.referral_code:
