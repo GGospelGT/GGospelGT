@@ -27,6 +27,8 @@ function App() {
             <Route path="/tradesperson/:tradespersonId/portfolio" element={<TradespersonPortfolioPage />} />
             <Route path="/notifications/preferences" element={<NotificationPreferencesPage />} />
             <Route path="/notifications/history" element={<NotificationHistoryPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/reviews/:userId" element={<ReviewsPage />} />
           </Routes>
           <Toaster />
         </BrowserRouter>
