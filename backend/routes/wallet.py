@@ -13,6 +13,7 @@ from models.base import (
     Wallet, WalletTransaction, WalletFundingRequest, WalletResponse,
     BankDetails, TransactionType, TransactionStatus
 )
+from models.auth import User
 
 router = APIRouter(prefix="/api/wallet", tags=["wallet"])
 
