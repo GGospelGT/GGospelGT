@@ -345,13 +345,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Show Interest System - Backend"
-    - "Show Interest Frontend Integration - BrowseJobsPage"
-    - "Homeowner Interest Review System - MyJobsPage Enhancement"
-    - "Phase 4: Mock Notifications System - Backend"
-    - "Phase 4: Frontend Notification System Integration"
-    - "Minor Issues Fix - Phase 7 Remaining Issues"
-    - "Phase 8: Rating & Review System - Backend"
+    - "Phase 8: Rating & Review System - Frontend"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
