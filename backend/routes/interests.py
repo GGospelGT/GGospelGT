@@ -216,10 +216,13 @@ async def pay_for_access(
         # Get job details for notification
         job = await database.get_job_by_id(interest["job_id"])
         
+        # Get full tradesperson data for notification
+        tradesperson_data = await database.get_user_by_id(current_user.id)
+        
         # Add background task to send payment confirmation notification
         background_tasks.add_task(
             _notify_payment_confirmation,
-            tradesperson=current_user.dict(),
+            tradesperson=tradesperson_data,
             job=job,
             interest_id=interest_id,
             access_fee=access_fee
