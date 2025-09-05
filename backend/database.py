@@ -35,6 +35,11 @@ class Database:
         """Access to portfolio collection"""
         return self.database.portfolio
 
+    @property
+    def users_collection(self):
+        """Access to users collection"""
+        return self.database.users
+
     # User authentication operations
     async def create_user(self, user_data: dict) -> dict:
         """Create a new user"""
