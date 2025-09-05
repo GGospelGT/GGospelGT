@@ -466,6 +466,88 @@ const AdminDashboard = () => {
                 </div>
               )}
 
+              {/* Verifications Tab */}
+              {activeTab === 'verifications' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold">ID Verifications</h2>
+                    <button
+                      onClick={fetchData}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+
+                  {loading ? (
+                    <div className="space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="bg-gray-50 p-4 rounded-lg animate-pulse">
+                          <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : verifications.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      No pending verifications
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {verifications.map((verification) => (
+                        <div key={verification.id} className="bg-gray-50 p-6 rounded-lg">
+                          <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                              <h3 className="font-semibold text-gray-800 mb-2">
+                                {verification.user_name} ({verification.user_email})
+                              </h3>
+                              <div className="space-y-1 text-sm text-gray-600">
+                                <p><strong>Role:</strong> {verification.user_role}</p>
+                                <p><strong>Document Type:</strong> {verification.document_type.replace('_', ' ').toUpperCase()}</p>
+                                <p><strong>Full Name:</strong> {verification.full_name}</p>
+                                {verification.document_number && (
+                                  <p><strong>Document Number:</strong> {verification.document_number}</p>
+                                )}
+                                <p><strong>Submitted:</strong> {formatDate(verification.submitted_at)}</p>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              {verification.document_url && (
+                                <div className="mb-4">
+                                  <p className="text-sm text-gray-600 mb-2">Document Image:</p>
+                                  <img
+                                    src={adminReferralsAPI.getDocumentUrl(verification.document_url)}
+                                    alt="Document"
+                                    className="h-32 w-auto rounded border cursor-pointer hover:shadow-lg transition-shadow"
+                                    onClick={() => window.open(adminReferralsAPI.getDocumentUrl(verification.document_url), '_blank')}
+                                  />
+                                </div>
+                              )}
+                              
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => handleApproveVerification(verification.id)}
+                                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => setSelectedVerification(verification)}
+                                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Stats Tab */}
               {activeTab === 'stats' && (
                 <div className="space-y-6">
@@ -473,7 +555,7 @@ const AdminDashboard = () => {
                   
                   {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {[...Array(6)].map((_, i) => (
+                      {[...Array(7)].map((_, i) => (
                         <div key={i} className="bg-gray-50 p-6 rounded-lg animate-pulse">
                           <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                           <div className="h-8 bg-gray-200 rounded w-1/2"></div>
@@ -517,10 +599,17 @@ const AdminDashboard = () => {
                         </p>
                       </div>
                       
+                      <div className="bg-red-50 p-6 rounded-lg border border-red-200">
+                        <h3 className="text-sm font-medium text-red-800">Pending Verifications</h3>
+                        <p className="text-2xl font-bold text-red-600">
+                          {stats.verification_stats?.pending_verifications || 0}
+                        </p>
+                      </div>
+                      
                       <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                        <h3 className="text-sm font-medium text-gray-800">Coin Rate</h3>
+                        <h3 className="text-sm font-medium text-gray-800">Referral Reward</h3>
                         <p className="text-lg font-bold text-gray-600">
-                          1 coin = ₦100
+                          5 coins per verified referral
                         </p>
                       </div>
                     </div>
