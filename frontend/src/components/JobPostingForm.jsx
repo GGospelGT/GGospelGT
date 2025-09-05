@@ -15,7 +15,7 @@ const JobPostingForm = ({ onComplete }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAccountCreation, setShowAccountCreation] = useState(false);
   const { toast } = useToast();
-  const { login, isAuthenticated } = useAuth();
+  const { loginWithToken, isAuthenticated } = useAuth();
 
   const [formData, setFormData] = useState({
     // Step 1: Job Details
