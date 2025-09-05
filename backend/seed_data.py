@@ -28,14 +28,17 @@ NIGERIAN_POSTCODES = [
 ]
 
 TRADE_CATEGORIES = [
-    "Gardening & Landscaping", "Painting & Decorating", "Plastering & Rendering",
-    "Plumbing", "Electrical Work", "Carpentry & Joinery", "Building", "Roofing",
-    "Heating & Gas", "Flooring", "Tiling", "Kitchen Installation", "Bathroom Installation"
+    "Building & Construction", "Plumbing & Water Works", "Electrical Installation", 
+    "Painting & Decorating", "Tiling & Marble Works", "Carpentry & Woodwork", 
+    "Roofing & Waterproofing", "POP & Ceiling Works", "Welding & Fabrication",
+    "Air Conditioning & Refrigeration", "Generator Installation & Repair", "Solar Installation",
+    "Landscaping & Gardening", "Interior Decoration", "House Cleaning Services"
 ]
 
 CERTIFICATIONS = [
-    "Gas Safe Registered", "NICEIC Approved", "City & Guilds", "NVQ Level 3",
-    "CITB Card", "CSCS Card", "Part P Qualified", "Corgi Registered"
+    "COREN Registered", "NECA Certified", "SON Approved", "ARCON Registered",
+    "Trade Test Certificate", "City & Guilds", "NBTE Certified", "NIQS Member",
+    "PMP Certified", "ISO Certified", "Green Building Certified"
 ]
 
 COMPANY_SUFFIXES = ["Ltd", "Services", "Solutions", "Contractors", "Specialists", "Experts"]
