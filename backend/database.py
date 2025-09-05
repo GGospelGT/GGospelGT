@@ -21,6 +21,11 @@ class Database:
             self.client.close()
             logger.info("MongoDB connection closed")
 
+    @property
+    def portfolio_collection(self):
+        """Access to portfolio collection"""
+        return self.database.portfolio
+
     # User authentication operations
     async def create_user(self, user_data: dict) -> dict:
         """Create a new user"""
