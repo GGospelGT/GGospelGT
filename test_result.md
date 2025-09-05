@@ -219,9 +219,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Backend API Enhancement"
-    - "My Jobs & Quotes Page for Homeowners" 
-    - "Navigation Integration"
+    - "User Profile Management - Frontend"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
