@@ -875,6 +875,40 @@ class BackendTester:
             self.log_result("Missing required fields handling", False, 
                            f"Expected 400/422, got {response.status_code}")
 
+    def test_referral_system_comprehensive(self):
+        """
+        REFERRAL SYSTEM COMPREHENSIVE TESTING
+        Test the complete referral system including code generation, tracking, verification, and rewards
+        """
+        print("\n" + "="*80)
+        print("🎯 REFERRAL SYSTEM COMPREHENSIVE TESTING")
+        print("="*80)
+        
+        # Step 1: Test referral code generation during registration
+        self._test_referral_code_generation()
+        
+        # Step 2: Test referral tracking and validation
+        self._test_referral_tracking_system()
+        
+        # Step 3: Test document verification system
+        self._test_document_verification_system()
+        
+        # Step 4: Test admin verification management
+        self._test_admin_verification_management()
+        
+        # Step 5: Test referral rewards distribution
+        self._test_referral_rewards_distribution()
+        
+        # Step 6: Test wallet integration with referrals
+        self._test_wallet_referral_integration()
+        
+        # Step 7: Test complete referral journey end-to-end
+        self._test_complete_referral_journey()
+        
+        print("\n" + "="*80)
+        print("🏁 REFERRAL SYSTEM TESTING COMPLETE")
+        print("="*80)
+
     def test_end_to_end_lead_generation_workflow(self):
         """
         PHASE 7: Complete End-to-End System Testing
