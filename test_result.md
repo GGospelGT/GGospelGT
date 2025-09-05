@@ -290,6 +290,7 @@ test_plan:
   current_focus:
     - "Show Interest System - Backend"
     - "Show Interest Frontend Integration - BrowseJobsPage"
+    - "Homeowner Interest Review System - MyJobsPage Enhancement"
   stuck_tasks:
     - "Show Interest Frontend Integration - BrowseJobsPage"
   test_all: false
