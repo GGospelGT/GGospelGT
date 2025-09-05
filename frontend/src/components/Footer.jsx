@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import Logo from './Logo';
 
 const Footer = () => {
   const footerSections = [
