@@ -84,7 +84,7 @@ const NotificationIndicator = () => {
     return content.substring(0, 80) + '...';
   };
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated()) {
     return null;
   }
 
