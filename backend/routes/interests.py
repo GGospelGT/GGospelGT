@@ -52,7 +52,7 @@ async def show_interest(
         )
         
         # Save to database
-        result = await database.create_interest(interest)
+        result = await database.create_interest(interest.dict())
         
         # Get full tradesperson data for notification
         tradesperson_data = await database.get_user_by_id(current_user.id)
