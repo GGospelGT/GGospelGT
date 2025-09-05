@@ -204,19 +204,53 @@ const BrowseJobsPage = () => {
               Browse jobs that match your skills and show your interest to homeowners.
             </p>
             
-            {/* User skills display */}
-            {user?.trade_categories && (
-              <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700 font-lato mb-2">Your Skills:</p>
-                <div className="flex flex-wrap gap-2">
-                  {user.trade_categories.map((category, index) => (
-                    <Badge key={index} className="bg-green-100 text-green-800">
-                      {category}
-                    </Badge>
-                  ))}
+            {/* Wallet Balance & User Skills */}
+            <div className="mt-6 grid md:grid-cols-2 gap-6">
+              {/* Wallet Balance */}
+              {walletBalance && (
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 font-lato">Wallet Balance</p>
+                      <p className="text-2xl font-bold text-green-600 font-montserrat">
+                        {walletBalance.balance_coins} coins
+                      </p>
+                      <p className="text-sm text-gray-600 font-lato">
+                        ₦{walletBalance.balance_naira.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <Button
+                        onClick={() => navigate('/wallet')}
+                        className="text-white font-lato text-sm px-3 py-1"
+                        style={{backgroundColor: '#2F8140'}}
+                      >
+                        Manage Wallet
+                      </Button>
+                      {walletBalance.balance_coins < 15 && (
+                        <p className="text-xs text-yellow-600 mt-1">
+                          ⚠️ Low balance
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+              
+              {/* User skills display */}
+              {user?.trade_categories && (
+                <div>
+                  <p className="text-sm font-medium text-gray-700 font-lato mb-2">Your Skills:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {user.trade_categories.map((category, index) => (
+                      <Badge key={index} className="bg-green-100 text-green-800">
+                        {category}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
