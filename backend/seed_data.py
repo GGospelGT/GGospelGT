@@ -41,7 +41,7 @@ CERTIFICATIONS = [
     "PMP Certified", "ISO Certified", "Green Building Certified"
 ]
 
-COMPANY_SUFFIXES = ["Ltd", "Services", "Solutions", "Contractors", "Specialists", "Experts"]
+COMPANY_SUFFIXES = ["Ltd", "Services", "Solutions", "Contractors", "Specialists", "Experts", "Works"]
 
 FIRST_NAMES = [
     "James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph",
