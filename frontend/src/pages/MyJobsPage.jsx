@@ -177,112 +177,152 @@ const MyJobsPage = () => {
     );
   }
 
-  // Show quotes view
-  if (selectedJob) {
+  // Show interested tradespeople modal
+  if (showInterestedModal && selectedJob) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            {/* Back button and job info */}
-            <div className="mb-6">
-              <Button
-                onClick={handleBackToJobs}
-                variant="outline"
-                className="mb-4 font-lato"
-              >
-                ← Back to My Jobs
-              </Button>
-              
-              <Card className="mb-6">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-2xl font-bold font-montserrat mb-2" style={{color: '#121E3C'}}>
+          <div className="max-w-4xl mx-auto">
+            {/* Back Button */}
+            <Button
+              variant="outline"
+              onClick={handleCloseInterestedModal}
+              className="mb-6 font-lato"
+            >
+              ← Back to My Jobs
+            </Button>
+
+            {/* Job Header */}
+            <Card className="mb-6">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <CardTitle className="text-2xl font-bold font-montserrat" style={{color: '#121E3C'}}>
                         {selectedJob.title}
                       </CardTitle>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 font-lato">
-                        <span className="flex items-center">
-                          <MapPin size={14} className="mr-1" />
-                          {selectedJob.location}
-                        </span>
-                        <span className="flex items-center">
-                          <Calendar size={14} className="mr-1" />
-                          Posted {formatDate(selectedJob.created_at)}
-                        </span>
-                        <Badge className={getStatusColor(selectedJob.status)}>
-                          {selectedJob.status}
-                        </Badge>
-                      </div>
+                      <Badge className={getStatusColor(selectedJob.status)}>
+                        {selectedJob.status}
+                      </Badge>
                     </div>
-                    {selectedJob.budget_min && selectedJob.budget_max && (
-                      <div className="text-right">
-                        <div className="text-xl font-bold font-montserrat" style={{color: '#2F8140'}}>
-                          {formatCurrency(selectedJob.budget_min)} - {formatCurrency(selectedJob.budget_max)}
-                        </div>
-                        <div className="text-sm text-gray-500 font-lato">Your Budget</div>
-                      </div>
-                    )}
+                    
+                    <div className="flex items-center space-x-4 text-sm text-gray-600 font-lato mb-2">
+                      <span className="flex items-center">
+                        <MapPin size={14} className="mr-1" />
+                        {selectedJob.location}
+                      </span>
+                      <span className="flex items-center">
+                        <Calendar size={14} className="mr-1" />
+                        Posted {formatDate(selectedJob.created_at)}
+                      </span>
+                    </div>
                   </div>
-                </CardHeader>
-              </Card>
+                  {selectedJob.budget_min && selectedJob.budget_max && (
+                    <div className="text-right">
+                      <div className="text-xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                        {formatCurrency(selectedJob.budget_min)} - {formatCurrency(selectedJob.budget_max)}
+                      </div>
+                      <div className="text-sm text-gray-500 font-lato">Your Budget</div>
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
+            </Card>
 
-              {/* Quote Summary */}
-              {quoteSummary && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                  <Card>
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold font-montserrat" style={{color: '#2F8140'}}>
-                        {quoteSummary.total_quotes}
-                      </div>
-                      <div className="text-sm text-gray-600 font-lato">Total Quotes</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold font-montserrat text-yellow-600">
-                        {quoteSummary.pending_quotes}
-                      </div>
-                      <div className="text-sm text-gray-600 font-lato">Pending</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold font-montserrat text-green-600">
-                        {quoteSummary.accepted_quotes}
-                      </div>
-                      <div className="text-sm text-gray-600 font-lato">Accepted</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="p-4 text-center">
-                      <div className="text-lg font-bold font-montserrat" style={{color: '#121E3C'}}>
-                        {quoteSummary.average_price > 0 ? formatCurrency(quoteSummary.average_price) : 'N/A'}
-                      </div>
-                      <div className="text-sm text-gray-600 font-lato">Avg. Quote</div>
-                    </CardContent>
-                  </Card>
+            {/* Interested Tradespeople */}
+            <div className="mb-6">
+              <h2 className="text-xl font-bold font-montserrat mb-4" style={{color: '#121E3C'}}>
+                Interested Tradespeople ({interestedTradespeople.length})
+              </h2>
+              
+              {interestsLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#2F8140'}}></div>
+                  <p className="text-gray-600 font-lato">Loading interested tradespeople...</p>
+                </div>
+              ) : interestedTradespeople.length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <Users size={48} className="mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold font-montserrat text-gray-900 mb-2">
+                      No interested tradespeople yet
+                    </h3>
+                    <p className="text-gray-600 font-lato">
+                      When tradespeople show interest in your job, they'll appear here.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {interestedTradespeople.map((person) => (
+                    <Card key={person.interest_id} className="hover:shadow-lg transition-shadow duration-300">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-3">
+                              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                                <Users size={20} className="text-gray-600" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-bold font-montserrat" style={{color: '#121E3C'}}>
+                                  {person.tradesperson_name}
+                                </h3>
+                                <p className="text-sm text-gray-600 font-lato">{person.tradesperson_email}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                              <div>
+                                <p className="text-sm font-medium text-gray-700 font-lato">Experience:</p>
+                                <p className="text-sm text-gray-600">{person.experience_years} years</p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-700 font-lato">Specialties:</p>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {person.trade_categories?.map((category, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {category}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-4 text-sm text-gray-500">
+                              <span>Interested {formatDate(person.created_at)}</span>
+                              <Badge className={person.status === 'contact_shared' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
+                                {person.status === 'contact_shared' ? 'Contact Shared' : 'Interested'}
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          <div className="ml-6">
+                            {person.status === 'interested' ? (
+                              <Button
+                                onClick={() => handleShareContact(person.interest_id)}
+                                className="text-white font-lato"
+                                style={{backgroundColor: '#2F8140'}}
+                              >
+                                Share Contact Details
+                              </Button>
+                            ) : (
+                              <Button
+                                disabled
+                                variant="outline"
+                                className="font-lato"
+                              >
+                                Contact Shared ✓
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               )}
             </div>
-
-            {/* Quotes List */}
-            {quotesLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#2F8140'}}></div>
-                <p className="text-gray-600 font-lato">Loading quotes...</p>
-              </div>
-            ) : (
-              <QuotesList 
-                jobId={selectedJob.id} 
-                quotes={quotes} 
-                onQuoteUpdate={() => loadJobQuotes(selectedJob.id)}
-              />
-            )}
           </div>
         </div>
         
