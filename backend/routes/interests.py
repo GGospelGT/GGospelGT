@@ -186,7 +186,7 @@ async def pay_for_access(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_tradesperson)
 ):
-    """Tradesperson pays for access to contact details (placeholder for payment integration)"""
+    """Tradesperson pays for access to contact details using wallet coins"""
     try:
         # Get interest record and verify it belongs to current user
         interest = await database.get_interest_by_id(interest_id)
@@ -200,14 +200,39 @@ async def pay_for_access(
                 detail="Contact details not yet shared by homeowner"
             )
         
-        # For now, we'll simulate payment success
-        # TODO: Integrate with Paystack/Flutterwave
-        access_fee = 1000.0  # ₦1000 default access fee
+        # Get job to check access fee
+        job = await database.get_job_by_id(interest["job_id"])
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        # Get access fee from job (default to ₦1500 if not set)
+        access_fee_naira = job.get("access_fee_naira", 1500)
+        access_fee_coins = job.get("access_fee_coins", 15)
+        
+        # Check wallet balance and deduct fee
+        success = await database.deduct_access_fee(
+            user_id=current_user.id,
+            job_id=job["id"],
+            access_fee_coins=access_fee_coins
+        )
+        
+        if not success:
+            # Get current wallet balance for error message
+            wallet = await database.get_wallet_by_user_id(current_user.id)
+            current_balance = wallet.get("balance_coins", 0)
+            shortfall = access_fee_coins - current_balance
+            
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Insufficient wallet balance. Required: {access_fee_coins} coins (₦{access_fee_naira:,}), "
+                       f"Current balance: {current_balance} coins (₦{current_balance * 100:,}), "
+                       f"Shortfall: {shortfall} coins (₦{shortfall * 100:,}). Please fund your wallet."
+            )
         
         # Update interest status
         update_data = {
             "status": InterestStatus.PAID_ACCESS,
-            "access_fee": access_fee,
+            "access_fee": access_fee_naira,
             "payment_made_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
         }
@@ -216,9 +241,6 @@ async def pay_for_access(
         
         if not updated_interest:
             raise HTTPException(status_code=400, detail="Failed to process payment")
-        
-        # Get job details for notification
-        job = await database.get_job_by_id(interest["job_id"])
         
         # Get full tradesperson data for notification
         tradesperson_data = await database.get_user_by_id(current_user.id)
@@ -229,12 +251,14 @@ async def pay_for_access(
             tradesperson=tradesperson_data,
             job=job,
             interest_id=interest_id,
-            access_fee=access_fee
+            access_fee=access_fee_naira
         )
         
         return {
             "message": "Payment successful! Access granted to contact details.",
-            "access_fee": access_fee
+            "access_fee_naira": access_fee_naira,
+            "access_fee_coins": access_fee_coins,
+            "payment_method": "wallet_coins"
         }
         
     except HTTPException:
