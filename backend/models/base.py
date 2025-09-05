@@ -111,7 +111,7 @@ class Tradesperson(BaseModel):
 # Quote Models
 class QuoteCreate(BaseModel):
     job_id: str
-    tradesperson_id: str
+    tradesperson_id: Optional[str] = None  # Will be set by backend from auth
     price: int = Field(..., ge=0)
     message: str = Field(..., min_length=20, max_length=1000)
     estimated_duration: str
