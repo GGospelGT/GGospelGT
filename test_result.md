@@ -326,6 +326,7 @@ test_plan:
     - "Homeowner Interest Review System - MyJobsPage Enhancement"
     - "Phase 4: Mock Notifications System - Backend"
     - "Phase 4: Frontend Notification System Integration"
+    - "Minor Issues Fix - Phase 7 Remaining Issues"
   stuck_tasks:
     - "Show Interest Frontend Integration - BrowseJobsPage"
   test_all: false
