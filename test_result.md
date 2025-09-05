@@ -296,7 +296,8 @@ test_plan:
   current_focus:
     - "Show Interest System - Backend"
     - "Show Interest Frontend Integration - BrowseJobsPage"
-  stuck_tasks: []
+  stuck_tasks:
+    - "Show Interest Frontend Integration - BrowseJobsPage"
   test_all: false
   test_priority: "high_first"
 
