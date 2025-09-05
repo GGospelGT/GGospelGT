@@ -19,6 +19,7 @@ function App() {
             <Route path="/post-job" element={<PostJobPage />} />
             <Route path="/my-jobs" element={<MyJobsPage />} />
             <Route path="/browse-jobs" element={<BrowseJobsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
           <Toaster />
         </BrowserRouter>
