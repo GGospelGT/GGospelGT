@@ -135,8 +135,8 @@ async def seed_jobs(count: int = 50):
         # Random job details
         title = random.choice(JOB_TITLES)
         category = random.choice(TRADE_CATEGORIES)
-        location = random.choice(UK_CITIES)
-        postcode = random.choice(POSTCODES)
+        location = random.choice(NIGERIAN_CITIES)
+        postcode = random.choice(NIGERIAN_POSTCODES)
         
         # Random budget
         budget_min = random.randint(500, 5000)
