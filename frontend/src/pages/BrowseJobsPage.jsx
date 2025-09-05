@@ -28,7 +28,7 @@ const BrowseJobsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
-  const [showQuoteForm, setShowQuoteForm] = useState(false);
+  const [showingInterest, setShowingInterest] = useState(null);
   const [pagination, setPagination] = useState(null);
 
   const { user, isAuthenticated, isTradesperson } = useAuth();
