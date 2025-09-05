@@ -107,44 +107,56 @@ async def get_job_interested_tradespeople(
             detail=f"Failed to get interested tradespeople: {str(e)}"
         )
 
-@router.put("/share-contact/{interest_id}")
+@router.put("/share-contact/{interest_id}", response_model=InterestResponse)
 async def share_contact_details(
     interest_id: str,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_homeowner)
 ):
     """Homeowner shares contact details with interested tradesperson"""
     try:
-        # Get interest record and verify authorization
-        interest = await database.interests_collection.find_one({"id": interest_id})
+        # Get interest record
+        interest = await database.get_interest_by_id(interest_id)
         if not interest:
             raise HTTPException(status_code=404, detail="Interest not found")
         
-        # Get job and verify homeowner owns it
+        # Verify job belongs to current homeowner
         job = await database.get_job_by_id(interest["job_id"])
-        if not job or job.get("homeowner", {}).get("email") != current_user.email:
-            raise HTTPException(
-                status_code=403, 
-                detail="Not authorized to share contact for this interest"
-            )
+        if not job or job["homeowner"]["id"] != current_user.id:
+            raise HTTPException(status_code=403, detail="You don't have permission to manage this interest")
         
-        # Update interest status to contact_shared
-        updated = await database.update_interest_status(
-            interest_id, 
-            InterestStatus.CONTACT_SHARED
+        # Check if interest is in correct status
+        if interest["status"] != InterestStatus.INTERESTED:
+            raise HTTPException(status_code=400, detail="Contact details can only be shared for interested tradespeople")
+        
+        # Update interest status
+        update_data = {
+            "status": InterestStatus.CONTACT_SHARED,
+            "contact_shared_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        
+        updated_interest = await database.update_interest_status(interest_id, update_data)
+        
+        # Add background task to notify tradesperson
+        background_tasks.add_task(
+            _notify_tradesperson_contact_shared,
+            job=job,
+            tradesperson_id=interest["tradesperson_id"],
+            interest_id=interest_id
         )
         
-        if not updated:
-            raise HTTPException(status_code=400, detail="Failed to update interest status")
-        
-        return {"message": "Contact details shared successfully"}
+        return InterestResponse(
+            interest_id=updated_interest["id"],
+            status=updated_interest["status"],
+            message="Contact details shared successfully"
+        )
         
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to share contact details: {str(e)}"
-        )
+        logger.error(f"Error sharing contact details: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to share contact details")
 
 @router.get("/my-interests", response_model=List[dict])
 async def get_my_interests(
