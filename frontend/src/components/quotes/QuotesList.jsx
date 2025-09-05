@@ -26,6 +26,7 @@ const QuotesList = ({ jobId, quotes: initialQuotes, onQuoteUpdate }) => {
   const [quotes, setQuotes] = useState(initialQuotes || []);
   const [processingQuote, setProcessingQuote] = useState(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-NG', {
