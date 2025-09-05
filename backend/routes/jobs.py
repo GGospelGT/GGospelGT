@@ -188,3 +188,43 @@ async def get_job(job_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+async def _notify_job_posted_successfully(homeowner: dict, job: dict):
+    """Background task to notify homeowner that job was posted successfully"""
+    try:
+        # Get homeowner ID
+        homeowner_id = homeowner.get("id")
+        if not homeowner_id:
+            logger.warning("No homeowner ID found in homeowner data")
+            return
+        
+        # Get homeowner preferences
+        preferences = await database.get_user_notification_preferences(homeowner_id)
+        
+        # Prepare template data
+        template_data = {
+            "homeowner_name": homeowner.get("name", "Homeowner"),
+            "job_title": job.get("title", "Untitled Job"),
+            "job_location": job.get("location", ""),
+            "job_category": job.get("category", ""),
+            "job_description": job.get("description", "")[:100] + "..." if len(job.get("description", "")) > 100 else job.get("description", ""),
+            "view_url": f"https://servicehub.ng/my-jobs"
+        }
+        
+        # Send notification
+        notification = await notification_service.send_notification(
+            user_id=homeowner_id,
+            notification_type=NotificationType.JOB_POSTED,
+            template_data=template_data,
+            user_preferences=preferences,
+            recipient_email=homeowner.get("email"),
+            recipient_phone=homeowner.get("phone")
+        )
+        
+        # Save notification to database
+        await database.create_notification(notification)
+        
+        logger.info(f"✅ Job posted notification sent to homeowner {homeowner_id} for job {job.get('id')}")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to send job posted notification for job {job.get('id')}: {str(e)}")
