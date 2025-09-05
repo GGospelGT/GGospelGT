@@ -933,7 +933,8 @@ class BackendTester:
                 'password': homeowner_data['password']
             }
         else:
-            self.log_result("E2E Homeowner Registration", False, f"Status: {response.status_code}")
+            error_detail = response.text if response.text else "No error details"
+            self.log_result("E2E Homeowner Registration", False, f"Status: {response.status_code}, Error: {error_detail}")
             return
         
         # Create test tradesperson with realistic Nigerian data
