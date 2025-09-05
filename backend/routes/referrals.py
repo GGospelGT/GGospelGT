@@ -118,17 +118,17 @@ async def submit_verification_documents(
     )
 
 @router.get("/wallet-with-referrals", response_model=WalletResponseWithReferrals)
-async def get_wallet_with_referral_info(current_user: dict = Depends(get_current_user)):
+async def get_wallet_with_referral_info(current_user = Depends(get_current_user)):
     """Get wallet balance including referral coins information"""
     
     # Get regular wallet info
-    wallet = await database.get_wallet_by_user_id(current_user["id"])
+    wallet = await database.get_wallet_by_user_id(current_user.id)
     
     # Get withdrawal eligibility
-    eligibility = await database.check_withdrawal_eligibility(current_user["id"])
+    eligibility = await database.check_withdrawal_eligibility(current_user.id)
     
     # Get recent transactions
-    transactions = await database.get_wallet_transactions(current_user["id"], limit=10)
+    transactions = await database.get_wallet_transactions(current_user.id, limit=10)
     
     return WalletResponseWithReferrals(
         balance_coins=wallet["balance_coins"],
