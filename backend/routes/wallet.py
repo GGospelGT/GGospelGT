@@ -121,12 +121,12 @@ async def fund_wallet(
 async def get_wallet_transactions(
     skip: int = 0,
     limit: int = 20,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Get user's wallet transaction history"""
     
     transactions = await database.get_wallet_transactions(
-        current_user["id"], skip=skip, limit=limit
+        current_user.id, skip=skip, limit=limit
     )
     
     return {
