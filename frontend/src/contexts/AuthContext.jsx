@@ -132,6 +132,7 @@ export const AuthProvider = ({ children }) => {
     registerHomeowner,
     registerTradesperson,
     updateProfile,
+    updateUser,
     isAuthenticated,
     isHomeowner,
     isTradesperson,
