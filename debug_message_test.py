@@ -32,7 +32,7 @@ def test_message_debug():
         "trade_categories": ["Plumbing"],
         "experience_years": 5,
         "company_name": "Test Plumbing",
-        "description": "Professional plumber with 5 years experience.",
+        "description": "Professional plumber with 5 years experience in residential and commercial projects. Specialized in bathroom installations, pipe repairs, and modern plumbing systems.",
         "certifications": ["Licensed Plumber"]
     }
     
