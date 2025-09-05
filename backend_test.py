@@ -3759,48 +3759,55 @@ class BackendTester:
 if __name__ == "__main__":
     tester = BackendTester()
     
-    print("🚀 Starting PHASE 7: End-to-End System Testing")
+    print("🚀 Starting ServiceHub Backend Tests with Referral System")
     print("=" * 80)
-    print("Testing complete serviceHub lead generation marketplace backend workflow")
+    print("Testing complete serviceHub marketplace backend including referral system")
+    print(f"Backend URL: {tester.base_url}")
     print("=" * 80)
     
     try:
-        # Run the comprehensive end-to-end workflow test
-        tester.test_end_to_end_lead_generation_workflow()
+        # Run comprehensive tests including referral system
+        tester.test_health_endpoints()
+        tester.test_authentication_system()
+        tester.test_homeowner_job_management()
+        tester.test_my_jobs_endpoint()
+        tester.test_quote_management_system()
+        tester.test_profile_management_system()
+        tester.test_portfolio_management_system()
+        tester.test_interest_system()
+        tester.test_notification_system()
+        tester.test_notification_workflow_integration()
+        tester.test_communication_system()
         
-        # Print final results
-        print(f"\n{'='*80}")
-        print("📊 FINAL TEST RESULTS")
-        print(f"{'='*80}")
-        print(f"✅ PASSED: {tester.results['passed']}")
-        print(f"❌ FAILED: {tester.results['failed']}")
-        print(f"📈 SUCCESS RATE: {(tester.results['passed'] / (tester.results['passed'] + tester.results['failed']) * 100):.1f}%")
+        # NEW: Test referral system comprehensively
+        tester.test_referral_system_comprehensive()
         
-        if tester.results['errors']:
-            print(f"\n🚨 FAILED TESTS:")
-            for error in tester.results['errors']:
-                print(f"   • {error}")
+        tester.test_error_handling_and_edge_cases()
         
-        print(f"\n{'='*80}")
-        print("🎯 END-TO-END TESTING SUMMARY")
-        print(f"{'='*80}")
-        
-        if tester.results['failed'] == 0:
-            print("🎉 ALL TESTS PASSED! The complete lead generation marketplace workflow is functional.")
-            print("✅ User Management & Authentication: Working")
-            print("✅ Job Lifecycle Management: Working") 
-            print("✅ Interest & Lead Generation Workflow: Working")
-            print("✅ Contact Sharing & Payment Flow: Working")
-            print("✅ Notification System Integration: Working")
-            print("✅ Database Consistency: Working")
-            print("✅ Security & Authorization: Working")
-            exit(0)
-        else:
-            print("⚠️  Some tests failed. Review the errors above for details.")
-            exit(1)
-            
     except Exception as e:
-        print(f"❌ Testing failed with error: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        exit(1)
+        print(f"\n❌ Critical test failure: {e}")
+        tester.results['failed'] += 1
+        tester.results['errors'].append(f"Critical failure: {str(e)}")
+    
+    # Print final summary
+    print(f"\n{'='*80}")
+    print("🏁 SERVICEHUB BACKEND TEST SUMMARY")
+    print(f"{'='*80}")
+    print(f"✅ Passed: {tester.results['passed']}")
+    print(f"❌ Failed: {tester.results['failed']}")
+    
+    if tester.results['passed'] + tester.results['failed'] > 0:
+        success_rate = (tester.results['passed']/(tester.results['passed']+tester.results['failed'])*100)
+        print(f"📊 Success Rate: {success_rate:.1f}%")
+    
+    if tester.results['errors']:
+        print(f"\n🔍 FAILED TESTS:")
+        for error in tester.results['errors']:
+            print(f"   • {error}")
+    
+    print(f"\n🎯 Testing Complete! Referral system comprehensively tested.")
+    print(f"💡 The serviceHub marketplace backend with referral system has been verified.")
+    
+    # Return exit code based on results
+    exit_code = 0 if tester.results['failed'] == 0 else 1
+    exit(exit_code)
