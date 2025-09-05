@@ -11,46 +11,46 @@ const PopularTrades = () => {
   // Fallback data while loading or on error
   const defaultTrades = [
     {
-      title: 'Gardening & Landscaping',
-      description: 'Dreaming of a garden that captivates and soothes? Our detailed guides will provide pricing info and help you find the perfect gardener.',
-      tradesperson_count: '12,543',
-      icon: '🌿',
-      color: 'from-green-400 to-green-600'
-    },
-    {
-      title: 'Painting & Decorating',
-      description: 'Thinking about giving your space a fresh, new look? Our guides will not only provide pricing info but also connect you with skilled painters.',
-      tradesperson_count: '18,721',
-      icon: '🎨',
-      color: 'from-blue-400 to-blue-600'
-    },
-    {
-      title: 'Plastering & Rendering',
-      description: 'Are you interested in price information about a job in this service category? To give you an idea of costs, here are some recent projects.',
-      tradesperson_count: '8,934',
+      title: 'Building & Construction',
+      description: 'From foundation to roofing, find experienced builders for your construction projects. Quality workmanship guaranteed.',
+      tradesperson_count: '15,234',
       icon: '🏗️',
       color: 'from-orange-400 to-orange-600'
     },
     {
-      title: 'Plumbing',
-      description: 'From leaky taps to full bathroom installations, find qualified plumbers for any job. Get quotes and compare reviews.',
-      tradesperson_count: '15,678',
+      title: 'Plumbing & Water Works',
+      description: 'Professional plumbers for installations, repairs, and water system maintenance. Available for emergency services.',
+      tradesperson_count: '8,721',
       icon: '🔧',
       color: 'from-indigo-400 to-indigo-600'
     },
     {
-      title: 'Electrical Work',
-      description: 'Safe, certified electrical work from qualified electricians. From socket installations to full rewiring projects.',
-      tradesperson_count: '11,234',
+      title: 'Electrical Installation',
+      description: 'Certified electricians for wiring, installations, and electrical repairs. Safe and reliable electrical services.',
+      tradesperson_count: '12,543',
       icon: '⚡',
       color: 'from-yellow-400 to-yellow-600'
     },
     {
-      title: 'Carpentry & Joinery',
-      description: 'Custom woodwork, fitted wardrobes, kitchen installations and more from skilled carpenters and joiners.',
-      tradesperson_count: '9,876',
-      icon: '🪚',
-      color: 'from-amber-400 to-amber-600'
+      title: 'Painting & Decorating',
+      description: 'Transform your space with professional painters and decorators. Interior and exterior painting services available.',
+      tradesperson_count: '18,934',
+      icon: '🎨',
+      color: 'from-blue-400 to-blue-600'
+    },
+    {
+      title: 'POP & Ceiling Works',
+      description: 'Expert ceiling installation and POP works. Modern designs and professional finishing for your interior spaces.',
+      tradesperson_count: '6,234',
+      icon: '🏠',
+      color: 'from-purple-400 to-purple-600'
+    },
+    {
+      title: 'Generator Installation',
+      description: 'Professional generator installation and maintenance services. Reliable power solutions for homes and businesses.',
+      tradesperson_count: '4,876',
+      icon: '🔌',
+      color: 'from-red-400 to-red-600'
     }
   ];
 
