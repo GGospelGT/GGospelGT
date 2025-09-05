@@ -1,7 +1,11 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
-from models.auth import User, UserRole
+import sys
+import os
+backend_dir = os.path.dirname(os.path.dirname(__file__))
+sys.path.insert(0, backend_dir)
+from models_package.auth import User, UserRole
 from auth.security import verify_token
 from database import database
 
