@@ -108,6 +108,11 @@ const MyJobsPage = () => {
     }
   };
 
+  const handleViewQuotes = (job) => {
+    setSelectedJob(job);
+    setShowInterestedModal(false);
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
