@@ -305,20 +305,37 @@ const BrowseJobsPage = () => {
                         </div>
                       </div>
 
-                      {/* Action Button */}
+                      {/* Action Buttons */}
                       <div className="flex justify-between items-center pt-4 border-t">
                         <div className="text-sm text-gray-500 font-lato">
                           Match: {user?.trade_categories?.includes(job.category) ? '✅ Your skill' : '⚠️ Different category'}
                         </div>
                         
-                        <Button
-                          onClick={() => handleQuoteJob(job)}
-                          className="text-white font-lato"
-                          style={{backgroundColor: '#2F8140'}}
-                        >
-                          Submit Quote
-                          <ArrowRight size={16} className="ml-2" />
-                        </Button>
+                        <div className="flex space-x-3">
+                          <Button
+                            variant="outline"
+                            onClick={() => navigate('/messages', { 
+                              state: { 
+                                selectedJobId: job.id, 
+                                selectedUserId: job.homeowner?.id,
+                                selectedUserName: job.homeowner?.name
+                              } 
+                            })}
+                            className="font-lato"
+                          >
+                            <MessageCircle size={16} className="mr-2" />
+                            Message Homeowner
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleQuoteJob(job)}
+                            className="text-white font-lato"
+                            style={{backgroundColor: '#2F8140'}}
+                          >
+                            Submit Quote
+                            <ArrowRight size={16} className="ml-2" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
