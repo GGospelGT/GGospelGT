@@ -138,9 +138,9 @@ frontend:
 
   - task: "Homeowner Interest Review System - MyJobsPage Enhancement"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/pages/MyJobsPage.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -150,6 +150,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ COMPREHENSIVE HOMEOWNER INTEREST REVIEW TESTING COMPLETE: All 20 backend API tests passed with 100% success rate. Tested complete homeowner interest workflow: 1) Homeowner job creation with realistic bathroom renovation project, 2) Tradesperson show interest with proper authentication and duplicate prevention, 3) Homeowner interest review via /api/interests/job/{job_id} endpoint returning detailed tradesperson profiles with experience, categories, ratings, and contact sharing status, 4) Contact sharing workflow via /api/interests/share-contact/{interest_id} with proper authorization, 5) Payment simulation (₦1000 access fee) via /api/interests/pay-access/{interest_id}, 6) Contact details access after payment via /api/interests/contact-details/{job_id}, 7) Tradesperson interest history via /api/interests/my-interests, 8) Comprehensive cross-user access prevention and unauthorized access protection. All authentication requirements, role-based access control, and security measures working correctly. The complete pivot from quote system to interest-based lead generation marketplace backend is fully functional and production-ready."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL INFRASTRUCTURE ISSUE BLOCKS FULL TESTING: Mixed Content Security Error prevents complete MyJobsPage testing. PASSED TESTS: ✅ Authentication & Access Control (unauthenticated users see 'Sign In Required' message), ✅ UI Components & Structure (Header, Footer, ServiceHub branding present), ✅ Responsive Design (desktop 1920x1080 and mobile 390x844), ✅ Component Integration (proper AuthContext integration, isAuthenticated/isHomeowner checks), ✅ Code Analysis shows comprehensive implementation with interests_count display, Heart icons, 'View Interested' buttons, InterestedTradespeopleModal, contact sharing workflow. BLOCKED TESTS: ❌ API Integration fails due to Mixed Content error (HTTPS page making HTTP requests), ❌ Authentication workflow blocked (cannot login to test homeowner features), ❌ Interest review modal testing blocked, ❌ Contact sharing functionality blocked. ROOT CAUSE: Same infrastructure issue affecting BrowseJobsPage - server-side redirect forcing HTTPS→HTTP despite correct frontend configuration. Frontend implementation is comprehensive and correct but cannot function due to Mixed Content Security Error."
 
   - task: "Navigation Integration"
     implemented: true
