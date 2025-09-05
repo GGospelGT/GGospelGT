@@ -94,7 +94,7 @@ const PopularTrades = () => {
                       ) : (
                         `${typeof trade.tradesperson_count === 'number' 
                           ? trade.tradesperson_count.toLocaleString() 
-                          : trade.tradesperson_count} tradespeople in UK`
+                          : trade.tradesperson_count} tradespeople in Nigeria`
                       )}
                     </span>
                     <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700 p-0">
