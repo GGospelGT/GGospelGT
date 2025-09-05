@@ -22,11 +22,15 @@ import {
   Briefcase,
   Clock,
   Shield,
-  Settings
+  Settings,
+  Camera,
+  Plus
 } from 'lucide-react';
-import { authAPI } from '../api/services';
+import { authAPI, portfolioAPI } from '../api/services';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import ImageUpload from '../components/portfolio/ImageUpload';
+import PortfolioGallery from '../components/portfolio/PortfolioGallery';
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
