@@ -1356,6 +1356,41 @@ class BackendTester:
         
         return self.results
 
+    def run_communication_system_tests(self):
+        """Run comprehensive communication system tests"""
+        print("🚀 Starting ServiceHub Communication System Tests")
+        print(f"Testing against: {self.base_url}")
+        
+        try:
+            self.test_health_endpoints()
+            self.test_authentication_system()
+            self.test_homeowner_job_management()
+            self.test_quote_management_system()  # Need quotes for messaging authorization
+            self.test_communication_system()
+            
+        except Exception as e:
+            print(f"\n❌ Critical test failure: {e}")
+            self.results['failed'] += 1
+            self.results['errors'].append(f"Critical failure: {str(e)}")
+        
+        # Print summary
+        print(f"\n{'='*60}")
+        print("🏁 COMMUNICATION SYSTEM TEST SUMMARY")
+        print(f"{'='*60}")
+        print(f"✅ Passed: {self.results['passed']}")
+        print(f"❌ Failed: {self.results['failed']}")
+        
+        if self.results['passed'] + self.results['failed'] > 0:
+            success_rate = (self.results['passed']/(self.results['passed']+self.results['failed'])*100)
+            print(f"📊 Success Rate: {success_rate:.1f}%")
+        
+        if self.results['errors']:
+            print(f"\n🔍 FAILED TESTS:")
+            for error in self.results['errors']:
+                print(f"   • {error}")
+        
+        return self.results
+
     def run_profile_management_tests(self):
         """Run comprehensive profile management tests"""
         print("🚀 Starting ServiceHub Profile Management Tests")
