@@ -595,7 +595,7 @@ const JobPostingForm = ({ onComplete }) => {
               }}>
                 {getStepIcon(step.number)}
               </div>
-              {step.number < 4 && (
+              {step.number < 5 && (
                 <div 
                   className={`w-full h-1 mx-4 ${
                     currentStep > step.number ? 'bg-[#2F8140]' : 'bg-gray-200'
@@ -605,7 +605,7 @@ const JobPostingForm = ({ onComplete }) => {
             </div>
           ))}
         </div>
-        <Progress value={(currentStep / 4) * 100} className="mb-2" />
+        <Progress value={(currentStep / 5) * 100} className="mb-2" />
         <div className="text-center">
           <h2 className="text-xl font-bold font-montserrat" style={{color: '#121E3C'}}>
             {steps[currentStep - 1].title}
