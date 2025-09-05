@@ -86,7 +86,7 @@ const ReviewsSection = () => {
               Millions of genuine reviews
             </h2>
             <p className="text-xl text-gray-600">
-              Reviews on MyBuilder are written by customers like you.
+              Reviews on serviceHub are written by customers like you.
             </p>
           </div>
 
