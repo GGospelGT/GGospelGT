@@ -4,6 +4,13 @@ import random
 from database import database
 from models import Job, Tradesperson, Review
 import uuid
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Load environment variables
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
 
 # Sample data
 UK_CITIES = [
