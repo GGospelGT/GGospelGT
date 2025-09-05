@@ -101,3 +101,73 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Create a page for homeowners to view and manage quotes on their jobs."
+
+backend:
+  - task: "Quote Management API Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/quotes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "All quote API endpoints are implemented and working: get job quotes, update quote status, quote summary"
+
+frontend:
+  - task: "Quote Components (QuoteForm, QuotesList)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/quotes/"
+    stuck_count: 0
+    priority: "high" 
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "QuoteForm and QuotesList components are fully implemented with Nigerian branding"
+
+  - task: "My Jobs & Quotes Page for Homeowners"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/pages/MyJobsPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Need to create dedicated page for homeowners to view their jobs and manage quotes"
+
+  - task: "Navigation Integration"
+    implemented: false
+    working: "NA"
+    file: "/app/frontend/src/App.js, /app/frontend/src/components/Header.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Need to add route and navigation link for My Jobs page"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0" 
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "My Jobs & Quotes Page for Homeowners"
+    - "Navigation Integration"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implementing homeowner job and quote management page. Backend APIs are ready, need to create frontend page and integrate navigation."
