@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Comprehensive Backend API Tests for MyBuilder Clone
-Tests all API endpoints with realistic data and error scenarios
+Comprehensive Backend API Tests for ServiceHub - Homeowner Job & Quote Management
+Tests authentication, job management, and quote system with focus on new /my-jobs endpoint
 """
 
 import requests
@@ -19,6 +19,7 @@ class BackendTester:
         self.base_url = BACKEND_URL
         self.session = requests.Session()
         self.test_data = {}
+        self.auth_tokens = {}  # Store auth tokens for different users
         self.results = {
             'passed': 0,
             'failed': 0,
