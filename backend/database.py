@@ -700,6 +700,13 @@ class Database:
             raise Exception("Already showed interest in this job")
         
         await self.interests_collection.insert_one(interest_data)
+        
+        # Update job's interests_count
+        await self.database.jobs.update_one(
+            {"id": interest_data["job_id"]},
+            {"$inc": {"interests_count": 1}}
+        )
+        
         return interest_data
 
     async def get_job_interested_tradespeople(self, job_id: str) -> List[dict]:
