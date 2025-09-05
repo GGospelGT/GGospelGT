@@ -134,6 +134,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     token,
     login,
+    loginWithToken,
     logout,
     registerHomeowner,
     registerTradesperson,
