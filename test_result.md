@@ -131,7 +131,7 @@ frontend:
         comment: "QuoteForm and QuotesList components are fully implemented with Nigerian branding"
 
   - task: "My Jobs & Quotes Page for Homeowners"
-    implemented: false
+    implemented: true
     working: "NA"
     file: "/app/frontend/src/pages/MyJobsPage.jsx"
     stuck_count: 0
@@ -140,10 +140,10 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Need to create dedicated page for homeowners to view their jobs and manage quotes"
+        comment: "Updated MyJobsPage to use proper backend endpoint /my-jobs instead of client-side filtering"
 
   - task: "Navigation Integration"
-    implemented: false
+    implemented: true
     working: "NA"
     file: "/app/frontend/src/App.js, /app/frontend/src/components/Header.jsx"
     stuck_count: 0
@@ -152,7 +152,19 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Need to add route and navigation link for My Jobs page"
+        comment: "Added /my-jobs and /browse-jobs routes to App.js. Updated Header with role-based navigation for homeowners and tradespeople"
+
+  - task: "Backend API Enhancement"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/routes/jobs.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /api/jobs/my-jobs endpoint for homeowners to get their own jobs with proper authentication"
 
 metadata:
   created_by: "main_agent"
