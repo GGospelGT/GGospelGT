@@ -167,7 +167,7 @@ async def serve_verification_document(filename: str):
 async def process_signup_referral(
     referral_code: str = Form(...),
     referred_user_id: str = Form(...),
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """Process referral when someone signs up with a referral code (internal use)"""
     
