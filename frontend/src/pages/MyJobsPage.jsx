@@ -434,8 +434,8 @@ const MyJobsPage = () => {
                                 </div>
                               </div>
 
-                              {/* Budget Display */}
-                              <div className="text-right">
+                              {/* Budget & Access Fee Display */}
+                              <div className="text-right space-y-2">
                                 {job.budget_min && job.budget_max ? (
                                   <div>
                                     <div className="text-lg font-bold font-montserrat" style={{color: '#2F8140'}}>
@@ -446,6 +446,16 @@ const MyJobsPage = () => {
                                 ) : (
                                   <div className="text-sm text-gray-500 font-lato">Budget not specified</div>
                                 )}
+                                
+                                {/* Access Fee */}
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
+                                  <div className="text-sm font-semibold text-blue-800">
+                                    Access Fee: {job.access_fee_coins || 15} coins
+                                  </div>
+                                  <div className="text-xs text-blue-600">
+                                    ₦{(job.access_fee_naira || 1500).toLocaleString()} per tradesperson
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </CardHeader>
