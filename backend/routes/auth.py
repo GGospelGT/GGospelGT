@@ -14,6 +14,9 @@ from database import database
 from datetime import datetime
 from typing import Optional
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
