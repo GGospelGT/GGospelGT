@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Eye, EyeOff, User, Mail, Lock, Phone, MapPin, AlertCircle, Home, Wrench } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Lock, Phone, MapPin, AlertCircle, Home, Wrench, Hash } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
 
