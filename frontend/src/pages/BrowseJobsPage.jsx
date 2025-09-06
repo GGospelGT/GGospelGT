@@ -418,7 +418,7 @@ const BrowseJobsPage = () => {
                     }
                   </p>
                   <Button 
-                    onClick={() => loadAvailableJobs()}
+                    onClick={() => loadJobsBasedOnFilters()}
                     className="text-white font-lato"
                     style={{backgroundColor: '#2F8140'}}
                   >
