@@ -3485,7 +3485,7 @@ class BackendTester:
                         params={
                             "latitude": lagos_lat,
                             "longitude": lagos_lng,
-                            "max_distance_km": 600,  # Should include Abuja
+                            "max_distance_km": 200,  # Maximum allowed distance
                             "limit": 50
                         }
                     )
