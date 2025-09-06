@@ -45,6 +45,7 @@ const Footer = () => {
       title: 'Company',
       links: [
         'About us',
+        'Reviews Policy',
         'Careers',
         'Press',
         'Blog',
