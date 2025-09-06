@@ -541,7 +541,7 @@ const BrowseJobsPage = () => {
                       <Button
                         key={page}
                         variant={page === pagination.page ? "default" : "outline"}
-                        onClick={() => loadAvailableJobs(page)}
+                        onClick={() => loadJobsBasedOnFilters(page)}
                         className="font-lato"
                         style={page === pagination.page ? {backgroundColor: '#2F8140', color: 'white'} : {}}
                       >
