@@ -35,6 +35,12 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
+            <a 
+              onClick={() => navigate('/about')}
+              className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
+            >
+              About us
+            </a>
             <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]">
               How it works
             </a>
