@@ -298,6 +298,49 @@ const SignupForm = ({ onClose, onSwitchToLogin }) => {
               </div>
             </div>
 
+            {/* Location and Postcode */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                  State/Location *
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <select
+                    value={formData.location}
+                    onChange={(e) => updateFormData('location', e.target.value)}
+                    className={`w-full pl-9 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
+                      errors.location ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  >
+                    <option value="">Select your state</option>
+                    {nigerianStates.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                  Postcode *
+                </label>
+                <div className="relative">
+                  <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <Input
+                    placeholder="Enter your postcode"
+                    value={formData.postcode}
+                    onChange={(e) => updateFormData('postcode', e.target.value)}
+                    className={`pl-9 font-lato ${errors.postcode ? 'border-red-500' : ''}`}
+                  />
+                </div>
+                {errors.postcode && <p className="text-red-500 text-sm mt-1">{errors.postcode}</p>}
+              </div>
+            </div>
+
             {/* Referral Code Field */}
             <div>
               <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
