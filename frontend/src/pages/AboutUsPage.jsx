@@ -86,19 +86,72 @@ const AboutUsPage = () => {
                   </h2>
                 </div>
                 
-                <div className="prose prose-lg max-w-none">
-                  <p className="text-gray-700 font-lato text-lg leading-relaxed mb-6">
-                    At ServiceHub, we believe finding trusted service professionals in Nigeria should be simple, safe, and stress-free. We are a digital marketplace that connects individuals and businesses with verified, reliable professionals across a wide range of services - from plumbing, electrical repairs, and carpentry to home cleaning, IT support, and more.
-                  </p>
-                  
-                  <p className="text-gray-700 font-lato text-lg leading-relaxed mb-6">
-                    Our mission is simple: <strong style={{color: '#2F8140'}}>empower Nigerians with easy access to reliable services while creating opportunities for skilled workers to thrive.</strong>
-                  </p>
-                  
-                  <div className="bg-green-50 border-l-4 border-green-500 p-6 rounded-lg">
-                    <p className="text-gray-800 font-lato italic text-lg">
-                      "We're not just a platform - we're building a community where trust, quality, and opportunity come together to transform Nigeria's service industry."
+                <div className="prose prose-lg max-w-none space-y-8">
+                  <div className="space-y-6">
+                    <p className="text-gray-700 font-lato text-lg leading-relaxed">
+                      At ServiceHub, we believe finding trusted service professionals in Nigeria should be <strong>simple</strong>, <strong>safe</strong>, and <strong>stress-free</strong>.
                     </p>
+                    
+                    <p className="text-gray-700 font-lato text-lg leading-relaxed">
+                      We are a digital marketplace that connects individuals and businesses with verified, reliable professionals across a wide range of services including:
+                    </p>
+                    
+                    <div className="grid md:grid-cols-2 gap-4 my-6">
+                      <ul className="space-y-2 text-gray-700 font-lato">
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          Plumbing & Water Works
+                        </li>
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          Electrical Repairs & Installation
+                        </li>
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          Carpentry & Furniture Making
+                        </li>
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          Building & Construction
+                        </li>
+                      </ul>
+                      <ul className="space-y-2 text-gray-700 font-lato">
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          Home Cleaning Services  
+                        </li>
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          Solar & Generator Services
+                        </li>
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          CCTV & Security Systems
+                        </li>
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          And many more...
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 p-8 rounded-xl">
+                    <h3 className="text-xl font-bold font-montserrat mb-4" style={{color: '#2F8140'}}>
+                      Our Simple Mission
+                    </h3>
+                    <p className="text-gray-800 font-lato text-lg leading-relaxed">
+                      <strong>Empower Nigerians</strong> with easy access to reliable services while creating opportunities for <strong>skilled workers to thrive</strong>.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-50 border-l-4 border-green-500 p-8 rounded-lg">
+                    <blockquote className="text-gray-800 font-lato italic text-xl leading-relaxed">
+                      "We're not just a platform - we're building a <strong>community</strong> where trust, quality, and opportunity come together to transform Nigeria's service industry."
+                    </blockquote>
+                    <footer className="mt-4 text-gray-600 font-lato">
+                      — The ServiceHub Team
+                    </footer>
                   </div>
                 </div>
               </CardContent>
