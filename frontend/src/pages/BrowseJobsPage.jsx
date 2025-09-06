@@ -30,6 +30,38 @@ import JobsMap from '../components/maps/JobsMap';
 import LocationSettingsModal from '../components/LocationSettingsModal';
 import { authAPI } from '../api/services';
 
+// Nigerian Trade Categories
+const NIGERIAN_TRADE_CATEGORIES = [
+  "Building",
+  "Concrete Works", 
+  "Tiling",
+  "CCTV & Security Systems",
+  "Door & Window Installation",
+  "Air Conditioning & Refrigeration",
+  "Renovations",
+  "Relocation/Moving",
+  "Painting",
+  "Carpentry",
+  "General Handyman Work",
+  "Bathroom Fitting",
+  "Generator Services",
+  "Home Extensions",
+  "Scaffolding",
+  "Waste Disposal",
+  "Flooring",
+  "Plastering/POP",
+  "Cleaning",
+  "Electrical Repairs",
+  "Solar & Inverter Installation",
+  "Plumbing",
+  "Welding",
+  "Furniture Making",
+  "Interior Design",
+  "Roofing",
+  "Locksmithing",
+  "Recycling"
+];
+
 const BrowseJobsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -360,14 +392,11 @@ const BrowseJobsPage = () => {
                   className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato"
                 >
                   <option value="">All Categories</option>
-                  <option value="Plumbing">Plumbing</option>
-                  <option value="Electrical">Electrical</option>
-                  <option value="Carpentry">Carpentry</option>
-                  <option value="Painting">Painting</option>
-                  <option value="Tiling">Tiling</option>
-                  <option value="Roofing">Roofing</option>
-                  <option value="HVAC">HVAC</option>
-                  <option value="Landscaping">Landscaping</option>
+                  {NIGERIAN_TRADE_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
                 </select>
               </div>
 
