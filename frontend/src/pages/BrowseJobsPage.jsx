@@ -27,6 +27,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import JobsMap from '../components/maps/JobsMap';
+import LocationSettingsModal from '../components/LocationSettingsModal';
 import { authAPI } from '../api/services';
 
 const BrowseJobsPage = () => {
