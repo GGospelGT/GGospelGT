@@ -40,14 +40,15 @@ const BrowseJobsPage = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [showLocationSettings, setShowLocationSettings] = useState(false);
+
+  const { user, isAuthenticated, isTradesperson } = useAuth();
+  
   const [filters, setFilters] = useState({
     search: '',
     category: '',
     useLocation: false,
     maxDistance: user?.travel_distance_km || 25
   });
-
-  const { user, isAuthenticated, isTradesperson } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
