@@ -319,32 +319,48 @@ const AboutUsPage = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-gradient-to-r from-green-600 to-green-700 text-white">
+      <section className="py-20 bg-gradient-to-r from-green-600 to-green-700 text-white">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold font-montserrat mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-montserrat mb-8">
               Ready to Experience the ServiceHub Difference?
             </h2>
             
-            <p className="text-xl font-lato mb-8 opacity-90">
-              Join thousands of Nigerians who trust ServiceHub for their service needs
-            </p>
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold font-montserrat">For Homeowners</h3>
+                <p className="text-lg font-lato opacity-90 leading-relaxed">
+                  Get your projects done by trusted, verified professionals. From small repairs to major renovations.
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold font-montserrat">For Tradespeople</h3>
+                <p className="text-lg font-lato opacity-90 leading-relaxed">
+                  Grow your business with a steady stream of local customers. Build your reputation and increase your income.
+                </p>
+              </div>
+            </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <button 
                 onClick={() => window.location.href = '/post-job'}
-                className="bg-white text-green-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-lato font-semibold transition-colors duration-300"
+                className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4 rounded-lg font-lato font-semibold text-lg transition-colors duration-300 shadow-lg"
               >
                 Post Your First Job
               </button>
               
               <button 
                 onClick={() => window.location.href = '/browse-jobs'}
-                className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-3 rounded-lg font-lato font-semibold transition-colors duration-300"
+                className="border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-lg font-lato font-semibold text-lg transition-colors duration-300"
               >
                 Find Work Opportunities
               </button>
             </div>
+            
+            <p className="text-sm font-lato opacity-75 mt-8">
+              Join thousands of Nigerians who trust ServiceHub for their service needs
+            </p>
           </div>
         </div>
       </section>
