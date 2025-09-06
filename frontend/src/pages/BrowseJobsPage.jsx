@@ -55,9 +55,15 @@ const BrowseJobsPage = () => {
     if (!isAuthenticated() || !isTradesperson()) {
       return;
     }
-    loadAvailableJobs();
     loadWalletBalance();
+    loadUserLocationData();
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated() && isTradesperson()) {
+      loadJobsBasedOnFilters();
+    }
+  }, [filters, userLocation]);
 
   const loadWalletBalance = async () => {
     try {
@@ -68,12 +74,47 @@ const BrowseJobsPage = () => {
     }
   };
 
-  const loadAvailableJobs = async (page = 1) => {
+  const loadUserLocationData = () => {
+    // Check if user has saved location
+    if (user?.latitude && user?.longitude) {
+      setUserLocation({ lat: user.latitude, lng: user.longitude });
+      setFilters(prev => ({ 
+        ...prev, 
+        maxDistance: user.travel_distance_km || 25,
+        useLocation: true 
+      }));
+    }
+  };
+
+  const loadJobsBasedOnFilters = async () => {
     try {
       setLoading(true);
-      const response = await jobsAPI.getJobs({ page, limit: 10 });
-      setJobs(response.jobs || []);
-      setPagination(response.pagination);
+      let response;
+
+      if (filters.useLocation && userLocation) {
+        // Use location-based job fetching
+        const params = new URLSearchParams({
+          latitude: userLocation.lat.toString(),
+          longitude: userLocation.lng.toString(),
+          max_distance_km: filters.maxDistance.toString(),
+          limit: '50'
+        });
+
+        if (filters.search) params.append('q', filters.search);
+        if (filters.category) params.append('category', filters.category);
+
+        const url = filters.search || filters.category 
+          ? `/jobs/search?${params.toString()}`
+          : `/jobs/nearby?${params.toString()}`;
+
+        response = await jobsAPI.apiClient.get(url);
+      } else {
+        // Use regular job fetching for tradespeople
+        response = await jobsAPI.apiClient.get('/jobs/for-tradesperson?limit=50');
+      }
+
+      setJobs(response.data.jobs || []);
+      setPagination(response.data.pagination || null);
     } catch (error) {
       console.error('Failed to load jobs:', error);
       toast({
@@ -83,6 +124,79 @@ const BrowseJobsPage = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Location not supported",
+        description: "Your browser doesn't support geolocation",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLocationLoading(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        
+        setUserLocation(location);
+        setFilters(prev => ({ ...prev, useLocation: true }));
+        setLocationLoading(false);
+        
+        toast({
+          title: "Location updated",
+          description: "Now showing jobs near your current location"
+        });
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        setLocationLoading(false);
+        toast({
+          title: "Location error",
+          description: "Unable to get your current location",
+          variant: "destructive"
+        });
+      }
+    );
+  };
+
+  const updateLocationSettings = async (latitude, longitude, travelDistance) => {
+    try {
+      const params = new URLSearchParams({
+        latitude: latitude.toString(),
+        longitude: longitude.toString(),
+        travel_distance_km: travelDistance.toString()
+      });
+
+      await jobsAPI.apiClient.put(`/auth/profile/location?${params.toString()}`);
+      
+      setUserLocation({ lat: latitude, lng: longitude });
+      setFilters(prev => ({ 
+        ...prev, 
+        maxDistance: travelDistance,
+        useLocation: true 
+      }));
+      
+      toast({
+        title: "Location settings saved",
+        description: "Your location and travel preferences have been updated"
+      });
+      
+      setShowLocationSettings(false);
+    } catch (error) {
+      console.error('Failed to update location settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update location settings",
+        variant: "destructive"
+      });
     }
   };
 
