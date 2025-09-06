@@ -98,7 +98,8 @@ const BrowseJobsPage = () => {
           latitude: userLocation.lat.toString(),
           longitude: userLocation.lng.toString(),
           max_distance_km: filters.maxDistance.toString(),
-          limit: '50'
+          limit: '50',
+          page: page.toString()
         });
 
         if (filters.search) params.append('q', filters.search);
