@@ -20,32 +20,32 @@ const AboutUsPage = () => {
     {
       icon: Shield,
       title: "Trust & Transparency",
-      description: "Verified professionals and honest reviews."
+      description: "Every professional on our platform is verified. Every review is genuine. Every transaction is secure. We believe trust is earned through consistent transparency."
     },
     {
       icon: Users,
       title: "Accessibility", 
-      description: "Services available to everyone, anytime."
+      description: "Quality services should be available to everyone, everywhere. We're breaking down barriers and making professional services accessible across Nigeria."
     },
     {
       icon: TrendingUp,
       title: "Empowerment",
-      description: "Helping skilled workers grow sustainable businesses."
+      description: "We're not just connecting customers with services - we're helping skilled workers build sustainable businesses and achieve financial independence."
     },
     {
       icon: Lightbulb,
       title: "Innovation",
-      description: "Using technology to improve service delivery."
+      description: "Technology should simplify lives. We continuously innovate to make finding and booking services as easy as a few taps on your phone."
     },
     {
       icon: Award,
       title: "Excellence",
-      description: "Committed to quality and customer satisfaction."
+      description: "We're committed to delivering exceptional experiences. From our platform design to customer support, excellence is our standard."
     },
     {
       icon: CheckCircle,
       title: "Accountability",
-      description: "Ensuring fairness and trust for all."
+      description: "Fair treatment for all users. Clear policies. Reliable support. We hold ourselves and our community to the highest standards."
     }
   ];
 
