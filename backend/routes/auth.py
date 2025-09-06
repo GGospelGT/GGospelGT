@@ -50,6 +50,13 @@ async def register_homeowner(registration_data: HomeownerRegistration):
 
         formatted_phone = format_nigerian_phone(registration_data.phone)
 
+        # Validate location/state
+        if registration_data.location and not validate_nigerian_state(registration_data.location):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid location. Must be one of: {', '.join(NIGERIAN_STATES)}"
+            )
+
         # Create user data
         user_id = str(uuid.uuid4())
         user_data = {
