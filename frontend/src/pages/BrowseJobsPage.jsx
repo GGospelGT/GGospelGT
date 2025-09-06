@@ -707,6 +707,8 @@ const BrowseJobsPage = () => {
                 )}
               </div>
             )}
+              </>
+            )}
           </div>
         </div>
       </section>
