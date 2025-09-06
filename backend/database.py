@@ -1650,6 +1650,10 @@ class Database:
         
         return result.modified_count > 0
 
+    async def get_available_jobs(self, skip: int = 0, limit: int = 50) -> List[dict]:
+        """Get all available (active) jobs"""
+        return await self.get_jobs(skip=skip, limit=limit, filters={"status": "active"})
+
     async def get_jobs_for_tradesperson(self, tradesperson_id: str, skip: int = 0, limit: int = 50) -> List[dict]:
         """Get jobs filtered by tradesperson's location and travel preferences"""
         # Get tradesperson details
