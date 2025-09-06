@@ -559,8 +559,8 @@ const BrowseJobsPage = () => {
                       </Card>
                     ))}
                   </div>
-            ) : jobs.length === 0 ? (
-              <Card>
+                ) : jobs.length === 0 ? (
+                  <Card>
                 <CardContent className="text-center py-16">
                   <Briefcase size={64} className="mx-auto text-gray-400 mb-4" />
                   <h3 className="text-xl font-semibold font-montserrat text-gray-900 mb-2">
