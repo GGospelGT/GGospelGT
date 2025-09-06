@@ -145,6 +145,13 @@ async def register_tradesperson(registration_data: TradespersonRegistration):
                 detail=f"Invalid trade categories: {', '.join(invalid_categories)}"
             )
 
+        # Validate location/state
+        if not validate_nigerian_state(registration_data.location):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid location. Must be one of: {', '.join(NIGERIAN_STATES)}"
+            )
+
         # Create user data
         user_data = {
             "id": str(uuid.uuid4()),
