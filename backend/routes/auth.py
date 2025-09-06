@@ -291,6 +291,38 @@ async def update_profile(
             detail=f"Failed to update profile: {str(e)}"
         )
 
+@router.put("/profile/location")
+async def update_user_location(
+    latitude: float = Query(..., ge=-90, le=90, description="Latitude coordinate"),
+    longitude: float = Query(..., ge=-180, le=180, description="Longitude coordinate"),
+    travel_distance_km: Optional[int] = Query(None, ge=1, le=200, description="Maximum travel distance in kilometers"),
+    current_user: dict = Depends(get_current_active_user)
+):
+    """Update user location and travel distance"""
+    try:
+        success = await database.update_user_location(
+            user_id=current_user["id"],
+            latitude=latitude,
+            longitude=longitude,
+            travel_distance_km=travel_distance_km
+        )
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to update location")
+        
+        return {
+            "message": "Location updated successfully",
+            "latitude": latitude,
+            "longitude": longitude,
+            "travel_distance_km": travel_distance_km
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating user location: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update location: {str(e)}")
+
 @router.put("/profile/tradesperson", response_model=UserProfile)
 async def update_tradesperson_profile(
     profile_data: TradespersonProfileUpdate,
