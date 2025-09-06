@@ -581,8 +581,8 @@ const BrowseJobsPage = () => {
                       </Button>
                     </CardContent>
                   </Card>
-            ) : (
-              <div className="space-y-6">
+                ) : (
+                  <div className="space-y-6">
                 {jobs.map((job) => (
                   <Card key={job.id} className="hover:shadow-lg transition-shadow duration-300">
                     <CardHeader>
