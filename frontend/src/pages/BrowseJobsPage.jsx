@@ -14,13 +14,20 @@ import {
   Filter,
   Briefcase,
   HandHeart,
-  Heart
+  Heart,
+  Map,
+  List,
+  Navigation,
+  Settings,
+  Crosshair
 } from 'lucide-react';
 import { jobsAPI, interestsAPI } from '../api/services';
 import { walletAPI } from '../api/wallet';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import JobsMap from '../components/maps/JobsMap';
+import { authAPI } from '../api/services';
 
 const BrowseJobsPage = () => {
   const [jobs, setJobs] = useState([]);
