@@ -31,10 +31,16 @@ const SignupForm = ({ onClose, onSwitchToLogin }) => {
   const { registerHomeowner, registerTradesperson } = useAuth();
   const { toast } = useToast();
 
-  const nigerianCities = [
-    'Lagos', 'Abuja', 'Kano', 'Ibadan', 'Port Harcourt',
-    'Benin City', 'Kaduna', 'Enugu', 'Jos', 'Ilorin',
-    'Onitsha', 'Aba', 'Warri', 'Calabar', 'Akure'
+  // Nigerian States - Updated service coverage areas
+  const nigerianStates = [
+    'Abuja',
+    'Lagos', 
+    'Delta',
+    'Rivers State',
+    'Benin',
+    'Bayelsa',
+    'Enugu',
+    'Cross Rivers'
   ];
 
   // Nigerian Trade Categories - Updated comprehensive list
