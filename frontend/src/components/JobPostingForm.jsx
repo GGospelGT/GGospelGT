@@ -38,6 +38,11 @@ const JobPostingForm = ({ onComplete }) => {
     homeowner_email: '',
     homeowner_phone: '',
     
+    // Job Location
+    job_latitude: null,
+    job_longitude: null,
+    job_address: '',
+    
     // Step 5: Account Creation
     password: '',
     confirmPassword: ''
