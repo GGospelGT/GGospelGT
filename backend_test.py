@@ -3231,6 +3231,8 @@ class BackendTester:
                            f"Expected 401/403, got {response.status_code}")
         
         # Test 5: Verify location is stored in user profile
+        import time
+        time.sleep(1)  # Wait a moment for database update
         response = self.make_request("GET", "/auth/me", auth_token=tradesperson_token)
         if response.status_code == 200:
             profile = response.json()
@@ -3240,8 +3242,12 @@ class BackendTester:
                 self.log_result("Location Persistence in Profile", True, 
                                "Location correctly stored in user profile")
             else:
+                # Debug: Print what we got vs what we expected
+                actual_lat = profile.get("latitude")
+                actual_lng = profile.get("longitude") 
+                actual_travel = profile.get("travel_distance_km")
                 self.log_result("Location Persistence in Profile", False, 
-                               "Location not found in user profile")
+                               f"Expected: lat={lagos_lat}, lng={lagos_lng}, travel={travel_distance}. Got: lat={actual_lat}, lng={actual_lng}, travel={actual_travel}")
         else:
             self.log_result("Location Persistence in Profile", False, 
                            f"Failed to get profile: {response.status_code}")
