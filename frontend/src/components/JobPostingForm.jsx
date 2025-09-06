@@ -56,6 +56,18 @@ const NIGERIAN_TRADE_CATEGORIES = [
   "Recycling"
 ];
 
+// Nigerian States - Service Coverage Areas
+const NIGERIAN_STATES = [
+  "Abuja",
+  "Lagos", 
+  "Delta",
+  "Rivers State",
+  "Benin",
+  "Bayelsa",
+  "Enugu",
+  "Cross Rivers"
+];
+
 const JobPostingForm = ({ onClose, onJobPosted }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -118,7 +130,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         break;
 
       case 2: // Location & Timeline
-        if (!formData.location.trim()) newErrors.location = 'Location is required';
+        if (!formData.location.trim()) newErrors.location = 'State/Location is required';
         if (!formData.postcode.trim()) newErrors.postcode = 'Postcode is required';
         if (!formData.timeline.trim()) newErrors.timeline = 'Timeline is required';
         break;
@@ -376,21 +388,44 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
               </p>
             </div>
 
-            {/* Location */}
-            <div>
-              <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-                Location *
-              </label>
-              <input
-                type="text"
-                placeholder="e.g., Victoria Island, Lagos"
-                value={formData.location}
-                onChange={(e) => updateFormData('location', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
-                  errors.location ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+            {/* State and Postcode */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                  State/Location *
+                </label>
+                <select
+                  value={formData.location}
+                  onChange={(e) => updateFormData('location', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
+                    errors.location ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select your state</option>
+                  {NIGERIAN_STATES.map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </select>
+                {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                  Postcode *
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., 100001"
+                  value={formData.postcode}
+                  onChange={(e) => updateFormData('postcode', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
+                    errors.postcode ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.postcode && <p className="text-red-500 text-sm mt-1">{errors.postcode}</p>}
+              </div>
             </div>
 
             {/* Map Location Picker */}
@@ -409,23 +444,6 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                 showCurrentLocation={true}
                 showSearch={true}
               />
-            </div>
-
-            {/* Postcode */}
-            <div>
-              <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-                Postcode *
-              </label>
-              <input
-                type="text"
-                placeholder="e.g., 101241"
-                value={formData.postcode}
-                onChange={(e) => updateFormData('postcode', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
-                  errors.postcode ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.postcode && <p className="text-red-500 text-sm mt-1">{errors.postcode}</p>}
             </div>
 
             {/* Timeline */}
