@@ -42,6 +42,7 @@ function App() {
             <Route path="/verify-account" element={<VerifyAccountPage />} />
             <Route path="/about" element={<AboutUsPage />} />
             <Route path="/reviews-policy" element={<ReviewsPolicyPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
           </Routes>
           <Toaster />
         </BrowserRouter>
