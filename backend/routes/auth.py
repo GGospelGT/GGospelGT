@@ -454,3 +454,11 @@ async def get_trade_categories():
         "categories": NIGERIAN_TRADE_CATEGORIES,
         "total": len(NIGERIAN_TRADE_CATEGORIES)
     }
+
+@router.get("/nigerian-states")
+async def get_nigerian_states():
+    """Get all available Nigerian states/locations for service coverage"""
+    return {
+        "states": NIGERIAN_STATES,
+        "total": len(NIGERIAN_STATES)
+    }
