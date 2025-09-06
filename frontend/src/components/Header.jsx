@@ -99,6 +99,14 @@ const Header = () => {
                       <span>💰</span>
                       <span>Wallet</span>
                     </Button>
+                    <Button 
+                      variant="ghost"
+                      onClick={() => navigate('/referrals')}
+                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                    >
+                      <span>🎁</span>
+                      <span>Referrals</span>
+                    </Button>
                   </>
                 )}
                 
