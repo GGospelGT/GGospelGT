@@ -12,6 +12,7 @@ from auth.security import (
 from auth.dependencies import get_current_user, get_current_active_user
 from database import database
 from datetime import datetime
+from typing import Optional
 import uuid
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
