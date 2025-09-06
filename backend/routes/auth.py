@@ -296,12 +296,12 @@ async def update_user_location(
     latitude: float = Query(..., ge=-90, le=90, description="Latitude coordinate"),
     longitude: float = Query(..., ge=-180, le=180, description="Longitude coordinate"),
     travel_distance_km: Optional[int] = Query(None, ge=1, le=200, description="Maximum travel distance in kilometers"),
-    current_user: dict = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user)
 ):
     """Update user location and travel distance"""
     try:
         success = await database.update_user_location(
-            user_id=current_user["id"],
+            user_id=current_user.id,
             latitude=latitude,
             longitude=longitude,
             travel_distance_km=travel_distance_km
