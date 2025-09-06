@@ -105,6 +105,8 @@ const Footer = () => {
                           e.preventDefault();
                           if (link === 'About us') {
                             navigate('/about');
+                          } else if (link === 'Reviews Policy') {
+                            navigate('/reviews-policy');
                           }
                         }}
                         className="text-gray-300 hover:text-white transition-colors text-sm font-lato cursor-pointer"
