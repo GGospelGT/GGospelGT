@@ -3184,6 +3184,10 @@ class BackendTester:
                 location_response.get("travel_distance_km") == travel_distance):
                 self.log_result("Update User Location - Valid Coordinates", True, 
                                f"Lagos coordinates: {lagos_lat}, {lagos_lng}, Travel: {travel_distance}km")
+                # Store the values for later verification
+                self.test_data['updated_lat'] = lagos_lat
+                self.test_data['updated_lng'] = lagos_lng
+                self.test_data['updated_travel'] = travel_distance
             else:
                 self.log_result("Update User Location - Valid Coordinates", False, 
                                "Response coordinates don't match input")
