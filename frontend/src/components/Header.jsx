@@ -193,7 +193,13 @@ const Header = () => {
               >
                 About us
               </a>
-              <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]">
+              <a 
+                onClick={() => {
+                  navigate('/how-it-works');
+                  setIsMenuOpen(false);
+                }}
+                className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
+              >
                 How it works
               </a>
               <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]">
