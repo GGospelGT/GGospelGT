@@ -1565,6 +1565,174 @@ class Database:
         return jobs
 
     # ==========================================
+    # LOCATION-BASED METHODS
+    # ==========================================
+    
+    def calculate_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        """Calculate distance between two points using Haversine formula (in kilometers)"""
+        import math
+        
+        # Convert latitude and longitude from degrees to radians
+        lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+        
+        # Haversine formula
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+        c = 2 * math.asin(math.sqrt(a))
+        
+        # Radius of Earth in kilometers
+        r = 6371
+        
+        return c * r
+
+    async def get_jobs_near_location(self, latitude: float, longitude: float, max_distance_km: int = 25, skip: int = 0, limit: int = 50) -> List[dict]:
+        """Get jobs within specified distance from a location"""
+        # Get all active jobs with location data
+        cursor = self.database.jobs.find({
+            "status": "active",
+            "latitude": {"$exists": True, "$ne": None},
+            "longitude": {"$exists": True, "$ne": None}
+        }).skip(skip).limit(limit * 2)  # Get more to filter by distance
+        
+        jobs_with_distance = []
+        
+        async for job in cursor:
+            job["_id"] = str(job["_id"])
+            
+            # Calculate distance
+            distance = self.calculate_distance(
+                latitude, longitude,
+                job["latitude"], job["longitude"]
+            )
+            
+            # Only include jobs within max distance
+            if distance <= max_distance_km:
+                job["distance_km"] = round(distance, 1)
+                jobs_with_distance.append(job)
+        
+        # Sort by distance (closest first)
+        jobs_with_distance.sort(key=lambda x: x["distance_km"])
+        
+        # Limit to requested number
+        return jobs_with_distance[:limit]
+
+    async def update_user_location(self, user_id: str, latitude: float, longitude: float, travel_distance_km: int = None) -> bool:
+        """Update user's location and travel distance"""
+        update_data = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "updated_at": datetime.utcnow()
+        }
+        
+        if travel_distance_km is not None:
+            update_data["travel_distance_km"] = travel_distance_km
+        
+        result = await self.users_collection.update_one(
+            {"id": user_id},
+            {"$set": update_data}
+        )
+        
+        return result.modified_count > 0
+
+    async def update_job_location(self, job_id: str, latitude: float, longitude: float) -> bool:
+        """Update job location coordinates"""
+        result = await self.database.jobs.update_one(
+            {"id": job_id},
+            {
+                "$set": {
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        return result.modified_count > 0
+
+    async def get_jobs_for_tradesperson(self, tradesperson_id: str, skip: int = 0, limit: int = 50) -> List[dict]:
+        """Get jobs filtered by tradesperson's location and travel preferences"""
+        # Get tradesperson details
+        tradesperson = await self.get_user_by_id(tradesperson_id)
+        if not tradesperson:
+            # Fallback to all jobs if tradesperson not found
+            return await self.get_available_jobs(skip=skip, limit=limit)
+        
+        # If tradesperson has location set, filter by distance
+        if (tradesperson.get("latitude") is not None and 
+            tradesperson.get("longitude") is not None):
+            
+            max_distance = tradesperson.get("travel_distance_km", 25)
+            
+            return await self.get_jobs_near_location(
+                latitude=tradesperson["latitude"],
+                longitude=tradesperson["longitude"],
+                max_distance_km=max_distance,
+                skip=skip,
+                limit=limit
+            )
+        else:
+            # No location set, return all jobs
+            return await self.get_available_jobs(skip=skip, limit=limit)
+
+    async def search_jobs_with_location(self, search_query: str = None, category: str = None, 
+                                       user_latitude: float = None, user_longitude: float = None, 
+                                       max_distance_km: int = None, skip: int = 0, limit: int = 50) -> List[dict]:
+        """Search jobs with optional location filtering"""
+        # Build search filter
+        search_filter = {"status": "active"}
+        
+        if search_query:
+            search_filter["$or"] = [
+                {"title": {"$regex": search_query, "$options": "i"}},
+                {"description": {"$regex": search_query, "$options": "i"}},
+                {"location": {"$regex": search_query, "$options": "i"}}
+            ]
+        
+        if category:
+            search_filter["category"] = category
+        
+        # If location-based filtering is requested
+        if (user_latitude is not None and user_longitude is not None and max_distance_km is not None):
+            search_filter.update({
+                "latitude": {"$exists": True, "$ne": None},
+                "longitude": {"$exists": True, "$ne": None}
+            })
+            
+            cursor = self.database.jobs.find(search_filter).skip(skip).limit(limit * 2)
+            
+            jobs_with_distance = []
+            
+            async for job in cursor:
+                job["_id"] = str(job["_id"])
+                
+                # Calculate distance
+                distance = self.calculate_distance(
+                    user_latitude, user_longitude,
+                    job["latitude"], job["longitude"]
+                )
+                
+                # Only include jobs within max distance
+                if distance <= max_distance_km:
+                    job["distance_km"] = round(distance, 1)
+                    jobs_with_distance.append(job)
+            
+            # Sort by distance
+            jobs_with_distance.sort(key=lambda x: x["distance_km"])
+            return jobs_with_distance[:limit]
+        
+        else:
+            # Regular search without location filtering
+            cursor = self.database.jobs.find(search_filter).sort("created_at", -1).skip(skip).limit(limit)
+            
+            jobs = []
+            async for job in cursor:
+                job["_id"] = str(job["_id"])
+                jobs.append(job)
+            
+            return jobs
+
+    # ==========================================
     # REFERRAL SYSTEM METHODS
     # ==========================================
     
