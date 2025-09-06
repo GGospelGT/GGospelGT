@@ -297,17 +297,17 @@ const AboutUsPage = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {coreValues.map((value, index) => (
-                <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  <CardContent className="p-8 text-center">
+                <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
+                  <CardContent className="p-8">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                       <value.icon size={32} style={{color: '#2F8140'}} />
                     </div>
                     
-                    <h3 className="text-xl font-bold font-montserrat mb-4" style={{color: '#121E3C'}}>
+                    <h3 className="text-xl font-bold font-montserrat mb-4 text-center" style={{color: '#121E3C'}}>
                       {value.title}
                     </h3>
                     
-                    <p className="text-gray-600 font-lato leading-relaxed">
+                    <p className="text-gray-600 font-lato leading-relaxed text-center">
                       {value.description}
                     </p>
                   </CardContent>
