@@ -273,6 +273,26 @@ const SignupForm = ({ onClose, onSwitchToLogin }) => {
               </div>
             </div>
 
+            {/* Referral Code Field */}
+            <div>
+              <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                Referral Code (Optional)
+              </label>
+              <div className="relative">
+                <Input
+                  placeholder="Enter referral code if you have one"
+                  value={formData.referral_code}
+                  onChange={(e) => updateFormData('referral_code', e.target.value.toUpperCase())}
+                  className="font-lato"
+                />
+              </div>
+              {formData.referral_code && (
+                <p className="text-green-600 text-sm mt-1">
+                  🎉 Great! You and your referrer will earn rewards when you verify your account
+                </p>
+              )}
+            </div>
+
             {/* Tradesperson Specific Fields */}
             <TabsContent value="tradesperson" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
