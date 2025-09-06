@@ -16,6 +16,7 @@ import ReferralsPage from "./pages/ReferralsPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
 import AboutUsPage from "./pages/AboutUsPage";
 import ReviewsPolicyPage from "./pages/ReviewsPolicyPage";
+import HowItWorksPage from "./pages/HowItWorksPage";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 
