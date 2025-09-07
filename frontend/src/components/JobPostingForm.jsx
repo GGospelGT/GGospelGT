@@ -118,6 +118,37 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+    
+    // When state changes, fetch LGAs and reset LGA selection
+    if (field === 'state' && value) {
+      fetchLGAsForState(value);
+      setFormData(prev => ({ ...prev, lga: '' })); // Reset LGA when state changes
+    }
+  };
+
+  // Fetch LGAs for selected state
+  const fetchLGAsForState = async (state) => {
+    if (!state) {
+      setAvailableLGAs([]);
+      return;
+    }
+    
+    setLoadingLGAs(true);
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/lgas/${encodeURIComponent(state)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableLGAs(data.lgas || []);
+      } else {
+        console.error('Failed to fetch LGAs:', response.statusText);
+        setAvailableLGAs([]);
+      }
+    } catch (error) {
+      console.error('Error fetching LGAs:', error);
+      setAvailableLGAs([]);
+    } finally {
+      setLoadingLGAs(false);
+    }
   };
 
   const validateStep = (step) => {
