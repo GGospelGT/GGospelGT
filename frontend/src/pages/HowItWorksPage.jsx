@@ -178,7 +178,7 @@ const HowItWorksPage = () => {
     {
       icon: Users,
       title: "Referral Program",
-      description: "Earn coins by referring friends and family to join the ServiceHub community"
+      description: "Earn rewards by referring friends and family to join the ServiceHub community"
     },
     {
       icon: Zap,
