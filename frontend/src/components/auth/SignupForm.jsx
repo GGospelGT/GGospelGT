@@ -146,8 +146,9 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'homeowner', showOn
 
     try {
       let result;
+      const currentTab = showOnlyTradesperson ? 'tradesperson' : activeTab;
       
-      if (activeTab === 'homeowner') {
+      if (currentTab === 'homeowner') {
         result = await registerHomeowner({
           name: formData.name,
           email: formData.email,
