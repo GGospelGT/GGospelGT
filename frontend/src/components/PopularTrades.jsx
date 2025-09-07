@@ -7,6 +7,7 @@ import { statsAPI } from '../api/services';
 import { useAPI } from '../hooks/useAPI';
 
 const PopularTrades = () => {
+  const navigate = useNavigate();
   const { data: categoriesData, loading, error } = useAPI(() => statsAPI.getCategories());
 
   // Fallback data while loading or on error
