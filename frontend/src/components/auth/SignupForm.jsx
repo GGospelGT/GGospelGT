@@ -431,7 +431,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'homeowner', showOn
                 </div>
                 {errors.trade_categories && <p className="text-red-500 text-sm mt-1">{errors.trade_categories}</p>}
               </div>
-            </TabsContent>
+            )}
 
             {/* Submit Error */}
             {errors.submit && (
