@@ -190,7 +190,7 @@ const HowItWorksPage = () => {
   const stats = [
     { number: "28+", label: "Service Categories" },
     { number: "8", label: "Nigerian States" },
-    { number: "15", label: "Average Access Fee (Coins)" },
+    { number: "5,000+", label: "Active Tradespeople" },
     { number: "5-200km", label: "Service Radius" }
   ];
 
