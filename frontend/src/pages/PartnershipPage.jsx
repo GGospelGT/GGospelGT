@@ -549,7 +549,7 @@ const PartnershipPage = () => {
                       For detailed partnership discussions, please send us your company information and partnership interests to:
                     </p>
                     <div className="bg-green-50 p-4 rounded-lg">
-                      <p className="text-green-800 font-lato font-semibold">partnerships@servicehub.ng</p>
+                      <p className="text-green-800 font-lato font-semibold">partnerships@myservicehub.co</p>
                     </div>
                   </div>
                 </CardContent>
