@@ -4,6 +4,12 @@ import { ArrowRight, TrendingUp, Clock, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const TradespeopleCTA = () => {
+  const { showAuthModal } = useAuth();
+
+  const handleJoinClick = () => {
+    // Show the authentication modal with tradesperson registration tab active
+    showAuthModal('register', 'tradesperson');
+  };
   const benefits = [
     {
       icon: TrendingUp,
