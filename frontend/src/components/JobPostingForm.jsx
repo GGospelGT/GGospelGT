@@ -199,7 +199,12 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         }
         break;
 
-      case 4: // Contact Details
+      case 4: // Contact Details (skip validation for authenticated users)
+        if (isAuthenticated()) {
+          // For authenticated users, no validation needed as we use their existing data
+          break;
+        }
+        // For non-authenticated users, validate contact details
         if (!formData.homeowner_name.trim()) newErrors.homeowner_name = 'Your name is required';
         if (!formData.homeowner_email.trim()) newErrors.homeowner_email = 'Email is required';
         else if (!/\S+@\S+\.\S+/.test(formData.homeowner_email)) {
