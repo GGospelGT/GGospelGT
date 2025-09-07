@@ -216,16 +216,25 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'homeowner', showOn
       
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="homeowner" className="flex items-center space-x-2">
-              <Home size={16} />
-              <span>Homeowner</span>
-            </TabsTrigger>
-            <TabsTrigger value="tradesperson" className="flex items-center space-x-2">
-              <Wrench size={16} />
-              <span>Tradesperson</span>
-            </TabsTrigger>
-          </TabsList>
+          {!showOnlyTradesperson ? (
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="homeowner" className="flex items-center space-x-2">
+                <Home size={16} />
+                <span>Homeowner</span>
+              </TabsTrigger>
+              <TabsTrigger value="tradesperson" className="flex items-center space-x-2">
+                <Wrench size={16} />
+                <span>Tradesperson</span>
+              </TabsTrigger>
+            </TabsList>
+          ) : (
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200">
+                <Wrench size={20} style={{color: '#2F8140'}} />
+                <span className="font-semibold text-green-800 font-montserrat">Tradesperson Registration</span>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-6">
             {/* Common Fields */}
