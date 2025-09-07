@@ -1,15 +1,61 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Search, MapPin, Plus } from 'lucide-react';
+import { Search, MapPin, Plus, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { jobsAPI } from '../api/services';
 import { useToast } from '../hooks/use-toast';
+
+// Nigerian Trade Categories
+const NIGERIAN_TRADE_CATEGORIES = [
+  "Building",
+  "Concrete Works", 
+  "Tiling",
+  "CCTV & Security Systems",
+  "Door & Window Installation",
+  "Air Conditioning & Refrigeration",
+  "Renovations",
+  "Relocation/Moving",
+  "Painting",
+  "Carpentry",
+  "General Handyman Work",
+  "Bathroom Fitting",
+  "Generator Services",
+  "Home Extensions",
+  "Scaffolding",
+  "Waste Disposal",
+  "Flooring",
+  "Plastering/POP",
+  "Cleaning",
+  "Electrical Repairs",
+  "Solar & Inverter Installation",
+  "Plumbing",
+  "Welding",
+  "Furniture Making",
+  "Interior Design",
+  "Roofing",
+  "Locksmithing",
+  "Recycling"
+];
+
+// Nigerian States
+const NIGERIAN_STATES = [
+  "Abuja",
+  "Lagos", 
+  "Delta",
+  "Rivers State",
+  "Benin",
+  "Bayelsa",
+  "Enugu",
+  "Cross Rivers"
+];
 
 const HeroSection = () => {
   const [job, setJob] = useState('');
   const [location, setLocation] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [showJobDropdown, setShowJobDropdown] = useState(false);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
