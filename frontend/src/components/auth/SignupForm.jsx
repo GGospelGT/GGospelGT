@@ -381,8 +381,9 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'homeowner', showOn
             </div>
 
             {/* Tradesperson Specific Fields */}
-            <TabsContent value="tradesperson" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {(activeTab === 'tradesperson' || showOnlyTradesperson) && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
                     Experience Years *
