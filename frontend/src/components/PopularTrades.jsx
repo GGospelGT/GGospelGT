@@ -57,19 +57,6 @@ const PopularTrades = () => {
   // Use real categories if available, otherwise use defaults
   const displayTrades = categoriesData?.categories || defaultTrades;
 
-  // Filter categories for dropdown
-  const filteredCategories = NIGERIAN_TRADE_CATEGORIES.filter(category =>
-    category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    setShowDropdown(false);
-    setSearchTerm('');
-    // Here you could add navigation or filtering logic
-    console.log('Selected category:', category);
-  };
-
   if (error) {
     console.warn('Failed to load categories, using defaults:', error);
   }
