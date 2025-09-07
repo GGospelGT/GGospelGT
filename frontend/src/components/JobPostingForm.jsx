@@ -1267,6 +1267,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
       </div>
 
       <AccountCreationModal />
+      <LoginModal />
     </>
   );
 };
