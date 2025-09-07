@@ -254,8 +254,8 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         email: formData.homeowner_email,
         password: formData.password,
         phone: formData.homeowner_phone,
-        location: formData.location,
-        postcode: formData.postcode
+        location: formData.state,  // Use state for location
+        postcode: formData.zip_code  // Use zip_code for postcode
       };
 
       const registrationResponse = await authAPI.registerHomeowner(registrationData);
@@ -272,8 +272,11 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         title: formData.title,
         description: formData.description,
         category: formData.category,
-        location: formData.location,
-        postcode: formData.postcode,
+        state: formData.state,
+        lga: formData.lga,
+        town: formData.town,
+        zip_code: formData.zip_code,
+        home_address: formData.home_address,
         budget_min: formData.budgetType === 'range' ? parseInt(formData.budget_min) : null,
         budget_max: formData.budgetType === 'range' ? parseInt(formData.budget_max) : null,
         timeline: formData.timeline,
