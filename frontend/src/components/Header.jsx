@@ -211,15 +211,6 @@ const Header = () => {
               <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]">
                 Help
               </a>
-              <a 
-                onClick={() => {
-                  navigate('/trade-categories');
-                  setIsMenuOpen(false);
-                }}
-                className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
-              >
-                Trade Categories
-              </a>
               <div className="flex flex-col space-y-2 pt-4">
                 {isAuthenticated() ? (
                   <>
