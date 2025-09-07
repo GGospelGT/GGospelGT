@@ -516,7 +516,7 @@ const PartnershipPage = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold font-montserrat mb-1">Email Us</h4>
-                      <p className="text-gray-600 font-lato">partnerships@servicehub.ng</p>
+                      <p className="text-gray-600 font-lato">partnerships@myservicehub.co</p>
                       <p className="text-sm text-gray-500 font-lato">We respond within 24 hours</p>
                     </div>
                   </div>
