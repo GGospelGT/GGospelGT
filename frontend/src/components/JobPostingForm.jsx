@@ -435,17 +435,17 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
               </p>
             </div>
 
-            {/* State and Postcode */}
+            {/* State and LGA */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-                  State/Location *
+                  State *
                 </label>
                 <select
-                  value={formData.location}
-                  onChange={(e) => updateFormData('location', e.target.value)}
+                  value={formData.state}
+                  onChange={(e) => updateFormData('state', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
-                    errors.location ? 'border-red-500' : 'border-gray-300'
+                    errors.state ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
                   <option value="">Select your state</option>
@@ -455,23 +455,92 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                     </option>
                   ))}
                 </select>
-                {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+                {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-                  Postcode *
+                  Local Government Area (LGA) *
+                </label>
+                <select
+                  value={formData.lga}
+                  onChange={(e) => updateFormData('lga', e.target.value)}
+                  disabled={!formData.state || loadingLGAs}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
+                    errors.lga ? 'border-red-500' : 'border-gray-300'
+                  } ${(!formData.state || loadingLGAs) ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                >
+                  <option value="">
+                    {loadingLGAs ? 'Loading LGAs...' : 'Select LGA'}
+                  </option>
+                  {availableLGAs.map((lga) => (
+                    <option key={lga} value={lga}>
+                      {lga}
+                    </option>
+                  ))}
+                </select>
+                {errors.lga && <p className="text-red-500 text-sm mt-1">{errors.lga}</p>}
+                {!formData.state && (
+                  <p className="text-gray-500 text-sm mt-1">Please select a state first</p>
+                )}
+              </div>
+            </div>
+
+            {/* Town and Zip Code */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                  Town/Area *
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Victoria Island, Ikeja, Warri"
+                  value={formData.town}
+                  onChange={(e) => updateFormData('town', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
+                    errors.town ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.town && <p className="text-red-500 text-sm mt-1">{errors.town}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                  Zip Code *
                 </label>
                 <input
                   type="text"
                   placeholder="e.g., 100001"
-                  value={formData.postcode}
-                  onChange={(e) => updateFormData('postcode', e.target.value)}
+                  value={formData.zip_code}
+                  onChange={(e) => updateFormData('zip_code', e.target.value)}
+                  maxLength={6}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
-                    errors.postcode ? 'border-red-500' : 'border-gray-300'
+                    errors.zip_code ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
-                {errors.postcode && <p className="text-red-500 text-sm mt-1">{errors.postcode}</p>}
+                {errors.zip_code && <p className="text-red-500 text-sm mt-1">{errors.zip_code}</p>}
+                <p className="text-gray-500 text-sm mt-1">Nigerian postal code (6 digits)</p>
+              </div>
+            </div>
+
+            {/* Home Address */}
+            <div>
+              <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                Home Address *
+              </label>
+              <textarea
+                rows={3}
+                placeholder="Enter your full home address (street, building number, landmarks, etc.)"
+                value={formData.home_address}
+                onChange={(e) => updateFormData('home_address', e.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato resize-none ${
+                  errors.home_address ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              {errors.home_address && <p className="text-red-500 text-sm mt-1">{errors.home_address}</p>}
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-gray-500 text-sm">Minimum 10 characters</p>
+                <p className="text-gray-500 text-sm">{formData.home_address.length}/500</p>
               </div>
             </div>
 
