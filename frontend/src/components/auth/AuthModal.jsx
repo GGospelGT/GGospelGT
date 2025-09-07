@@ -21,7 +21,11 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login', defaultTab = 'homeo
         {mode === 'login' ? (
           <LoginForm onClose={handleClose} onSwitchToSignup={switchToSignup} />
         ) : (
-          <SignupForm onClose={handleClose} onSwitchToLogin={switchToLogin} />
+          <SignupForm 
+            onClose={handleClose} 
+            onSwitchToLogin={switchToLogin} 
+            defaultTab={defaultTab}
+          />
         )}
       </DialogContent>
     </Dialog>
