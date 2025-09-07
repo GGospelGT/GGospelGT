@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { statsAPI } from '../api/services';
 import { useAPI } from '../hooks/useAPI';
 
