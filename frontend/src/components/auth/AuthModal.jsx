@@ -25,6 +25,7 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login', defaultTab = 'homeo
             onClose={handleClose} 
             onSwitchToLogin={switchToLogin} 
             defaultTab={defaultTab}
+            showOnlyTradesperson={showOnlyTradesperson}
           />
         )}
       </DialogContent>
