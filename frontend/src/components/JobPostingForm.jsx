@@ -77,12 +77,15 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     category: '',
     
     // Step 2: Location & Timeline
-    location: '',
-    postcode: '',
+    state: '',
+    lga: '',
+    town: '',
+    zip_code: '',
+    home_address: '',
     timeline: '',
     jobLocation: null, // For coordinates
     
-    // Step 3: Budget
+    // Step 3: Budget  
     budgetType: 'range', // 'range' or 'discussion'
     budget_min: '',
     budget_max: '',
