@@ -109,7 +109,11 @@ const PopularTrades = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+            <Button 
+              variant="outline" 
+              className="border-green-600 text-green-600 hover:bg-green-50"
+              onClick={() => navigate('/trade-categories')}
+            >
               View all trade categories
             </Button>
           </div>
