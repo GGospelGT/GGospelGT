@@ -448,6 +448,7 @@ const HowItWorksPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Safety & Trust */}
       <section className="py-16 bg-gray-100">
