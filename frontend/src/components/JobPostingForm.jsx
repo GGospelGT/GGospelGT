@@ -166,8 +166,19 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         break;
 
       case 2: // Location & Timeline
-        if (!formData.location.trim()) newErrors.location = 'State/Location is required';
-        if (!formData.postcode.trim()) newErrors.postcode = 'Postcode is required';
+        if (!formData.state.trim()) newErrors.state = 'State is required';
+        if (!formData.lga.trim()) newErrors.lga = 'Local Government Area (LGA) is required';
+        if (!formData.town.trim()) newErrors.town = 'Town/Area is required';
+        if (!formData.zip_code.trim()) {
+          newErrors.zip_code = 'Zip code is required';
+        } else if (!/^\d{6}$/.test(formData.zip_code.trim())) {
+          newErrors.zip_code = 'Zip code must be 6 digits';
+        }
+        if (!formData.home_address.trim()) {
+          newErrors.home_address = 'Home address is required';
+        } else if (formData.home_address.trim().length < 10) {
+          newErrors.home_address = 'Home address must be at least 10 characters';
+        }
         if (!formData.timeline.trim()) newErrors.timeline = 'Timeline is required';
         break;
 
