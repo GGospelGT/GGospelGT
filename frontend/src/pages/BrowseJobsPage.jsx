@@ -497,7 +497,8 @@ const BrowseJobsPage = () => {
             {/* Wallet Balance & User Skills */}
             <div className="mt-6 grid md:grid-cols-2 gap-6">
               {/* Wallet Balance */}
-              {walletBalance && (
+              {/* Wallet Balance - Only visible to tradespeople */}
+              {isTradesperson() && walletBalance && (
                 <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
                   <div className="flex justify-between items-center">
                     <div>
