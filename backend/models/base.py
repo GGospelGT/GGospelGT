@@ -49,8 +49,18 @@ class JobCreate(BaseModel):
     title: str = Field(..., min_length=10, max_length=200)
     description: str = Field(..., min_length=50, max_length=2000)
     category: str
-    location: str
-    postcode: str
+    
+    # Enhanced location fields
+    state: str  # Nigerian state
+    lga: str    # Local Government Area
+    town: str   # Town/area name
+    zip_code: str = Field(..., min_length=6, max_length=6)  # Nigerian 6-digit postal code
+    home_address: str = Field(..., min_length=10, max_length=500)  # Full home address
+    
+    # Legacy fields (keep for compatibility)
+    location: Optional[str] = None  # Will be auto-populated from state
+    postcode: Optional[str] = None  # Will be auto-populated from zip_code
+    
     budget_min: Optional[int] = Field(None, ge=0)
     budget_max: Optional[int] = Field(None, ge=0)
     timeline: str
