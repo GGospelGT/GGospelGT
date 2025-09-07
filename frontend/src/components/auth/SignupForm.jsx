@@ -120,7 +120,8 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'homeowner', showOn
     }
 
     // Tradesperson specific validation
-    if (activeTab === 'tradesperson') {
+    const currentTab = showOnlyTradesperson ? 'tradesperson' : activeTab;
+    if (currentTab === 'tradesperson') {
       if (formData.trade_categories.length === 0) {
         newErrors.trade_categories = 'Please select at least one trade category';
       }
