@@ -99,6 +99,7 @@ const TradespeopleCTA = () => {
         onClose={() => setAuthModalOpen(false)} 
         defaultMode="signup" 
         defaultTab="tradesperson"
+        showOnlyTradesperson={true}
       />
     </>
   );
