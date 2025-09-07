@@ -656,15 +656,17 @@ const BrowseJobsPage = () => {
                             <div className="text-sm text-gray-500 font-lato">Budget not specified</div>
                           )}
                           
-                          {/* Access Fee */}
-                          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
-                            <div className="text-sm font-semibold text-yellow-800">
-                              Access Fee: {job.access_fee_coins || 15} coins
+                          {/* Access Fee - Only visible to tradespeople */}
+                          {isTradesperson() && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+                              <div className="text-sm font-semibold text-yellow-800">
+                                Access Fee: {job.access_fee_coins || 15} coins
+                              </div>
+                              <div className="text-xs text-yellow-600">
+                                ₦{(job.access_fee_naira || 1500).toLocaleString()} for contact details
+                              </div>
                             </div>
-                            <div className="text-xs text-yellow-600">
-                              ₦{(job.access_fee_naira || 1500).toLocaleString()} for contact details
-                            </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                     </CardHeader>
