@@ -1,9 +1,9 @@
 <analysis>
-The trajectory details the iterative development of , a full-stack application for the Nigerian market. Starting from an MVP, the AI engineer incrementally added significant features based on user requirements. Key phases included evolving from a messaging system to a Show Interest lead generation model, implementing a robust Rating & Review system, and establishing a comprehensive coin-based Wallet system with admin controls for funding and access fees. A viral Referral system with identity verification was then integrated, boosting user acquisition and trust. Each phase involved detailed backend and frontend implementation, rigorous testing, and frequent user interaction for clarification. The project maintains a strong focus on secure environment variable management and adherence to API routing rules. The current work is focused on integrating Google Maps for location-based job matching and tradesperson travel preferences, making the application highly tailored and user-centric for its target market.
+The previous AI engineer effectively transitioned the  application from an MVP to a feature-rich platform tailored for the Nigerian market. Initial work established core functionalities like authentication, job posting, a Show Interest lead system, and a robust rating/review mechanism. Significant additions included a coin-based Wallet system with admin controls and a viral Referral system with identity verification. The work then focused on integrating Google Maps for location-based job matching. Debugging included resolving a frontend authentication issue for testing. Subsequent development was heavily user-driven, encompassing the implementation of comprehensive Nigerian trade categories and specific state lists, followed by the creation of dedicated About Us, Reviews Policy, How It Works, and Partnership content pages. A brief UI feature for landing page trade categories was implemented and then reverted upon user feedback, leading to its re-implementation in the hero section. The trajectory demonstrates iterative development, direct response to user requests, and thorough testing.
 </analysis>
 
 <product_requirements>
-The goal is to develop , a pixel-perfect, responsive full-stack application (React, FastAPI, MongoDB) for the Nigerian market. Initially, it included rebranding, user authentication, multi-step job posting for homeowners, and quote/interest management for tradespeople. User profiles and tradesperson portfolios were added. A key pivot established a lead generation marketplace where tradespeople Show Interest in jobs, replacing direct messaging. Further enhancements include a homeowner interest review system, a notification system (email/SMS), and a comprehensive rating and review system. Most recently, a coin-based wallet system was implemented for access fees, allowing tradespeople to fund wallets via bank transfer (Kuda Bank) and administrators to manage fees and verify payments. A referral system rewards users (5 coins for verified sign-up, 15 coins for withdrawal) with custom links and ID/document verification. The current focus is integrating Google Maps for location-based job matching, enabling tradespeople to view nearby jobs and set travel distances. The final aim is production deployment, including Paystack integration (though manual payment was chosen).
+The objective is to build , a responsive full-stack application for Nigeria, featuring rebranding, user authentication, multi-step job posting for homeowners, and quote/interest management for tradespeople. Core requirements included user profiles, tradesperson portfolios, a lead generation marketplace with Show Interest functionality, and a comprehensive rating/review system. Later additions encompassed a coin-based wallet system for access fees (manual bank transfer), a referral system with ID verification and rewards, and Google Maps integration for location-based job matching with tradesperson travel distances. Subsequent user requests expanded the platform with an extensive list of Nigerian trade categories, specific Nigerian states for location selection, dedicated content pages (About Us, Reviews Policy, How It Works, Partnership), and interactive dropdowns for job categories and states on the landing page's hero section. The final aim is production deployment on .
 </product_requirements>
 
 <key_technical_concepts>
@@ -12,89 +12,50 @@ The goal is to develop , a pixel-perfect, responsive full-stack application (Rea
 - API: Axios, JWT, bcrypt, Pydantic, UUIDs for IDs
 - State Management: React Context API
 - Environment:  files, Kubernetes, Supervisor
-- Image Handling: Pillow
-- External Integrations: Google Maps API, Paystack (initially planned, then moved to manual bank transfer wallet system)
+- External Integrations: Google Maps API, SendGrid (planned), Twilio (planned)
 </key_technical_concepts>
 
 <code_architecture>
 
-- : Main FastAPI app.
-    - **Changes**: Integrated new , , , , , and  routers.
-- : Core Pydantic models.
-    - **Changes**: Added/updated  models, , , , , , , , , .  model updated with , .  updated with , , .
-- : Pydantic models for authentication.
-    - **Changes**:  model updated to include , , , .  and  models updated with optional .
-- : Handles MongoDB interactions.
-    - **Changes**: Added methods for , ,  management, and extensive CRUD operations for , ,  tracking, and . Includes new , , , , , , , , , and location-based filtering/distance calculation.
-- : API for Show Interest.
-    - **Changes**:  logic updated to integrate with the new wallet system for access fee deduction.
-- : **NEW.**
-    - **Importance**: API endpoints for managing user wallets, funding, and transactions.
-- : **NEW.**
-    - **Importance**: API endpoints for administrative tasks, including funding request approval/rejection, verification management, and job access fee settings.
-- : **NEW.**
-    - **Importance**: API endpoints for user referral statistics, code generation, document verification uploads, and withdrawal eligibility checks.
-- : Authentication API.
-    - **Changes**: Modified registration processes (, ) to handle  and record referral data. Added endpoints for updating user location and travel distance (, ).
-- : API for jobs.
-    - **Changes**: Job creation updated to include default access fee. Added location-based endpoints like  for filtered job searches.
-- : Frontend environment variables.
-    - **Changes**: Added .
-- : Frontend dependencies.
-    - **Changes**: Added .
-- : Main React app routing.
-    - **Changes**: Added routes for notifications, reviews, , , , and .
-- : Frontend API client.
-    - **Changes**: Updated  to use  correctly.
-- : **NEW.**
-    - **Importance**: Frontend API client for wallet management.
-- : **NEW.**
-    - **Importance**: Frontend API client for referral system interactions.
-- : Global navigation bar.
-    - **Changes**: Integrated , My Reviews, Wallet (for tradespeople), and Referrals links.
-- : Multi-step job posting form.
-    - **Changes**: Modified to a 5-step process, with Step 5 for homeowner account creation, including password fields and account benefits. Integrated  for job coordinates.
-- : **NEW.**
-    - **Importance**: Displays user's current wallet balance.
-- : **NEW.**
-    - **Importance**: Handles the UI for funding a wallet via bank transfer.
-- : **NEW.**
-    - **Importance**: Displays a list of user's wallet transactions.
-- : **NEW.**
-    - **Importance**: Reusable component for selecting a precise geographical location on a map.
-- : **NEW.**
-    - **Importance**: Displays jobs on an interactive Google Map.
-- : **NEW.**
-    - **Importance**: Modal for tradespeople to set their home location and preferred travel distance.
-- : User signup form.
-    - **Changes**: Added optional  field and integrated URL parameter parsing for  codes.
-- : Page for tradespeople to browse jobs.
-    - **Changes**: Updated to display access fees and perform wallet balance checks before showing interest. Currently being updated to include map/list toggle view, location-based filtering, and .
-- : Page for homeowners to manage their jobs.
-    - **Changes**: Added access fee display in job cards.
-- : **NEW.**
-    - **Importance**: Central page for wallet management, funding, and transaction history.
-- : **NEW.**
-    - **Importance**: Admin interface for managing funding requests, job access fees, and user verifications.
-- : **NEW.**
-    - **Importance**: User dashboard for referral statistics, code sharing, and social media integration.
-- : **NEW.**
-    - **Importance**: Page for users to upload identity documents for verification.
+- : Updated  with , ;  with , , .
+- :  model updated for referral/verification. Registration models (, ) updated for referral codes and new .
+- : **NEW**. Defines 28 Nigerian trade categories for system-wide use.
+- : **NEW**. Defines 8 Nigerian states and related validation logic.
+- : Modified registration to include , added endpoints for user location/travel distance (, ). Now includes validation for  and  during registration. Added  and  endpoints.
+- : Added .
+- : Main React app routing. Added routes for , , , , , , , .
+- : Integrated , My Reviews, Wallet, Referrals, About us, How it works links in both desktop and mobile navigation.
+- : Modified to a 5-step process, with  for job coordinates. Updated to use new trade categories.
+- : **NEW**. Component for tradespeople to set home location and travel distance. Integrated into .
+- : Added optional  field, integrated URL parameter parsing for  codes. Updated to include , , and  fields with validation using new Nigerian lists.
+- : **MODIFIED**. Updated input fields to dropdowns for trade categories and Nigerian states, enhancing job search on the landing page.
+- : **MODIFIED (then reverted)**. Was updated to include a dropdown for trade categories, but then reverted to its original static card display as per user request.
+- : Updated to display access fees and perform wallet balance checks. Includes map/list toggle view, location-based filtering, and  integration. Filter updated with new trades.
+- : Added a link to the new .
+- : **NEW**. Dedicated page displaying company mission, vision, values, and statistics.
+- : **NEW**. Dedicated page outlining ServiceHub's reviews and ratings policy.
+- : **NEW**. Dedicated page explaining ServiceHub's process for both homeowners and tradespeople.
+- : **NEW**. Dedicated page for partnership opportunities, including contact details and various partnership models.
 </code_architecture>
 
 <pending_tasks>
 - Real Notifications: Upgrade from mock email/SMS to real SendGrid/Twilio services.
-- Advanced Features (Analytics, Search, Admin): Develop analytics dashboard, advanced job search and filtering beyond basic location, and further admin functionalities.
-- Production Deployment: Configure Docker files and deployment scripts for Hostinger, and perform the actual deployment.
+- Advanced Features (Analytics, Search, Admin): Develop analytics dashboard, advanced job search and filtering, and further admin functionalities.
+- Production Deployment: Configure Docker files and deployment scripts for , and perform the actual deployment.
 </pending_tasks>
 
 <current_work>
-Immediately prior to this summary request, the AI engineer was implementing the Google Maps integration (Phase 9E). This involved several backend and frontend updates.
-On the backend, models were updated to include ,  for jobs and , ,  for tradesperson profiles. New database methods for distance calculation and location-based job filtering were added. API endpoints for location-based job search () and updating user/tradesperson location/travel distance (, ) were created.
-On the frontend, the Google Maps API key was added to , and  was installed. New components  and  were created. The  was modified to integrate the  for setting job coordinates. The  is actively being updated to include a map/list toggle view, location-based filtering, and to integrate these new map components. The  component was just created to allow tradespeople to configure their home location and travel distance. The backend services were restarted and verified to be running.
+Immediately prior to this summary request, the AI engineer completed a series of feature enhancements driven by user requests. The Google Maps integration was successfully finished, including rendering the , visually verifying map components, and passing backend tests (96.7% success). A critical frontend authentication issue for testing was identified and resolved by creating a test user and re-verifying backend login.
+
+Following this, the system was updated with a comprehensive list of 28 Nigerian trade categories, which involved creating a new backend model (), updating backend  models and routes for validation, and modifying frontend components like , , and . Similarly, 8 specific Nigerian states were integrated, requiring a new backend model (), updates to  (UI for location and postcode), , and state validation in backend  routes.
+
+Several new content pages were created: , , , and . Each page was populated with detailed content, integrated into the  routing, and linked from  and . The About Us page's text formatting was refined for readability, and the Partnership page's contact details were updated to .
+
+Most recently, the user requested an interactive dropdown for trade categories on the landing page. An initial implementation in  was performed but then reverted as it was not what the user intended. The user then clarified the request, explicitly asking for trade category and state dropdowns in the  of the landing page. This was successfully implemented, providing interactive and searchable dropdowns for job categories and states, significantly enhancing the landing page's user experience.
+
+The current work left off with a new user request to further enhance the Post a job form with more granular location fields.
 </current_work>
 
 <optional_next_step>
-Import and use the  in the  component.
+Enhance the Job Posting form to include state, LGA dropdown, town textbox, replace postcode with zip code, and add a home address textbox.
 </optional_next_step>
-
