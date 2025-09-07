@@ -113,6 +113,8 @@ const Footer = () => {
                             navigate('/how-it-works');
                           } else if (link === 'Partnerships') {
                             navigate('/partnerships');
+                          } else if (link === 'Trade Categories') {
+                            navigate('/trade-categories');
                           }
                         }}
                         className="text-gray-300 hover:text-white transition-colors text-sm font-lato cursor-pointer"
