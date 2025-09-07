@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight, TrendingUp, Clock, Shield } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import AuthModal from './auth/AuthModal';
 
 const TradespeopleCTA = () => {
   const { showAuthModal } = useAuth();
