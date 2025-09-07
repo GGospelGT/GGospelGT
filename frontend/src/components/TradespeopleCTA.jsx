@@ -98,6 +98,7 @@ const TradespeopleCTA = () => {
         isOpen={authModalOpen} 
         onClose={() => setAuthModalOpen(false)} 
         defaultMode="signup" 
+        defaultTab="tradesperson"
       />
     </>
   );
