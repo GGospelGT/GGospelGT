@@ -62,7 +62,7 @@ const WalletBalance = ({ showFundButton = true, onFundClick }) => {
               Fund Wallet
             </button>
             <p className="text-xs text-gray-500 mt-1">
-              Min. ₦1,500
+              Any amount
             </p>
           </div>
         )}
