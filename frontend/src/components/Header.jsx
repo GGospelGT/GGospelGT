@@ -63,6 +63,16 @@ const Header = () => {
             >
               Help
             </a>
+            <a 
+              href="#" 
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/contact');
+              }}
+              className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]"
+            >
+              Contact
+            </a>
           </nav>
 
           {/* Desktop Auth Buttons */}
