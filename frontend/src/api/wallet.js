@@ -355,3 +355,16 @@ export const skillsAPI = {
     return response.data;
   }
 };
+
+// Public API for policies (no authentication required)
+export const policiesAPI = {
+  async getAllPolicies() {
+    const response = await apiClient.get('/jobs/policies');
+    return response.data;
+  },
+
+  async getPolicyByType(policyType) {
+    const response = await apiClient.get(`/jobs/policies/${policyType}`);
+    return response.data;
+  }
+};
