@@ -345,6 +345,42 @@ export const adminAPI = {
   async activateScheduledPolicies() {
     const response = await apiClient.post('/admin/policies/activate-scheduled');
     return response.data;
+  },
+
+  // Contact Management Methods
+  async getAllContacts() {
+    const response = await apiClient.get('/admin/contacts');
+    return response.data;
+  },
+
+  async getContactTypes() {
+    const response = await apiClient.get('/admin/contacts/types');
+    return response.data;
+  },
+
+  async getContactById(contactId) {
+    const response = await apiClient.get(`/admin/contacts/${contactId}`);
+    return response.data;
+  },
+
+  async createContact(contactData) {
+    const response = await apiClient.post('/admin/contacts', contactData);
+    return response.data;
+  },
+
+  async updateContact(contactId, contactData) {
+    const response = await apiClient.put(`/admin/contacts/${contactId}`, contactData);
+    return response.data;
+  },
+
+  async deleteContact(contactId) {
+    const response = await apiClient.delete(`/admin/contacts/${contactId}`);
+    return response.data;
+  },
+
+  async initializeDefaultContacts() {
+    const response = await apiClient.post('/admin/contacts/initialize-defaults');
+    return response.data;
   }
 };
 
