@@ -580,7 +580,7 @@ export const skillsTestQuestions = {
   // Add more trade categories: 'Roofing', 'Carpentry', 'Painting', etc.
   // Each should have exactly 20 questions covering technical knowledge, safety, and Nigerian standards
 
-  'Concrete Works': [
+  "Concrete Works": [
     {
       question: "What is the standard concrete mix ratio for structural work in Nigeria?",
       options: ["1:2:4", "1:3:6", "1:2:3", "1:4:8"],
