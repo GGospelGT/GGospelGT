@@ -218,6 +218,23 @@ const AdminDashboard = () => {
     });
   };
 
+  const handleLocationDataLoad = async () => {
+    try {
+      // Load states data for dropdowns
+      const statesData = await adminAPI.getAllStates();
+      setStates(statesData.states || []);
+    } catch (error) {
+      console.error('Failed to load states data:', error);
+    }
+  };
+
+  // Load states data when component mounts and when location tab is active
+  useEffect(() => {
+    if (isLoggedIn && activeTab === 'locations') {
+      handleLocationDataLoad();
+    }
+  }, [isLoggedIn, activeTab]);
+
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gray-50">
