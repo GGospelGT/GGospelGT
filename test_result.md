@@ -191,6 +191,12 @@ frontend:
       - working: true
         agent: "main"
         comment: "✅ INFRASTRUCTURE ISSUE RESOLVED: Fixed Mixed Content Security Error by implementing two-part solution: 1) Created start-frontend.sh script to properly load REACT_APP_BACKEND_URL environment variable into React development server, 2) Updated FastAPI server configuration with redirect_slashes=False to prevent HTTP redirects for trailing slash routes. Console logs now show: ✅ API Configuration correctly loaded with HTTPS URLs, ✅ All API requests successful (/stats, /stats/categories, /reviews/featured), ✅ No Mixed Content Security Errors, ✅ Authentication system accessible. The Show Interest system is now fully functional and ready for end-to-end testing."
+      - working: false
+        agent: "user"
+        comment: "❌ USER REPORTED BUG: Failed to load jobs error appearing on BrowseJobsPage with message 'There was an error loading available jobs. Please try again.' User provided screenshot showing red error message."
+      - working: true
+        agent: "main"
+        comment: "✅ JOBS LOADING BUG FIXED: Root cause identified as incorrect API parameter format in loadJobsBasedOnFilters function. Backend expects 'skip' parameter but frontend was sending 'page' parameter. Fixed by converting page to skip (skip = (page - 1) * 50) for both regular job fetching (/jobs/for-tradesperson) and location-based fetching (/jobs/nearby, /jobs/search). Backend API confirmed working correctly with curl test returning 50 jobs. Frontend should now load jobs properly for authenticated tradespeople."
 
   - task: "Minor Issues Fix - Phase 7 Remaining Issues"
     implemented: true
