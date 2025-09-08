@@ -36,6 +36,16 @@ const AdminDashboard = () => {
   const [selectedTrade, setSelectedTrade] = useState('');
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null);
+  
+  // Policy Management state
+  const [policies, setPolicies] = useState([]);
+  const [policyTypes, setPolicyTypes] = useState([]);
+  const [selectedPolicy, setSelectedPolicy] = useState(null);
+  const [policyHistory, setPolicyHistory] = useState([]);
+  const [showAddPolicy, setShowAddPolicy] = useState(false);
+  const [editingPolicy, setEditingPolicy] = useState(null);
+  const [showPolicyHistory, setShowPolicyHistory] = useState(false);
+  
   const { toast } = useToast();
 
   useEffect(() => {
