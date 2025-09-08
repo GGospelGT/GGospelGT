@@ -615,13 +615,129 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         {errors.idType && <p className="text-red-500 text-sm mt-1">{errors.idType}</p>}
       </div>
 
+      {/* File Upload Section */}
+      {formData.idType && (
+        <div className="space-y-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Upload your {formData.idType === 'nin' ? 'NIN' : formData.idType === 'drivers_licence' ? "Driver's License" : 'Passport'} document
+          </label>
+          <p className="text-sm text-gray-600">
+            Upload a clear photo or scan of your ID document. Accepted formats: JPEG, PNG, WebP, PDF (max 5MB)
+          </p>
+
+          {!formData.idDocument ? (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    handleFileUpload(file);
+                  }
+                }}
+                className="hidden"
+                id="id-document-upload"
+                disabled={isUploading}
+              />
+              <label
+                htmlFor="id-document-upload"
+                className="cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      JPEG, PNG, WebP or PDF up to 5MB
+                    </p>
+                  </div>
+                </div>
+              </label>
+            </div>
+          ) : (
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  {formData.idDocument.type.startsWith('image/') ? (
+                    <img
+                      src={formData.idDocument.url}
+                      alt="ID Document"
+                      className="w-16 h-16 object-cover rounded-lg border"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center">
+                      <FileText className="h-8 w-8 text-red-600" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {formData.idDocument.name}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {(formData.idDocument.size / (1024 * 1024)).toFixed(2)} MB
+                  </p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="text-xs text-green-600">Uploaded successfully</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeUploadedFile}
+                  className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Upload Progress */}
+          {isUploading && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Uploading...</span>
+                <span className="text-gray-600">{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+
+          {errors.idDocument && <p className="text-red-500 text-sm">{errors.idDocument}</p>}
+        </div>
+      )}
+
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex items-start space-x-3">
           <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
           <div>
-            <h4 className="font-medium text-blue-800">Next: Skills Assessment</h4>
-            <p className="text-sm text-blue-700 mt-1">
-              After verifying your identity, you'll take a skills test to demonstrate your expertise in your selected trades. This helps us ensure quality for our customers.
+            <h4 className="font-medium text-blue-800">Security & Privacy</h4>
+            <ul className="text-sm text-blue-700 mt-2 space-y-1">
+              <li>• Your documents are encrypted and stored securely</li>
+              <li>• Only authorized personnel can access your ID for verification</li>
+              <li>• Documents are automatically deleted after verification</li>
+              <li>• We comply with Nigerian data protection regulations</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div className="flex items-start space-x-3">
+          <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+          <div>
+            <h4 className="font-medium text-yellow-800">Next: Skills Assessment</h4>
+            <p className="text-sm text-yellow-700 mt-1">
+              After uploading your ID, you'll take a skills test to demonstrate your expertise in your selected trades. This helps us ensure quality for our customers.
             </p>
           </div>
         </div>
