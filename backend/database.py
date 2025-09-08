@@ -2566,6 +2566,11 @@ class Database:
         try:
             questions = await self.database.skills_questions.find().to_list(length=None)
             
+            # Convert ObjectIds to strings for JSON serialization
+            for question in questions:
+                if '_id' in question:
+                    question['_id'] = str(question['_id'])
+            
             # Group questions by trade
             questions_by_trade = {}
             for question in questions:
@@ -2585,6 +2590,12 @@ class Database:
             questions = await self.database.skills_questions.find(
                 {"trade_category": trade_category}
             ).to_list(length=None)
+            
+            # Convert ObjectIds to strings for JSON serialization
+            for question in questions:
+                if '_id' in question:
+                    question['_id'] = str(question['_id'])
+            
             return questions
         except Exception as e:
             print(f"Error getting questions for trade {trade_category}: {e}")
