@@ -519,7 +519,26 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
           {currentStep === 1 && renderStep1()}
           {currentStep === 2 && renderStep2()}
           {currentStep === 3 && renderStep3()}
-          {currentStep === 4 && <SkillsTest formData={formData} updateFormData={updateFormData} />}
+          {currentStep === 4 && (
+            <SkillsTestComponent 
+              formData={formData} 
+              updateFormData={updateFormData}
+              onTestComplete={(results) => {
+                if (results.passed) {
+                  toast({
+                    title: "Skills Test Passed!",
+                    description: `Congratulations! You scored ${results.overallScore}%. You can now continue with your registration.`,
+                  });
+                } else {
+                  toast({
+                    title: "Skills Test Failed",
+                    description: `You scored ${results.overallScore}%. You need 80% or higher to continue.`,
+                    variant: "destructive"
+                  });
+                }
+              }}
+            />
+          )}
           {currentStep === 5 && <ProfileSetup formData={formData} updateFormData={updateFormData} />}
           {currentStep === 6 && <WalletSetup formData={formData} updateFormData={updateFormData} />}
         </div>
