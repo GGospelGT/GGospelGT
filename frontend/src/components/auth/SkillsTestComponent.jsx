@@ -26,10 +26,12 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
   const [testResults, setTestResults] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Initialize test questions when component mounts
+  // Initialize test questions when component mounts - only for main trade
   useEffect(() => {
     if (formData.selectedTrades && formData.selectedTrades.length > 0) {
-      const questions = getQuestionsForTrades(formData.selectedTrades, 20);
+      // Only test the main trade (first selected trade)
+      const mainTrade = formData.selectedTrades[0];
+      const questions = getQuestionsForTrades([mainTrade], 20);
       setTestQuestions(questions);
     }
   }, [formData.selectedTrades]);
