@@ -88,10 +88,10 @@ const FundWalletModal = ({ isOpen, onClose, onSuccess }) => {
       return;
     }
 
-    if (parseInt(formData.amount_naira) < 1500) {
+    if (parseInt(formData.amount_naira) < 100) {
       toast({
         title: "Invalid Amount",
-        description: "Minimum funding amount is ₦1,500",
+        description: "Minimum funding amount is ₦100",
         variant: "destructive"
       });
       return;
