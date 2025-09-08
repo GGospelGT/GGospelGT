@@ -10,6 +10,20 @@ const TradeCategoriesPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Convert category name to URL slug
+  const categoryToSlug = (categoryName) => {
+    return categoryName.toLowerCase()
+      .replace(/&/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+  };
+
+  // Handle category click
+  const handleCategoryClick = (categoryName) => {
+    const slug = categoryToSlug(categoryName);
+    navigate(`/trade-categories/${slug}`);
+  };
+
   // Nigerian Trade Categories with descriptions and icons
   const tradeCategories = [
     {
