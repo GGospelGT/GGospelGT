@@ -42,7 +42,7 @@ const HelpFAQsPage = () => {
     homeowners: [
       {
         question: "How do I post a job on serviceHub?",
-        answer: "Posting a job is free and easy! Click 'Post a Job' on our homepage, fill out the job details including category, description, budget, and location. You can post without creating an account initially, but you'll need to register to manage your job and contact tradespeople."
+        answer: "Posting a job is completely FREE and easy! Click 'Post a Job' on our homepage, fill out the job details including category, description, budget, and location. You can post without creating an account initially, but you'll need to register to manage your job and communicate with interested tradespeople. Everything is free for homeowners - no charges at any stage."
       },
       {
         question: "How much does it cost to use serviceHub as a homeowner?",
