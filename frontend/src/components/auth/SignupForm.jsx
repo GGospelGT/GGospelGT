@@ -207,6 +207,22 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
     }));
   };
 
+  // Use multi-step registration for tradespeople if enabled
+  if (showMultiStep && (activeTab === 'tradesperson' || showOnlyTradesperson)) {
+    return (
+      <TradespersonRegistration 
+        onClose={onClose}
+        onComplete={(result) => {
+          toast({
+            title: "Registration Complete!",
+            description: "Welcome to ServiceHub! Your application is being reviewed.",
+          });
+          if (onClose) onClose();
+        }}
+      />
+    );
+  }
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader className="text-center">
