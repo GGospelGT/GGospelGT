@@ -22,6 +22,8 @@ import TradeCategoriesPage from "./pages/TradeCategoriesPage";
 import TradeCategoryDetailPage from "./pages/TradeCategoryDetailPage";
 import HelpFAQsPage from "./pages/HelpFAQsPage";
 import ContactUsPage from "./pages/ContactUsPage";
+import JoinForFreePage from "./pages/JoinForFreePage";
+import HelpCentrePage from "./pages/HelpCentrePage";
 import TradespersonRegistrationDemo from "./pages/TradespersonRegistrationDemo";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
