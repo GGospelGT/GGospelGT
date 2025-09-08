@@ -127,7 +127,7 @@ class AccessFeeSystemTester:
             "title": "Test Job for Access Fee Verification",
             "description": "Testing that new jobs have default ₦1000 access fee instead of ₦1500",
             "category": "Plumbing",
-            "location": "Lagos, Lagos State",
+            "location": "Lagos",
             "postcode": "100001",
             "budget_min": 100000,
             "budget_max": 200000,
