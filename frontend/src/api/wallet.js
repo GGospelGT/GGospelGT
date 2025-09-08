@@ -126,5 +126,30 @@ export const adminAPI = {
   // Get payment proof image (admin)
   getPaymentProofUrl(filename) {
     return `${process.env.REACT_APP_BACKEND_URL}/api/admin/wallet/payment-proof/${filename}`;
+  },
+
+  // User Management Methods
+  async getAllUsers(skip = 0, limit = 50, role = null, status = null, search = null) {
+    const params = new URLSearchParams({ skip: skip.toString(), limit: limit.toString() });
+    if (role) params.append('role', role);
+    if (status) params.append('status', status);
+    if (search) params.append('search', search);
+    
+    const response = await apiClient.get(`/admin/users?${params.toString()}`);
+    return response.data;
+  },
+
+  async getUserDetails(userId) {
+    const response = await apiClient.get(`/admin/users/${userId}`);
+    return response.data;
+  },
+
+  async updateUserStatus(userId, status, adminNotes = '') {
+    const formData = new FormData();
+    formData.append('status', status);
+    formData.append('admin_notes', adminNotes);
+    
+    const response = await apiClient.put(`/admin/users/${userId}/status`, formData);
+    return response.data;
   }
 };
