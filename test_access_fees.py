@@ -87,7 +87,7 @@ class AccessFeeSystemTester:
             "email": f"tradesperson.{uuid.uuid4().hex[:8]}@test.com",
             "password": "SecurePass123",
             "phone": "08187654321",
-            "location": "Lagos, Lagos State",
+            "location": "Lagos",
             "postcode": "100001",
             "trade_categories": ["Plumbing"],
             "experience_years": 5,
