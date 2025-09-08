@@ -197,10 +197,28 @@ const HelpFAQsPage = () => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
   };
 
-  const filteredFAQs = faqData[activeCategory]?.filter(faq =>
-    faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredFAQs = faqData[activeCategory]?.filter(faq => {
+    // First filter by search query
+    const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (!matchesSearch) return false;
+    
+    // Then filter by role for specific questions
+    if (activeCategory === 'tradespeople') {
+      const tradespeopleOnlyQuestions = [
+        "How much does it cost to use serviceHub as a tradesperson?",
+        "How do I add funds to my wallet?"
+      ];
+      
+      // If it's a tradespeople-only question and user is not an authenticated tradesperson, hide it
+      if (tradespeopleOnlyQuestions.includes(faq.question) && !(isAuthenticated() && isTradesperson())) {
+        return false;
+      }
+    }
+    
+    return true;
+  }) || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
