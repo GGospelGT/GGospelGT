@@ -1455,6 +1455,485 @@ const AdminDashboard = () => {
                 </div>
               )}
 
+              {/* Policy Management Tab */}
+              {activeTab === 'policies' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold">Policy Management</h2>
+                    <button
+                      onClick={fetchData}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+
+                  {/* Policy Overview */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h3 className="text-lg font-semibold text-gray-800">Total Policies</h3>
+                      <p className="text-3xl font-bold text-blue-600">
+                        {policies.length}
+                      </p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h3 className="text-lg font-semibold text-gray-800">Active Policies</h3>
+                      <p className="text-3xl font-bold text-green-600">
+                        {policies.filter(p => p.status === 'active').length}
+                      </p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h3 className="text-lg font-semibold text-gray-800">Scheduled Policies</h3>
+                      <p className="text-3xl font-bold text-orange-600">
+                        {policies.filter(p => p.status === 'scheduled').length}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Add New Policy Button */}
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Manage Policies</h3>
+                    <button
+                      onClick={() => setShowAddPolicy(true)}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
+                    >
+                      Add New Policy
+                    </button>
+                  </div>
+
+                  {/* Add Policy Form */}
+                  {showAddPolicy && (
+                    <div className="bg-white p-6 rounded-lg border">
+                      <h4 className="text-lg font-semibold mb-4">Add New Policy</h4>
+                      <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        const policyData = {
+                          policy_type: formData.get('policy_type'),
+                          title: formData.get('title'),
+                          content: formData.get('content'),
+                          effective_date: formData.get('effective_date') || null,
+                          notes: formData.get('notes') || ''
+                        };
+                        
+                        try {
+                          await adminAPI.createPolicy(policyData);
+                          toast({ title: "Policy created successfully" });
+                          setShowAddPolicy(false);
+                          fetchData();
+                        } catch (error) {
+                          toast({ title: "Failed to create policy", variant: "destructive" });
+                        }
+                      }}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Policy Type
+                            </label>
+                            <select
+                              name="policy_type"
+                              required
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="">Select policy type</option>
+                              {policyTypes.map((type) => (
+                                <option key={type.value} value={type.value}>
+                                  {type.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Effective Date (Optional)
+                            </label>
+                            <input
+                              type="datetime-local"
+                              name="effective_date"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        </div>
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Policy Title
+                          </label>
+                          <input
+                            type="text"
+                            name="title"
+                            required
+                            minLength="5"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., Privacy Policy for ServiceHub"
+                          />
+                        </div>
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Policy Content
+                          </label>
+                          <textarea
+                            name="content"
+                            required
+                            minLength="50"
+                            rows="10"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                            placeholder="Enter the complete policy content in plain text..."
+                          />
+                        </div>
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Admin Notes (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            name="notes"
+                            maxLength="500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="Internal notes about this policy update..."
+                          />
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            type="submit"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+                          >
+                            Create Policy
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowAddPolicy(false)}
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
+                  {/* Policies List */}
+                  {loading ? (
+                    <div className="space-y-2">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="bg-white p-4 rounded-lg animate-pulse">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-lg border overflow-hidden">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Policy Details
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status & Version
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Dates
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {policies.map((policy, index) => (
+                            <tr key={policy.id || index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {policy.title}
+                                  </div>
+                                  <div className="text-sm text-gray-500 capitalize">
+                                    {(policy.policy_type || '').replace('_', ' ')}
+                                  </div>
+                                  {policy.notes && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      📝 {policy.notes}
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex flex-col">
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                    policy.status === 'active' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : policy.status === 'scheduled'
+                                      ? 'bg-orange-100 text-orange-800'
+                                      : policy.status === 'draft'
+                                      ? 'bg-gray-100 text-gray-800'
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    {policy.status}
+                                  </span>
+                                  <span className="text-xs text-gray-500 mt-1">
+                                    v{policy.version} {policy.has_history && `(${policy.total_versions} total)`}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <div className="space-y-1">
+                                  <div>Created: {new Date(policy.created_at).toLocaleDateString()}</div>
+                                  {policy.effective_date && (
+                                    <div>Effective: {new Date(policy.effective_date).toLocaleDateString()}</div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div className="flex space-x-2">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedPolicy(policy);
+                                      setEditingPolicy({
+                                        id: policy.id,
+                                        title: policy.title,
+                                        content: policy.content,
+                                        notes: policy.notes || ''
+                                      });
+                                    }}
+                                    className="text-blue-600 hover:text-blue-900"
+                                  >
+                                    Edit
+                                  </button>
+                                  {policy.has_history && (
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          const historyData = await adminAPI.getPolicyHistory(policy.policy_type);
+                                          setPolicyHistory(historyData.history || []);
+                                          setSelectedPolicy(policy);
+                                          setShowPolicyHistory(true);
+                                        } catch (error) {
+                                          toast({ title: "Failed to load policy history", variant: "destructive" });
+                                        }
+                                      }}
+                                      className="text-purple-600 hover:text-purple-900"
+                                    >
+                                      History
+                                    </button>
+                                  )}
+                                  {policy.status === 'draft' && (
+                                    <button
+                                      onClick={async () => {
+                                        if (window.confirm(`Delete draft policy "${policy.title}"?`)) {
+                                          try {
+                                            await adminAPI.deletePolicy(policy.id);
+                                            toast({ title: "Policy deleted successfully" });
+                                            fetchData();
+                                          } catch (error) {
+                                            toast({ title: "Failed to delete policy", variant: "destructive" });
+                                          }
+                                        }
+                                      }}
+                                      className="text-red-600 hover:text-red-900"
+                                    >
+                                      Delete
+                                    </button>
+                                  )}
+                                  {policy.status !== 'archived' && (
+                                    <button
+                                      onClick={async () => {
+                                        if (window.confirm(`Archive policy "${policy.title}"?`)) {
+                                          try {
+                                            await adminAPI.archivePolicy(policy.id);
+                                            toast({ title: "Policy archived successfully" });
+                                            fetchData();
+                                          } catch (error) {
+                                            toast({ title: "Failed to archive policy", variant: "destructive" });
+                                          }
+                                        }
+                                      }}
+                                      className="text-yellow-600 hover:text-yellow-900"
+                                    >
+                                      Archive
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      
+                      {policies.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          No policies found. Click "Add New Policy" to create your first policy.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Edit Policy Modal */}
+                  {editingPolicy && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                      <div className="bg-white p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                        <h4 className="text-lg font-semibold mb-4">Edit Policy</h4>
+                        <form onSubmit={async (e) => {
+                          e.preventDefault();
+                          const formData = new FormData(e.target);
+                          const policyData = {
+                            title: formData.get('title'),
+                            content: formData.get('content'),
+                            effective_date: formData.get('effective_date') || null,
+                            notes: formData.get('notes') || ''
+                          };
+                          
+                          try {
+                            await adminAPI.updatePolicy(editingPolicy.id, policyData);
+                            toast({ title: "Policy updated successfully" });
+                            setEditingPolicy(null);
+                            fetchData();
+                          } catch (error) {
+                            toast({ title: "Failed to update policy", variant: "destructive" });
+                          }
+                        }}>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Policy Title
+                              </label>
+                              <input
+                                type="text"
+                                name="title"
+                                required
+                                minLength="5"
+                                defaultValue={editingPolicy.title}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Effective Date (Optional)
+                              </label>
+                              <input
+                                type="datetime-local"
+                                name="effective_date"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+                          <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Policy Content
+                            </label>
+                            <textarea
+                              name="content"
+                              required
+                              minLength="50"
+                              rows="15"
+                              defaultValue={editingPolicy.content}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                            />
+                          </div>
+                          <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Admin Notes (Optional)
+                            </label>
+                            <input
+                              type="text"
+                              name="notes"
+                              maxLength="500"
+                              defaultValue={editingPolicy.notes}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              type="submit"
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+                            >
+                              Update Policy
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingPolicy(null)}
+                              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Policy History Modal */}
+                  {showPolicyHistory && selectedPolicy && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                      <div className="bg-white p-6 rounded-lg max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="text-lg font-semibold">
+                            Policy History: {selectedPolicy.title}
+                          </h4>
+                          <button
+                            onClick={() => {
+                              setShowPolicyHistory(false);
+                              setSelectedPolicy(null);
+                              setPolicyHistory([]);
+                            }}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          {policyHistory.map((version, index) => (
+                            <div key={index} className="border rounded-lg p-4">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <h5 className="font-medium">Version {version.version}</h5>
+                                  <p className="text-sm text-gray-500">
+                                    Created by {version.created_by} on {new Date(version.created_at).toLocaleDateString()}
+                                  </p>
+                                  {version.effective_date && (
+                                    <p className="text-sm text-gray-500">
+                                      Effective: {new Date(version.effective_date).toLocaleDateString()}
+                                    </p>
+                                  )}
+                                </div>
+                                <button
+                                  onClick={async () => {
+                                    if (window.confirm(`Restore version ${version.version}? This will create a new active version.`)) {
+                                      try {
+                                        await adminAPI.restorePolicyVersion(selectedPolicy.policy_type, version.version);
+                                        toast({ title: `Version ${version.version} restored successfully` });
+                                        setShowPolicyHistory(false);
+                                        fetchData();
+                                      } catch (error) {
+                                        toast({ title: "Failed to restore version", variant: "destructive" });
+                                      }
+                                    }
+                                  }}
+                                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                                >
+                                  Restore
+                                </button>
+                              </div>
+                              <div className="text-sm">
+                                <p className="font-medium mb-1">{version.title}</p>
+                                <div className="bg-gray-50 p-3 rounded text-xs font-mono max-h-40 overflow-y-auto">
+                                  {version.content.substring(0, 500)}
+                                  {version.content.length > 500 && '...'}
+                                </div>
+                                {version.notes && (
+                                  <p className="text-gray-600 mt-2">Notes: {version.notes}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Stats Tab */}
               {activeTab === 'stats' && (
                 <div className="space-y-6">
