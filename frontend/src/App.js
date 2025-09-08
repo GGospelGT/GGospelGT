@@ -54,6 +54,7 @@ function App() {
             <Route path="/trade-categories/:categorySlug" element={<TradeCategoryDetailPage />} />
             <Route path="/help" element={<HelpFAQsPage />} />
             <Route path="/contact" element={<ContactUsPage />} />
+            <Route path="/tradesperson-registration-demo" element={<TradespersonRegistrationDemo />} />
           </Routes>
           <Toaster />
         </BrowserRouter>
