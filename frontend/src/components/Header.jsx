@@ -340,47 +340,14 @@ const Header = () => {
         )}
       </div>
       
-      {/* Working Auth Modal */}
-      {authModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-8 rounded-lg max-w-md w-full mx-4 shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">
-                {authMode === 'login' ? 'Sign In' : 'Join serviceHub'}
-              </h2>
-              <button 
-                onClick={() => setAuthModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="space-y-4">
-              <input 
-                type="email" 
-                placeholder="Email Address" 
-                className="w-full p-3 border rounded-lg"
-              />
-              <input 
-                type="password" 
-                placeholder="Password" 
-                className="w-full p-3 border rounded-lg"
-              />
-              <button className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700">
-                {authMode === 'login' ? 'Sign In' : 'Join serviceHub'}
-              </button>
-              <div className="text-center mt-4">
-                <button 
-                  onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-                  className="text-green-600 hover:text-green-700 text-sm"
-                >
-                  {authMode === 'login' ? "Don't have an account? Join now" : "Already have an account? Sign in"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)}
+        defaultMode={authMode}
+        defaultTab="tradesperson"
+        showOnlyTradesperson={true}
+      />
     </header>
   );
 };
