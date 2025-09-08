@@ -93,6 +93,10 @@ class Job(BaseModel):
     quotes_count: int = 0
     interests_count: int = 0  # Add interests count field
     
+    # Access fee fields (now part of every job)
+    access_fee_naira: Optional[int] = 1000  # Default ₦1000 (flexible)
+    access_fee_coins: Optional[int] = 10    # Default 10 coins
+    
     # Location fields
     latitude: Optional[float] = None           # Job location latitude
     longitude: Optional[float] = None          # Job location longitude
