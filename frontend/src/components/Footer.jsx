@@ -101,6 +101,9 @@ const Footer = () => {
                     <a
                       key={index}
                       href={social.href}
+                      target={social.href !== '#' ? '_blank' : '_self'}
+                      rel={social.href !== '#' ? 'noopener noreferrer' : undefined}
+                      title={social.label}
                       className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-[#2F8140] transition-colors"
                     >
                       <IconComponent size={16} />
