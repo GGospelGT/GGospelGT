@@ -424,6 +424,48 @@ async def get_public_policy(policy_type: str):
         logger.error(f"Error getting public policy {policy_type}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get policy: {str(e)}")
 
+# Public Contact Endpoints (no authentication required)
+@router.get("/contacts")
+async def get_public_contacts():
+    """Get all active contacts for public display (footer, contact page, etc.)"""
+    try:
+        contacts = await database.get_public_contacts()
+        
+        return {
+            'contacts': contacts
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting public contacts: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get contacts: {str(e)}")
+
+@router.get("/contacts/{contact_type}")
+async def get_public_contacts_by_type(contact_type: str):
+    """Get contacts of specific type for public display"""
+    try:
+        contacts = await database.get_contacts_by_type(contact_type)
+        
+        # Format for public consumption
+        public_contacts = []
+        for contact in contacts:
+            public_contacts.append({
+                'label': contact.get('label'),
+                'value': contact.get('value'),
+                'display_order': contact.get('display_order', 0)
+            })
+        
+        # Sort by display order
+        public_contacts.sort(key=lambda x: x['display_order'])
+        
+        return {
+            'contact_type': contact_type,
+            'contacts': public_contacts
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting public contacts for type {contact_type}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get contacts: {str(e)}")
+
 @router.get("/{job_id}", response_model=Job)
 async def get_job(job_id: str):
     """Get a specific job by ID"""
