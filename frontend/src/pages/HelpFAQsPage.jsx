@@ -10,13 +10,24 @@ const HelpFAQsPage = () => {
   const [activeCategory, setActiveCategory] = useState('general');
   const [expandedFAQ, setExpandedFAQ] = useState(null);
 
-  const categories = [
-    { id: 'general', name: 'General', icon: HelpCircle },
-    { id: 'homeowners', name: 'For Homeowners', icon: Briefcase },
-    { id: 'tradespeople', name: 'For Tradespeople', icon: Users },
-    { id: 'payments', name: 'Payments & Wallet', icon: Wallet },
-    { id: 'account', name: 'Account & Security', icon: Shield }
-  ];
+  // Filter categories based on user role
+  const getVisibleCategories = () => {
+    const baseCategories = [
+      { id: 'general', name: 'General', icon: HelpCircle },
+      { id: 'homeowners', name: 'For Homeowners', icon: Briefcase },
+      { id: 'tradespeople', name: 'For Tradespeople', icon: Users },
+      { id: 'account', name: 'Account & Security', icon: Shield }
+    ];
+
+    // Only show Payments & Wallet to authenticated tradespeople
+    if (isAuthenticated() && isTradesperson()) {
+      baseCategories.splice(3, 0, { id: 'payments', name: 'Payments & Wallet', icon: Wallet });
+    }
+
+    return baseCategories;
+  };
+
+  const categories = getVisibleCategories();
 
   const faqData = {
     general: [
