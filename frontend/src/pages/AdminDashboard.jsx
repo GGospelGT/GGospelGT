@@ -77,6 +77,10 @@ const AdminDashboard = () => {
           setTrades(data.trades || []);
           setTradeGroups(data.groups || []);
         }
+      } else if (activeTab === 'questions') {
+        const data = await adminAPI.getAllSkillsQuestions();
+        setSkillsQuestions(data.questions || {});
+        setQuestionStats(data.stats || {});
       } else if (activeTab === 'stats') {
         const data = await adminAPI.getDashboardStats();
         setStats(data);
