@@ -134,6 +134,8 @@ const Footer = () => {
                             navigate('/partnerships');
                           } else if (link === 'Trade Categories') {
                             navigate('/trade-categories');
+                          } else if (link === 'Help & FAQs') {
+                            navigate('/help');
                           }
                         }}
                         className="text-gray-300 hover:text-white transition-colors text-sm font-lato cursor-pointer"
