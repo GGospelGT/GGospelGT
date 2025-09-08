@@ -2613,14 +2613,14 @@ class Database:
                 "category": question_data.get('category', 'General'),
                 "explanation": question_data.get('explanation', ''),
                 "difficulty": question_data.get('difficulty', 'Medium'),
-                "created_at": datetime.now(),
-                "updated_at": datetime.now(),
+                "created_at": datetime.now().isoformat(),
+                "updated_at": datetime.now().isoformat(),
                 "created_by": "admin",
                 "is_active": True
             }
             
             result = await self.database.skills_questions.insert_one(question_doc)
-            return str(result.inserted_id) if result.inserted_id else None
+            return question_doc['id']  # Return the UUID instead of ObjectId
         except Exception as e:
             print(f"Error adding skills question: {e}")
             return None
@@ -2635,7 +2635,7 @@ class Database:
                 "category": question_data.get('category', 'General'),
                 "explanation": question_data.get('explanation', ''),
                 "difficulty": question_data.get('difficulty', 'Medium'),
-                "updated_at": datetime.now()
+                "updated_at": datetime.now().isoformat()
             }
             
             result = await self.database.skills_questions.update_one(
