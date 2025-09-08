@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Eye, EyeOff, User, Mail, Lock, Phone, MapPin, AlertCircle, Home, Wrench, Hash } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
+import TradespersonRegistration from './TradespersonRegistration';
 
 const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', showOnlyTradesperson = true }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
