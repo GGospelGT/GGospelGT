@@ -24,7 +24,7 @@ const HelpFAQsPage = () => {
       },
       {
         question: "How does serviceHub work?",
-        answer: "It's simple! Homeowners post their job requirements for free, and qualified tradespeople can show interest in the job. Homeowners can then review profiles, ratings, and choose the best professional for their needs. Payment is only required when accessing contact details of interested tradespeople."
+        answer: "It's simple and FREE for homeowners! Post your job requirements for free, and qualified tradespeople can show interest in your job. You can then review their profiles, ratings, portfolios, and choose the best professional for your needs. Contact details and communication are completely free - no hidden charges for homeowners."
       },
       {
         question: "Is serviceHub available across Nigeria?",
