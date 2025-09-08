@@ -46,6 +46,13 @@ const AdminDashboard = () => {
   const [editingPolicy, setEditingPolicy] = useState(null);
   const [showPolicyHistory, setShowPolicyHistory] = useState(false);
   
+  // Contact Management state
+  const [contacts, setContacts] = useState([]);
+  const [contactTypes, setContactTypes] = useState([]);
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [editingContact, setEditingContact] = useState(null);
+  
   const { toast } = useToast();
 
   useEffect(() => {
