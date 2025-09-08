@@ -5231,6 +5231,27 @@ class BackendTester:
             self.log_result("Search jobs (text only)", False, 
                            f"Status: {response.status_code}")
     
+    def print_final_results(self):
+        """Print comprehensive test results"""
+        print("\n" + "=" * 80)
+        print("🏁 JOB LOADING API TESTING COMPLETE")
+        print("=" * 80)
+        
+        total_tests = self.results['passed'] + self.results['failed']
+        success_rate = (self.results['passed'] / total_tests * 100) if total_tests > 0 else 0
+        
+        print(f"📊 FINAL RESULTS:")
+        print(f"   ✅ Passed: {self.results['passed']}")
+        print(f"   ❌ Failed: {self.results['failed']}")
+        print(f"   📈 Success Rate: {success_rate:.1f}%")
+        
+        if self.results['errors']:
+            print(f"\n❌ FAILED TESTS:")
+            for error in self.results['errors']:
+                print(f"   • {error}")
+        
+        print("\n" + "=" * 80)
+
     def run_job_loading_tests(self):
         """Run only the job loading API tests"""
         print("🚀 Starting Job Loading API Testing Suite")
