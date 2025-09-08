@@ -167,9 +167,9 @@ const FundWalletModal = ({ isOpen, onClose, onSuccess }) => {
                 name="amount_naira"
                 value={formData.amount_naira}
                 onChange={handleInputChange}
-                min="1500"
+                min="100"
                 step="100"
-                placeholder="Enter amount (min. ₦1,500)"
+                placeholder="Enter amount (min. ₦100)"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
               />
