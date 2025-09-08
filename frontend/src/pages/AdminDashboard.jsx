@@ -418,8 +418,8 @@ const AdminDashboard = () => {
                                   <div className="flex space-x-2">
                                     <input
                                       type="number"
-                                      min="1500"
-                                      max="5000"
+                                      min="1"
+                                      max="10000"
                                       defaultValue={job.access_fee_naira}
                                       className="w-20 px-2 py-1 border rounded text-sm"
                                       onKeyPress={(e) => {
