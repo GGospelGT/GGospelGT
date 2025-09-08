@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime, timedelta
 
 # Get backend URL from environment
-BACKEND_URL = "https://servicepro-ng.preview.emergentagent.com/api"
+BACKEND_URL = "https://tradehub-ng.preview.emergentagent.com/api"
 
 class EnhancedJobPostingTester:
     def __init__(self):

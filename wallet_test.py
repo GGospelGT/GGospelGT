@@ -14,7 +14,7 @@ import io
 from PIL import Image
 
 # Get backend URL from environment
-BACKEND_URL = "https://servicepro-ng.preview.emergentagent.com/api"
+BACKEND_URL = "https://tradehub-ng.preview.emergentagent.com/api"
 
 class WalletSystemTester:
     def __init__(self):
