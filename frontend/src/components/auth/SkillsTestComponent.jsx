@@ -140,21 +140,17 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
   };
 
   const getTotalQuestions = () => {
-    return Object.values(testQuestions).reduce((total, questions) => total + questions.length, 0);
+    const mainTrade = formData.selectedTrades[0];
+    return testQuestions[mainTrade]?.length || 0;
   };
 
   const getCurrentQuestionNumber = () => {
-    let questionNumber = 1;
-    for (let i = 0; i < currentTrade; i++) {
-      questionNumber += testQuestions[formData.selectedTrades[i]]?.length || 0;
-    }
-    questionNumber += currentQuestion;
-    return questionNumber;
+    return currentQuestion + 1;
   };
 
   const getCurrentAnswer = () => {
-    const tradeKey = formData.selectedTrades[currentTrade];
-    const questionKey = `${tradeKey}_${currentQuestion}`;
+    const mainTrade = formData.selectedTrades[0];
+    const questionKey = `${mainTrade}_${currentQuestion}`;
     return answers[questionKey];
   };
 
