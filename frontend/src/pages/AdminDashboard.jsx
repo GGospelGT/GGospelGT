@@ -54,6 +54,22 @@ const AdminDashboard = () => {
         const data = await adminAPI.getAllUsers();
         setUsers(data.users || []);
         setUserStats(data.stats || {});
+      } else if (activeTab === 'locations') {
+        // Load location and trade data based on active sub-tab
+        if (activeLocationTab === 'states') {
+          const data = await adminAPI.getAllStates();
+          setStates(data.states || []);
+        } else if (activeLocationTab === 'lgas') {
+          const data = await adminAPI.getAllLGAs();
+          setLgas(data.lgas || {});
+        } else if (activeLocationTab === 'towns') {
+          const data = await adminAPI.getAllTowns();
+          setTowns(data.towns || {});
+        } else if (activeLocationTab === 'trades') {
+          const data = await adminAPI.getAllTrades();
+          setTrades(data.trades || []);
+          setTradeGroups(data.groups || []);
+        }
       } else if (activeTab === 'stats') {
         const data = await adminAPI.getDashboardStats();
         setStats(data);
