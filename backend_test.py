@@ -4857,6 +4857,331 @@ class BackendTester:
         else:
             self.log_result("Combined role and status filtering", False, f"Status: {response.status_code}")
 
+    def test_admin_location_trades_management(self):
+        """Test comprehensive Admin Location & Trades Management functionality"""
+        print("\n=== Testing Admin Location & Trades Management System ===")
+        
+        # Test 1: Admin Authentication
+        admin_credentials = {
+            "username": "admin",
+            "password": "servicehub2024"
+        }
+        
+        response = self.make_request("POST", "/admin/login", data=admin_credentials)
+        if response.status_code == 200:
+            admin_response = response.json()
+            if "admin" in admin_response and admin_response["admin"]["role"] == "admin":
+                self.log_result("Admin authentication", True, "Admin login successful")
+                admin_token = admin_response.get("token", "admin_token_placeholder")
+            else:
+                self.log_result("Admin authentication", False, "Invalid admin response")
+                return
+        else:
+            self.log_result("Admin authentication", False, f"Status: {response.status_code}, Response: {response.text}")
+            return
+        
+        # Test 2: Get All Nigerian States
+        response = self.make_request("GET", "/admin/locations/states")
+        if response.status_code == 200:
+            states_data = response.json()
+            if "states" in states_data and isinstance(states_data["states"], list):
+                states_count = len(states_data["states"])
+                self.log_result("Get all Nigerian states", True, f"Found {states_count} states")
+                
+                # Verify some expected Nigerian states
+                states_list = states_data["states"]
+                expected_states = ["Lagos", "Abuja", "Rivers State", "Delta"]
+                found_states = [state for state in expected_states if state in states_list]
+                if len(found_states) >= 3:
+                    self.log_result("Nigerian states validation", True, f"Found expected states: {found_states}")
+                else:
+                    self.log_result("Nigerian states validation", False, f"Missing expected states, found: {found_states}")
+            else:
+                self.log_result("Get all Nigerian states", False, "Invalid response structure")
+        else:
+            self.log_result("Get all Nigerian states", False, f"Status: {response.status_code}")
+        
+        # Test 3: Add New State
+        new_state_data = {
+            "state_name": "Test State",
+            "region": "Test Region",
+            "postcode_samples": "123456,654321"
+        }
+        
+        response = self.make_request("POST", "/admin/locations/states", data=new_state_data)
+        if response.status_code == 200:
+            add_response = response.json()
+            if add_response.get("state_name") == "Test State":
+                self.log_result("Add new state", True, "Test State added successfully")
+            else:
+                self.log_result("Add new state", False, "State name mismatch in response")
+        else:
+            self.log_result("Add new state", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 4: Update State
+        update_state_data = {
+            "new_name": "Updated Test State",
+            "region": "Updated Region",
+            "postcode_samples": "111111,222222"
+        }
+        
+        response = self.make_request("PUT", "/admin/locations/states/Test State", data=update_state_data)
+        if response.status_code == 200:
+            update_response = response.json()
+            if update_response.get("new_name") == "Updated Test State":
+                self.log_result("Update state", True, "State updated successfully")
+            else:
+                self.log_result("Update state", False, "State update failed")
+        else:
+            self.log_result("Update state", False, f"Status: {response.status_code}")
+        
+        # Test 5: Get All LGAs
+        response = self.make_request("GET", "/admin/locations/lgas")
+        if response.status_code == 200:
+            lgas_data = response.json()
+            if "lgas" in lgas_data and isinstance(lgas_data["lgas"], dict):
+                total_lgas = sum(len(lgas) for lgas in lgas_data["lgas"].values())
+                self.log_result("Get all LGAs", True, f"Found LGAs for {len(lgas_data['lgas'])} states, total: {total_lgas}")
+            else:
+                self.log_result("Get all LGAs", False, "Invalid LGAs response structure")
+        else:
+            self.log_result("Get all LGAs", False, f"Status: {response.status_code}")
+        
+        # Test 6: Get LGAs for Specific State (Lagos)
+        response = self.make_request("GET", "/admin/locations/lgas/Lagos")
+        if response.status_code == 200:
+            lagos_lgas = response.json()
+            if "lgas" in lagos_lgas and isinstance(lagos_lgas["lgas"], list):
+                lgas_count = len(lagos_lgas["lgas"])
+                self.log_result("Get Lagos LGAs", True, f"Found {lgas_count} LGAs for Lagos")
+                
+                # Verify some expected Lagos LGAs
+                expected_lgas = ["Ikeja", "Victoria Island", "Surulere", "Alimosho"]
+                found_lgas = [lga for lga in expected_lgas if lga in lagos_lgas["lgas"]]
+                if len(found_lgas) >= 2:
+                    self.log_result("Lagos LGAs validation", True, f"Found expected LGAs: {found_lgas}")
+                else:
+                    self.log_result("Lagos LGAs validation", False, f"Missing expected LGAs, found: {found_lgas}")
+            else:
+                self.log_result("Get Lagos LGAs", False, "Invalid Lagos LGAs response")
+        else:
+            self.log_result("Get Lagos LGAs", False, f"Status: {response.status_code}")
+        
+        # Test 7: Add New LGA
+        new_lga_data = {
+            "state_name": "Lagos",
+            "lga_name": "Test LGA",
+            "zip_codes": "100001,100002"
+        }
+        
+        response = self.make_request("POST", "/admin/locations/lgas", data=new_lga_data)
+        if response.status_code == 200:
+            add_lga_response = response.json()
+            if add_lga_response.get("lga") == "Test LGA" and add_lga_response.get("state") == "Lagos":
+                self.log_result("Add new LGA", True, "Test LGA added to Lagos successfully")
+            else:
+                self.log_result("Add new LGA", False, "LGA addition response mismatch")
+        else:
+            self.log_result("Add new LGA", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 8: Update LGA
+        update_lga_data = {
+            "new_name": "Updated Test LGA",
+            "zip_codes": "100003,100004"
+        }
+        
+        response = self.make_request("PUT", "/admin/locations/lgas/Lagos/Test LGA", data=update_lga_data)
+        if response.status_code == 200:
+            update_lga_response = response.json()
+            if update_lga_response.get("new_name") == "Updated Test LGA":
+                self.log_result("Update LGA", True, "LGA updated successfully")
+            else:
+                self.log_result("Update LGA", False, "LGA update failed")
+        else:
+            self.log_result("Update LGA", False, f"Status: {response.status_code}")
+        
+        # Test 9: Get All Towns
+        response = self.make_request("GET", "/admin/locations/towns")
+        if response.status_code == 200:
+            towns_data = response.json()
+            if "towns" in towns_data:
+                self.log_result("Get all towns", True, "Towns data retrieved successfully")
+            else:
+                self.log_result("Get all towns", False, "Invalid towns response structure")
+        else:
+            self.log_result("Get all towns", False, f"Status: {response.status_code}")
+        
+        # Test 10: Add New Town
+        new_town_data = {
+            "state_name": "Lagos",
+            "lga_name": "Ikeja",
+            "town_name": "Test Town",
+            "zip_code": "100005"
+        }
+        
+        response = self.make_request("POST", "/admin/locations/towns", data=new_town_data)
+        if response.status_code == 200:
+            add_town_response = response.json()
+            if add_town_response.get("town") == "Test Town":
+                self.log_result("Add new town", True, "Test Town added successfully")
+            else:
+                self.log_result("Add new town", False, "Town addition response mismatch")
+        else:
+            self.log_result("Add new town", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 11: Get All Trade Categories
+        response = self.make_request("GET", "/admin/trades")
+        if response.status_code == 200:
+            trades_data = response.json()
+            if "trades" in trades_data and "groups" in trades_data:
+                trades_count = len(trades_data["trades"])
+                groups_count = len(trades_data["groups"])
+                self.log_result("Get all trade categories", True, f"Found {trades_count} trades in {groups_count} groups")
+                
+                # Verify some expected trade categories
+                expected_trades = ["Plumbing", "Electrical Repairs", "Tiling", "Building"]
+                found_trades = [trade for trade in expected_trades if trade in trades_data["trades"]]
+                if len(found_trades) >= 3:
+                    self.log_result("Trade categories validation", True, f"Found expected trades: {found_trades}")
+                else:
+                    self.log_result("Trade categories validation", False, f"Missing expected trades, found: {found_trades}")
+            else:
+                self.log_result("Get all trade categories", False, "Invalid trades response structure")
+        else:
+            self.log_result("Get all trade categories", False, f"Status: {response.status_code}")
+        
+        # Test 12: Add New Trade Category
+        new_trade_data = {
+            "trade_name": "Test Trade Category",
+            "group": "Test Services",
+            "description": "Test trade category for testing purposes"
+        }
+        
+        response = self.make_request("POST", "/admin/trades", data=new_trade_data)
+        if response.status_code == 200:
+            add_trade_response = response.json()
+            if add_trade_response.get("trade_name") == "Test Trade Category":
+                self.log_result("Add new trade category", True, "Test Trade Category added successfully")
+            else:
+                self.log_result("Add new trade category", False, "Trade addition response mismatch")
+        else:
+            self.log_result("Add new trade category", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 13: Update Trade Category
+        update_trade_data = {
+            "new_name": "Updated Test Trade",
+            "group": "Updated Services",
+            "description": "Updated test trade category"
+        }
+        
+        response = self.make_request("PUT", "/admin/trades/Test Trade Category", data=update_trade_data)
+        if response.status_code == 200:
+            update_trade_response = response.json()
+            if update_trade_response.get("new_name") == "Updated Test Trade":
+                self.log_result("Update trade category", True, "Trade category updated successfully")
+            else:
+                self.log_result("Update trade category", False, "Trade update failed")
+        else:
+            self.log_result("Update trade category", False, f"Status: {response.status_code}")
+        
+        # Test 14: Validation Tests - Empty Names
+        empty_state_data = {"state_name": "", "region": "Test"}
+        response = self.make_request("POST", "/admin/locations/states", data=empty_state_data)
+        if response.status_code == 400:
+            self.log_result("Empty state name validation", True, "Correctly rejected empty state name")
+        else:
+            self.log_result("Empty state name validation", False, f"Expected 400, got {response.status_code}")
+        
+        empty_lga_data = {"state_name": "Lagos", "lga_name": "", "zip_codes": "100001"}
+        response = self.make_request("POST", "/admin/locations/lgas", data=empty_lga_data)
+        if response.status_code == 400:
+            self.log_result("Empty LGA name validation", True, "Correctly rejected empty LGA name")
+        else:
+            self.log_result("Empty LGA name validation", False, f"Expected 400, got {response.status_code}")
+        
+        empty_trade_data = {"trade_name": "", "group": "Test"}
+        response = self.make_request("POST", "/admin/trades", data=empty_trade_data)
+        if response.status_code == 400:
+            self.log_result("Empty trade name validation", True, "Correctly rejected empty trade name")
+        else:
+            self.log_result("Empty trade name validation", False, f"Expected 400, got {response.status_code}")
+        
+        # Test 15: Error Handling - Non-existent Items
+        response = self.make_request("PUT", "/admin/locations/states/NonExistentState", 
+                                   data={"new_name": "Test"})
+        if response.status_code == 404:
+            self.log_result("Non-existent state update", True, "Correctly returned 404 for non-existent state")
+        else:
+            self.log_result("Non-existent state update", False, f"Expected 404, got {response.status_code}")
+        
+        response = self.make_request("DELETE", "/admin/locations/lgas/Lagos/NonExistentLGA")
+        if response.status_code == 404:
+            self.log_result("Non-existent LGA deletion", True, "Correctly returned 404 for non-existent LGA")
+        else:
+            self.log_result("Non-existent LGA deletion", False, f"Expected 404, got {response.status_code}")
+        
+        response = self.make_request("DELETE", "/admin/trades/NonExistentTrade")
+        if response.status_code == 404:
+            self.log_result("Non-existent trade deletion", True, "Correctly returned 404 for non-existent trade")
+        else:
+            self.log_result("Non-existent trade deletion", False, f"Expected 404, got {response.status_code}")
+        
+        # Test 16: Data Relationships - LGA belongs to State
+        invalid_lga_data = {
+            "state_name": "NonExistentState",
+            "lga_name": "Test LGA",
+            "zip_codes": "100001"
+        }
+        
+        response = self.make_request("POST", "/admin/locations/lgas", data=invalid_lga_data)
+        if response.status_code == 400:
+            self.log_result("Invalid state-LGA relationship", True, "Correctly rejected LGA for non-existent state")
+        else:
+            self.log_result("Invalid state-LGA relationship", False, f"Expected 400, got {response.status_code}")
+        
+        # Test 17: Town belongs to LGA relationship
+        invalid_town_data = {
+            "state_name": "Lagos",
+            "lga_name": "NonExistentLGA",
+            "town_name": "Test Town",
+            "zip_code": "100001"
+        }
+        
+        response = self.make_request("POST", "/admin/locations/towns", data=invalid_town_data)
+        if response.status_code == 400:
+            self.log_result("Invalid LGA-town relationship", True, "Correctly rejected town for non-existent LGA")
+        else:
+            self.log_result("Invalid LGA-town relationship", False, f"Expected 400, got {response.status_code}")
+        
+        # Test 18: Cleanup - Delete Test Items
+        # Delete test town
+        response = self.make_request("DELETE", "/admin/locations/towns/Lagos/Ikeja/Test Town")
+        if response.status_code == 200:
+            self.log_result("Delete test town", True, "Test town deleted successfully")
+        else:
+            self.log_result("Delete test town", False, f"Status: {response.status_code}")
+        
+        # Delete test LGA
+        response = self.make_request("DELETE", "/admin/locations/lgas/Lagos/Updated Test LGA")
+        if response.status_code == 200:
+            self.log_result("Delete test LGA", True, "Test LGA deleted successfully")
+        else:
+            self.log_result("Delete test LGA", False, f"Status: {response.status_code}")
+        
+        # Delete test trade
+        response = self.make_request("DELETE", "/admin/trades/Updated Test Trade")
+        if response.status_code == 200:
+            self.log_result("Delete test trade", True, "Test trade deleted successfully")
+        else:
+            self.log_result("Delete test trade", False, f"Status: {response.status_code}")
+        
+        # Delete test state
+        response = self.make_request("DELETE", "/admin/locations/states/Updated Test State")
+        if response.status_code == 200:
+            self.log_result("Delete test state", True, "Test state deleted successfully")
+        else:
+            self.log_result("Delete test state", False, f"Status: {response.status_code}")
+
     def run_all_tests(self):
         """Run all test suites"""
         print("🚀 Starting Comprehensive Backend API Tests for ServiceHub")
