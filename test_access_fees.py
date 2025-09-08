@@ -148,6 +148,8 @@ class AccessFeeSystemTester:
             access_fee_naira = created_job.get('access_fee_naira', 0)
             access_fee_coins = created_job.get('access_fee_coins', 0)
             
+            print(f"DEBUG: Created job response: {json.dumps(created_job, indent=2, default=str)}")
+            
             if access_fee_naira == 1000 and access_fee_coins == 10:
                 self.log_result("New Job Default Access Fee ₦1000 (10 coins)", True, 
                                f"Correct default: ₦{access_fee_naira} ({access_fee_coins} coins)")
@@ -155,6 +157,8 @@ class AccessFeeSystemTester:
             else:
                 self.log_result("New Job Default Access Fee ₦1000 (10 coins)", False, 
                                f"Expected ₦1000 (10 coins), got ₦{access_fee_naira} ({access_fee_coins} coins)")
+                # Still store the job for other tests
+                self.test_data['test_job'] = created_job
         else:
             self.log_result("New Job Default Access Fee ₦1000 (10 coins)", False, 
                            f"Status: {response.status_code}, Response: {response.text}")
