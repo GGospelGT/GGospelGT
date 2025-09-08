@@ -2314,7 +2314,7 @@ class Database:
                 "updated_at": datetime.now()
             }
             
-            result = await self.db.system_locations.update_one(
+            result = await self.database.system_locations.update_one(
                 {"name": old_name, "type": "state"},
                 {"$set": update_data}
             )
