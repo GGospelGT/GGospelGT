@@ -236,6 +236,97 @@ async def view_payment_proof(filename: str):
     
     return FileResponse(file_path, media_type="image/jpeg")
 
+# ==========================================
+# USER MANAGEMENT
+# ==========================================
+
+@router.get("/users")
+async def get_all_users(
+    skip: int = 0, 
+    limit: int = 50,
+    role: Optional[str] = None,
+    status: Optional[str] = None,
+    search: Optional[str] = None
+):
+    """Get all registered users with filtering options"""
+    
+    users = await database.get_all_users_for_admin(
+        skip=skip, 
+        limit=limit, 
+        role=role, 
+        status=status,
+        search=search
+    )
+    
+    # Get user statistics
+    total_users = await database.get_total_users_count()
+    active_users = await database.get_active_users_count()
+    homeowners_count = await database.get_users_count_by_role("homeowner")
+    tradespeople_count = await database.get_users_count_by_role("tradesperson")
+    
+    return {
+        "users": users,
+        "pagination": {
+            "skip": skip,
+            "limit": limit,
+            "total": len(users)
+        },
+        "stats": {
+            "total_users": total_users,
+            "active_users": active_users,
+            "homeowners": homeowners_count,
+            "tradespeople": tradespeople_count,
+            "verified_users": await database.get_verified_users_count()
+        }
+    }
+
+@router.get("/users/{user_id}")
+async def get_user_details(user_id: str):
+    """Get detailed information about a specific user"""
+    
+    user = await database.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Get additional user activity data
+    user_activity = await database.get_user_activity_stats(user_id)
+    
+    # Remove password hash for security
+    user.pop("password_hash", None)
+    user["_id"] = str(user.get("_id", ""))
+    
+    return {
+        "user": user,
+        "activity_stats": user_activity
+    }
+
+@router.put("/users/{user_id}/status")
+async def update_user_status(
+    user_id: str,
+    status: str = Form(...),
+    admin_notes: str = Form("")
+):
+    """Update user status (active, suspended, banned)"""
+    
+    valid_statuses = ["active", "suspended", "banned"]
+    if status not in valid_statuses:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+        )
+    
+    success = await database.update_user_status(user_id, status, admin_notes)
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "message": f"User status updated to {status}",
+        "user_id": user_id,
+        "new_status": status,
+        "admin_notes": admin_notes
+    }
+
 @router.get("/wallet/transaction/{transaction_id}")
 async def get_transaction_details(transaction_id: str):
     """Get detailed transaction information for admin review"""
