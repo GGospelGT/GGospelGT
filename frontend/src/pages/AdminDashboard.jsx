@@ -78,9 +78,15 @@ const AdminDashboard = () => {
           setTradeGroups(data.groups || []);
         }
       } else if (activeTab === 'questions') {
-        const data = await adminAPI.getAllSkillsQuestions();
-        setSkillsQuestions(data.questions || {});
-        setQuestionStats(data.stats || {});
+        // Load both skills questions and available trade categories
+        const [questionsData, tradesData] = await Promise.all([
+          adminAPI.getAllSkillsQuestions(),
+          adminAPI.getAllTrades()
+        ]);
+        
+        setSkillsQuestions(questionsData.questions || {});
+        setQuestionStats(questionsData.stats || {});
+        setTrades(tradesData.trades || []); // Use trades for dropdown options
       } else if (activeTab === 'stats') {
         const data = await adminAPI.getDashboardStats();
         setStats(data);
