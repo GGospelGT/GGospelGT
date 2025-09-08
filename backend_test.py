@@ -4542,6 +4542,321 @@ class BackendTester:
                     self.log_result(f"Reject {description}", False, 
                                    f"Expected 400, got {response.status_code}")
 
+    def test_admin_user_management_system(self):
+        """
+        ADMIN USER MANAGEMENT SYSTEM TESTING
+        Test the new comprehensive user management functionality for admin dashboard
+        """
+        print("\n" + "="*80)
+        print("🎯 ADMIN USER MANAGEMENT SYSTEM TESTING")
+        print("="*80)
+        
+        # Step 1: Test admin authentication
+        self._test_admin_authentication()
+        
+        # Step 2: Test user listing with statistics
+        self._test_admin_user_listing()
+        
+        # Step 3: Test individual user details
+        self._test_admin_user_details()
+        
+        # Step 4: Test user status updates
+        self._test_admin_user_status_updates()
+        
+        # Step 5: Test user filtering and search
+        self._test_admin_user_filtering()
+        
+        print("\n" + "="*80)
+        print("🏁 ADMIN USER MANAGEMENT SYSTEM TESTING COMPLETE")
+        print("="*80)
+
+    def _test_admin_authentication(self):
+        """Test admin login functionality"""
+        print("\n=== Step 1: Admin Authentication ===")
+        
+        # Test valid admin login
+        admin_credentials = {
+            "username": "admin",
+            "password": "servicehub2024"
+        }
+        
+        response = self.make_request("POST", "/admin/login", data=admin_credentials)
+        if response.status_code == 200:
+            admin_response = response.json()
+            if "token" in admin_response and admin_response.get("admin", {}).get("role") == "admin":
+                self.log_result("Admin login with valid credentials", True, "Admin authenticated successfully")
+                self.test_data['admin_token'] = admin_response['token']
+            else:
+                self.log_result("Admin login with valid credentials", False, "Invalid admin response structure")
+        else:
+            self.log_result("Admin login with valid credentials", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test invalid admin login
+        invalid_credentials = {
+            "username": "admin",
+            "password": "wrongpassword"
+        }
+        
+        response = self.make_request("POST", "/admin/login", data=invalid_credentials)
+        if response.status_code == 401:
+            self.log_result("Admin login with invalid credentials", True, "Correctly rejected invalid credentials")
+        else:
+            self.log_result("Admin login with invalid credentials", False, f"Expected 401, got {response.status_code}")
+
+    def _test_admin_user_listing(self):
+        """Test admin user listing with statistics"""
+        print("\n=== Step 2: User Listing with Statistics ===")
+        
+        # Test get all users endpoint
+        response = self.make_request("GET", "/admin/users")
+        if response.status_code == 200:
+            users_data = response.json()
+            
+            # Verify response structure
+            required_fields = ['users', 'pagination', 'stats']
+            missing_fields = [field for field in required_fields if field not in users_data]
+            
+            if not missing_fields:
+                users = users_data['users']
+                stats = users_data['stats']
+                
+                # Verify user statistics
+                required_stats = ['total_users', 'active_users', 'homeowners', 'tradespeople', 'verified_users']
+                missing_stats = [stat for stat in required_stats if stat not in stats]
+                
+                if not missing_stats:
+                    self.log_result("Get all users with statistics", True, 
+                                   f"Found {len(users)} users, Total: {stats['total_users']}, "
+                                   f"Homeowners: {stats['homeowners']}, Tradespeople: {stats['tradespeople']}")
+                    
+                    # Verify user data structure
+                    if users:
+                        user = users[0]
+                        required_user_fields = ['id', 'name', 'email', 'role', 'status', 'created_at']
+                        missing_user_fields = [field for field in required_user_fields if field not in user]
+                        
+                        if not missing_user_fields:
+                            self.log_result("User data structure validation", True, "All required user fields present")
+                            
+                            # Store user data for further testing
+                            self.test_data['admin_users'] = users
+                            self.test_data['admin_stats'] = stats
+                        else:
+                            self.log_result("User data structure validation", False, f"Missing user fields: {missing_user_fields}")
+                    else:
+                        self.log_result("User data structure validation", True, "No users found (expected for new system)")
+                else:
+                    self.log_result("Get all users with statistics", False, f"Missing statistics: {missing_stats}")
+            else:
+                self.log_result("Get all users with statistics", False, f"Missing response fields: {missing_fields}")
+        else:
+            self.log_result("Get all users with statistics", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test pagination
+        response = self.make_request("GET", "/admin/users", params={"skip": 0, "limit": 5})
+        if response.status_code == 200:
+            paginated_data = response.json()
+            if paginated_data.get('pagination', {}).get('limit') == 5:
+                self.log_result("User listing pagination", True, "Pagination working correctly")
+            else:
+                self.log_result("User listing pagination", False, "Pagination not working as expected")
+        else:
+            self.log_result("User listing pagination", False, f"Status: {response.status_code}")
+
+    def _test_admin_user_details(self):
+        """Test getting detailed user information"""
+        print("\n=== Step 3: Individual User Details ===")
+        
+        # Use existing test users if available
+        test_user_id = None
+        if 'homeowner_user' in self.test_data:
+            test_user_id = self.test_data['homeowner_user']['id']
+        elif 'admin_users' in self.test_data and self.test_data['admin_users']:
+            test_user_id = self.test_data['admin_users'][0]['id']
+        
+        if test_user_id:
+            response = self.make_request("GET", f"/admin/users/{test_user_id}")
+            if response.status_code == 200:
+                user_details = response.json()
+                
+                # Verify response structure
+                required_fields = ['user', 'activity_stats']
+                missing_fields = [field for field in required_fields if field not in user_details]
+                
+                if not missing_fields:
+                    user = user_details['user']
+                    activity = user_details['activity_stats']
+                    
+                    # Verify user details don't contain password
+                    if 'password_hash' not in user:
+                        self.log_result("Get user details", True, 
+                                       f"User: {user.get('name', 'Unknown')}, Role: {user.get('role', 'Unknown')}")
+                        
+                        # Verify activity stats structure
+                        expected_activity_fields = ['registration_date', 'last_login', 'is_verified', 'status']
+                        has_activity_fields = all(field in activity for field in expected_activity_fields)
+                        
+                        if has_activity_fields:
+                            self.log_result("User activity statistics", True, 
+                                           f"Verified: {activity.get('is_verified', False)}, "
+                                           f"Status: {activity.get('status', 'unknown')}")
+                        else:
+                            self.log_result("User activity statistics", False, "Missing activity statistics fields")
+                    else:
+                        self.log_result("Get user details", False, "Password hash exposed in response")
+                else:
+                    self.log_result("Get user details", False, f"Missing response fields: {missing_fields}")
+            else:
+                self.log_result("Get user details", False, f"Status: {response.status_code}, Response: {response.text}")
+        else:
+            self.log_result("Get user details", False, "No test user available")
+        
+        # Test invalid user ID
+        response = self.make_request("GET", "/admin/users/invalid-user-id")
+        if response.status_code == 404:
+            self.log_result("Get invalid user details", True, "Correctly returned 404 for invalid user ID")
+        else:
+            self.log_result("Get invalid user details", False, f"Expected 404, got {response.status_code}")
+
+    def _test_admin_user_status_updates(self):
+        """Test user status update functionality"""
+        print("\n=== Step 4: User Status Updates ===")
+        
+        # Use existing test user if available
+        test_user_id = None
+        if 'homeowner_user' in self.test_data:
+            test_user_id = self.test_data['homeowner_user']['id']
+        elif 'admin_users' in self.test_data and self.test_data['admin_users']:
+            test_user_id = self.test_data['admin_users'][0]['id']
+        
+        if test_user_id:
+            # Test valid status updates
+            valid_statuses = ["active", "suspended", "banned"]
+            
+            for status in valid_statuses:
+                status_data = {
+                    "status": status,
+                    "admin_notes": f"Status updated to {status} for testing purposes"
+                }
+                
+                response = self.make_request("PUT", f"/admin/users/{test_user_id}/status", data=status_data)
+                if response.status_code == 200:
+                    update_response = response.json()
+                    if update_response.get('new_status') == status:
+                        self.log_result(f"Update user status to {status}", True, 
+                                       f"Status updated successfully to {status}")
+                    else:
+                        self.log_result(f"Update user status to {status}", False, "Status not updated correctly")
+                else:
+                    self.log_result(f"Update user status to {status}", False, 
+                                   f"Status: {response.status_code}, Response: {response.text}")
+            
+            # Test invalid status
+            invalid_status_data = {
+                "status": "invalid_status",
+                "admin_notes": "Testing invalid status"
+            }
+            
+            response = self.make_request("PUT", f"/admin/users/{test_user_id}/status", data=invalid_status_data)
+            if response.status_code == 400:
+                self.log_result("Update user with invalid status", True, "Correctly rejected invalid status")
+            else:
+                self.log_result("Update user with invalid status", False, f"Expected 400, got {response.status_code}")
+        else:
+            self.log_result("User status update tests", False, "No test user available")
+        
+        # Test invalid user ID
+        status_data = {
+            "status": "active",
+            "admin_notes": "Testing with invalid user ID"
+        }
+        
+        response = self.make_request("PUT", "/admin/users/invalid-user-id/status", data=status_data)
+        if response.status_code == 404:
+            self.log_result("Update status for invalid user", True, "Correctly returned 404 for invalid user ID")
+        else:
+            self.log_result("Update status for invalid user", False, f"Expected 404, got {response.status_code}")
+
+    def _test_admin_user_filtering(self):
+        """Test user filtering and search functionality"""
+        print("\n=== Step 5: User Filtering and Search ===")
+        
+        # Test role filtering
+        for role in ["homeowner", "tradesperson"]:
+            response = self.make_request("GET", "/admin/users", params={"role": role})
+            if response.status_code == 200:
+                filtered_data = response.json()
+                users = filtered_data.get('users', [])
+                
+                # Verify all users have the correct role
+                if users:
+                    all_correct_role = all(user.get('role') == role for user in users)
+                    if all_correct_role:
+                        self.log_result(f"Filter users by role ({role})", True, f"Found {len(users)} {role}s")
+                    else:
+                        self.log_result(f"Filter users by role ({role})", False, "Some users have incorrect role")
+                else:
+                    self.log_result(f"Filter users by role ({role})", True, f"No {role}s found (expected for new system)")
+            else:
+                self.log_result(f"Filter users by role ({role})", False, f"Status: {response.status_code}")
+        
+        # Test status filtering
+        for status in ["active", "suspended", "banned"]:
+            response = self.make_request("GET", "/admin/users", params={"status": status})
+            if response.status_code == 200:
+                filtered_data = response.json()
+                users = filtered_data.get('users', [])
+                
+                # Verify all users have the correct status
+                if users:
+                    all_correct_status = all(user.get('status') == status for user in users)
+                    if all_correct_status:
+                        self.log_result(f"Filter users by status ({status})", True, f"Found {len(users)} {status} users")
+                    else:
+                        self.log_result(f"Filter users by status ({status})", False, "Some users have incorrect status")
+                else:
+                    self.log_result(f"Filter users by status ({status})", True, f"No {status} users found")
+            else:
+                self.log_result(f"Filter users by status ({status})", False, f"Status: {response.status_code}")
+        
+        # Test search functionality
+        if 'homeowner_user' in self.test_data:
+            search_term = self.test_data['homeowner_user']['name'].split()[0]  # First name
+            response = self.make_request("GET", "/admin/users", params={"search": search_term})
+            if response.status_code == 200:
+                search_data = response.json()
+                users = search_data.get('users', [])
+                
+                # Verify search results contain the search term
+                if users:
+                    found_user = any(search_term.lower() in user.get('name', '').lower() for user in users)
+                    if found_user:
+                        self.log_result("Search users by name", True, f"Found {len(users)} users matching '{search_term}'")
+                    else:
+                        self.log_result("Search users by name", False, "Search term not found in results")
+                else:
+                    self.log_result("Search users by name", True, "No users found for search term")
+            else:
+                self.log_result("Search users by name", False, f"Status: {response.status_code}")
+        
+        # Test combined filtering
+        response = self.make_request("GET", "/admin/users", params={"role": "homeowner", "status": "active"})
+        if response.status_code == 200:
+            combined_data = response.json()
+            users = combined_data.get('users', [])
+            
+            # Verify combined filtering works
+            if users:
+                all_match = all(user.get('role') == 'homeowner' and user.get('status') == 'active' for user in users)
+                if all_match:
+                    self.log_result("Combined role and status filtering", True, f"Found {len(users)} active homeowners")
+                else:
+                    self.log_result("Combined role and status filtering", False, "Some users don't match both filters")
+            else:
+                self.log_result("Combined role and status filtering", True, "No users match combined filters")
+        else:
+            self.log_result("Combined role and status filtering", False, f"Status: {response.status_code}")
+
     def run_all_tests(self):
         """Run all test suites"""
         print("🚀 Starting Comprehensive Backend API Tests for ServiceHub")
@@ -4571,6 +4886,9 @@ class BackendTester:
         
         # NEW: Access Fee System Changes Testing
         self.test_access_fee_system_changes()
+        
+        # NEW: Admin User Management System Testing
+        self.test_admin_user_management_system()
         
         # Print final results
         print("\n" + "=" * 80)
