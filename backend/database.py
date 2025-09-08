@@ -2087,17 +2087,17 @@ class Database:
         
         referral_coins = sum(t.get("amount_coins", 0) for t in referral_transactions)
         
-        # Check if total wallet balance >= 15 coins
+        # Check if total wallet balance >= 5 coins (lowered minimum for flexibility)
         total_coins = wallet.get("balance_coins", 0)
-        can_withdraw = total_coins >= 15
+        can_withdraw = total_coins >= 5
         
         return {
             "total_coins": total_coins,
             "referral_coins": referral_coins,
             "regular_coins": total_coins - referral_coins,
             "can_withdraw_referrals": can_withdraw,
-            "minimum_required": 15,
-            "shortfall": max(0, 15 - total_coins)
+            "minimum_required": 5,
+            "shortfall": max(0, 5 - total_coins)
         }
 
 # Global database instance
