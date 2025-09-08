@@ -67,7 +67,7 @@ class AccessFeeSystemTester:
             "email": f"homeowner.{uuid.uuid4().hex[:8]}@test.com",
             "password": "SecurePass123",
             "phone": "08123456789",
-            "location": "Lagos, Lagos State",
+            "location": "Lagos",
             "postcode": "100001"
         }
         
