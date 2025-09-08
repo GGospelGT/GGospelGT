@@ -184,6 +184,28 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
     setUploadProgress(0);
   };
 
+  // Drag and drop handlers
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      handleFileUpload(file);
+    }
+  };
+
   const nextStep = () => {
     if (validateCurrentStep()) {
       setCurrentStep(prev => Math.min(prev + 1, 6));
