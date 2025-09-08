@@ -369,6 +369,61 @@ async def get_my_jobs(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Public Policy Endpoints (no authentication required) - MUST come before /{job_id} route
+@router.get("/policies")
+async def get_public_policies():
+    """Get all active policies for public display (footer links, etc.)"""
+    try:
+        policies = await database.get_all_policies()
+        
+        # Filter only active policies and format for public consumption
+        public_policies = []
+        for policy in policies:
+            if policy.get('status') == 'active':
+                public_policies.append({
+                    'policy_type': policy.get('policy_type'),
+                    'title': policy.get('title'),
+                    'content': policy.get('content'),
+                    'effective_date': policy.get('effective_date'),
+                    'updated_at': policy.get('updated_at')
+                })
+        
+        return {
+            'policies': public_policies,
+            'count': len(public_policies)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting public policies: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get policies: {str(e)}")
+
+@router.get("/policies/{policy_type}")
+async def get_public_policy(policy_type: str):
+    """Get a specific active policy for public display"""
+    try:
+        policy = await database.get_policy_by_type(policy_type)
+        
+        if not policy or policy.get('status') != 'active':
+            raise HTTPException(status_code=404, detail="Policy not found")
+        
+        # Format for public consumption
+        public_policy = {
+            'policy_type': policy.get('policy_type'),
+            'title': policy.get('title'),
+            'content': policy.get('content'),
+            'effective_date': policy.get('effective_date'),
+            'updated_at': policy.get('updated_at')
+        }
+        
+        return {'policy': public_policy}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting public policy {policy_type}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get policy: {str(e)}")
+
 @router.get("/{job_id}", response_model=Job)
 async def get_job(job_id: str):
     """Get a specific job by ID"""
