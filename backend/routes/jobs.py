@@ -424,3 +424,32 @@ async def _notify_job_posted_successfully(homeowner: dict, job: dict):
         
     except Exception as e:
         logger.error(f"❌ Failed to send job posted notification for job {job.get('id')}: {str(e)}")
+
+# Public Skills Questions Endpoint (no authentication required)
+@router.get("/skills-questions/{trade_category}")
+async def get_public_skills_questions(trade_category: str):
+    """Get skills test questions for a specific trade category (public endpoint for registration)"""
+    try:
+        questions = await database.get_questions_for_trade(trade_category)
+        
+        # Format questions for frontend consumption
+        formatted_questions = []
+        for question in questions:
+            if question.get('is_active', True):  # Only include active questions
+                formatted_questions.append({
+                    'question': question.get('question'),
+                    'options': question.get('options', []),
+                    'correct': question.get('correct_answer', 0),
+                    'category': question.get('category', 'General'),
+                    'explanation': question.get('explanation', '')
+                })
+        
+        return {
+            'trade_category': trade_category,
+            'questions': formatted_questions,
+            'count': len(formatted_questions)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting public skills questions for {trade_category}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get skills questions: {str(e)}")
