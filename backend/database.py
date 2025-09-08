@@ -2151,9 +2151,9 @@ class Database:
             
             # Count jobs/interests based on role
             if user.get("role") == "homeowner":
-                user["jobs_posted"] = await self.jobs_collection.count_documents({"homeowner.id": user["id"]})
+                user["jobs_posted"] = await self.database.jobs.count_documents({"homeowner.id": user["id"]})
             elif user.get("role") == "tradesperson":
-                user["interests_shown"] = await self.interests_collection.count_documents({"tradesperson_id": user["id"]})
+                user["interests_shown"] = await self.database.interests.count_documents({"tradesperson_id": user["id"]})
             
             processed_users.append(user)
         
