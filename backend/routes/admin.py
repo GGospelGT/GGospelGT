@@ -213,9 +213,8 @@ async def get_admin_dashboard_stats():
         },
         "system_stats": {
             "coin_conversion_rate": "1 coin = ₦100",
-            "min_access_fee": "₦1,500 (15 coins)",
-            "max_access_fee": "₦5,000 (50 coins)",
-            "min_funding_amount": "₦1,500 (15 coins)",
+            "max_access_fee": "₦10,000 (100 coins)",
+            "min_funding_amount": "Any positive amount",
             "referral_reward": "5 coins per verified referral"
         }
     }
