@@ -623,6 +623,205 @@ const AdminDashboard = () => {
                   ) : null}
                 </div>
               )}
+
+              {/* User Management Tab */}
+              {activeTab === 'users' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold">User Management</h2>
+                    {userStats && (
+                      <div className="flex space-x-4 text-sm text-gray-600">
+                        <span>Total: {userStats.total_users}</span>
+                        <span>Active: {userStats.active_users}</span>
+                        <span>Verified: {userStats.verified_users}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* User Statistics Cards */}
+                  {userStats && (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h3 className="text-sm font-medium text-blue-800">Total Users</h3>
+                        <p className="text-2xl font-bold text-blue-600">{userStats.total_users}</p>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h3 className="text-sm font-medium text-green-800">Active Users</h3>
+                        <p className="text-2xl font-bold text-green-600">{userStats.active_users}</p>
+                      </div>
+                      <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                        <h3 className="text-sm font-medium text-purple-800">Tradespeople</h3>
+                        <p className="text-2xl font-bold text-purple-600">{userStats.tradespeople}</p>
+                      </div>
+                      <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                        <h3 className="text-sm font-medium text-orange-800">Homeowners</h3>
+                        <p className="text-2xl font-bold text-orange-600">{userStats.homeowners}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Users Table */}
+                  {loading ? (
+                    <div className="space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="bg-gray-50 p-4 rounded-lg animate-pulse">
+                          <div className="flex justify-between items-center">
+                            <div className="space-y-2">
+                              <div className="h-4 bg-gray-200 rounded w-48"></div>
+                              <div className="h-3 bg-gray-200 rounded w-32"></div>
+                            </div>
+                            <div className="h-8 bg-gray-200 rounded w-20"></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-white border rounded-lg overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                User Details
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Role & Status
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Activity
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Registration
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {users.map((user) => (
+                              <tr key={user.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="flex items-center">
+                                    <div className="flex-shrink-0 h-10 w-10">
+                                      <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                        <span className="text-sm font-medium text-gray-700">
+                                          {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="ml-4">
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {user.name || 'No Name'}
+                                      </div>
+                                      <div className="text-sm text-gray-500">
+                                        {user.email}
+                                      </div>
+                                      {user.phone && (
+                                        <div className="text-xs text-gray-400">
+                                          {user.phone}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="flex flex-col">
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                      user.role === 'tradesperson' 
+                                        ? 'bg-blue-100 text-blue-800' 
+                                        : 'bg-green-100 text-green-800'
+                                    }`}>
+                                      {user.role}
+                                    </span>
+                                    <span className={`mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                      user.status === 'active' 
+                                        ? 'bg-green-100 text-green-800' 
+                                        : user.status === 'suspended'
+                                        ? 'bg-yellow-100 text-yellow-800'
+                                        : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      {user.status || 'active'}
+                                    </span>
+                                    {user.is_verified && (
+                                      <span className="mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                        ✓ Verified
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {user.role === 'tradesperson' ? (
+                                    <div className="space-y-1">
+                                      <div>Interests: {user.interests_shown || 0}</div>
+                                      <div>Wallet: {user.wallet_balance || 0} coins</div>
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-1">
+                                      <div>Jobs: {user.jobs_posted || 0}</div>
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                  <div className="flex space-x-2">
+                                    <button
+                                      onClick={() => window.alert(`User ID: ${user.id}\nEmail: ${user.email}\nRole: ${user.role}\nStatus: ${user.status || 'active'}`)}
+                                      className="text-blue-600 hover:text-blue-900"
+                                    >
+                                      View
+                                    </button>
+                                    {user.status !== 'suspended' && (
+                                      <button
+                                        onClick={() => {
+                                          if (window.confirm(`Suspend user ${user.name || user.email}?`)) {
+                                            adminAPI.updateUserStatus(user.id, 'suspended', 'Suspended by admin')
+                                              .then(() => {
+                                                toast({ title: "User suspended successfully" });
+                                                fetchData();
+                                              })
+                                              .catch(() => {
+                                                toast({ title: "Failed to suspend user", variant: "destructive" });
+                                              });
+                                          }
+                                        }}
+                                        className="text-yellow-600 hover:text-yellow-900"
+                                      >
+                                        Suspend
+                                      </button>
+                                    )}
+                                    {user.status === 'suspended' && (
+                                      <button
+                                        onClick={() => {
+                                          if (window.confirm(`Reactivate user ${user.name || user.email}?`)) {
+                                            adminAPI.updateUserStatus(user.id, 'active', 'Reactivated by admin')
+                                              .then(() => {
+                                                toast({ title: "User reactivated successfully" });
+                                                fetchData();
+                                              })
+                                              .catch(() => {
+                                                toast({ title: "Failed to reactivate user", variant: "destructive" });
+                                              });
+                                          }
+                                        }}
+                                        className="text-green-600 hover:text-green-900"
+                                      >
+                                        Activate
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
