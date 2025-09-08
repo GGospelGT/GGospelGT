@@ -5745,6 +5745,464 @@ class BackendTester:
         else:
             self.log_result("Policy count verification", False, f"Status: {response.status_code}")
 
+    def test_contact_management_system(self):
+        """
+        CONTACT MANAGEMENT SYSTEM COMPREHENSIVE TESTING
+        Test the complete contact management system including admin authentication,
+        CRUD operations, validation, and public access endpoints
+        """
+        print("\n" + "="*80)
+        print("🎯 CONTACT MANAGEMENT SYSTEM COMPREHENSIVE TESTING")
+        print("="*80)
+        
+        # Step 1: Test admin authentication
+        self._test_admin_authentication()
+        
+        # Step 2: Test contact types endpoint
+        self._test_contact_types_endpoint()
+        
+        # Step 3: Test initialize default contacts
+        self._test_initialize_default_contacts()
+        
+        # Step 4: Test get all contacts
+        self._test_get_all_contacts()
+        
+        # Step 5: Test contact creation with validation
+        self._test_contact_creation_validation()
+        
+        # Step 6: Test contact CRUD operations
+        self._test_contact_crud_operations()
+        
+        # Step 7: Test public contact endpoints
+        self._test_public_contact_endpoints()
+        
+        # Step 8: Test contact management with different types
+        self._test_contact_types_management()
+        
+        print("\n" + "="*80)
+        print("🏁 CONTACT MANAGEMENT SYSTEM TESTING COMPLETE")
+        print("="*80)
+    
+    def _test_admin_authentication(self):
+        """Test admin authentication system"""
+        print("\n=== Step 1: Admin Authentication ===")
+        
+        # Test valid admin login
+        admin_data = {
+            "username": "admin",
+            "password": "servicehub2024"
+        }
+        
+        response = self.make_request("POST", "/admin/login", data=admin_data)
+        if response.status_code == 200:
+            login_response = response.json()
+            if "admin" in login_response and login_response["admin"]["role"] == "admin":
+                self.log_result("Admin Authentication", True, "Admin login successful")
+                self.test_data['admin_authenticated'] = True
+            else:
+                self.log_result("Admin Authentication", False, "Invalid admin response structure")
+        else:
+            self.log_result("Admin Authentication", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test invalid admin credentials
+        invalid_data = {
+            "username": "admin",
+            "password": "wrongpassword"
+        }
+        
+        response = self.make_request("POST", "/admin/login", data=invalid_data)
+        if response.status_code == 401:
+            self.log_result("Invalid Admin Credentials Rejection", True, "Correctly rejected invalid credentials")
+        else:
+            self.log_result("Invalid Admin Credentials Rejection", False, f"Expected 401, got {response.status_code}")
+    
+    def _test_contact_types_endpoint(self):
+        """Test contact types endpoint"""
+        print("\n=== Step 2: Contact Types Endpoint ===")
+        
+        response = self.make_request("GET", "/admin/contacts/types")
+        if response.status_code == 200:
+            types_response = response.json()
+            if "contact_types" in types_response:
+                contact_types = types_response["contact_types"]
+                
+                # Verify all 11 expected contact types are present
+                expected_types = [
+                    "phone_support", "phone_business", "email_support", "email_business",
+                    "address_office", "social_facebook", "social_instagram", "social_youtube",
+                    "social_twitter", "website_url", "business_hours"
+                ]
+                
+                actual_types = [ct["value"] for ct in contact_types]
+                missing_types = [t for t in expected_types if t not in actual_types]
+                
+                if not missing_types and len(contact_types) == 11:
+                    self.log_result("Contact Types Endpoint", True, f"Found all {len(contact_types)} contact types")
+                    self.test_data['contact_types'] = contact_types
+                    
+                    # Verify categories are present
+                    categories = set(ct["category"] for ct in contact_types)
+                    expected_categories = {"Phone Numbers", "Email Addresses", "Physical Addresses", "Social Media", "Website", "Operating Hours"}
+                    if categories == expected_categories:
+                        self.log_result("Contact Categories Verification", True, f"Found all {len(categories)} categories")
+                    else:
+                        self.log_result("Contact Categories Verification", False, f"Missing categories: {expected_categories - categories}")
+                else:
+                    self.log_result("Contact Types Endpoint", False, f"Missing types: {missing_types}, Found: {len(contact_types)}")
+            else:
+                self.log_result("Contact Types Endpoint", False, "Missing contact_types in response")
+        else:
+            self.log_result("Contact Types Endpoint", False, f"Status: {response.status_code}")
+    
+    def _test_initialize_default_contacts(self):
+        """Test initialize default contacts endpoint"""
+        print("\n=== Step 3: Initialize Default Contacts ===")
+        
+        response = self.make_request("POST", "/admin/contacts/initialize-defaults")
+        if response.status_code == 200:
+            init_response = response.json()
+            if "message" in init_response and "initialized" in init_response["message"].lower():
+                self.log_result("Initialize Default Contacts", True, "Default contacts initialized")
+            else:
+                self.log_result("Initialize Default Contacts", False, "Unexpected response message")
+        else:
+            self.log_result("Initialize Default Contacts", False, f"Status: {response.status_code}")
+    
+    def _test_get_all_contacts(self):
+        """Test get all contacts endpoint"""
+        print("\n=== Step 4: Get All Contacts ===")
+        
+        response = self.make_request("GET", "/admin/contacts")
+        if response.status_code == 200:
+            contacts_response = response.json()
+            if "contacts" in contacts_response and "total_count" in contacts_response:
+                contacts = contacts_response["contacts"]
+                total_count = contacts_response["total_count"]
+                
+                if len(contacts) > 0:
+                    self.log_result("Get All Contacts", True, f"Found {total_count} contacts")
+                    self.test_data['existing_contacts'] = contacts
+                    
+                    # Verify contact structure
+                    first_contact = contacts[0]
+                    required_fields = ["id", "contact_type", "label", "value", "is_active", "created_at"]
+                    missing_fields = [field for field in required_fields if field not in first_contact]
+                    
+                    if not missing_fields:
+                        self.log_result("Contact Structure Validation", True, "All required fields present")
+                    else:
+                        self.log_result("Contact Structure Validation", False, f"Missing fields: {missing_fields}")
+                else:
+                    self.log_result("Get All Contacts", True, "No contacts found (expected for fresh system)")
+                    self.test_data['existing_contacts'] = []
+            else:
+                self.log_result("Get All Contacts", False, "Invalid response structure")
+        else:
+            self.log_result("Get All Contacts", False, f"Status: {response.status_code}")
+    
+    def _test_contact_creation_validation(self):
+        """Test contact creation with validation"""
+        print("\n=== Step 5: Contact Creation Validation ===")
+        
+        # Test valid contact creation
+        valid_contact = {
+            "contact_type": "phone_support",
+            "label": "Customer Support Line",
+            "value": "+234 901 234 5678"
+        }
+        
+        response = self.make_request("POST", "/admin/contacts", json=valid_contact)
+        if response.status_code == 200:
+            create_response = response.json()
+            if "contact_id" in create_response and "message" in create_response:
+                self.log_result("Valid Contact Creation", True, f"Contact ID: {create_response['contact_id']}")
+                self.test_data['test_contact_id'] = create_response['contact_id']
+            else:
+                self.log_result("Valid Contact Creation", False, "Invalid creation response")
+        else:
+            self.log_result("Valid Contact Creation", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test missing required fields
+        invalid_contact = {
+            "contact_type": "email_support"
+            # Missing label and value
+        }
+        
+        response = self.make_request("POST", "/admin/contacts", json=invalid_contact)
+        if response.status_code == 400:
+            self.log_result("Missing Required Fields Validation", True, "Correctly rejected missing fields")
+        else:
+            self.log_result("Missing Required Fields Validation", False, f"Expected 400, got {response.status_code}")
+        
+        # Test invalid contact type
+        invalid_type_contact = {
+            "contact_type": "invalid_type",
+            "label": "Test Label",
+            "value": "Test Value"
+        }
+        
+        response = self.make_request("POST", "/admin/contacts", json=invalid_type_contact)
+        if response.status_code == 400:
+            self.log_result("Invalid Contact Type Validation", True, "Correctly rejected invalid contact type")
+        else:
+            self.log_result("Invalid Contact Type Validation", False, f"Expected 400, got {response.status_code}")
+        
+        # Test label length validation
+        short_label_contact = {
+            "contact_type": "phone_support",
+            "label": "A",  # Too short
+            "value": "+234 901 234 5678"
+        }
+        
+        response = self.make_request("POST", "/admin/contacts", json=short_label_contact)
+        if response.status_code == 400:
+            self.log_result("Label Length Validation", True, "Correctly rejected short label")
+        else:
+            self.log_result("Label Length Validation", False, f"Expected 400, got {response.status_code}")
+        
+        # Test empty value validation
+        empty_value_contact = {
+            "contact_type": "email_support",
+            "label": "Support Email",
+            "value": ""  # Empty value
+        }
+        
+        response = self.make_request("POST", "/admin/contacts", json=empty_value_contact)
+        if response.status_code == 400:
+            self.log_result("Empty Value Validation", True, "Correctly rejected empty value")
+        else:
+            self.log_result("Empty Value Validation", False, f"Expected 400, got {response.status_code}")
+    
+    def _test_contact_crud_operations(self):
+        """Test contact CRUD operations"""
+        print("\n=== Step 6: Contact CRUD Operations ===")
+        
+        if 'test_contact_id' not in self.test_data:
+            self.log_result("CRUD Operations", False, "No test contact ID available")
+            return
+        
+        contact_id = self.test_data['test_contact_id']
+        
+        # Test get specific contact
+        response = self.make_request("GET", f"/admin/contacts/{contact_id}")
+        if response.status_code == 200:
+            contact = response.json()
+            if contact.get('id') == contact_id:
+                self.log_result("Get Specific Contact", True, f"Retrieved contact: {contact.get('label')}")
+            else:
+                self.log_result("Get Specific Contact", False, "Contact ID mismatch")
+        else:
+            self.log_result("Get Specific Contact", False, f"Status: {response.status_code}")
+        
+        # Test update contact
+        update_data = {
+            "label": "Updated Customer Support Line",
+            "value": "+234 901 234 9999"
+        }
+        
+        response = self.make_request("PUT", f"/admin/contacts/{contact_id}", json=update_data)
+        if response.status_code == 200:
+            update_response = response.json()
+            if "updated successfully" in update_response.get("message", "").lower():
+                self.log_result("Update Contact", True, "Contact updated successfully")
+                
+                # Verify update by retrieving contact
+                response = self.make_request("GET", f"/admin/contacts/{contact_id}")
+                if response.status_code == 200:
+                    updated_contact = response.json()
+                    if updated_contact.get('label') == update_data['label']:
+                        self.log_result("Update Verification", True, "Update changes verified")
+                    else:
+                        self.log_result("Update Verification", False, "Update changes not reflected")
+            else:
+                self.log_result("Update Contact", False, "Unexpected update response")
+        else:
+            self.log_result("Update Contact", False, f"Status: {response.status_code}")
+        
+        # Test update validation
+        invalid_update = {
+            "label": "A"  # Too short
+        }
+        
+        response = self.make_request("PUT", f"/admin/contacts/{contact_id}", json=invalid_update)
+        if response.status_code == 400:
+            self.log_result("Update Validation", True, "Correctly rejected invalid update")
+        else:
+            self.log_result("Update Validation", False, f"Expected 400, got {response.status_code}")
+        
+        # Test delete contact
+        response = self.make_request("DELETE", f"/admin/contacts/{contact_id}")
+        if response.status_code == 200:
+            delete_response = response.json()
+            if "deleted successfully" in delete_response.get("message", "").lower():
+                self.log_result("Delete Contact", True, "Contact deleted successfully")
+                
+                # Verify deletion
+                response = self.make_request("GET", f"/admin/contacts/{contact_id}")
+                if response.status_code == 404:
+                    self.log_result("Delete Verification", True, "Contact successfully removed")
+                else:
+                    self.log_result("Delete Verification", False, "Contact still exists after deletion")
+            else:
+                self.log_result("Delete Contact", False, "Unexpected delete response")
+        else:
+            self.log_result("Delete Contact", False, f"Status: {response.status_code}")
+        
+        # Test operations on non-existent contact
+        response = self.make_request("GET", "/admin/contacts/non-existent-id")
+        if response.status_code == 404:
+            self.log_result("Non-existent Contact Handling", True, "Correctly returned 404 for non-existent contact")
+        else:
+            self.log_result("Non-existent Contact Handling", False, f"Expected 404, got {response.status_code}")
+    
+    def _test_public_contact_endpoints(self):
+        """Test public contact endpoints"""
+        print("\n=== Step 7: Public Contact Endpoints ===")
+        
+        # Test get all public contacts
+        response = self.make_request("GET", "/jobs/contacts")
+        if response.status_code == 200:
+            public_contacts = response.json()
+            if "contacts" in public_contacts:
+                self.log_result("Get Public Contacts", True, "Public contacts endpoint working")
+                
+                # Verify structure - should be grouped by category
+                contacts_data = public_contacts["contacts"]
+                if isinstance(contacts_data, dict):
+                    categories = list(contacts_data.keys())
+                    self.log_result("Public Contacts Structure", True, f"Found {len(categories)} contact categories")
+                else:
+                    self.log_result("Public Contacts Structure", False, "Contacts not properly grouped")
+            else:
+                self.log_result("Get Public Contacts", False, "Missing contacts in response")
+        else:
+            self.log_result("Get Public Contacts", False, f"Status: {response.status_code}")
+        
+        # Test get contacts by specific type
+        test_types = ["phone_support", "email_support", "social_facebook"]
+        
+        for contact_type in test_types:
+            response = self.make_request("GET", f"/jobs/contacts/{contact_type}")
+            if response.status_code == 200:
+                type_contacts = response.json()
+                if "contact_type" in type_contacts and "contacts" in type_contacts:
+                    contacts = type_contacts["contacts"]
+                    self.log_result(f"Get {contact_type} Contacts", True, f"Found {len(contacts)} contacts")
+                    
+                    # Verify contacts are sorted by display_order
+                    if len(contacts) > 1:
+                        is_sorted = all(contacts[i].get('display_order', 0) <= contacts[i+1].get('display_order', 0) 
+                                      for i in range(len(contacts)-1))
+                        if is_sorted:
+                            self.log_result(f"{contact_type} Sorting", True, "Contacts properly sorted by display_order")
+                        else:
+                            self.log_result(f"{contact_type} Sorting", False, "Contacts not sorted by display_order")
+                else:
+                    self.log_result(f"Get {contact_type} Contacts", False, "Invalid response structure")
+            else:
+                self.log_result(f"Get {contact_type} Contacts", False, f"Status: {response.status_code}")
+        
+        # Test invalid contact type
+        response = self.make_request("GET", "/jobs/contacts/invalid_type")
+        if response.status_code == 200:
+            invalid_response = response.json()
+            if len(invalid_response.get("contacts", [])) == 0:
+                self.log_result("Invalid Contact Type Handling", True, "Correctly returned empty list for invalid type")
+            else:
+                self.log_result("Invalid Contact Type Handling", False, "Should return empty list for invalid type")
+        else:
+            self.log_result("Invalid Contact Type Handling", False, f"Expected 200, got {response.status_code}")
+    
+    def _test_contact_types_management(self):
+        """Test contact management with different types"""
+        print("\n=== Step 8: Contact Types Management ===")
+        
+        # Test creating contacts of each type
+        test_contacts = [
+            {
+                "contact_type": "phone_business",
+                "label": "Business Line",
+                "value": "+234 803 123 4567"
+            },
+            {
+                "contact_type": "email_business",
+                "label": "Business Email",
+                "value": "business@servicehub.ng"
+            },
+            {
+                "contact_type": "address_office",
+                "label": "Head Office",
+                "value": "123 Victoria Island, Lagos, Nigeria"
+            },
+            {
+                "contact_type": "social_instagram",
+                "label": "Instagram",
+                "value": "@servicehub_ng"
+            },
+            {
+                "contact_type": "website_url",
+                "label": "Main Website",
+                "value": "https://servicehub.ng"
+            },
+            {
+                "contact_type": "business_hours",
+                "label": "Operating Hours",
+                "value": "Monday - Friday: 8:00 AM - 6:00 PM, Saturday: 9:00 AM - 4:00 PM"
+            }
+        ]
+        
+        created_contacts = []
+        
+        for contact_data in test_contacts:
+            response = self.make_request("POST", "/admin/contacts", json=contact_data)
+            if response.status_code == 200:
+                create_response = response.json()
+                contact_id = create_response.get('contact_id')
+                if contact_id:
+                    created_contacts.append(contact_id)
+                    self.log_result(f"Create {contact_data['contact_type']} Contact", True, 
+                                   f"Created: {contact_data['label']}")
+                else:
+                    self.log_result(f"Create {contact_data['contact_type']} Contact", False, "No contact ID returned")
+            else:
+                self.log_result(f"Create {contact_data['contact_type']} Contact", False, 
+                               f"Status: {response.status_code}")
+        
+        # Verify all contacts appear in admin list
+        response = self.make_request("GET", "/admin/contacts")
+        if response.status_code == 200:
+            all_contacts = response.json().get("contacts", [])
+            total_found = len(all_contacts)
+            
+            # Count contacts by type
+            type_counts = {}
+            for contact in all_contacts:
+                contact_type = contact.get('contact_type')
+                type_counts[contact_type] = type_counts.get(contact_type, 0) + 1
+            
+            self.log_result("Contact Types Distribution", True, 
+                           f"Total: {total_found}, Types: {len(type_counts)}")
+            
+            # Verify contacts appear in public endpoints
+            response = self.make_request("GET", "/jobs/contacts")
+            if response.status_code == 200:
+                public_contacts = response.json().get("contacts", {})
+                public_total = sum(len(contacts) for contacts in public_contacts.values())
+                
+                if public_total > 0:
+                    self.log_result("Public Contacts Integration", True, 
+                                   f"Found {public_total} public contacts across {len(public_contacts)} categories")
+                else:
+                    self.log_result("Public Contacts Integration", False, "No public contacts found")
+            else:
+                self.log_result("Public Contacts Integration", False, f"Status: {response.status_code}")
+        else:
+            self.log_result("Contact Types Distribution", False, f"Status: {response.status_code}")
+        
+        # Clean up created test contacts
+        for contact_id in created_contacts:
+            self.make_request("DELETE", f"/admin/contacts/{contact_id}")
+
     def run_all_tests(self):
         """Run all test suites"""
         print("🚀 Starting Comprehensive Backend API Tests for ServiceHub")
