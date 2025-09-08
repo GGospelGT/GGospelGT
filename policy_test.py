@@ -103,13 +103,13 @@ class PolicyTester:
         else:
             self.log_result("Get all policies", False, f"Status: {response.status_code}")
         
-        # Test 4: Create New Privacy Policy
+        # Test 4: Create New Privacy Policy (Active)
         privacy_policy_data = {
             "policy_type": "privacy_policy",
             "title": "ServiceHub Privacy Policy - Nigerian Marketplace",
             "content": "This Privacy Policy describes how ServiceHub ('we', 'our', or 'us') collects, uses, and protects your personal information when you use our Nigerian marketplace platform. We are committed to protecting your privacy and ensuring the security of your personal data in accordance with Nigerian data protection laws and international best practices. This policy applies to all users of our platform including homeowners seeking services and tradespeople offering services across Nigeria.",
-            "effective_date": (datetime.utcnow() + timedelta(days=1)).isoformat(),
-            "status": "draft"
+            "effective_date": datetime.utcnow().isoformat(),  # Immediate activation
+            "status": "active"
         }
         
         response = self.make_request("POST", "/admin/policies", json=privacy_policy_data)
