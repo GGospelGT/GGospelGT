@@ -274,35 +274,33 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
           </div>
 
           <div className="space-y-4">
-            <h4 className="font-medium text-gray-800">Results by Trade:</h4>
-            {Object.entries(testResults.tradeResults).map(([trade, result]) => (
-              <div key={trade} className="border rounded-lg p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium">{trade}</span>
-                  <div className="flex items-center space-x-2">
-                    <span className={`font-bold ${
-                      result.passed ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {result.score}%
-                    </span>
-                    {result.passed ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-red-600" />
-                    )}
-                  </div>
+            <h4 className="font-medium text-gray-800">Test Result for {testResults.mainTrade}:</h4>
+            <div className="border rounded-lg p-4 bg-green-50">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium text-lg">{testResults.mainTrade}</span>
+                <div className="flex items-center space-x-2">
+                  <span className={`font-bold text-xl ${
+                    testResults.tradeResult.passed ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {testResults.tradeResult.score}%
+                  </span>
+                  {testResults.tradeResult.passed ? (
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-600" />
+                  )}
                 </div>
-                <div className="text-sm text-gray-600">
-                  {result.correct} out of {result.total} questions correct
-                </div>
-                <Progress 
-                  value={result.score} 
-                  className={`h-2 mt-2 ${
-                    result.passed ? 'bg-green-100' : 'bg-red-100'
-                  }`}
-                />
               </div>
-            ))}
+              <div className="text-sm text-gray-700 mb-2">
+                {testResults.tradeResult.correct} out of {testResults.tradeResult.total} questions correct
+              </div>
+              <Progress 
+                value={testResults.tradeResult.score} 
+                className={`h-3 ${
+                  testResults.tradeResult.passed ? 'bg-green-100' : 'bg-red-100'
+                }`}
+              />
+            </div>
           </div>
         </div>
 
