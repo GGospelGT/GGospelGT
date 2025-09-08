@@ -89,6 +89,6 @@ export const adminReferralsAPI = {
 
   // Get verification document image URL (admin)
   getDocumentUrl(filename) {
-    return `${import.meta.env.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL}/api/admin/verifications/document/${filename}`;
+    return `${process.env.REACT_APP_BACKEND_URL}/api/admin/verifications/document/${filename}`;
   }
 };
