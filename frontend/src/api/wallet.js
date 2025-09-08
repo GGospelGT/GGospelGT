@@ -268,5 +268,31 @@ export const adminAPI = {
   async deleteTrade(tradeName) {
     const response = await apiClient.delete(`/admin/trades/${tradeName}`);
     return response.data;
+  },
+
+  // Skills Test Questions Management
+  async getAllSkillsQuestions() {
+    const response = await apiClient.get('/admin/skills-questions');
+    return response.data;
+  },
+
+  async getQuestionsForTrade(tradeCategory) {
+    const response = await apiClient.get(`/admin/skills-questions/${encodeURIComponent(tradeCategory)}`);
+    return response.data;
+  },
+
+  async addSkillsQuestion(tradeCategory, questionData) {
+    const response = await apiClient.post(`/admin/skills-questions/${encodeURIComponent(tradeCategory)}`, questionData);
+    return response.data;
+  },
+
+  async updateSkillsQuestion(questionId, questionData) {
+    const response = await apiClient.put(`/admin/skills-questions/${questionId}`, questionData);
+    return response.data;
+  },
+
+  async deleteSkillsQuestion(questionId) {
+    const response = await apiClient.delete(`/admin/skills-questions/${questionId}`);
+    return response.data;
   }
 };
