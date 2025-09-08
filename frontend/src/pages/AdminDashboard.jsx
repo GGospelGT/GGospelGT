@@ -293,6 +293,7 @@ const AdminDashboard = () => {
                   { id: 'jobs', label: 'Job Access Fees', icon: '🔧' },
                   { id: 'verifications', label: 'ID Verifications', icon: '🆔' },
                   { id: 'users', label: 'User Management', icon: '👥' },
+                  { id: 'locations', label: 'Locations & Trades', icon: '🌍' },
                   { id: 'stats', label: 'Dashboard Stats', icon: '📊' }
                 ].map((tab) => (
                   <button
