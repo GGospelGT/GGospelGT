@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Search, Wrench, Users, Star, ArrowRight, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const TradeCategoriesPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Nigerian Trade Categories with descriptions and icons
