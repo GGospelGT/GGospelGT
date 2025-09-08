@@ -49,9 +49,9 @@ async def fund_wallet(
 ):
     """Request wallet funding with payment proof"""
     
-    # Validate amount (minimum ₦1500)
-    if amount_naira < 1500:
-        raise HTTPException(status_code=400, detail="Minimum funding amount is ₦1500")
+    # Validate amount (minimum ₦100)
+    if amount_naira < 100:
+        raise HTTPException(status_code=400, detail="Minimum funding amount is ₦100")
     
     # Validate image file
     if not proof_image.content_type.startswith("image/"):
