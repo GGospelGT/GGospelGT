@@ -52,6 +52,7 @@ function App() {
             <Route path="/trade-categories" element={<TradeCategoriesPage />} />
             <Route path="/trade-categories/:categorySlug" element={<TradeCategoryDetailPage />} />
             <Route path="/help" element={<HelpFAQsPage />} />
+            <Route path="/contact" element={<ContactUsPage />} />
           </Routes>
           <Toaster />
         </BrowserRouter>
