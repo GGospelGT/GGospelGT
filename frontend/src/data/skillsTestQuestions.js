@@ -575,10 +575,7 @@ export const skillsTestQuestions = {
       category: "Workmanship",
       explanation: "Chipped edges typically result from using wrong cutting tools or poor technique."
     }
-  ]
-
-  // Add more trade categories: 'Roofing', 'Carpentry', 'Painting', etc.
-  // Each should have exactly 20 questions covering technical knowledge, safety, and Nigerian standards
+  ],
 
   "Concrete Works": [
     {
