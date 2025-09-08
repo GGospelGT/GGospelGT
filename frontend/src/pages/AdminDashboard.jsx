@@ -1952,6 +1952,21 @@ const AdminDashboard = () => {
                 </div>
               )}
 
+              {/* Contact Management Tab */}
+              {activeTab === 'contacts' && (
+                <ContactManagementTab
+                  contacts={contacts}
+                  contactTypes={contactTypes}
+                  showAddContact={showAddContact}
+                  setShowAddContact={setShowAddContact}
+                  editingContact={editingContact}
+                  setEditingContact={setEditingContact}
+                  loading={loading}
+                  fetchData={fetchData}
+                  toast={toast}
+                />
+              )}
+
               {/* Stats Tab */}
               {activeTab === 'stats' && (
                 <div className="space-y-6">
