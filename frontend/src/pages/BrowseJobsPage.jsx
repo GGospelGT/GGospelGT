@@ -662,10 +662,10 @@ const BrowseJobsPage = () => {
                           {isTradesperson() && (
                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
                               <div className="text-sm font-semibold text-yellow-800">
-                                Access Fee: {job.access_fee_coins || 15} coins
+                                Access Fee: {job.access_fee_coins || 10} coins
                               </div>
                               <div className="text-xs text-yellow-600">
-                                ₦{(job.access_fee_naira || 1500).toLocaleString()} for contact details
+                                ₦{(job.access_fee_naira || 1000).toLocaleString()} for contact details
                               </div>
                             </div>
                           )}
