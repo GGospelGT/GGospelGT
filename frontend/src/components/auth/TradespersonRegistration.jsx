@@ -76,6 +76,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
   const [testAnswers, setTestAnswers] = useState({});
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const { registerTradesperson } = useAuth();
   const { toast } = useToast();
