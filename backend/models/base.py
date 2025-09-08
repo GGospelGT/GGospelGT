@@ -474,3 +474,66 @@ class WithdrawalRequest(BaseModel):
     amount_coins: int
     include_referral_coins: bool = False
     bank_details_confirmed: bool = True
+
+# Policy Management Models
+class PolicyType(str, Enum):
+    PRIVACY_POLICY = "privacy_policy"
+    TERMS_OF_SERVICE = "terms_of_service"
+    REVIEWS_POLICY = "reviews_policy"
+    COOKIE_POLICY = "cookie_policy"
+    REFUND_POLICY = "refund_policy"
+
+class PolicyStatus(str, Enum):
+    DRAFT = "draft"
+    SCHEDULED = "scheduled"
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+
+class PolicyCreate(BaseModel):
+    policy_type: PolicyType
+    title: str = Field(..., min_length=5, max_length=200)
+    content: str = Field(..., min_length=50)
+    effective_date: Optional[datetime] = None
+    notes: Optional[str] = Field(None, max_length=500)
+
+class PolicyUpdate(BaseModel):
+    title: Optional[str] = Field(None, min_length=5, max_length=200)
+    content: Optional[str] = Field(None, min_length=50)
+    effective_date: Optional[datetime] = None
+    notes: Optional[str] = Field(None, max_length=500)
+    status: Optional[PolicyStatus] = None
+
+class Policy(BaseModel):
+    id: str
+    policy_type: PolicyType
+    title: str
+    content: str
+    status: PolicyStatus
+    version: int
+    effective_date: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    created_by: str  # admin username
+    notes: Optional[str] = None
+    
+class PolicyHistory(BaseModel):
+    policy_id: str
+    policy_type: PolicyType
+    title: str
+    content: str
+    version: int
+    effective_date: Optional[datetime] = None
+    created_at: datetime
+    created_by: str
+    notes: Optional[str] = None
+    archived_at: datetime
+    archived_by: str
+
+class PolicyResponse(BaseModel):
+    policy: Policy
+    has_history: bool
+    total_versions: int
+
+class PolicyListResponse(BaseModel):
+    policies: List[Policy]
+    total_count: int
