@@ -344,7 +344,7 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
         <div className="flex justify-between items-center mb-3">
           <div>
             <h3 className="font-semibold text-blue-800">
-              {formData.selectedTrades[currentTrade]} Skills Test
+              {formData.selectedTrades[0]} Skills Test
             </h3>
             <p className="text-sm text-blue-600">
               Question {getCurrentQuestionNumber()} of {getTotalQuestions()}
