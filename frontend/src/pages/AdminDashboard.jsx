@@ -19,6 +19,16 @@ const AdminDashboard = () => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [editingJob, setEditingJob] = useState(null);
   const [selectedVerification, setSelectedVerification] = useState(null);
+  
+  // Location & Trades Management state
+  const [activeLocationTab, setActiveLocationTab] = useState('states');
+  const [states, setStates] = useState([]);
+  const [lgas, setLgas] = useState([]);
+  const [towns, setTowns] = useState([]);
+  const [trades, setTrades] = useState([]);
+  const [tradeGroups, setTradeGroups] = useState([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
