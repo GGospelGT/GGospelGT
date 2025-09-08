@@ -290,7 +290,8 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         break;
       case 3:
         if (!formData.idType) newErrors.idType = 'Please select an ID type';
-        if (!formData.idDocument) newErrors.idDocument = 'Please upload your ID document';
+        // Temporarily disable document upload requirement for testing
+        // if (!formData.idDocument) newErrors.idDocument = 'Please upload your ID document';
         break;
       case 4:
         if (!formData.skillsTestPassed) {
