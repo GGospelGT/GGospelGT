@@ -5244,56 +5244,5 @@ class BackendTester:
     
 if __name__ == "__main__":
     tester = BackendTester()
-    
-    print("🚀 Starting ServiceHub Backend Tests with Referral System")
-    print("=" * 80)
-    print("Testing complete serviceHub marketplace backend including referral system")
-    print(f"Backend URL: {tester.base_url}")
-    print("=" * 80)
-    
-    try:
-        # Run comprehensive tests including referral system
-        tester.test_health_endpoints()
-        tester.test_authentication_system()
-        tester.test_homeowner_job_management()
-        tester.test_my_jobs_endpoint()
-        tester.test_quote_management_system()
-        tester.test_profile_management_system()
-        tester.test_portfolio_management_system()
-        tester.test_interest_system()
-        tester.test_notification_system()
-        tester.test_notification_workflow_integration()
-        tester.test_communication_system()
-        
-        # NEW: Test referral system comprehensively
-        tester.test_referral_system_comprehensive()
-        
-        tester.test_error_handling_and_edge_cases()
-        
-    except Exception as e:
-        print(f"\n❌ Critical test failure: {e}")
-        tester.results['failed'] += 1
-        tester.results['errors'].append(f"Critical failure: {str(e)}")
-    
-    # Print final summary
-    print(f"\n{'='*80}")
-    print("🏁 SERVICEHUB BACKEND TEST SUMMARY")
-    print(f"{'='*80}")
-    print(f"✅ Passed: {tester.results['passed']}")
-    print(f"❌ Failed: {tester.results['failed']}")
-    
-    if tester.results['passed'] + tester.results['failed'] > 0:
-        success_rate = (tester.results['passed']/(tester.results['passed']+tester.results['failed'])*100)
-        print(f"📊 Success Rate: {success_rate:.1f}%")
-    
-    if tester.results['errors']:
-        print(f"\n🔍 FAILED TESTS:")
-        for error in tester.results['errors']:
-            print(f"   • {error}")
-    
-    print(f"\n🎯 Testing Complete! Referral system comprehensively tested.")
-    print(f"💡 The serviceHub marketplace backend with referral system has been verified.")
-    
-    # Return exit code based on results
-    exit_code = 0 if tester.results['failed'] == 0 else 1
-    exit(exit_code)
+    # Run only job loading tests as requested
+    tester.run_job_loading_tests()
