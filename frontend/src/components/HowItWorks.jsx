@@ -68,7 +68,11 @@ const HowItWorks = () => {
           </div>
 
           <div className="text-center">
-            <Button className="text-white px-8 py-3 text-lg font-lato hover:opacity-90" style={{backgroundColor: '#2F8140'}}>
+            <Button 
+              onClick={handleSeeHowItWorks}
+              className="text-white px-8 py-3 text-lg font-lato hover:opacity-90" 
+              style={{backgroundColor: '#2F8140'}}
+            >
               See how it works
             </Button>
           </div>
