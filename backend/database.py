@@ -2099,6 +2099,182 @@ class Database:
             "minimum_required": 5,
             "shortfall": max(0, 5 - total_coins)
         }
+    
+    # ==========================================
+    # USER MANAGEMENT METHODS (Admin)
+    # ==========================================
+    
+    async def get_all_users_for_admin(self, skip: int = 0, limit: int = 50, role: str = None, status: str = None, search: str = None):
+        """Get all users with filtering for admin dashboard"""
+        
+        # Build query filter
+        query = {}
+        
+        if role:
+            query["role"] = role
+            
+        if status:
+            query["status"] = status
+        else:
+            # Default to active users if no status specified
+            query["status"] = {"$ne": "deleted"}
+            
+        if search:
+            # Search in name, email, phone, or skills
+            query["$or"] = [
+                {"name": {"$regex": search, "$options": "i"}},
+                {"email": {"$regex": search, "$options": "i"}},
+                {"phone": {"$regex": search, "$options": "i"}},
+                {"skills": {"$regex": search, "$options": "i"}}
+            ]
+        
+        # Get users with pagination
+        users_cursor = self.users_collection.find(query).skip(skip).limit(limit).sort("created_at", -1)
+        users = await users_cursor.to_list(length=limit)
+        
+        # Process users to add activity info and remove sensitive data
+        processed_users = []
+        for user in users:
+            user["_id"] = str(user["_id"])
+            user.pop("password_hash", None)  # Remove password hash
+            
+            # Add activity indicators
+            user["last_login"] = user.get("last_login", user.get("created_at"))
+            user["is_verified"] = user.get("is_verified", False)
+            user["wallet_balance"] = 0
+            
+            # Get wallet balance if tradesperson
+            if user.get("role") == "tradesperson":
+                wallet = await self.wallets_collection.find_one({"user_id": user["id"]})
+                if wallet:
+                    user["wallet_balance"] = wallet.get("balance_coins", 0)
+            
+            # Count jobs/interests based on role
+            if user.get("role") == "homeowner":
+                user["jobs_posted"] = await self.jobs_collection.count_documents({"homeowner.id": user["id"]})
+            elif user.get("role") == "tradesperson":
+                user["interests_shown"] = await self.interests_collection.count_documents({"tradesperson_id": user["id"]})
+            
+            processed_users.append(user)
+        
+        return processed_users
+    
+    async def get_total_users_count(self):
+        """Get total number of registered users"""
+        return await self.users_collection.count_documents({"status": {"$ne": "deleted"}})
+    
+    async def get_active_users_count(self):
+        """Get count of active users (logged in within last 30 days)"""
+        from datetime import datetime, timedelta
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+        
+        return await self.users_collection.count_documents({
+            "status": "active",
+            "last_login": {"$gte": thirty_days_ago}
+        })
+    
+    async def get_users_count_by_role(self, role: str):
+        """Get count of users by role"""
+        return await self.users_collection.count_documents({
+            "role": role,
+            "status": {"$ne": "deleted"}
+        })
+    
+    async def get_verified_users_count(self):
+        """Get count of verified users"""
+        return await self.users_collection.count_documents({
+            "is_verified": True,
+            "status": {"$ne": "deleted"}
+        })
+    
+    async def get_user_activity_stats(self, user_id: str):
+        """Get comprehensive activity statistics for a user"""
+        
+        user = await self.get_user_by_id(user_id)
+        if not user:
+            return {}
+        
+        stats = {
+            "registration_date": user.get("created_at"),
+            "last_login": user.get("last_login", user.get("created_at")),
+            "is_verified": user.get("is_verified", False),
+            "status": user.get("status", "active")
+        }
+        
+        if user.get("role") == "homeowner":
+            # Homeowner statistics
+            stats.update({
+                "total_jobs_posted": await self.jobs_collection.count_documents({"homeowner.id": user_id}),
+                "active_jobs": await self.jobs_collection.count_documents({
+                    "homeowner.id": user_id,
+                    "status": "open"
+                }),
+                "completed_jobs": await self.jobs_collection.count_documents({
+                    "homeowner.id": user_id,
+                    "status": "completed"
+                }),
+                "total_interests_received": await self.interests_collection.count_documents({
+                    "job.homeowner.id": user_id
+                }),
+                "average_job_budget": await self._get_average_job_budget(user_id)
+            })
+            
+        elif user.get("role") == "tradesperson":
+            # Tradesperson statistics
+            wallet = await self.wallets_collection.find_one({"user_id": user_id})
+            
+            stats.update({
+                "total_interests_shown": await self.interests_collection.count_documents({"tradesperson_id": user_id}),
+                "wallet_balance_coins": wallet.get("balance_coins", 0) if wallet else 0,
+                "wallet_balance_naira": wallet.get("balance_naira", 0) if wallet else 0,
+                "successful_referrals": await self.user_verifications_collection.count_documents({
+                    "referred_by": user_id,
+                    "verification_status": "verified"
+                }),
+                "portfolio_items": await self.portfolio_collection.count_documents({"tradesperson_id": user_id}),
+                "average_rating": await self._get_tradesperson_average_rating(user_id),
+                "total_reviews": await self.reviews_collection.count_documents({"tradesperson_id": user_id})
+            })
+        
+        return stats
+    
+    async def update_user_status(self, user_id: str, status: str, admin_notes: str = ""):
+        """Update user status with admin notes"""
+        
+        update_data = {
+            "status": status,
+            "updated_at": datetime.now(),
+            "admin_notes": admin_notes
+        }
+        
+        result = await self.users_collection.update_one(
+            {"id": user_id},
+            {"$set": update_data}
+        )
+        
+        return result.modified_count > 0
+    
+    async def _get_average_job_budget(self, homeowner_id: str):
+        """Helper method to calculate average job budget for a homeowner"""
+        
+        pipeline = [
+            {"$match": {"homeowner.id": homeowner_id, "budget": {"$gt": 0}}},
+            {"$group": {"_id": None, "avg_budget": {"$avg": "$budget"}}}
+        ]
+        
+        result = await self.jobs_collection.aggregate(pipeline).to_list(length=1)
+        return round(result[0]["avg_budget"], 2) if result else 0
+        
+    async def _get_tradesperson_average_rating(self, tradesperson_id: str):
+        """Helper method to calculate average rating for a tradesperson"""
+        
+        pipeline = [
+            {"$match": {"tradesperson_id": tradesperson_id}},
+            {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}}}
+        ]
+        
+        result = await self.reviews_collection.aggregate(pipeline).to_list(length=1)
+        return round(result[0]["avg_rating"], 1) if result else 0
 
 # Global database instance
 database = Database()
