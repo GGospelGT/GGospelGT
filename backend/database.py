@@ -2262,7 +2262,7 @@ class Database:
             {"$group": {"_id": None, "avg_budget": {"$avg": "$budget"}}}
         ]
         
-        result = await self.jobs_collection.aggregate(pipeline).to_list(length=1)
+        result = await self.database.jobs.aggregate(pipeline).to_list(length=1)
         return round(result[0]["avg_budget"], 2) if result else 0
         
     async def _get_tradesperson_average_rating(self, tradesperson_id: str):
@@ -2273,7 +2273,7 @@ class Database:
             {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}}}
         ]
         
-        result = await self.reviews_collection.aggregate(pipeline).to_list(length=1)
+        result = await self.database.reviews.aggregate(pipeline).to_list(length=1)
         return round(result[0]["avg_rating"], 1) if result else 0
 
 # Global database instance
