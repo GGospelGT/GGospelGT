@@ -1926,6 +1926,173 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Add/Edit Skills Question Modal */}
+      {(showAddQuestion || editingQuestion) && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4">
+              {editingQuestion ? 'Edit Question' : 'Add New Question'}
+            </h3>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              
+              const questionData = {
+                question: formData.get('question'),
+                options: [
+                  formData.get('option1'),
+                  formData.get('option2'),
+                  formData.get('option3'),
+                  formData.get('option4')
+                ].filter(opt => opt && opt.trim()),
+                correct_answer: parseInt(formData.get('correct_answer')),
+                category: formData.get('category'),
+                explanation: formData.get('explanation'),
+                difficulty: formData.get('difficulty')
+              };
+
+              try {
+                if (editingQuestion) {
+                  await adminAPI.updateSkillsQuestion(editingQuestion.id, questionData);
+                  toast({ title: "Question updated successfully" });
+                } else {
+                  await adminAPI.addSkillsQuestion(selectedTrade, questionData);
+                  toast({ title: "Question added successfully" });
+                }
+                
+                setShowAddQuestion(false);
+                setEditingQuestion(null);
+                fetchData();
+              } catch (error) {
+                toast({ 
+                  title: editingQuestion ? "Failed to update question" : "Failed to add question", 
+                  variant: "destructive" 
+                });
+              }
+            }}>
+              <div className="space-y-4">
+                {/* Question Text */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Question *
+                  </label>
+                  <textarea
+                    name="question"
+                    required
+                    defaultValue={editingQuestion?.question || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    rows="3"
+                    placeholder="Enter the question text..."
+                  />
+                </div>
+
+                {/* Answer Options */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Answer Options *
+                  </label>
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4].map((num) => (
+                      <div key={num} className="flex items-center space-x-3">
+                        <input
+                          type="radio"
+                          name="correct_answer"
+                          value={num - 1}
+                          defaultChecked={editingQuestion?.correct_answer === (num - 1)}
+                          className="text-green-600"
+                          required
+                        />
+                        <input
+                          type="text"
+                          name={`option${num}`}
+                          defaultValue={editingQuestion?.options?.[num - 1] || ''}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          placeholder={`Option ${num}`}
+                          required={num <= 2}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Select the radio button next to the correct answer. At least 2 options required.
+                  </p>
+                </div>
+
+                {/* Category and Difficulty */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category
+                    </label>
+                    <select
+                      name="category"
+                      defaultValue={editingQuestion?.category || 'Technical Knowledge'}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Technical Knowledge">Technical Knowledge</option>
+                      <option value="Safety Standards">Safety Standards</option>
+                      <option value="Nigerian Building Code">Nigerian Building Code</option>
+                      <option value="Materials & Tools">Materials & Tools</option>
+                      <option value="Quality Control">Quality Control</option>
+                      <option value="Climate Considerations">Climate Considerations</option>
+                      <option value="Regional Considerations">Regional Considerations</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Difficulty
+                    </label>
+                    <select
+                      name="difficulty"
+                      defaultValue={editingQuestion?.difficulty || 'Medium'}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Explanation */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Explanation (Optional)
+                  </label>
+                  <textarea
+                    name="explanation"
+                    defaultValue={editingQuestion?.explanation || ''}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    rows="2"
+                    placeholder="Explain why this is the correct answer..."
+                  />
+                </div>
+              </div>
+              
+              <div className="flex space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddQuestion(false);
+                    setEditingQuestion(null);
+                  }}
+                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                >
+                  {editingQuestion ? 'Update Question' : 'Add Question'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
