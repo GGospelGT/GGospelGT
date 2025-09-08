@@ -378,7 +378,7 @@ class JobWithAccessFee(Job):
     access_fee_coins: int = 15   # Default 15 coins
 
 class JobAccessFeeUpdate(BaseModel):
-    access_fee_naira: int = Field(..., ge=1500, le=5000)  # ₦1500 - ₦5000
+    access_fee_naira: int = Field(..., gt=0, le=10000)  # Must be positive, max ₦10,000
 
 # Bank Details Model for Frontend
 class BankDetails(BaseModel):
