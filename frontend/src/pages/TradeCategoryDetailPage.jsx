@@ -198,6 +198,409 @@ const TradeCategoryDetailPage = () => {
         "Cannot cut tiles properly"
       ]
     },
+    "concrete-works": {
+      name: "Concrete Works",
+      description: "Professional concrete services for foundations, floors, and structural elements",
+      services: [
+        "Foundation concrete pouring",
+        "Floor slab construction", 
+        "Concrete repairs",
+        "Stamped concrete",
+        "Concrete finishing",
+        "Reinforcement installation"
+      ],
+      averagePrice: "₦50,000 - ₦800,000",
+      timeframe: "1-7 days",
+      materials: ["Cement", "Sand", "Granite", "Water", "Steel reinforcement", "Admixtures"],
+      whatToExpect: "Concrete workers handle mixing, pouring, and finishing concrete for various applications. They ensure proper curing and strength development.",
+      whenToHire: "For foundations, floor slabs, driveways, or any structural concrete work in construction projects.",
+      tips: [
+        "Check concrete mix specifications",
+        "Ensure proper reinforcement placement",
+        "Plan for weather conditions",
+        "Understand curing requirements",
+        "Verify equipment and tools availability"
+      ],
+      redFlags: [
+        "Uses incorrect concrete mix ratios",
+        "Ignores weather conditions",
+        "Doesn't understand reinforcement requirements",
+        "Rushes the curing process",
+        "Lacks proper finishing tools"
+      ]
+    },
+    "cctv-security-systems": {
+      name: "CCTV & Security Systems",
+      description: "Professional security system installation and monitoring solutions",
+      services: [
+        "CCTV camera installation",
+        "Access control systems",
+        "Alarm system setup",
+        "Security system maintenance",
+        "Remote monitoring setup",
+        "Integration with mobile apps"
+      ],
+      averagePrice: "₦30,000 - ₦500,000",
+      timeframe: "1-3 days",
+      materials: ["CCTV cameras", "DVR/NVR systems", "Cables", "Monitors", "Hard drives", "Power supplies"],
+      whatToExpect: "Security technicians install and configure surveillance systems, ensuring optimal coverage and reliable recording. They provide training on system operation.",
+      whenToHire: "When enhancing property security, installing new surveillance, or upgrading existing security systems.",
+      tips: [
+        "Plan camera placement for optimal coverage",
+        "Discuss storage and recording options",
+        "Ensure network compatibility",
+        "Ask about mobile app access",
+        "Understand maintenance requirements"
+      ],
+      redFlags: [
+        "Cannot explain system capabilities",
+        "Uses low-quality equipment",
+        "Poor cable management",
+        "No system testing or demonstration",
+        "Inadequate training provided"
+      ]
+    },
+    "door-window-installation": {
+      name: "Door & Window Installation",
+      description: "Professional installation and repair of doors, windows, and frames",
+      services: [
+        "Door installation and replacement",
+        "Window installation",
+        "Frame repairs",
+        "Hardware installation", 
+        "Weatherproofing",
+        "Security door installation"
+      ],
+      averagePrice: "₦15,000 - ₦200,000",
+      timeframe: "4 hours - 2 days",
+      materials: ["Doors", "Windows", "Frames", "Hinges", "Locks", "Sealants"],
+      whatToExpect: "Installation specialists ensure proper fitting, alignment, and sealing of doors and windows. They handle hardware and weatherproofing.",
+      whenToHire: "For new installations, replacements, repairs, or security upgrades to doors and windows.",
+      tips: [
+        "Measure openings accurately",
+        "Choose appropriate materials for climate",
+        "Ensure proper weatherproofing",
+        "Check hardware quality",
+        "Verify security features"
+      ],
+      redFlags: [
+        "Doesn't measure openings properly",
+        "Uses poor quality hardware",
+        "Ignores weatherproofing requirements",
+        "Cannot adjust for alignment issues",
+        "Leaves gaps or poor sealing"
+      ]
+    },
+    "renovations": {
+      name: "Renovations", 
+      description: "Complete renovation services for homes and commercial spaces",
+      services: [
+        "Kitchen renovations",
+        "Bathroom remodeling",
+        "Room additions",
+        "Interior renovations",
+        "Exterior renovations",
+        "Project coordination"
+      ],
+      averagePrice: "₦200,000 - ₦5,000,000",
+      timeframe: "2 weeks - 6 months",
+      materials: ["Varies by project", "Tiles", "Paint", "Fixtures", "Flooring", "Lighting"],
+      whatToExpect: "Renovation contractors manage complete remodeling projects, coordinating multiple trades and ensuring quality results within timeline and budget.",
+      whenToHire: "When updating spaces, increasing property value, or improving functionality of existing areas.",
+      tips: [
+        "Define scope and budget clearly",
+        "Get detailed project timeline",
+        "Understand permit requirements",
+        "Plan for temporary disruptions",
+        "Set realistic expectations"
+      ],
+      redFlags: [
+        "Vague project scope or timeline",
+        "No written contract",
+        "Demands large upfront payments",
+        "Cannot provide renovation portfolio",
+        "Doesn't discuss permits"
+      ]
+    },
+    "relocation-moving": {
+      name: "Relocation/Moving",
+      description: "Professional moving and relocation services for homes and offices",
+      services: [
+        "Residential moving",
+        "Office relocations",
+        "Packing services",
+        "Loading and unloading",
+        "Furniture assembly",
+        "Storage solutions"
+      ],
+      averagePrice: "₦20,000 - ₦200,000",
+      timeframe: "4 hours - 2 days",
+      materials: ["Moving boxes", "Packing materials", "Moving truck", "Dollies", "Straps", "Protective covers"],
+      whatToExpected: "Moving professionals handle packing, loading, transportation, and unloading of belongings with care and efficiency.",
+      whenToHire: "When relocating homes or offices, need professional packing, or require specialized moving equipment.",
+      tips: [
+        "Get written estimates from multiple movers",
+        "Verify insurance coverage",
+        "Inventory valuable items",
+        "Pack essentials separately",
+        "Confirm moving date and timeline"
+      ],
+      redFlags: [
+        "No insurance or bonding",
+        "Extremely low estimates",
+        "Demands cash payment only",
+        "No written contract",
+        "Cannot provide references"
+      ]
+    },
+    "general-handyman-work": {
+      name: "General Handyman Work",
+      description: "Multi-skilled professionals for various home maintenance and repair tasks",
+      services: [
+        "Small repairs and fixes",
+        "Assembly services",
+        "Basic maintenance",
+        "Minor installations",
+        "Patch work",
+        "Odd jobs"
+      ],
+      averagePrice: "₦5,000 - ₦50,000",
+      timeframe: "2 hours - 1 day",
+      materials: ["Basic tools", "Fasteners", "Adhesives", "Small parts", "Touch-up paint", "Sealants"],
+      whatToExpect: "Handymen handle various small tasks and repairs around the home, providing convenient multi-service support.",
+      whenToHire: "For multiple small tasks, minor repairs, assembly work, or maintenance that doesn't require specialized trades.",
+      tips: [
+        "List all tasks before getting quote",
+        "Verify tools and materials needed",
+        "Set priorities for task completion",
+        "Check references for quality work",
+        "Discuss any safety concerns"
+      ],
+      redFlags: [
+        "Lacks basic tools",
+        "Cannot handle multiple task types",
+        "No understanding of safety practices",
+        "Quotes without seeing all tasks",
+        "Leaves tasks incomplete"
+      ]
+    },
+    "bathroom-fitting": {
+      name: "Bathroom Fitting",
+      description: "Complete bathroom installation and renovation services",
+      services: [
+        "Bathroom suite installation",
+        "Shower installation",
+        "Toilet installation",
+        "Basin and vanity fitting",
+        "Tiling and waterproofing",
+        "Plumbing connections"
+      ],
+      averagePrice: "₦100,000 - ₦800,000", 
+      timeframe: "3-10 days",
+      materials: ["Bathroom suites", "Tiles", "Waterproof membranes", "Plumbing fittings", "Sealants", "Fixtures"],
+      whatToExpect: "Bathroom fitters handle complete installation from plumbing to finishing, ensuring waterproofing and functionality.",
+      whenToHire: "For new bathroom installations, complete renovations, or major bathroom upgrades.",
+      tips: [
+        "Plan layout and design first",
+        "Ensure proper waterproofing",
+        "Choose quality fixtures",
+        "Verify plumbing compatibility",
+        "Consider ventilation requirements"
+      ],
+      redFlags: [
+        "Ignores waterproofing requirements",
+        "Poor quality fixtures or materials",
+        "Cannot handle plumbing connections",
+        "Doesn't follow building codes",
+        "Rushes installation process"
+      ]
+    },
+    "solar-inverter-installation": {
+      name: "Solar & Inverter Installation",
+      description: "Professional solar power and inverter system installation and maintenance",
+      services: [
+        "Solar panel installation",
+        "Inverter system setup",
+        "Battery installation",
+        "System commissioning",
+        "Maintenance services",
+        "Performance monitoring"
+      ],
+      averagePrice: "₦200,000 - ₦2,000,000",
+      timeframe: "1-5 days",
+      materials: ["Solar panels", "Inverters", "Batteries", "Charge controllers", "Cables", "Mounting systems"],
+      whatToExpect: "Solar technicians design and install renewable energy systems, ensuring optimal performance and safety compliance.",
+      whenToHire: "When installing backup power, reducing electricity costs, or implementing renewable energy solutions.",
+      tips: [
+        "Assess energy needs accurately",
+        "Understand system components",
+        "Check warranty terms",
+        "Verify installer certifications",
+        "Plan for maintenance requirements"
+      ],
+      redFlags: [
+        "Cannot size system properly",
+        "Uses substandard components",
+        "Poor installation practices",
+        "No safety certifications",
+        "Inadequate system documentation"
+      ]
+    },
+    "welding": {
+      name: "Welding",
+      description: "Professional welding services for metal fabrication and repairs",
+      services: [
+        "Steel fabrication",
+        "Repair welding",
+        "Gate and railing installation",
+        "Structural welding",
+        "Decorative metalwork",
+        "Emergency repairs"
+      ],
+      averagePrice: "₦10,000 - ₦300,000",
+      timeframe: "2 hours - 1 week",
+      materials: ["Welding rods", "Steel", "Gas", "Safety equipment", "Grinding discs", "Paint"],
+      whatToExpect: "Welders join metals using various techniques, creating strong and durable connections for structural and decorative purposes.",
+      whenToHire: "For metal fabrication, repairs, installations, or custom metalwork projects.",
+      tips: [
+        "Verify welding certifications",
+        "Discuss material specifications",
+        "Ensure proper safety measures",
+        "Check previous welding work",
+        "Understand finishing requirements"
+      ],
+      redFlags: [
+        "No welding certifications",
+        "Ignores safety protocols",
+        "Poor quality welds",
+        "Uses inappropriate materials",
+        "Cannot read technical drawings"
+      ]
+    },
+    "furniture-making": {
+      name: "Furniture Making",
+      description: "Custom furniture design and manufacturing services",
+      services: [
+        "Custom furniture design",
+        "Kitchen cabinets",
+        "Wardrobes and closets",
+        "Office furniture",
+        "Repairs and restoration",
+        "Upholstery work"
+      ],
+      averagePrice: "₦50,000 - ₦1,000,000",
+      timeframe: "1-8 weeks",
+      materials: ["Hardwood", "Plywood", "Hardware", "Finishes", "Upholstery materials", "Adhesives"],
+      whatToExpect: "Furniture makers create custom pieces tailored to specific requirements, combining craftsmanship with functionality.",
+      whenToHire: "For custom furniture needs, built-in storage, or specialized pieces not available commercially.",
+      tips: [
+        "Review portfolio and samples",
+        "Discuss wood types and quality",
+        "Understand construction methods",
+        "Set realistic timeframes",
+        "Clarify warranty and aftercare"
+      ],
+      redFlags: [
+        "Cannot show quality examples",
+        "Uses poor materials",
+        "Unrealistic promises or timelines",
+        "No understanding of joinery",
+        "Lacks proper workshop facilities"
+      ]
+    },
+    "interior-design": {
+      name: "Interior Design",
+      description: "Professional interior design and space planning services",
+      services: [
+        "Space planning",
+        "Color consultation",
+        "Furniture selection",
+        "Lighting design",
+        "Project management",
+        "Styling and decoration"
+      ],
+      averagePrice: "₦100,000 - ₦2,000,000",
+      timeframe: "2-12 weeks",
+      materials: ["Design materials", "Furniture", "Lighting", "Textiles", "Accessories", "Art"],
+      whatToExpect: "Interior designers create functional and aesthetic spaces through careful planning, selection, and coordination of design elements.",
+      whenToHire: "When planning room makeovers, new construction interiors, or need professional design guidance.",
+      tips: [
+        "Review designer's portfolio",
+        "Discuss budget and timeline",
+        "Understand design process",
+        "Clarify purchasing arrangements",
+        "Set clear communication expectations"
+      ],
+      redFlags: [
+        "No portfolio or credentials",
+        "Cannot work within budget",
+        "Poor communication skills",
+        "Doesn't understand client needs",
+        "No project management experience"
+      ]
+    },
+    "locksmithing": {
+      name: "Locksmithing", 
+      description: "Professional lock installation, repair, and security services",
+      services: [
+        "Lock installation and repair",
+        "Key cutting and duplication",
+        "Emergency lockout service",
+        "Security system integration",
+        "Safe installation",
+        "Master key systems"
+      ],
+      averagePrice: "₦5,000 - ₦100,000",
+      timeframe: "30 minutes - 1 day",
+      materials: ["Locks", "Keys", "Security hardware", "Tools", "Lubricants", "Installation materials"],
+      whatToExpect: "Locksmiths provide security solutions through lock installation, repair, and emergency services with professional expertise.",
+      whenToHire: "For lock installations, repairs, emergencies, security upgrades, or key management needs.",
+      tips: [
+        "Verify locksmith credentials",
+        "Get written estimates",
+        "Ask about warranty on locks",
+        "Ensure 24/7 availability if needed",
+        "Check insurance coverage"
+      ],
+      redFlags: [
+        "Cannot provide proper identification",
+        "Excessive charges for simple tasks",
+        "Damages locks unnecessarily",
+        "No emergency service availability",
+        "Cannot handle modern lock systems"
+      ]
+    },
+    "recycling": {
+      name: "Recycling",
+      description: "Waste management and recycling services for various materials",
+      services: [
+        "Material collection",
+        "Sorting and processing",
+        "Electronics recycling",
+        "Metal recycling",
+        "Paper and cardboard recycling",
+        "Consultation services"
+      ],
+      averagePrice: "₦5,000 - ₦50,000",
+      timeframe: "1-3 hours",
+      materials: ["Collection containers", "Transportation", "Processing equipment", "Safety gear", "Documentation", "Certifications"],
+      whatToExpect: "Recycling professionals collect, sort, and process recyclable materials according to environmental standards and regulations.",
+      whenToHire: "For large-scale waste disposal, specialized recycling needs, or environmental compliance requirements.",
+      tips: [
+        "Understand what materials are accepted",
+        "Check environmental certifications",
+        "Discuss pickup schedules",
+        "Verify proper disposal methods",
+        "Ask about documentation provided"
+      ],
+      redFlags: [
+        "No environmental certifications",
+        "Cannot handle specialized materials",
+        "Poor sorting practices",
+        "No documentation provided",
+        "Environmentally harmful practices"
+      ]
+    },
     "roofing": {
       name: "Roofing",
       description: "Professional roofing services for installation, repairs, and maintenance",
