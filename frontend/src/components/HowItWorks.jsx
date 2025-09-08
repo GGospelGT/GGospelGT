@@ -4,6 +4,11 @@ import { Button } from './ui/button';
 import { Edit3, Users, CheckCircle } from 'lucide-react';
 
 const HowItWorks = () => {
+  const navigate = useNavigate();
+
+  const handleSeeHowItWorks = () => {
+    navigate('/how-it-works');
+  };
   const steps = [
     {
       number: '1',
