@@ -1556,10 +1556,10 @@ class Database:
         jobs = []
         async for job in cursor:
             job["_id"] = str(job["_id"])
-            # Set default access fee if not present
+            # Set default access fee if not present (flexible default)
             if "access_fee_naira" not in job:
-                job["access_fee_naira"] = 1500
-                job["access_fee_coins"] = 15
+                job["access_fee_naira"] = 1000  # Default ₦1000 (10 coins) - more flexible
+                job["access_fee_coins"] = 10
             jobs.append(job)
         
         return jobs
