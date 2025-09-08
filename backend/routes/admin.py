@@ -581,6 +581,100 @@ async def delete_trade(trade_name: str):
     
     return {"message": f"Trade category '{trade_name}' deleted successfully"}
 
+# Skills Test Questions Management
+@router.get("/skills-questions")
+async def get_all_skills_questions():
+    """Get all skills test questions grouped by trade"""
+    
+    questions = await database.get_all_skills_questions()
+    stats = await database.get_question_stats()
+    
+    return {
+        "questions": questions,
+        "stats": stats,
+        "total_questions": sum(len(q) for q in questions.values())
+    }
+
+@router.get("/skills-questions/{trade_category}")
+async def get_questions_for_trade(trade_category: str):
+    """Get all questions for a specific trade category"""
+    
+    questions = await database.get_questions_for_trade(trade_category)
+    
+    return {
+        "trade_category": trade_category,
+        "questions": questions,
+        "count": len(questions)
+    }
+
+@router.post("/skills-questions/{trade_category}")
+async def add_skills_question(trade_category: str, question_data: dict):
+    """Add a new skills test question for a trade category"""
+    
+    # Validate required fields
+    required_fields = ['question', 'options', 'correct_answer']
+    for field in required_fields:
+        if field not in question_data:
+            raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+    
+    # Validate options array
+    if not isinstance(question_data['options'], list) or len(question_data['options']) < 2:
+        raise HTTPException(status_code=400, detail="Options must be an array with at least 2 items")
+    
+    # Validate correct_answer index
+    if not isinstance(question_data['correct_answer'], int) or question_data['correct_answer'] >= len(question_data['options']):
+        raise HTTPException(status_code=400, detail="Invalid correct_answer index")
+    
+    question_id = await database.add_skills_question(trade_category, question_data)
+    
+    if not question_id:
+        raise HTTPException(status_code=500, detail="Failed to add question")
+    
+    return {
+        "message": "Skills question added successfully",
+        "question_id": question_id,
+        "trade_category": trade_category
+    }
+
+@router.put("/skills-questions/{question_id}")
+async def update_skills_question(question_id: str, question_data: dict):
+    """Update an existing skills test question"""
+    
+    # Validate required fields
+    required_fields = ['question', 'options', 'correct_answer']
+    for field in required_fields:
+        if field not in question_data:
+            raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+    
+    # Validate options array
+    if not isinstance(question_data['options'], list) or len(question_data['options']) < 2:
+        raise HTTPException(status_code=400, detail="Options must be an array with at least 2 items")
+    
+    # Validate correct_answer index
+    if not isinstance(question_data['correct_answer'], int) or question_data['correct_answer'] >= len(question_data['options']):
+        raise HTTPException(status_code=400, detail="Invalid correct_answer index")
+    
+    success = await database.update_skills_question(question_id, question_data)
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    return {
+        "message": "Skills question updated successfully",
+        "question_id": question_id
+    }
+
+@router.delete("/skills-questions/{question_id}")
+async def delete_skills_question(question_id: str):
+    """Delete a skills test question"""
+    
+    success = await database.delete_skills_question(question_id)
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    return {"message": f"Skills question deleted successfully"}
+
 @router.get("/wallet/transaction/{transaction_id}")
 async def get_transaction_details(transaction_id: str):
     """Get detailed transaction information for admin review"""
