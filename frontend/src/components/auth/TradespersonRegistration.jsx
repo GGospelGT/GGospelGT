@@ -21,7 +21,10 @@ import {
   Star,
   Clock,
   Trophy,
-  BookOpen
+  BookOpen,
+  Upload,
+  X,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
