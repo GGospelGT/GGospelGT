@@ -144,7 +144,8 @@ class ContactNotificationTester:
             self.test_data['job'] = created_job
             return True
         else:
-            self.log_result("Test Job Creation", False, f"Status: {response.status_code}")
+            error_detail = response.text if response.text else "No error details"
+            self.log_result("Test Job Creation", False, f"Status: {response.status_code}, Error: {error_detail}")
             return False
     
     def test_notification_template_variables(self):
