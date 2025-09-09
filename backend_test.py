@@ -6632,7 +6632,7 @@ class BackendTester:
             "phone": "08187654321",
             "location": "Abuja",
             "postcode": "900001",
-            "trade_categories": ["Plumbing", "Electrical"],
+            "trade_categories": ["Plumbing", "Electrical Repairs"],  # Fixed: Use valid trade categories
             "experience_years": 6,
             "company_name": "Okonkwo Professional Services",
             "description": "Expert plumber and electrician with 6 years experience in residential projects.",
