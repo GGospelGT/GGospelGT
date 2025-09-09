@@ -6865,7 +6865,7 @@ class BackendTester:
         job_with_valid_location = {
             "title": "Electrical Installation - New Home Wiring",
             "description": "Need professional electrician to install complete electrical system in new 3-bedroom home in Lekki, Lagos. Includes wiring, outlets, switches, and electrical panel installation.",
-            "category": "Electrical",
+            "category": "Electrical Repairs",  # Fixed: Use valid trade category
             "state": "Lagos",
             "lga": "Eti-Osa",  # Valid LGA for Lagos
             "town": "Lekki",
@@ -6873,7 +6873,11 @@ class BackendTester:
             "home_address": "Plot 25, Lekki Phase 1",
             "budget_min": 400000,
             "budget_max": 700000,
-            "timeline": "Within 3 weeks"
+            "timeline": "Within 3 weeks",
+            # Add required homeowner fields
+            "homeowner_name": self.test_data.get('jobpost_homeowner_user', {}).get('name', 'Test Homeowner'),
+            "homeowner_email": self.test_data.get('jobpost_homeowner_user', {}).get('email', 'test@example.com'),
+            "homeowner_phone": self.test_data.get('jobpost_homeowner_user', {}).get('phone', '08123456789')
         }
         
         response = self.make_request("POST", "/jobs/", json=job_with_valid_location, auth_token=homeowner_token)
