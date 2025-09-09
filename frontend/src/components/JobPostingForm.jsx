@@ -130,8 +130,8 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     }
   }, [currentUser, isAuthenticated, loading]);
 
-  // Dynamic total steps based on authentication status  
-  const totalSteps = isUserAuthenticated() ? 4 : 5;
+  // Dynamic total steps based on authentication status - using defensive approach
+  const totalSteps = (isAuthenticated() && !loading) ? 4 : 5;
 
   const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
