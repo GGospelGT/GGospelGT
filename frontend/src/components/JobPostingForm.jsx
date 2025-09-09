@@ -235,7 +235,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
   const nextStep = () => {
     if (currentStep === 4) {
       // If user is already authenticated, skip account creation and submit job
-      if (isAuthenticated()) {
+      if (isUserAuthenticated()) {
         handleJobSubmissionForAuthenticatedUser();
         return;
       }
@@ -247,7 +247,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     if (validateStep(currentStep)) {
       const nextStepNumber = Math.min(currentStep + 1, totalSteps);
       // Safety check: prevent authenticated users from reaching step 5
-      if (isAuthenticated() && nextStepNumber === 5) {
+      if (isUserAuthenticated() && nextStepNumber === 5) {
         console.warn('Authenticated user tried to reach step 5 - calling handleSubmit instead');
         handleJobSubmissionForAuthenticatedUser();
         return;
