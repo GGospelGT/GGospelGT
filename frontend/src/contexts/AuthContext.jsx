@@ -114,6 +114,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isAuthenticated = () => {
+    // If we're still loading and have a token, assume authenticated
+    // This prevents the race condition where token exists but user data hasn't loaded yet
+    if (loading && token) {
+      return true;
+    }
+    // Normal check: both user and token must be present
     return !!user && !!token;
   };
 
