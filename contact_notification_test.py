@@ -89,7 +89,7 @@ class ContactNotificationTester:
             "phone": "08187654321",
             "location": "Lagos",
             "postcode": "100001",
-            "trade_categories": ["Plumbing", "Heating & Gas"],
+            "trade_categories": ["Plumbing"],
             "experience_years": 7,
             "company_name": "Okoro Professional Plumbing",
             "description": "Expert plumber specializing in residential and commercial installations.",
