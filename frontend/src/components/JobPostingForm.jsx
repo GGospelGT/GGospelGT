@@ -259,11 +259,22 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
   };
 
   const handleJobSubmissionForAuthenticatedUser = async () => {
-    if (!isAuthenticated() || !currentUser) {
+    // Check authentication with improved loading state handling
+    if (!isAuthenticated()) {
       toast({
         title: "Error",
         description: "You must be logged in to post a job.",
         variant: "destructive",
+      });
+      return;
+    }
+
+    // Wait for user data to load if we're still in loading state
+    if (!currentUser) {
+      toast({
+        title: "Loading...",
+        description: "Please wait while we load your account information.",
+        variant: "default",
       });
       return;
     }
@@ -284,9 +295,9 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         budget_min: formData.budgetType === 'range' ? parseInt(formData.budget_min) : null,
         budget_max: formData.budgetType === 'range' ? parseInt(formData.budget_max) : null,
         timeline: formData.timeline,
-        homeowner_name: currentUser.name,
-        homeowner_email: currentUser.email,
-        homeowner_phone: currentUser.phone
+        homeowner_name: currentUser.name || 'Homeowner',
+        homeowner_email: currentUser.email || '',
+        homeowner_phone: currentUser.phone || ''
       };
 
       // Add coordinates if location was selected
