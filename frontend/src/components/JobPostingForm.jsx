@@ -272,7 +272,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
 
   const handleJobSubmissionForAuthenticatedUser = async () => {
     // Check authentication with improved loading state handling
-    if (!isAuthenticated()) {
+    if (!isUserAuthenticated()) {
       toast({
         title: "Error",
         description: "You must be logged in to post a job.",
