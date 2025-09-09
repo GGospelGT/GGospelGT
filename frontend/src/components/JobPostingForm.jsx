@@ -875,6 +875,29 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
             ) : (
               // For non-authenticated users - show contact form
               <>
+                {/* Contact Information */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold font-montserrat" style={{color: '#121E3C'}}>
+                      Your Contact Information
+                    </h3>
+                    {isUserAuthenticated() && currentUser && (
+                      <div className="flex items-center text-green-600 text-sm">
+                        <CheckCircle size={16} className="mr-1" />
+                        Auto-filled from your account
+                      </div>
+                    )}
+                  </div>
+                  
+                  <p className="text-gray-600 font-lato mb-6">
+                    {isUserAuthenticated() 
+                      ? "We've automatically filled in your details from your account. You can edit them if needed."
+                      : "Tradespeople will use this information to contact you about your job."
+                    }
+                  </p>
+                </div>
+                
+              <>
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
