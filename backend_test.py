@@ -7031,7 +7031,7 @@ class BackendTester:
             "email": f"interests.test.tradesperson.{timestamp}@test.com",
             "password": "SecurePass123",
             "phone": "08187654321",
-            "location": "Ikeja, Lagos State",
+            "location": "Lagos",
             "postcode": "100001",
             "trade_categories": ["Plumbing", "Electrical"],
             "experience_years": 6,
