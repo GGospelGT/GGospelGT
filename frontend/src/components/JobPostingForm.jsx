@@ -112,8 +112,13 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
   const { loginWithToken, isAuthenticated, currentUser, loading } = useAuth();
   const { toast } = useToast();
   
-  // Dynamic total steps based on authentication status
-  const totalSteps = isAuthenticated() ? 4 : 5;
+  // Enhanced authentication check - use multiple indicators to be more robust
+  const isUserAuthenticated = () => {
+    return isAuthenticated() || (currentUser && currentUser.id);
+  };
+
+  // Dynamic total steps based on authentication status  
+  const totalSteps = isUserAuthenticated() ? 4 : 5;
 
   const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
