@@ -7025,38 +7025,21 @@ class BackendTester:
             self.log_result("Interests Test Homeowner Registration", False, f"Status: {response.status_code}")
             return
         
-        # Create test tradesperson
-        tradesperson_data = {
-            "name": "Kunle Ogundimu",
-            "email": f"interests.test.tradesperson.{timestamp}@test.com",
-            "password": "SecurePass123",
-            "phone": "08187654321",
-            "location": "Lagos",
-            "postcode": "100001",
-            "trade_categories": ["Plumbing & Water Works", "Electrical Installation"],
-            "experience_years": 6,
-            "company_name": "Ogundimu Professional Services",
-            "description": "Expert plumber and electrician with 6 years experience in Lagos residential projects. Specializing in modern plumbing systems and electrical installations for homes and businesses.",
-            "certifications": ["Licensed Plumber", "Electrical Installation Certificate"]
+        # Use existing tradesperson account
+        tradesperson_login = {
+            "email": "john.plumber@gmail.com",
+            "password": "Password123!"
         }
         
-        response = self.make_request("POST", "/auth/register/tradesperson", json=tradesperson_data)
+        response = self.make_request("POST", "/auth/login", json=tradesperson_login)
         if response.status_code == 200:
-            tradesperson_profile = response.json()
-            self.log_result("Interests Test Tradesperson Registration", True, f"ID: {tradesperson_profile['id']}")
-            self.test_data['interests_tradesperson'] = tradesperson_profile
-            
-            # Login tradesperson to get token
-            login_data = {"email": tradesperson_data["email"], "password": tradesperson_data["password"]}
-            login_response = self.make_request("POST", "/auth/login", json=login_data)
-            if login_response.status_code == 200:
-                login_result = login_response.json()
-                self.auth_tokens['interests_tradesperson'] = login_result['access_token']
-                self.log_result("Interests Test Tradesperson Login", True)
-            else:
-                self.log_result("Interests Test Tradesperson Login", False, f"Status: {login_response.status_code}")
+            login_result = response.json()
+            self.log_result("Interests Test Tradesperson Login", True, f"ID: {login_result['user']['id']}")
+            self.test_data['interests_tradesperson'] = login_result['user']
+            self.auth_tokens['interests_tradesperson'] = login_result['access_token']
         else:
-            self.log_result("Interests Test Tradesperson Registration", False, f"Status: {response.status_code}")
+            self.log_result("Interests Test Tradesperson Login", False, f"Status: {response.status_code}")
+            return
     
     def _test_wallet_balance_api(self):
         """Test wallet balance API for tradespeople"""
