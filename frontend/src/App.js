@@ -38,6 +38,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/post-job" element={<PostJobPage />} />
             <Route path="/my-jobs" element={<MyJobsPage />} />
+            <Route path="/my-interests" element={<MyInterestsPage />} />
             <Route path="/browse-jobs" element={<BrowseJobsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/tradesperson/:tradespersonId/portfolio" element={<TradespersonPortfolioPage />} />
