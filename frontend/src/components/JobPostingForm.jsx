@@ -120,20 +120,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
 
   // Auto-populate user details for authenticated users
   useEffect(() => {
-    console.log('Auto-population useEffect triggered:', {
-      isAuthenticated: isAuthenticated(),
-      currentUser: currentUser,
-      loading: loading,
-      hasUserData: !!(currentUser && currentUser.name)
-    });
-    
     if (isAuthenticated() && currentUser && !loading) {
-      console.log('Auto-populating user details:', {
-        name: currentUser.name,
-        email: currentUser.email,
-        phone: currentUser.phone
-      });
-      
       setFormData(prev => ({
         ...prev,
         homeowner_name: currentUser.name || '',
@@ -141,7 +128,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         homeowner_phone: currentUser.phone || ''
       }));
     }
-  }, [currentUser, loading]); // Removed isAuthenticated function from dependencies
+  }, [currentUser, loading]);
 
   // Dynamic total steps based on authentication status - using defensive approach
   const totalSteps = (isAuthenticated() && !loading) ? 4 : 5;
