@@ -156,6 +156,7 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     updateUser,
     isAuthenticated,
+    isUserAuthenticated,
     isHomeowner,
     isTradesperson,
     isActive,
