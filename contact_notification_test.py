@@ -77,7 +77,8 @@ class ContactNotificationTester:
             self.test_data['homeowner_user'] = homeowner_profile['user']
             self.auth_tokens['homeowner'] = homeowner_profile['access_token']
         else:
-            self.log_result("Homeowner Registration", False, f"Status: {response.status_code}")
+            error_detail = response.text if response.text else "No error details"
+            self.log_result("Homeowner Registration", False, f"Status: {response.status_code}, Error: {error_detail}")
             return False
         
         # Create tradesperson
