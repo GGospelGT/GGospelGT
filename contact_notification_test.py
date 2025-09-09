@@ -110,7 +110,8 @@ class ContactNotificationTester:
                 self.auth_tokens['tradesperson'] = login_response.json()['access_token']
                 self.test_data['tradesperson_user'] = login_response.json()['user']
         else:
-            self.log_result("Tradesperson Registration", False, f"Status: {response.status_code}")
+            error_detail = response.text if response.text else "No error details"
+            self.log_result("Tradesperson Registration", False, f"Status: {response.status_code}, Error: {error_detail}")
             return False
         
         return True
