@@ -314,7 +314,10 @@ class AuthenticationBugTester:
                 "home_address": "123 Test Street",
                 "budget_min": 100000,
                 "budget_max": 200000,
-                "timeline": "Within 1 week"
+                "timeline": "Within 1 week",
+                "homeowner_name": "Test Name",
+                "homeowner_email": "test@example.com",
+                "homeowner_phone": "08123456789"
             }
             
             response = self.make_request("POST", "/jobs/", json=job_data, 
