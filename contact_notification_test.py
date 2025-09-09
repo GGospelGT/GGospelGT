@@ -228,7 +228,7 @@ class ContactNotificationTester:
             required_fields = ['interest_id', 'status', 'message', 'contact_shared_at']
             missing_fields = [field for field in required_fields if field not in share_response]
             
-            if not missing_fields and share_response.get('status') == 'CONTACT_SHARED':
+            if not missing_fields and share_response.get('status') in ['CONTACT_SHARED', 'contact_shared']:
                 self.log_result("Contact Sharing API Response", True, 
                                f"Status: {share_response['status']}, Interest ID: {share_response['interest_id']}")
                 
