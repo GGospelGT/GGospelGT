@@ -7558,5 +7558,5 @@ class BackendTester:
     
 if __name__ == "__main__":
     tester = BackendTester()
-    # Run only job loading tests as requested
-    tester.run_job_loading_tests()
+    # Run the contact sharing notification system test as requested in review
+    tester.test_contact_sharing_notification_system()
