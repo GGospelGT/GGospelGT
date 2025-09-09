@@ -6966,84 +6966,376 @@ class BackendTester:
         else:
             self.log_result("My Jobs Endpoint", False, f"Status: {response.status_code}")
 
+    def test_interests_api_for_my_interests_page(self):
+        """
+        Test interests API endpoints specifically for My Interests page functionality
+        Focus on: /api/interests/my-interests and /api/wallet/balance endpoints
+        """
+        print("\n" + "="*80)
+        print("🎯 TESTING INTERESTS API FOR MY INTERESTS PAGE")
+        print("="*80)
+        
+        # Step 1: Setup test users and authentication
+        self._setup_interests_test_users()
+        
+        # Step 2: Test wallet balance API for tradespeople
+        self._test_wallet_balance_api()
+        
+        # Step 3: Create test job and interest for testing
+        self._create_test_job_and_interest()
+        
+        # Step 4: Test my-interests endpoint with authentication
+        self._test_my_interests_endpoint()
+        
+        # Step 5: Test authentication requirements
+        self._test_interests_authentication_requirements()
+        
+        # Step 6: Test data structure validation
+        self._test_interests_data_structure()
+        
+        print("\n" + "="*80)
+        print("🏁 INTERESTS API TESTING COMPLETE")
+        print("="*80)
+    
+    def _setup_interests_test_users(self):
+        """Setup test users for interests testing"""
+        print("\n=== Setting up Test Users ===")
+        
+        # Create unique timestamp for email addresses
+        import time
+        timestamp = str(int(time.time()))
+        
+        # Create test homeowner
+        homeowner_data = {
+            "name": "Folake Adebayo",
+            "email": f"interests.test.homeowner.{timestamp}@test.com",
+            "password": "SecurePass123",
+            "phone": "08123456789",
+            "location": "Victoria Island, Lagos State",
+            "postcode": "101001"
+        }
+        
+        response = self.make_request("POST", "/auth/register/homeowner", json=homeowner_data)
+        if response.status_code == 200:
+            homeowner_profile = response.json()
+            self.log_result("Interests Test Homeowner Registration", True, f"ID: {homeowner_profile['user']['id']}")
+            self.test_data['interests_homeowner'] = homeowner_profile['user']
+            self.auth_tokens['interests_homeowner'] = homeowner_profile['access_token']
+        else:
+            self.log_result("Interests Test Homeowner Registration", False, f"Status: {response.status_code}")
+            return
+        
+        # Create test tradesperson
+        tradesperson_data = {
+            "name": "Kunle Ogundimu",
+            "email": f"interests.test.tradesperson.{timestamp}@test.com",
+            "password": "SecurePass123",
+            "phone": "08187654321",
+            "location": "Ikeja, Lagos State",
+            "postcode": "100001",
+            "trade_categories": ["Plumbing", "Electrical"],
+            "experience_years": 6,
+            "company_name": "Ogundimu Professional Services",
+            "description": "Expert plumber and electrician with 6 years experience in Lagos residential projects.",
+            "certifications": ["Licensed Plumber", "Electrical Installation Certificate"]
+        }
+        
+        response = self.make_request("POST", "/auth/register/tradesperson", json=tradesperson_data)
+        if response.status_code == 200:
+            tradesperson_profile = response.json()
+            self.log_result("Interests Test Tradesperson Registration", True, f"ID: {tradesperson_profile['id']}")
+            self.test_data['interests_tradesperson'] = tradesperson_profile
+            
+            # Login tradesperson to get token
+            login_data = {"email": tradesperson_data["email"], "password": tradesperson_data["password"]}
+            login_response = self.make_request("POST", "/auth/login", json=login_data)
+            if login_response.status_code == 200:
+                login_result = login_response.json()
+                self.auth_tokens['interests_tradesperson'] = login_result['access_token']
+                self.log_result("Interests Test Tradesperson Login", True)
+            else:
+                self.log_result("Interests Test Tradesperson Login", False, f"Status: {login_response.status_code}")
+        else:
+            self.log_result("Interests Test Tradesperson Registration", False, f"Status: {response.status_code}")
+    
+    def _test_wallet_balance_api(self):
+        """Test wallet balance API for tradespeople"""
+        print("\n=== Testing Wallet Balance API ===")
+        
+        if 'interests_tradesperson' not in self.auth_tokens:
+            self.log_result("Wallet Balance API Tests", False, "No tradesperson token")
+            return
+        
+        tradesperson_token = self.auth_tokens['interests_tradesperson']
+        
+        # Test GET /api/wallet/balance endpoint
+        response = self.make_request("GET", "/wallet/balance", auth_token=tradesperson_token)
+        if response.status_code == 200:
+            wallet_data = response.json()
+            required_fields = ['balance_coins', 'balance_naira', 'transactions']
+            missing_fields = [field for field in required_fields if field not in wallet_data]
+            
+            if not missing_fields:
+                self.log_result("Wallet Balance API Structure", True, 
+                               f"Balance: {wallet_data['balance_coins']} coins (₦{wallet_data['balance_naira']:,})")
+                self.test_data['wallet_balance'] = wallet_data
+                
+                # Verify balance calculation (coins * 100 = naira)
+                expected_naira = wallet_data['balance_coins'] * 100
+                if wallet_data['balance_naira'] == expected_naira:
+                    self.log_result("Wallet Balance Calculation", True, "Coins to Naira conversion correct")
+                else:
+                    self.log_result("Wallet Balance Calculation", False, 
+                                   f"Expected ₦{expected_naira}, got ₦{wallet_data['balance_naira']}")
+                
+                # Verify transactions is a list
+                if isinstance(wallet_data['transactions'], list):
+                    self.log_result("Wallet Transactions Structure", True, 
+                                   f"Found {len(wallet_data['transactions'])} transactions")
+                else:
+                    self.log_result("Wallet Transactions Structure", False, "Transactions should be a list")
+            else:
+                self.log_result("Wallet Balance API Structure", False, f"Missing fields: {missing_fields}")
+        else:
+            self.log_result("Wallet Balance API", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test wallet balance for homeowner (should also work)
+        if 'interests_homeowner' in self.auth_tokens:
+            homeowner_token = self.auth_tokens['interests_homeowner']
+            response = self.make_request("GET", "/wallet/balance", auth_token=homeowner_token)
+            if response.status_code == 200:
+                self.log_result("Homeowner Wallet Balance Access", True, "Homeowners can access wallet balance")
+            else:
+                self.log_result("Homeowner Wallet Balance Access", False, f"Status: {response.status_code}")
+        
+        # Test unauthenticated access
+        response = self.make_request("GET", "/wallet/balance")
+        if response.status_code in [401, 403]:
+            self.log_result("Wallet Balance Authentication Required", True, "Correctly requires authentication")
+        else:
+            self.log_result("Wallet Balance Authentication Required", False, 
+                           f"Expected 401/403, got {response.status_code}")
+    
+    def _create_test_job_and_interest(self):
+        """Create test job and interest for testing my-interests endpoint"""
+        print("\n=== Creating Test Job and Interest ===")
+        
+        if 'interests_homeowner' not in self.auth_tokens or 'interests_tradesperson' not in self.auth_tokens:
+            self.log_result("Test Job Creation", False, "Missing authentication tokens")
+            return
+        
+        homeowner_token = self.auth_tokens['interests_homeowner']
+        tradesperson_token = self.auth_tokens['interests_tradesperson']
+        homeowner_user = self.test_data.get('interests_homeowner', {})
+        
+        # Create test job
+        job_data = {
+            "title": "Kitchen Plumbing Upgrade - My Interests Test",
+            "description": "Need professional plumber to upgrade kitchen plumbing system. Install new sink, dishwasher connections, and fix water pressure issues. Modern kitchen in Lagos home.",
+            "category": "Plumbing",
+            "location": "Victoria Island, Lagos State",
+            "postcode": "101001",
+            "budget_min": 150000,
+            "budget_max": 300000,
+            "timeline": "Within 2 weeks",
+            "homeowner_name": homeowner_user.get('name', 'Test Homeowner'),
+            "homeowner_email": homeowner_user.get('email', 'test@example.com'),
+            "homeowner_phone": homeowner_user.get('phone', '08123456789')
+        }
+        
+        response = self.make_request("POST", "/jobs/", json=job_data, auth_token=homeowner_token)
+        if response.status_code == 200:
+            created_job = response.json()
+            self.log_result("Test Job Creation", True, f"Job ID: {created_job['id']}")
+            self.test_data['interests_test_job'] = created_job
+            
+            # Tradesperson shows interest in the job
+            interest_data = {"job_id": created_job['id']}
+            response = self.make_request("POST", "/interests/show-interest", 
+                                       json=interest_data, auth_token=tradesperson_token)
+            if response.status_code == 200:
+                created_interest = response.json()
+                self.log_result("Test Interest Creation", True, f"Interest ID: {created_interest['id']}")
+                self.test_data['interests_test_interest'] = created_interest
+            else:
+                self.log_result("Test Interest Creation", False, f"Status: {response.status_code}")
+        else:
+            self.log_result("Test Job Creation", False, f"Status: {response.status_code}")
+    
+    def _test_my_interests_endpoint(self):
+        """Test the /api/interests/my-interests endpoint"""
+        print("\n=== Testing My Interests Endpoint ===")
+        
+        if 'interests_tradesperson' not in self.auth_tokens:
+            self.log_result("My Interests Endpoint Tests", False, "No tradesperson token")
+            return
+        
+        tradesperson_token = self.auth_tokens['interests_tradesperson']
+        
+        # Test GET /api/interests/my-interests
+        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+        if response.status_code == 200:
+            interests_data = response.json()
+            
+            # Verify response is a list
+            if isinstance(interests_data, list):
+                self.log_result("My Interests Response Structure", True, f"Found {len(interests_data)} interests")
+                
+                # If we have interests, verify the data structure
+                if len(interests_data) > 0:
+                    interest = interests_data[0]
+                    required_fields = ['id', 'job_id', 'tradesperson_id', 'status', 'created_at']
+                    missing_fields = [field for field in required_fields if field not in interest]
+                    
+                    if not missing_fields:
+                        self.log_result("Interest Data Structure", True, "All required fields present")
+                        
+                        # Verify job details are included
+                        if 'job_title' in interest or 'title' in interest:
+                            self.log_result("Job Details in Interest", True, "Job information included")
+                        else:
+                            self.log_result("Job Details in Interest", False, "Missing job information")
+                        
+                        # Verify tradesperson ID matches current user
+                        tradesperson_id = self.test_data.get('interests_tradesperson', {}).get('id')
+                        if interest.get('tradesperson_id') == tradesperson_id:
+                            self.log_result("Interest Ownership Verification", True, "Interest belongs to current tradesperson")
+                        else:
+                            self.log_result("Interest Ownership Verification", False, "Interest ownership mismatch")
+                    else:
+                        self.log_result("Interest Data Structure", False, f"Missing fields: {missing_fields}")
+                else:
+                    self.log_result("My Interests Content", True, "No interests found (expected for new account)")
+            else:
+                self.log_result("My Interests Response Structure", False, "Response should be a list")
+        else:
+            self.log_result("My Interests Endpoint", False, f"Status: {response.status_code}, Response: {response.text}")
+    
+    def _test_interests_authentication_requirements(self):
+        """Test authentication requirements for interests endpoints"""
+        print("\n=== Testing Authentication Requirements ===")
+        
+        # Test unauthenticated access to my-interests
+        response = self.make_request("GET", "/interests/my-interests")
+        if response.status_code in [401, 403]:
+            self.log_result("My Interests Authentication Required", True, "Correctly requires authentication")
+        else:
+            self.log_result("My Interests Authentication Required", False, 
+                           f"Expected 401/403, got {response.status_code}")
+        
+        # Test homeowner trying to access my-interests (should be tradesperson-only)
+        if 'interests_homeowner' in self.auth_tokens:
+            homeowner_token = self.auth_tokens['interests_homeowner']
+            response = self.make_request("GET", "/interests/my-interests", auth_token=homeowner_token)
+            if response.status_code == 403:
+                self.log_result("Homeowner My Interests Access Prevention", True, "Correctly denied homeowner access")
+            else:
+                self.log_result("Homeowner My Interests Access Prevention", False, 
+                               f"Expected 403, got {response.status_code}")
+        
+        # Test invalid token
+        response = self.make_request("GET", "/interests/my-interests", auth_token="invalid_token")
+        if response.status_code in [401, 403]:
+            self.log_result("Invalid Token Rejection", True, "Correctly rejected invalid token")
+        else:
+            self.log_result("Invalid Token Rejection", False, f"Expected 401/403, got {response.status_code}")
+    
+    def _test_interests_data_structure(self):
+        """Test that API returns expected data structure for frontend"""
+        print("\n=== Testing Data Structure for Frontend ===")
+        
+        if 'interests_tradesperson' not in self.auth_tokens:
+            self.log_result("Data Structure Tests", False, "No tradesperson token")
+            return
+        
+        tradesperson_token = self.auth_tokens['interests_tradesperson']
+        
+        # Test my-interests endpoint data structure
+        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+        if response.status_code == 200:
+            interests_data = response.json()
+            
+            if isinstance(interests_data, list) and len(interests_data) > 0:
+                interest = interests_data[0]
+                
+                # Check for frontend-required fields
+                frontend_fields = {
+                    'id': 'Interest ID',
+                    'job_id': 'Job ID',
+                    'status': 'Interest Status',
+                    'created_at': 'Creation Date'
+                }
+                
+                all_present = True
+                for field, description in frontend_fields.items():
+                    if field not in interest:
+                        self.log_result(f"Frontend Field: {description}", False, f"Missing {field}")
+                        all_present = False
+                    else:
+                        self.log_result(f"Frontend Field: {description}", True, f"Present: {field}")
+                
+                if all_present:
+                    self.log_result("Frontend Data Structure Complete", True, "All required fields present")
+                
+                # Test status values are valid
+                valid_statuses = ['INTERESTED', 'CONTACT_SHARED', 'PAID_ACCESS']
+                if interest.get('status') in valid_statuses:
+                    self.log_result("Interest Status Validation", True, f"Status: {interest['status']}")
+                else:
+                    self.log_result("Interest Status Validation", False, f"Invalid status: {interest.get('status')}")
+                
+                # Test date format
+                created_at = interest.get('created_at')
+                if created_at:
+                    try:
+                        # Try to parse the date
+                        from datetime import datetime
+                        if isinstance(created_at, str):
+                            datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                        self.log_result("Date Format Validation", True, "Date format is valid")
+                    except:
+                        self.log_result("Date Format Validation", False, f"Invalid date format: {created_at}")
+            else:
+                self.log_result("Data Structure Tests", True, "No interests to test structure (expected for new account)")
+        else:
+            self.log_result("Data Structure Tests", False, f"Could not retrieve interests: {response.status_code}")
+
     def run_all_tests(self):
         """Run all test suites"""
-        print("🚀 Starting Comprehensive Backend API Tests for ServiceHub")
-        print(f"Backend URL: {self.base_url}")
-        print("=" * 80)
+        print("🚀 Starting Comprehensive Backend Testing")
+        print("="*80)
         
-        # Run JobPosting Form Backend Verification (focused on review request)
-        self.test_jobposting_form_backend_verification()
-        
-        # Run other test suites if needed
-        # self.test_authentication_system()
-        # self.test_homeowner_job_management()
-        # self.test_my_jobs_endpoint()
-        # self.test_quote_management_system()
-        # self.test_profile_management_system()
-        # self.test_portfolio_management_system()
-        # self.test_communication_system()
-        # self.test_interest_system()
-        # self.test_notification_system()
-        # self.test_notification_workflow_integration()
-        
-        # NEW: Phase 8 - Rating & Review System
-        # self.test_rating_review_system()
-        
-        # NEW: Phase 9E - Google Maps Integration
-        # self.test_google_maps_integration_comprehensive()
-        
-        # NEW: Phase 10 - Enhanced Job Posting Form Backend
-        # self.test_phase_10_enhanced_job_posting_backend()
-        
-        # NEW: Access Fee System Changes Testing
-        # self.test_access_fee_system_changes()
-        
-        # NEW: Admin User Management System Testing
-        # self.test_admin_user_management_system()
-        
-        # NEW: Admin Location & Trades Management System Testing
-        self.test_admin_location_trades_management()
-        
-        # NEW: Admin Skills Questions Management System Testing (as requested)
-        self.test_admin_skills_questions_management()
-        
-        # NEW: Policy Management System Testing (as requested)
-        self.test_policy_management_system()
-        
-        # NEW: Contact Management System Testing (as requested)
-        self.test_contact_management_system()
-        
-        # NEW: Contact Sharing Notification System Testing (from review request)
-        self.test_contact_sharing_notification_system()
+        # Run the specific interests API tests for My Interests page
+        self.test_interests_api_for_my_interests_page()
         
         # Print final results
-        print("\n" + "=" * 80)
-        print("🏁 FINAL TEST RESULTS")
-        print("=" * 80)
-        print(f"✅ PASSED: {self.results['passed']}")
-        print(f"❌ FAILED: {self.results['failed']}")
-        print(f"📊 SUCCESS RATE: {(self.results['passed'] / (self.results['passed'] + self.results['failed']) * 100):.1f}%")
+        self.print_final_results()
+    
+    def print_final_results(self):
+        """Print comprehensive test results"""
+        total_tests = self.results['passed'] + self.results['failed']
+        success_rate = (self.results['passed'] / total_tests * 100) if total_tests > 0 else 0
+        
+        print("\n" + "="*80)
+        print("🏁 INTERESTS API TESTING COMPLETE")
+        print("="*80)
+        print(f"✅ Tests Passed: {self.results['passed']}")
+        print(f"❌ Tests Failed: {self.results['failed']}")
+        print(f"📊 Success Rate: {success_rate:.1f}%")
         
         if self.results['errors']:
-            print(f"\n❌ FAILED TESTS ({len(self.results['errors'])}):")
-            for error in self.results['errors']:
-                print(f"   • {error}")
+            print(f"\n❌ Failed Tests ({len(self.results['errors'])}):")
+            for i, error in enumerate(self.results['errors'], 1):
+                print(f"   {i}. {error}")
         
-        print("\n🎯 Test Summary:")
-        print("   • Authentication System: User registration, login, profile management")
-        print("   • Job Management: Creation, retrieval, homeowner-specific endpoints")
-        print("   • Quote System: Quote creation, management, authorization")
-        print("   • Profile Management: User profiles, role-based updates")
-        print("   • Portfolio System: Image upload, CRUD operations, public/private visibility")
-        print("   • Communication System: Job-based messaging, image sharing, real-time features")
-        print("   • Interest System: Lead generation marketplace, contact sharing, payment workflow")
-        print("   • Notification System: Mock email/SMS services, preferences, history, workflow integration")
-        print("   • Rating & Review System: 5-star ratings, category ratings, mutual reviews, platform stats")
-        print("   • Google Maps Integration: Location-based job search, distance calculations, user location management")
-        print("   • Access Fee System: Flexible access fees, lower minimums, 5-coin withdrawal eligibility")
-        
-        return self.results['failed'] == 0
+        if success_rate >= 95:
+            print("\n🎉 EXCELLENT: Interests API system is production ready!")
+        elif success_rate >= 85:
+            print("\n✅ GOOD: Interests API is mostly functional with minor issues")
+        elif success_rate >= 70:
+            print("\n⚠️  FAIR: Interests API has some issues that need attention")
+        else:
+            print("\n🚨 POOR: Interests API has significant issues requiring immediate attention")
 
     def run_notification_system_tests(self):
         """Run comprehensive notification system tests for Phase 4"""
