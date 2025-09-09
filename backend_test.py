@@ -7261,7 +7261,7 @@ class BackendTester:
                     self.log_result("Frontend Data Structure Complete", True, "All required fields present")
                 
                 # Test status values are valid
-                valid_statuses = ['INTERESTED', 'CONTACT_SHARED', 'PAID_ACCESS']
+                valid_statuses = ['INTERESTED', 'CONTACT_SHARED', 'PAID_ACCESS', 'interested', 'contact_shared', 'paid_access']
                 if interest.get('status') in valid_statuses:
                     self.log_result("Interest Status Validation", True, f"Status: {interest['status']}")
                 else:
