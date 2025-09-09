@@ -108,6 +108,18 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Auto-populate user details for authenticated users
+  useEffect(() => {
+    if (isUserAuthenticated() && currentUser) {
+      setFormData(prev => ({
+        ...prev,
+        homeowner_name: currentUser.name || '',
+        homeowner_email: currentUser.email || '',
+        homeowner_phone: currentUser.phone || ''
+      }));
+    }
+  }, [currentUser, isUserAuthenticated]);
   
   const { loginWithToken, isAuthenticated, currentUser, loading } = useAuth();
   const { toast } = useToast();
