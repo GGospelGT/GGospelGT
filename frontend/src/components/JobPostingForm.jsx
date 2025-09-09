@@ -1273,7 +1273,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                     className="flex items-center text-white font-lato"
                     style={{backgroundColor: '#2F8140'}}
                   >
-                    {currentStep === 4 && isAuthenticated() ? (
+                    {currentStep === 4 && isUserAuthenticated() ? (
                       submitting ? 'Posting Job...' : 'Post Job'
                     ) : currentStep === 4 ? (
                       'Continue'
