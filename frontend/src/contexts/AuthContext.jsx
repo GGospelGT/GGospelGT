@@ -123,6 +123,15 @@ export const AuthProvider = ({ children }) => {
     return !!user && !!token;
   };
 
+  // Enhanced authentication check that considers loading state
+  const isUserAuthenticated = () => {
+    // More robust check that considers both user data and loading state
+    if (loading && token) {
+      return true; // Assume authenticated if we have token and still loading
+    }
+    return !!user && !!token && !loading;
+  };
+
   const isHomeowner = () => {
     return user?.role === 'homeowner';
   };
