@@ -126,7 +126,7 @@ class ContactNotificationTester:
             "title": "Contact Sharing Notification Test - Bathroom Plumbing",
             "description": "Test job for contact sharing notification system verification after payment_url bug fix.",
             "category": "Plumbing",
-            "location": "Victoria Island, Lagos State",
+            "location": "Lagos",
             "postcode": "101001",
             "budget_min": 300000,
             "budget_max": 500000,
