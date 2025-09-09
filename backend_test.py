@@ -8262,5 +8262,5 @@ class BackendTester:
     
 if __name__ == "__main__":
     tester = BackendTester()
-    # Run the JobPosting Form Backend Verification as requested in review
-    tester.test_jobposting_form_backend_verification()
+    # Run the Interests API tests for My Interests page as requested in review
+    tester.test_interests_api_for_my_interests_page()
