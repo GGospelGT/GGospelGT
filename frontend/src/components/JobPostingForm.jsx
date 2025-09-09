@@ -350,7 +350,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     if (e) e.preventDefault();
     
     // If user is authenticated, use the authenticated flow
-    if (isAuthenticated()) {
+    if (isUserAuthenticated()) {
       await handleJobSubmissionForAuthenticatedUser();
       return;
     }
