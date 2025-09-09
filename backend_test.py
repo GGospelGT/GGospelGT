@@ -7033,7 +7033,7 @@ class BackendTester:
             "phone": "08187654321",
             "location": "Lagos",
             "postcode": "100001",
-            "trade_categories": ["Plumbing", "Electrical"],
+            "trade_categories": ["Plumbing & Water Works", "Electrical Installation"],
             "experience_years": 6,
             "company_name": "Ogundimu Professional Services",
             "description": "Expert plumber and electrician with 6 years experience in Lagos residential projects.",
