@@ -897,7 +897,6 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                   </p>
                 </div>
                 
-              <>
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
