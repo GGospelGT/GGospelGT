@@ -293,6 +293,14 @@ const Header = () => {
                         </Button>
                         <Button 
                           variant="ghost"
+                          onClick={() => navigate('/my-interests')}
+                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                        >
+                          <Heart size={16} />
+                          <span>My Interests</span>
+                        </Button>
+                        <Button 
+                          variant="ghost"
                           onClick={() => navigate('/wallet')}
                           className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
                         >
