@@ -829,8 +829,23 @@ async def delete_state(state_name: str):
 @router.get("/locations/lgas")
 async def get_all_lgas():
     """Get all LGAs organized by state"""
+    # Get static LGAs
     from models.nigerian_lgas import NIGERIAN_LGAS
-    return {"lgas": NIGERIAN_LGAS}
+    
+    # Get custom LGAs from database
+    custom_lgas = await database.get_custom_lgas()
+    
+    # Merge both dictionaries
+    all_lgas = NIGERIAN_LGAS.copy()
+    for state, lgas in custom_lgas.items():
+        if state in all_lgas:
+            # Merge LGAs for existing state
+            all_lgas[state] = list(set(all_lgas[state] + lgas))
+        else:
+            # Add new state with its LGAs
+            all_lgas[state] = lgas
+    
+    return {"lgas": all_lgas}
 
 @router.get("/locations/lgas/{state_name}")
 async def get_lgas_for_state(state_name: str):
