@@ -157,7 +157,7 @@ class DynamicLocationTester:
         response = self.make_request("POST", "/admin/locations/states", data=kaduna_state_data, auth_token=admin_token)
         if response.status_code in [200, 201]:
             state_response = response.json()
-            self.log_result("Add Kaduna state", True, f"State added: {state_response.get('name', 'Kaduna')}")
+            self.log_result("Add Kaduna state", True, f"State added: {state_response.get('state_name', 'Kaduna')}")
         elif response.status_code == 400 and "already exists" in response.text:
             self.log_result("Add Kaduna state", True, "State already exists (expected)")
         else:
