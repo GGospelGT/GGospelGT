@@ -621,112 +621,77 @@ const BrowseJobsPage = () => {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {jobs.map((job) => (
-                      <Card key={job.id} className="hover:shadow-lg transition-shadow duration-300">
-                        <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <CardTitle className="text-xl font-bold font-montserrat" style={{color: '#121E3C'}}>
-                              {job.title}
-                            </CardTitle>
-                            <Badge className="bg-blue-100 text-blue-800">
-                              {job.category}
-                            </Badge>
-                          </div>
-                          
-                          <div className="flex items-center space-x-4 text-sm text-gray-600 font-lato">
-                            <span className="flex items-center">
-                              <MapPin size={14} className="mr-1" />
-                              {job.location}
-                            </span>
-                            <span className="flex items-center">
-                              <Calendar size={14} className="mr-1" />
-                              Posted {formatDate(job.created_at)}
-                            </span>
-                            <span className="flex items-center">
-                              <Heart size={14} className="mr-1" />
-                              {job.interests_count || 0} interested
-                            </span>
-                          </div>
-                        </div>
+                      <Card 
+                        key={job.id} 
+                        className="hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                        onClick={() => handleViewJobDetails(job)}
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <h3 className="text-xl font-bold font-montserrat" style={{color: '#121E3C'}}>
+                                  {job.title}
+                                </h3>
+                                <Badge className="bg-blue-100 text-blue-800">
+                                  {job.category}
+                                </Badge>
+                              </div>
+                              
+                              <div className="flex items-center space-x-4 text-sm text-gray-600 font-lato mb-3">
+                                <span className="flex items-center">
+                                  <MapPin size={14} className="mr-1" />
+                                  {job.location}
+                                </span>
+                                <span className="flex items-center">
+                                  <Calendar size={14} className="mr-1" />
+                                  Posted {formatDate(job.created_at)}
+                                </span>
+                                <span className="flex items-center">
+                                  <Heart size={14} className="mr-1" />
+                                  {job.interests_count || 0} interested
+                                </span>
+                              </div>
 
-                        {/* Budget & Access Fee Display */}
-                        <div className="text-right space-y-2">
-                          {job.budget_min && job.budget_max ? (
-                            <div>
-                              <div className="text-lg font-bold font-montserrat" style={{color: '#2F8140'}}>
-                                {formatCurrency(job.budget_min)} - {formatCurrency(job.budget_max)}
-                              </div>
-                              <div className="text-sm text-gray-500 font-lato">Budget Range</div>
-                            </div>
-                          ) : (
-                            <div className="text-sm text-gray-500 font-lato">Budget not specified</div>
-                          )}
-                          
-                          {/* Access Fee - Only visible to tradespeople */}
-                          {isTradesperson() && (
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
-                              <div className="text-sm font-semibold text-yellow-800">
-                                Access Fee: {job.access_fee_coins || 10} coins
-                              </div>
-                              <div className="text-xs text-yellow-600">
-                                ₦{(job.access_fee_naira || 1000).toLocaleString()} for contact details
+                              {/* Job Summary */}
+                              <p className="text-gray-700 font-lato line-clamp-2 mb-4">
+                                {job.description}
+                              </p>
+
+                              {/* Quick Details */}
+                              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                <span className="flex items-center">
+                                  <Clock size={14} className="mr-1" />
+                                  {job.timeline || 'Flexible'}
+                                </span>
+                                <span className="flex items-center">
+                                  <User size={14} className="mr-1" />
+                                  {job.homeowner?.name || 'Homeowner'}
+                                </span>
                               </div>
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
 
-                    <CardContent>
-                      {/* Job Description */}
-                      <div className="mb-4">
-                        <p className="text-gray-700 font-lato line-clamp-3">
-                          {job.description}
-                        </p>
-                      </div>
-
-                      {/* Job Details Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
-                        <div className="flex items-center text-gray-600">
-                          <Clock size={14} className="mr-2" />
-                          <span className="font-lato">Timeline: {job.timeline || 'Flexible'}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <User size={14} className="mr-2" />
-                          <span className="font-lato">By: {job.homeowner?.name}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <Calendar size={14} className="mr-2" />
-                          <span className="font-lato">
-                            Expires: {formatDate(job.expires_at)}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <Heart size={14} className="mr-2" />
-                          <span className="font-lato">{job.interests_count || 0} interested</span>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex justify-between items-center pt-4 border-t">
-                        <div className="text-sm text-gray-500 font-lato">
-                          Match: {user?.trade_categories?.includes(job.category) ? '✅ Your skill' : '⚠️ Different category'}
-                        </div>
-                        
-                        <Button
-                          onClick={() => handleShowInterest(job)}
-                          disabled={showingInterest === job.id}
-                          className="text-white font-lato"
-                          style={{backgroundColor: '#2F8140'}}
-                        >
-                          <HandHeart size={16} className="mr-2" />
-                          {showingInterest === job.id ? 'Showing Interest...' : 'Show Interest'}
-                        </Button>
-                      </div>
-                    </CardContent>
+                            {/* Budget & Status */}
+                            <div className="text-right space-y-2 ml-4">
+                              {job.budget_min && job.budget_max ? (
+                                <div>
+                                  <div className="text-lg font-bold font-montserrat" style={{color: '#2F8140'}}>
+                                    {formatCurrency(job.budget_min)} - {formatCurrency(job.budget_max)}
+                                  </div>
+                                  <div className="text-sm text-gray-500 font-lato">Budget Range</div>
+                                </div>
+                              ) : (
+                                <div className="text-sm text-gray-500 font-lato">Budget negotiable</div>
+                              )}
+                              
+                              <div className="text-sm text-blue-600 font-medium">
+                                Click to view details →
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
                       </Card>
                     ))}
 
