@@ -273,7 +273,11 @@ export const adminAPI = {
     formData.append('town_name', townName);
     formData.append('zip_code', zipCode);
     
-    const response = await apiClient.post('/admin/locations/towns', formData);
+    const response = await apiClient.post('/admin/locations/towns', formData, {
+      headers: {
+        'Content-Type': undefined, // Let axios set multipart/form-data with boundary
+      },
+    });
     return response.data;
   },
 
