@@ -146,9 +146,14 @@ class AdminJobManagementTester:
         response = self.make_request("POST", "/auth/register/tradesperson", json=tradesperson_data)
         if response.status_code == 200:
             tradesperson_profile = response.json()
-            self.auth_tokens['tradesperson'] = tradesperson_profile['access_token']
-            self.test_data['tradesperson_user'] = tradesperson_profile
-            self.log_result("Create test tradesperson", True, f"ID: {tradesperson_profile['id']}")
+            # Handle different response structures
+            if 'access_token' in tradesperson_profile:
+                self.auth_tokens['tradesperson'] = tradesperson_profile['access_token']
+                self.test_data['tradesperson_user'] = tradesperson_profile.get('user', tradesperson_profile)
+            else:
+                # Direct user object response
+                self.test_data['tradesperson_user'] = tradesperson_profile
+            self.log_result("Create test tradesperson", True, f"ID: {tradesperson_profile.get('id', 'unknown')}")
         else:
             self.log_result("Create test tradesperson", False, f"Status: {response.status_code}")
         
