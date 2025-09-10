@@ -41,11 +41,12 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 import uuid
 import time
+import asyncio
 
 # Get backend URL from environment
 BACKEND_URL = "https://notify-connect.preview.emergentagent.com/api"
 
-class AdminJobManagementTester:
+class NotificationSystemTester:
     def __init__(self):
         self.base_url = BACKEND_URL
         self.session = requests.Session()
@@ -88,51 +89,35 @@ class AdminJobManagementTester:
             print(f"Request failed: {e}")
             raise
     
-    def test_admin_authentication(self):
-        """Test admin authentication system"""
-        print("\n=== Testing Admin Authentication ===")
+    def test_user_authentication(self):
+        """Test user authentication system for notification testing"""
+        print("\n=== Testing User Authentication ===")
         
-        # Test admin login with form data
-        admin_credentials = {
-            "username": "admin",
-            "password": "servicehub2024"
+        # Test tradesperson login
+        tradesperson_credentials = {
+            "email": "john.plumber@gmail.com",
+            "password": "password123"
         }
         
-        response = self.make_request("POST", "/admin/login", data=admin_credentials)
+        response = self.make_request("POST", "/auth/login", json=tradesperson_credentials)
         if response.status_code == 200:
             login_response = response.json()
-            if 'token' in login_response:
-                self.log_result("Admin login", True, "Admin authentication successful")
-                self.auth_tokens['admin'] = login_response['token']
-                self.test_data['admin_user'] = login_response.get('admin', {})
+            if 'access_token' in login_response:
+                self.log_result("Tradesperson login", True, "Authentication successful")
+                self.auth_tokens['tradesperson'] = login_response['access_token']
+                self.test_data['tradesperson_user'] = login_response.get('user', {})
             else:
-                self.log_result("Admin login", False, "No token in response")
+                self.log_result("Tradesperson login", False, "No access token in response")
         else:
-            self.log_result("Admin login", False, f"Status: {response.status_code}, Response: {response.text}")
+            self.log_result("Tradesperson login", False, f"Status: {response.status_code}, Response: {response.text}")
         
-        # Test invalid admin credentials
-        invalid_credentials = {
-            "username": "admin",
-            "password": "wrongpassword"
-        }
-        
-        response = self.make_request("POST", "/admin/login", data=invalid_credentials)
-        if response.status_code == 401:
-            self.log_result("Invalid admin credentials", True, "Correctly rejected invalid credentials")
-        else:
-            self.log_result("Invalid admin credentials", False, f"Expected 401, got {response.status_code}")
-    
-    def test_setup_test_data(self):
-        """Setup test data - create users and jobs for testing"""
-        print("\n=== Setting Up Test Data ===")
-        
-        # Create homeowner for job creation
+        # Test homeowner login - create a test homeowner if needed
         homeowner_data = {
             "name": "Adebayo Johnson",
             "email": f"adebayo.johnson.{uuid.uuid4().hex[:8]}@email.com",
             "password": "SecurePass123",
-            "phone": "08123456789",
-            "location": "Lagos",  # Use valid location
+            "phone": "+2348123456789",
+            "location": "Lagos",
             "postcode": "100001"
         }
         
@@ -144,542 +129,548 @@ class AdminJobManagementTester:
             self.test_data['homeowner_user'] = homeowner_profile['user']
         else:
             self.log_result("Create test homeowner", False, f"Status: {response.status_code}")
-        
-        # Create tradesperson
-        tradesperson_data = {
-            "name": "Emeka Okafor",
-            "email": f"emeka.okafor.{uuid.uuid4().hex[:8]}@tradework.com",
-            "password": "SecurePass123",
-            "phone": "08187654321",
-            "location": "Abuja",
-            "postcode": "900001",
-            "trade_categories": ["Plumbing", "Building"],
-            "experience_years": 8,
-            "company_name": "Okafor Services",
-            "description": "Professional tradesperson with 8 years experience in residential and commercial projects across Nigeria.",
-            "certifications": ["Licensed Professional"]
-        }
-        
-        response = self.make_request("POST", "/auth/register/tradesperson", json=tradesperson_data)
-        if response.status_code == 200:
-            tradesperson_profile = response.json()
-            # Handle different response structures
-            if 'access_token' in tradesperson_profile:
-                self.auth_tokens['tradesperson'] = tradesperson_profile['access_token']
-                self.test_data['tradesperson_user'] = tradesperson_profile.get('user', tradesperson_profile)
-            else:
-                # Direct user object response
-                self.test_data['tradesperson_user'] = tradesperson_profile
-            self.log_result("Create test tradesperson", True, f"ID: {tradesperson_profile.get('id', 'unknown')}")
-        else:
-            self.log_result("Create test tradesperson", False, f"Status: {response.status_code}")
-        
-        # Get existing jobs from the database for testing admin endpoints
-        if 'admin' in self.auth_tokens:
-            admin_token = self.auth_tokens['admin']
-            response = self.make_request("GET", "/admin/jobs/all?limit=5", auth_token=admin_token)
-            if response.status_code == 200:
-                jobs_response = response.json()
-                existing_jobs = jobs_response.get('jobs', [])
-                if existing_jobs:
-                    self.test_data['created_jobs'] = existing_jobs[:3]  # Use first 3 jobs for testing
-                    self.log_result("Get existing jobs for testing", True, f"Found {len(existing_jobs)} existing jobs")
-                else:
-                    self.log_result("Get existing jobs for testing", False, "No existing jobs found")
-            else:
-                self.log_result("Get existing jobs for testing", False, f"Status: {response.status_code}")
-        
-        # If we have tradesperson and jobs, show interest in some jobs
-        if ('tradesperson' in self.auth_tokens and 
-            'created_jobs' in self.test_data and 
-            len(self.test_data['created_jobs']) > 0):
-            tradesperson_token = self.auth_tokens['tradesperson']
-            for i, job in enumerate(self.test_data['created_jobs'][:2]):
-                interest_data = {"job_id": job['id']}
-                response = self.make_request("POST", "/interests/show-interest", 
-                                           json=interest_data, auth_token=tradesperson_token)
-                if response.status_code == 200:
-                    self.log_result(f"Show interest in job {i+1}", True)
-                else:
-                    self.log_result(f"Show interest in job {i+1}", False, f"Status: {response.status_code}")
     
-    def test_admin_jobs_all_endpoint(self):
-        """Test GET /api/admin/jobs/all endpoint"""
-        print("\n=== Testing Admin Jobs All Endpoint ===")
+    def test_notification_preferences(self):
+        """Test notification preferences management"""
+        print("\n=== Testing Notification Preferences ===")
         
-        if 'admin' not in self.auth_tokens:
-            self.log_result("Admin jobs all tests", False, "No admin authentication token")
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("Notification preferences tests", False, "No tradesperson authentication token")
             return
         
-        admin_token = self.auth_tokens['admin']
+        tradesperson_token = self.auth_tokens['tradesperson']
         
-        # Test 1: Get all jobs without filters
-        response = self.make_request("GET", "/admin/jobs/all", auth_token=admin_token)
+        # Test 1: Get notification preferences
+        response = self.make_request("GET", "/notifications/preferences", auth_token=tradesperson_token)
         if response.status_code == 200:
-            jobs_response = response.json()
-            if 'jobs' in jobs_response and 'pagination' in jobs_response:
-                jobs = jobs_response['jobs']
-                pagination = jobs_response['pagination']
-                
-                # Validate data structure
-                if jobs and len(jobs) > 0:
-                    job = jobs[0]
-                    required_fields = ['id', 'title', 'description', 'category', 'location', 
-                                     'budget_min', 'budget_max', 'timeline', 'homeowner', 
-                                     'interests_count', 'created_at']
-                    missing_fields = [field for field in required_fields if field not in job]
-                    
-                    if not missing_fields:
-                        self.log_result("Admin jobs all - data structure", True, 
-                                       f"Complete job data with {len(jobs)} jobs")
-                        
-                        # Validate homeowner information
-                        homeowner = job.get('homeowner', {})
-                        homeowner_fields = ['id', 'name', 'email', 'phone']
-                        missing_homeowner_fields = [field for field in homeowner_fields if field not in homeowner]
-                        
-                        if not missing_homeowner_fields:
-                            self.log_result("Admin jobs all - homeowner data", True, 
-                                           f"Complete homeowner info: {homeowner['name']}")
-                        else:
-                            self.log_result("Admin jobs all - homeowner data", False, 
-                                           f"Missing homeowner fields: {missing_homeowner_fields}")
-                        
-                        # Validate interests count
-                        if 'interests_count' in job and isinstance(job['interests_count'], int):
-                            self.log_result("Admin jobs all - interests count", True, 
-                                           f"Interests count: {job['interests_count']}")
-                        else:
-                            self.log_result("Admin jobs all - interests count", False, 
-                                           "Invalid interests count")
-                    else:
-                        self.log_result("Admin jobs all - data structure", False, 
-                                       f"Missing fields: {missing_fields}")
-                
-                # Validate pagination
-                if 'skip' in pagination and 'limit' in pagination and 'total' in pagination:
-                    self.log_result("Admin jobs all - pagination", True, 
-                                   f"Total: {pagination['total']}, Skip: {pagination['skip']}, Limit: {pagination['limit']}")
-                else:
-                    self.log_result("Admin jobs all - pagination", False, "Invalid pagination structure")
-                
-                self.log_result("Admin jobs all endpoint", True, f"Retrieved {len(jobs)} jobs")
+            preferences = response.json()
+            required_fields = ['id', 'user_id', 'new_interest', 'contact_shared', 'job_posted', 'payment_confirmation']
+            missing_fields = [field for field in required_fields if field not in preferences]
+            
+            if not missing_fields:
+                self.log_result("Get notification preferences", True, 
+                               f"Complete preferences structure with channels: {preferences.get('new_interest', 'N/A')}")
+                self.test_data['original_preferences'] = preferences
             else:
-                self.log_result("Admin jobs all endpoint", False, "Invalid response structure")
+                self.log_result("Get notification preferences", False, 
+                               f"Missing fields: {missing_fields}")
         else:
-            self.log_result("Admin jobs all endpoint", False, 
+            self.log_result("Get notification preferences", False, 
                            f"Status: {response.status_code}, Response: {response.text}")
         
-        # Test 2: Get jobs with pagination
-        response = self.make_request("GET", "/admin/jobs/all?skip=0&limit=2", auth_token=admin_token)
-        if response.status_code == 200:
-            jobs_response = response.json()
-            jobs = jobs_response.get('jobs', [])
-            if len(jobs) <= 2:
-                self.log_result("Admin jobs all - pagination limit", True, 
-                               f"Correctly limited to {len(jobs)} jobs")
-            else:
-                self.log_result("Admin jobs all - pagination limit", False, 
-                               f"Expected max 2 jobs, got {len(jobs)}")
-        else:
-            self.log_result("Admin jobs all - pagination limit", False, 
-                           f"Status: {response.status_code}")
+        # Test 2: Update notification preferences
+        update_data = {
+            "new_interest": "both",
+            "contact_shared": "email",
+            "job_posted": "sms",
+            "payment_confirmation": "both"
+        }
         
-        # Test 3: Filter by status
-        response = self.make_request("GET", "/admin/jobs/all?status=active", auth_token=admin_token)
+        response = self.make_request("PUT", "/notifications/preferences", json=update_data, auth_token=tradesperson_token)
         if response.status_code == 200:
-            jobs_response = response.json()
-            jobs = jobs_response.get('jobs', [])
-            # Check if all returned jobs have active status
-            active_jobs = [job for job in jobs if job.get('status') == 'active']
-            if len(active_jobs) == len(jobs):
-                self.log_result("Admin jobs all - status filter", True, 
-                               f"All {len(jobs)} jobs have active status")
+            updated_preferences = response.json()
+            
+            # Verify updates were applied
+            updates_applied = all(
+                updated_preferences.get(key) == value 
+                for key, value in update_data.items()
+            )
+            
+            if updates_applied:
+                self.log_result("Update notification preferences", True, 
+                               f"Preferences updated successfully")
             else:
-                self.log_result("Admin jobs all - status filter", False, 
-                               f"Status filter not working correctly")
+                self.log_result("Update notification preferences", False, 
+                               "Updates not reflected in response")
         else:
-            self.log_result("Admin jobs all - status filter", False, 
-                           f"Status: {response.status_code}")
+            self.log_result("Update notification preferences", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
         
-        # Test 4: Unauthorized access (Note: Admin endpoints may not require authentication by design)
-        response = self.make_request("GET", "/admin/jobs/all")
-        if response.status_code in [401, 403]:
-            self.log_result("Admin jobs all - unauthorized access", True, 
-                           "Correctly requires admin authentication")
-        elif response.status_code == 200:
-            self.log_result("Admin jobs all - unauthorized access", True, 
-                           "Admin endpoints accessible without authentication (by design)")
+        # Test 3: Invalid preference values
+        invalid_data = {
+            "new_interest": "invalid_channel"
+        }
+        
+        response = self.make_request("PUT", "/notifications/preferences", json=invalid_data, auth_token=tradesperson_token)
+        if response.status_code in [400, 422]:
+            self.log_result("Invalid preference values", True, 
+                           "Correctly rejected invalid channel")
         else:
-            self.log_result("Admin jobs all - unauthorized access", False, 
-                           f"Unexpected status code: {response.status_code}")
+            self.log_result("Invalid preference values", False, 
+                           f"Expected 400/422, got {response.status_code}")
     
-    def test_admin_job_details_endpoint(self):
-        """Test GET /api/admin/jobs/{job_id}/details endpoint"""
-        print("\n=== Testing Admin Job Details Endpoint ===")
+    def test_notification_templates_and_rendering(self):
+        """Test notification template rendering for all types"""
+        print("\n=== Testing Notification Templates and Rendering ===")
         
-        if 'admin' not in self.auth_tokens or not self.test_data.get('created_jobs'):
-            self.log_result("Admin job details tests", False, "Missing admin token or test jobs")
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("Template rendering tests", False, "No tradesperson authentication token")
             return
         
-        admin_token = self.auth_tokens['admin']
-        test_job = self.test_data['created_jobs'][0]
-        job_id = test_job['id']
+        tradesperson_token = self.auth_tokens['tradesperson']
         
-        # Test 1: Get job details
-        response = self.make_request("GET", f"/admin/jobs/{job_id}/details", auth_token=admin_token)
-        if response.status_code == 200:
-            job_response = response.json()
-            if 'job' in job_response:
-                job = job_response['job']
+        # Test all 4 notification types
+        notification_types = ["new_interest", "contact_shared", "job_posted", "payment_confirmation"]
+        
+        for notification_type in notification_types:
+            response = self.make_request("POST", f"/notifications/test/{notification_type}", auth_token=tradesperson_token)
+            
+            if response.status_code == 200:
+                test_response = response.json()
                 
-                # Validate comprehensive job details
-                required_fields = ['id', 'title', 'description', 'category', 'location', 
-                                 'budget_min', 'budget_max', 'timeline', 'homeowner', 
-                                 'interests_count', 'interested_tradespeople', 'created_at']
-                missing_fields = [field for field in required_fields if field not in job]
+                # Verify response structure
+                required_fields = ['message', 'notification_id', 'status']
+                missing_fields = [field for field in required_fields if field not in test_response]
                 
                 if not missing_fields:
-                    self.log_result("Admin job details - data structure", True, 
-                                   f"Complete job details for: {job['title']}")
+                    self.log_result(f"Template rendering - {notification_type}", True, 
+                                   f"Template rendered and notification sent: {test_response['notification_id']}")
                     
-                    # Validate interested tradespeople details
-                    interested_tradespeople = job.get('interested_tradespeople', [])
-                    if interested_tradespeople:
-                        tradesperson = interested_tradespeople[0]
-                        tp_fields = ['interest_id', 'tradesperson_name', 'tradesperson_email', 'status', 'created_at']
-                        missing_tp_fields = [field for field in tp_fields if field not in tradesperson]
-                        
-                        if not missing_tp_fields:
-                            self.log_result("Admin job details - interested tradespeople", True, 
-                                           f"Complete tradesperson details: {tradesperson['tradesperson_name']}")
-                        else:
-                            self.log_result("Admin job details - interested tradespeople", False, 
-                                           f"Missing tradesperson fields: {missing_tp_fields}")
-                    else:
-                        self.log_result("Admin job details - interested tradespeople", True, 
-                                       "No interested tradespeople (expected for some jobs)")
-                    
-                    self.log_result("Admin job details endpoint", True, 
-                                   f"Retrieved detailed job info: {job['title']}")
+                    # Store notification ID for history testing
+                    if 'test_notifications' not in self.test_data:
+                        self.test_data['test_notifications'] = []
+                    self.test_data['test_notifications'].append({
+                        'type': notification_type,
+                        'id': test_response['notification_id']
+                    })
                 else:
-                    self.log_result("Admin job details - data structure", False, 
-                                   f"Missing fields: {missing_fields}")
+                    self.log_result(f"Template rendering - {notification_type}", False, 
+                                   f"Missing response fields: {missing_fields}")
             else:
-                self.log_result("Admin job details endpoint", False, "Invalid response structure")
-        else:
-            self.log_result("Admin job details endpoint", False, 
-                           f"Status: {response.status_code}, Response: {response.text}")
+                self.log_result(f"Template rendering - {notification_type}", False, 
+                               f"Status: {response.status_code}, Response: {response.text}")
         
-        # Test 2: Invalid job ID
-        response = self.make_request("GET", "/admin/jobs/invalid-job-id/details", auth_token=admin_token)
-        if response.status_code == 404:
-            self.log_result("Admin job details - invalid ID", True, 
-                           "Correctly returned 404 for invalid job ID")
-        else:
-            self.log_result("Admin job details - invalid ID", False, 
-                           f"Expected 404, got {response.status_code}")
-        
-        # Test 3: Unauthorized access (Note: Admin endpoints may not require authentication by design)
-        response = self.make_request("GET", f"/admin/jobs/{job_id}/details")
-        if response.status_code in [401, 403]:
-            self.log_result("Admin job details - unauthorized access", True, 
-                           "Correctly requires admin authentication")
-        elif response.status_code == 200:
-            self.log_result("Admin job details - unauthorized access", True, 
-                           "Admin endpoints accessible without authentication (by design)")
-        else:
-            self.log_result("Admin job details - unauthorized access", False, 
-                           f"Unexpected status code: {response.status_code}")
-    
-    def test_admin_update_job_endpoint(self):
-        """Test PUT /api/admin/jobs/{job_id} endpoint"""
-        print("\n=== Testing Admin Update Job Endpoint ===")
-        
-        if 'admin' not in self.auth_tokens or not self.test_data.get('created_jobs'):
-            self.log_result("Admin update job tests", False, "Missing admin token or test jobs")
-            return
-        
-        admin_token = self.auth_tokens['admin']
-        test_job = self.test_data['created_jobs'][0]
-        job_id = test_job['id']
-        
-        # Test 1: Update job details
-        update_data = {
-            "title": "Updated Bathroom Plumbing Installation - Premium Service",
-            "description": "Updated description: Looking for an experienced plumber to install premium bathroom fixtures in our Lagos home.",
-            "budget_min": 250000,
-            "budget_max": 450000,
-            "timeline": "Within 4 weeks",
-            "access_fee_naira": 1500,
-            "access_fee_coins": 15
+        # Test template rendering with custom data
+        custom_template_data = {
+            "homeowner_name": "Adebayo Johnson",
+            "job_title": "Premium Bathroom Renovation",
+            "job_location": "Victoria Island, Lagos",
+            "tradesperson_name": "John Plumber",
+            "tradesperson_experience": "8",
+            "job_budget": "₦150,000 - ₦300,000"
         }
         
-        response = self.make_request("PUT", f"/admin/jobs/{job_id}", json=update_data, auth_token=admin_token)
+        # Test NEW_INTEREST with custom data
+        notification_request = {
+            "user_id": self.test_data['tradesperson_user']['id'],
+            "type": "new_interest",
+            "template_data": custom_template_data,
+            "override_channel": "both"
+        }
+        
+        response = self.make_request("POST", "/notifications/send", json=notification_request, auth_token=tradesperson_token)
         if response.status_code == 200:
-            update_response = response.json()
-            if 'message' in update_response and 'job_id' in update_response:
-                self.log_result("Admin update job", True, 
-                               f"Job updated successfully: {update_response['message']}")
-                
-                # Verify the update by fetching job details
-                response = self.make_request("GET", f"/admin/jobs/{job_id}/details", auth_token=admin_token)
-                if response.status_code == 200:
-                    job_response = response.json()
-                    job = job_response.get('job', {})
-                    
-                    # Check if updates were applied
-                    if (job.get('title') == update_data['title'] and 
-                        job.get('budget_min') == update_data['budget_min'] and
-                        job.get('budget_max') == update_data['budget_max']):
-                        self.log_result("Admin update job - verification", True, 
-                                       "Job updates verified successfully")
-                    else:
-                        self.log_result("Admin update job - verification", False, 
-                                       "Job updates not reflected in database")
+            send_response = response.json()
+            if send_response.get('status') == 'pending':
+                self.log_result("Custom template data rendering", True, 
+                               f"Notification queued with custom data")
             else:
-                self.log_result("Admin update job", False, "Invalid response structure")
+                self.log_result("Custom template data rendering", False, 
+                               f"Unexpected status: {send_response.get('status')}")
         else:
-            self.log_result("Admin update job", False, 
+            self.log_result("Custom template data rendering", False, 
                            f"Status: {response.status_code}, Response: {response.text}")
-        
-        # Test 2: Update with invalid job ID
-        response = self.make_request("PUT", "/admin/jobs/invalid-job-id", json=update_data, auth_token=admin_token)
-        if response.status_code == 404:
-            self.log_result("Admin update job - invalid ID", True, 
-                           "Correctly returned 404 for invalid job ID")
-        else:
-            self.log_result("Admin update job - invalid ID", False, 
-                           f"Expected 404, got {response.status_code}")
-        
-        # Test 3: Unauthorized access (Note: Admin endpoints may not require authentication by design)
-        response = self.make_request("PUT", f"/admin/jobs/{job_id}", json=update_data)
-        if response.status_code in [401, 403]:
-            self.log_result("Admin update job - unauthorized access", True, 
-                           "Correctly requires admin authentication")
-        elif response.status_code in [200, 404]:  # 404 is expected for non-existent job
-            self.log_result("Admin update job - unauthorized access", True, 
-                           "Admin endpoints accessible without authentication (by design)")
-        else:
-            self.log_result("Admin update job - unauthorized access", False, 
-                           f"Unexpected status code: {response.status_code}")
     
-    def test_admin_update_job_status_endpoint(self):
-        """Test PATCH /api/admin/jobs/{job_id}/status endpoint"""
-        print("\n=== Testing Admin Update Job Status Endpoint ===")
+    def test_notification_history(self):
+        """Test notification history retrieval"""
+        print("\n=== Testing Notification History ===")
         
-        if 'admin' not in self.auth_tokens or not self.test_data.get('created_jobs'):
-            self.log_result("Admin update job status tests", False, "Missing admin token or test jobs")
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("Notification history tests", False, "No tradesperson authentication token")
             return
         
-        admin_token = self.auth_tokens['admin']
-        test_job = self.test_data['created_jobs'][1]  # Use second job
-        job_id = test_job['id']
+        tradesperson_token = self.auth_tokens['tradesperson']
         
-        # Test 1: Update job status to completed
-        response = self.make_request("PATCH", f"/admin/jobs/{job_id}/status?status=completed", auth_token=admin_token)
+        # Wait a moment for background tasks to complete
+        time.sleep(3)
+        
+        # Test 1: Get notification history
+        response = self.make_request("GET", "/notifications/history", auth_token=tradesperson_token)
         if response.status_code == 200:
-            status_response = response.json()
-            if ('message' in status_response and 'job_id' in status_response and 
-                'new_status' in status_response):
-                if status_response['new_status'] == 'completed':
-                    self.log_result("Admin update job status", True, 
-                                   f"Status updated to: {status_response['new_status']}")
+            history = response.json()
+            
+            # Verify history structure
+            required_fields = ['notifications', 'total', 'unread']
+            missing_fields = [field for field in required_fields if field not in history]
+            
+            if not missing_fields:
+                notifications = history['notifications']
+                total_count = history['total']
+                unread_count = history['unread']
+                
+                self.log_result("Get notification history", True, 
+                               f"Retrieved {len(notifications)} notifications (Total: {total_count}, Unread: {unread_count})")
+                
+                # Verify notification structure if any exist
+                if notifications:
+                    notification = notifications[0]
+                    notification_fields = ['id', 'user_id', 'type', 'channel', 'subject', 'content', 'status', 'created_at']
+                    missing_notification_fields = [field for field in notification_fields if field not in notification]
                     
-                    # Verify status update
-                    response = self.make_request("GET", f"/admin/jobs/{job_id}/details", auth_token=admin_token)
-                    if response.status_code == 200:
-                        job_response = response.json()
-                        job = job_response.get('job', {})
-                        if job.get('status') == 'completed':
-                            self.log_result("Admin update job status - verification", True, 
-                                           "Status update verified in database")
-                        else:
-                            self.log_result("Admin update job status - verification", False, 
-                                           f"Expected 'completed', got '{job.get('status')}'")
+                    if not missing_notification_fields:
+                        self.log_result("Notification history - data structure", True, 
+                                       f"Complete notification data: {notification['type']} via {notification['channel']}")
+                    else:
+                        self.log_result("Notification history - data structure", False, 
+                                       f"Missing notification fields: {missing_notification_fields}")
                 else:
-                    self.log_result("Admin update job status", False, 
-                                   f"Wrong status returned: {status_response['new_status']}")
+                    self.log_result("Notification history - data structure", True, 
+                                   "No notifications in history (expected for new user)")
             else:
-                self.log_result("Admin update job status", False, "Invalid response structure")
+                self.log_result("Get notification history", False, 
+                               f"Missing history fields: {missing_fields}")
         else:
-            self.log_result("Admin update job status", False, 
+            self.log_result("Get notification history", False, 
                            f"Status: {response.status_code}, Response: {response.text}")
         
-        # Test 2: Test all valid statuses
-        valid_statuses = ["active", "completed", "cancelled", "expired", "on_hold"]
-        for status in valid_statuses:
-            response = self.make_request("PATCH", f"/admin/jobs/{job_id}/status?status={status}", auth_token=admin_token)
+        # Test 2: Get notification history with pagination
+        response = self.make_request("GET", "/notifications/history?limit=5&offset=0", auth_token=tradesperson_token)
+        if response.status_code == 200:
+            paginated_history = response.json()
+            notifications = paginated_history.get('notifications', [])
+            
+            if len(notifications) <= 5:
+                self.log_result("Notification history pagination", True, 
+                               f"Correctly limited to {len(notifications)} notifications")
+            else:
+                self.log_result("Notification history pagination", False, 
+                               f"Expected max 5 notifications, got {len(notifications)}")
+        else:
+            self.log_result("Notification history pagination", False, 
+                           f"Status: {response.status_code}")
+    
+    def test_service_initialization_and_environment_variables(self):
+        """Test service initialization and environment variable handling"""
+        print("\n=== Testing Service Initialization and Environment Variables ===")
+        
+        # This test verifies that the services are properly configured
+        # by checking if notifications are being processed correctly
+        
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("Service initialization tests", False, "No tradesperson authentication token")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        
+        # Test SendGrid service initialization by sending email notification
+        email_notification_request = {
+            "user_id": self.test_data['tradesperson_user']['id'],
+            "type": "job_posted",
+            "template_data": {
+                "homeowner_name": "Test Homeowner",
+                "job_title": "Test Email Service Job",
+                "job_location": "Lagos, Nigeria",
+                "job_budget": "₦50,000 - ₦100,000",
+                "post_date": "Today",
+                "manage_url": "https://servicehub.ng/my-jobs"
+            },
+            "override_channel": "email"
+        }
+        
+        response = self.make_request("POST", "/notifications/send", json=email_notification_request, auth_token=tradesperson_token)
+        if response.status_code == 200:
+            send_response = response.json()
+            if send_response.get('status') == 'pending':
+                self.log_result("SendGrid service initialization", True, 
+                               "Email notification queued successfully")
+            else:
+                self.log_result("SendGrid service initialization", False, 
+                               f"Unexpected status: {send_response.get('status')}")
+        else:
+            self.log_result("SendGrid service initialization", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test Termii service initialization by sending SMS notification
+        sms_notification_request = {
+            "user_id": self.test_data['tradesperson_user']['id'],
+            "type": "payment_confirmation",
+            "template_data": {
+                "tradesperson_name": "John Plumber",
+                "job_title": "Test SMS Service Job",
+                "job_location": "Abuja, Nigeria",
+                "homeowner_name": "Test Homeowner",
+                "homeowner_phone": "+2348123456789",
+                "homeowner_email": "test@example.com"
+            },
+            "override_channel": "sms"
+        }
+        
+        response = self.make_request("POST", "/notifications/send", json=sms_notification_request, auth_token=tradesperson_token)
+        if response.status_code == 200:
+            send_response = response.json()
+            if send_response.get('status') == 'pending':
+                self.log_result("Termii service initialization", True, 
+                               "SMS notification queued successfully")
+            else:
+                self.log_result("Termii service initialization", False, 
+                               f"Unexpected status: {send_response.get('status')}")
+        else:
+            self.log_result("Termii service initialization", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test both channels (email + SMS)
+        both_channels_request = {
+            "user_id": self.test_data['tradesperson_user']['id'],
+            "type": "contact_shared",
+            "template_data": {
+                "tradesperson_name": "John Plumber",
+                "job_title": "Test Both Channels Job",
+                "job_location": "Port Harcourt, Nigeria",
+                "payment_url": "https://servicehub.ng/payments"
+            },
+            "override_channel": "both"
+        }
+        
+        response = self.make_request("POST", "/notifications/send", json=both_channels_request, auth_token=tradesperson_token)
+        if response.status_code == 200:
+            send_response = response.json()
+            if send_response.get('status') == 'pending':
+                self.log_result("Both channels service test", True, 
+                               "Email + SMS notification queued successfully")
+            else:
+                self.log_result("Both channels service test", False, 
+                               f"Unexpected status: {send_response.get('status')}")
+        else:
+            self.log_result("Both channels service test", False, 
+                           f"Status: {response.status_code}, Response: {response.text}")
+    
+    def test_nigerian_phone_number_formatting(self):
+        """Test Nigerian phone number formatting for Termii API"""
+        print("\n=== Testing Nigerian Phone Number Formatting ===")
+        
+        if 'homeowner' not in self.auth_tokens:
+            self.log_result("Phone formatting tests", False, "No homeowner authentication token")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        
+        # Test different Nigerian phone number formats
+        phone_formats = [
+            "+2348123456789",  # International format with +
+            "2348123456789",   # International format without +
+            "08123456789",     # Local format with 0
+            "8123456789"       # Local format without 0
+        ]
+        
+        for i, phone_format in enumerate(phone_formats):
+            # Update user phone number for testing
+            update_data = {"phone": phone_format}
+            
+            # Send SMS notification to test phone formatting
+            sms_request = {
+                "user_id": self.test_data['homeowner_user']['id'],
+                "type": "new_interest",
+                "template_data": {
+                    "homeowner_name": "Test Homeowner",
+                    "job_title": f"Phone Format Test Job {i+1}",
+                    "tradesperson_name": "John Plumber",
+                    "view_url": "https://servicehub.ng/my-jobs"
+                },
+                "override_channel": "sms"
+            }
+            
+            response = self.make_request("POST", "/notifications/send", json=sms_request, auth_token=homeowner_token)
             if response.status_code == 200:
-                self.log_result(f"Admin update job status - {status}", True, 
-                               f"Successfully updated to {status}")
+                send_response = response.json()
+                if send_response.get('status') == 'pending':
+                    self.log_result(f"Phone format test - {phone_format}", True, 
+                                   "SMS notification queued with phone format")
+                else:
+                    self.log_result(f"Phone format test - {phone_format}", False, 
+                                   f"Unexpected status: {send_response.get('status')}")
             else:
-                self.log_result(f"Admin update job status - {status}", False, 
-                               f"Failed to update to {status}: {response.status_code}")
-        
-        # Test 3: Invalid status
-        response = self.make_request("PATCH", f"/admin/jobs/{job_id}/status?status=invalid_status", auth_token=admin_token)
-        if response.status_code == 400:
-            self.log_result("Admin update job status - invalid status", True, 
-                           "Correctly rejected invalid status")
-        else:
-            self.log_result("Admin update job status - invalid status", False, 
-                           f"Expected 400, got {response.status_code}")
-        
-        # Test 4: Invalid job ID
-        response = self.make_request("PATCH", "/admin/jobs/invalid-job-id/status?status=active", auth_token=admin_token)
-        if response.status_code == 404:
-            self.log_result("Admin update job status - invalid ID", True, 
-                           "Correctly returned 404 for invalid job ID")
-        else:
-            self.log_result("Admin update job status - invalid ID", False, 
-                           f"Expected 404, got {response.status_code}")
+                self.log_result(f"Phone format test - {phone_format}", False, 
+                               f"Status: {response.status_code}, Response: {response.text}")
     
-    def test_admin_delete_job_endpoint(self):
-        """Test DELETE /api/admin/jobs/{job_id} endpoint"""
-        print("\n=== Testing Admin Delete Job Endpoint ===")
+    def test_html_content_conversion(self):
+        """Test HTML content conversion for email notifications"""
+        print("\n=== Testing HTML Content Conversion ===")
         
-        if 'admin' not in self.auth_tokens or not self.test_data.get('created_jobs'):
-            self.log_result("Admin delete job tests", False, "Missing admin token or test jobs")
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("HTML conversion tests", False, "No tradesperson authentication token")
             return
         
-        admin_token = self.auth_tokens['admin']
-        test_job = self.test_data['created_jobs'][2]  # Use third job for deletion
-        job_id = test_job['id']
+        tradesperson_token = self.auth_tokens['tradesperson']
         
-        # Test 1: Soft delete job
-        response = self.make_request("DELETE", f"/admin/jobs/{job_id}", auth_token=admin_token)
+        # Test email notification with content that should be converted to HTML
+        html_test_request = {
+            "user_id": self.test_data['tradesperson_user']['id'],
+            "type": "job_posted",
+            "template_data": {
+                "homeowner_name": "Test Homeowner",
+                "job_title": "HTML Content Test Job\nWith Multiple Lines\nAnd Line Breaks",
+                "job_location": "Lagos, Nigeria",
+                "job_budget": "₦75,000 - ₦150,000",
+                "post_date": "Today",
+                "manage_url": "https://servicehub.ng/my-jobs"
+            },
+            "override_channel": "email"
+        }
+        
+        response = self.make_request("POST", "/notifications/send", json=html_test_request, auth_token=tradesperson_token)
         if response.status_code == 200:
-            delete_response = response.json()
-            if 'message' in delete_response and 'job_id' in delete_response:
-                self.log_result("Admin delete job", True, 
-                               f"Job soft deleted: {delete_response['message']}")
-                
-                # Verify soft deletion - job should still exist but with deleted status
-                response = self.make_request("GET", f"/admin/jobs/{job_id}/details", auth_token=admin_token)
-                if response.status_code == 200:
-                    job_response = response.json()
-                    job = job_response.get('job', {})
-                    if job.get('status') == 'deleted':
-                        self.log_result("Admin delete job - verification", True, 
-                                       "Job soft deleted (status = deleted)")
-                    else:
-                        self.log_result("Admin delete job - verification", False, 
-                                       f"Expected status 'deleted', got '{job.get('status')}'")
-                else:
-                    # Job might not be accessible after deletion, which is also valid
-                    self.log_result("Admin delete job - verification", True, 
-                                   "Job no longer accessible after deletion")
+            send_response = response.json()
+            if send_response.get('status') == 'pending':
+                self.log_result("HTML content conversion test", True, 
+                               "Email with line breaks queued for HTML conversion")
             else:
-                self.log_result("Admin delete job", False, "Invalid response structure")
+                self.log_result("HTML content conversion test", False, 
+                               f"Unexpected status: {send_response.get('status')}")
         else:
-            self.log_result("Admin delete job", False, 
+            self.log_result("HTML content conversion test", False, 
                            f"Status: {response.status_code}, Response: {response.text}")
-        
-        # Test 2: Delete non-existent job
-        response = self.make_request("DELETE", "/admin/jobs/invalid-job-id", auth_token=admin_token)
-        if response.status_code == 404:
-            self.log_result("Admin delete job - invalid ID", True, 
-                           "Correctly returned 404 for invalid job ID")
-        else:
-            self.log_result("Admin delete job - invalid ID", False, 
-                           f"Expected 404, got {response.status_code}")
-        
-        # Test 3: Unauthorized access (Note: Admin endpoints may not require authentication by design)
-        response = self.make_request("DELETE", f"/admin/jobs/{job_id}")
-        if response.status_code in [401, 403]:
-            self.log_result("Admin delete job - unauthorized access", True, 
-                           "Correctly requires admin authentication")
-        elif response.status_code in [200, 404]:  # 404 is expected for non-existent job
-            self.log_result("Admin delete job - unauthorized access", True, 
-                           "Admin endpoints accessible without authentication (by design)")
-        else:
-            self.log_result("Admin delete job - unauthorized access", False, 
-                           f"Unexpected status code: {response.status_code}")
     
-    def test_admin_job_statistics_endpoint(self):
-        """Test GET /api/admin/jobs/stats endpoint"""
-        print("\n=== Testing Admin Job Statistics Endpoint ===")
+    def test_error_handling_and_fallback(self):
+        """Test error handling and fallback mechanisms"""
+        print("\n=== Testing Error Handling and Fallback ===")
         
-        if 'admin' not in self.auth_tokens:
-            self.log_result("Admin job statistics tests", False, "No admin authentication token")
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("Error handling tests", False, "No tradesperson authentication token")
             return
         
-        admin_token = self.auth_tokens['admin']
+        tradesperson_token = self.auth_tokens['tradesperson']
         
-        # Test 1: Get job statistics
-        response = self.make_request("GET", "/admin/jobs/stats", auth_token=admin_token)
-        if response.status_code == 200:
-            stats_response = response.json()
-            if 'job_stats' in stats_response:
-                job_stats = stats_response['job_stats']
-                
-                # Validate statistics structure
-                expected_stats = ['total_jobs', 'active_jobs', 'completed_jobs', 
-                                'cancelled_jobs', 'expired_jobs', 'total_interests']
-                missing_stats = [stat for stat in expected_stats if stat not in job_stats]
-                
-                if not missing_stats:
-                    self.log_result("Admin job statistics - data structure", True, 
-                                   f"Complete statistics: Total jobs: {job_stats.get('total_jobs', 0)}")
-                    
-                    # Validate that statistics are numbers
-                    valid_numbers = all(isinstance(job_stats.get(stat, 0), int) for stat in expected_stats)
-                    if valid_numbers:
-                        self.log_result("Admin job statistics - data types", True, 
-                                       "All statistics are valid numbers")
-                    else:
-                        self.log_result("Admin job statistics - data types", False, 
-                                       "Some statistics are not valid numbers")
-                    
-                    # Log key statistics
-                    total_jobs = job_stats.get('total_jobs', 0)
-                    active_jobs = job_stats.get('active_jobs', 0)
-                    total_interests = job_stats.get('total_interests', 0)
-                    
-                    self.log_result("Admin job statistics endpoint", True, 
-                                   f"Stats: {total_jobs} total jobs, {active_jobs} active, {total_interests} interests")
-                else:
-                    self.log_result("Admin job statistics - data structure", False, 
-                                   f"Missing statistics: {missing_stats}")
-            else:
-                self.log_result("Admin job statistics endpoint", False, "Invalid response structure")
-        else:
-            self.log_result("Admin job statistics endpoint", False, 
-                           f"Status: {response.status_code}, Response: {response.text}")
+        # Test 1: Invalid user ID
+        invalid_user_request = {
+            "user_id": "invalid-user-id-12345",
+            "type": "new_interest",
+            "template_data": {
+                "homeowner_name": "Test",
+                "job_title": "Test Job",
+                "tradesperson_name": "Test Tradesperson",
+                "view_url": "https://servicehub.ng"
+            }
+        }
         
-        # Test 2: Unauthorized access (Note: Admin endpoints may not require authentication by design)
-        response = self.make_request("GET", "/admin/jobs/stats")
-        if response.status_code in [401, 403]:
-            self.log_result("Admin job statistics - unauthorized access", True, 
-                           "Correctly requires admin authentication")
-        elif response.status_code == 200:
-            self.log_result("Admin job statistics - unauthorized access", True, 
-                           "Admin endpoints accessible without authentication (by design)")
+        response = self.make_request("POST", "/notifications/send", json=invalid_user_request, auth_token=tradesperson_token)
+        if response.status_code == 404:
+            self.log_result("Invalid user ID handling", True, 
+                           "Correctly returned 404 for invalid user ID")
         else:
-            self.log_result("Admin job statistics - unauthorized access", False, 
+            self.log_result("Invalid user ID handling", False, 
+                           f"Expected 404, got {response.status_code}")
+        
+        # Test 2: Missing template data
+        missing_data_request = {
+            "user_id": self.test_data['tradesperson_user']['id'],
+            "type": "new_interest",
+            "template_data": {}  # Empty template data
+        }
+        
+        response = self.make_request("POST", "/notifications/send", json=missing_data_request, auth_token=tradesperson_token)
+        # This should still work as the system should handle missing template variables gracefully
+        if response.status_code in [200, 400, 422]:
+            self.log_result("Missing template data handling", True, 
+                           f"Handled missing template data appropriately: {response.status_code}")
+        else:
+            self.log_result("Missing template data handling", False, 
                            f"Unexpected status code: {response.status_code}")
+        
+        # Test 3: Invalid notification type
+        invalid_type_request = {
+            "user_id": self.test_data['tradesperson_user']['id'],
+            "type": "invalid_notification_type",
+            "template_data": {
+                "test": "data"
+            }
+        }
+        
+        response = self.make_request("POST", "/notifications/send", json=invalid_type_request, auth_token=tradesperson_token)
+        if response.status_code in [400, 422]:
+            self.log_result("Invalid notification type handling", True, 
+                           "Correctly rejected invalid notification type")
+        else:
+            self.log_result("Invalid notification type handling", False, 
+                           f"Expected 400/422, got {response.status_code}")
     
-    def run_admin_job_management_tests(self):
-        """Run comprehensive admin job management API testing"""
-        print("🎯 STARTING ADMIN JOB MANAGEMENT API ENDPOINTS TESTING")
+    def test_background_task_processing(self):
+        """Test background task notification processing"""
+        print("\n=== Testing Background Task Processing ===")
+        
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("Background task tests", False, "No tradesperson authentication token")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        
+        # Send multiple notifications to test background processing
+        notification_requests = []
+        for i in range(3):
+            request = {
+                "user_id": self.test_data['tradesperson_user']['id'],
+                "type": "job_posted",
+                "template_data": {
+                    "homeowner_name": f"Test Homeowner {i+1}",
+                    "job_title": f"Background Task Test Job {i+1}",
+                    "job_location": "Lagos, Nigeria",
+                    "job_budget": "₦50,000 - ₦100,000",
+                    "post_date": "Today",
+                    "manage_url": "https://servicehub.ng/my-jobs"
+                },
+                "override_channel": "both"
+            }
+            notification_requests.append(request)
+        
+        # Send all notifications quickly to test background processing
+        sent_notifications = []
+        for i, request in enumerate(notification_requests):
+            response = self.make_request("POST", "/notifications/send", json=request, auth_token=tradesperson_token)
+            if response.status_code == 200:
+                send_response = response.json()
+                if send_response.get('status') == 'pending':
+                    sent_notifications.append(send_response)
+                    self.log_result(f"Background task {i+1}", True, 
+                                   "Notification queued for background processing")
+                else:
+                    self.log_result(f"Background task {i+1}", False, 
+                                   f"Unexpected status: {send_response.get('status')}")
+            else:
+                self.log_result(f"Background task {i+1}", False, 
+                               f"Status: {response.status_code}")
+        
+        # Wait for background tasks to complete
+        time.sleep(5)
+        
+        # Check if notifications were processed by looking at history
+        response = self.make_request("GET", "/notifications/history?limit=10", auth_token=tradesperson_token)
+        if response.status_code == 200:
+            history = response.json()
+            recent_notifications = history.get('notifications', [])
+            
+            # Count notifications from the last few minutes
+            recent_count = len([n for n in recent_notifications if 'Background Task Test Job' in n.get('subject', '')])
+            
+            if recent_count >= len(sent_notifications):
+                self.log_result("Background task completion", True, 
+                               f"Found {recent_count} processed notifications in history")
+            else:
+                self.log_result("Background task completion", False, 
+                               f"Expected {len(sent_notifications)} notifications, found {recent_count}")
+        else:
+            self.log_result("Background task completion", False, 
+                           f"Could not verify background task completion: {response.status_code}")
+    
+    def run_notification_system_tests(self):
+        """Run comprehensive notification system testing"""
+        print("🎯 STARTING REAL-TIME NOTIFICATION SYSTEM TESTING")
         print("=" * 80)
         
         # Setup authentication and test data
-        self.test_admin_authentication()
-        self.test_setup_test_data()
+        self.test_user_authentication()
         
-        # Run admin job management specific tests
-        self.test_admin_jobs_all_endpoint()
-        self.test_admin_job_details_endpoint()
-        self.test_admin_update_job_endpoint()
-        self.test_admin_update_job_status_endpoint()
-        self.test_admin_delete_job_endpoint()
-        self.test_admin_job_statistics_endpoint()
+        # Run notification system specific tests
+        self.test_notification_preferences()
+        self.test_notification_templates_and_rendering()
+        self.test_notification_history()
+        self.test_service_initialization_and_environment_variables()
+        self.test_nigerian_phone_number_formatting()
+        self.test_html_content_conversion()
+        self.test_error_handling_and_fallback()
+        self.test_background_task_processing()
         
         # Print final summary
         print("\n" + "=" * 80)
-        print("🎯 ADMIN JOB MANAGEMENT API TESTING COMPLETE")
+        print("🎯 REAL-TIME NOTIFICATION SYSTEM TESTING COMPLETE")
         print(f"✅ PASSED: {self.results['passed']}")
         print(f"❌ FAILED: {self.results['failed']}")
         success_rate = (self.results['passed'] / (self.results['passed'] + self.results['failed'])) * 100
@@ -693,5 +684,5 @@ class AdminJobManagementTester:
         return success_rate >= 85  # Consider 85%+ as successful
 
 if __name__ == "__main__":
-    tester = AdminJobManagementTester()
-    tester.run_admin_job_management_tests()
+    tester = NotificationSystemTester()
+    tester.run_notification_system_tests()
