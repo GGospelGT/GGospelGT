@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """
-CRITICAL AUTHENTICATION BUG INVESTIGATION
-Testing authentication system where logged-in homeowners are being told 
-"You must be logged in to post a job" even though they are authenticated.
+INTERESTS API ENDPOINTS TESTING
+Testing the interests API endpoints that support the new Interested Tradespeople page functionality.
 
 Focus Areas:
-1. JWT token validation and authentication chain
-2. get_current_homeowner dependency functionality  
-3. Bearer token validation
-4. User role validation (homeowner vs tradesperson)
-5. Edge cases: expired tokens, invalid tokens, missing tokens
+1. Job Interests API: /api/interests/job/{job_id} - Get tradespeople who showed interest
+2. Interest Management APIs:
+   - /api/interests/show-interest - For tradespeople showing interest
+   - /api/interests/share-contact/{interest_id} - For homeowners sharing contact details  
+   - /api/interests/my-interests - For tradespeople viewing their interests
+3. Data Structure Validation: Complete tradesperson profiles, interest status tracking, job details
+4. Authentication Requirements: homeowner/tradesperson roles
+5. Error Handling: Valid/invalid IDs, various interest statuses, edge cases
 """
 
 import requests
