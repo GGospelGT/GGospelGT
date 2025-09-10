@@ -440,6 +440,9 @@ class NotificationService:
         if not notification.recipient_phone:
             raise ValueError("No recipient phone provided")
         
+        # Ensure services are initialized
+        self._ensure_services_initialized()
+        
         template = self.template_service.get_template(notification.type, NotificationChannel.SMS)
         if not template:
             raise ValueError(f"No SMS template found for {notification.type}")
