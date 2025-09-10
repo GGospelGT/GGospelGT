@@ -149,11 +149,12 @@ class DynamicLocationTester:
         
         # Add Kaduna state
         kaduna_state_data = {
-            "name": "Kaduna",
-            "description": "Kaduna State - Added via admin dashboard for testing dynamic location integration"
+            "state_name": "Kaduna",
+            "region": "North Central Nigeria",
+            "postcode_samples": "800001,800101,800201"
         }
         
-        response = self.make_request("POST", "/admin/locations/states", json=kaduna_state_data, auth_token=admin_token)
+        response = self.make_request("POST", "/admin/locations/states", data=kaduna_state_data, auth_token=admin_token)
         if response.status_code in [200, 201]:
             state_response = response.json()
             self.log_result("Add Kaduna state", True, f"State added: {state_response.get('name', 'Kaduna')}")
