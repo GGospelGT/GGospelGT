@@ -68,7 +68,7 @@ const AdminDashboard = () => {
     if (isLoggedIn) {
       fetchData();
     }
-  }, [isLoggedIn, activeTab]);
+  }, [isLoggedIn, activeTab, activeLocationTab]);
 
   const fetchData = async () => {
     try {
