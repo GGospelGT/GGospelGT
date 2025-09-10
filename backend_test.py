@@ -196,11 +196,11 @@ class DynamicLocationTester:
             response = self.make_request("POST", "/admin/locations/lgas", data=lga_data, auth_token=admin_token)
             if response.status_code in [200, 201]:
                 lga_response = response.json()
-                self.log_result(f"Add {lga_data['name']} LGA", True, f"LGA added to {lga_data['state']}")
+                self.log_result(f"Add {lga_data['lga_name']} LGA", True, f"LGA added to {lga_data['state_name']}")
             elif response.status_code == 400 and "already exists" in response.text:
-                self.log_result(f"Add {lga_data['name']} LGA", True, "LGA already exists (expected)")
+                self.log_result(f"Add {lga_data['lga_name']} LGA", True, "LGA already exists (expected)")
             else:
-                self.log_result(f"Add {lga_data['name']} LGA", False, f"Status: {response.status_code}, Response: {response.text}")
+                self.log_result(f"Add {lga_data['lga_name']} LGA", False, f"Status: {response.status_code}, Response: {response.text}")
     
     def test_dynamic_states_integration(self):
         """Test that GET /api/jobs/locations/states includes both static and admin-added states"""
