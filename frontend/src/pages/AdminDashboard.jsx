@@ -114,6 +114,8 @@ const AdminDashboard = () => {
         setSkillsQuestions(questionsData.questions || {});
         setQuestionStats(questionsData.stats || {});
         setTrades(tradesData.trades || []); // Use trades for dropdown options
+        // Extract group names from the groups object for skills questions context
+        setTradeGroups(tradesData.groups ? Object.keys(tradesData.groups) : []);
       } else if (activeTab === 'policies') {
         // Load policies and policy types
         const [policiesData, typesData] = await Promise.all([
