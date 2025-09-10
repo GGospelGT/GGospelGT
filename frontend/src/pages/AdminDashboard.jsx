@@ -1310,16 +1310,31 @@ const AdminDashboard = () => {
                             <form onSubmit={async (e) => {
                               e.preventDefault();
                               const formData = new FormData(e.target);
+                              
+                              // Debug: log form data
+                              const tradeName = formData.get('trade_name');
+                              const group = formData.get('group');
+                              const description = formData.get('description');
+                              
+                              console.log('Form submission data:', {
+                                tradeName,
+                                group,
+                                description
+                              });
+                              
                               try {
-                                await adminAPI.addNewTrade(
-                                  formData.get('trade_name'),
-                                  formData.get('group'),
-                                  formData.get('description')
+                                const result = await adminAPI.addNewTrade(
+                                  tradeName,
+                                  group,
+                                  description
                                 );
+                                console.log('API response:', result);
                                 toast({ title: "Trade category added successfully" });
                                 setShowAddForm(false);
                                 fetchData();
                               } catch (error) {
+                                console.error('Form submission error:', error);
+                                console.error('Error details:', error.response?.data);
                                 toast({ title: "Failed to add trade category", variant: "destructive" });
                               }
                             }}>
