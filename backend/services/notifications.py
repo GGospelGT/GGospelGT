@@ -18,28 +18,46 @@ import requests
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("notifications")
 
-class MockEmailService:
-    """Mock email service that logs instead of sending real emails"""
+class SendGridEmailService:
+    """Real SendGrid email service for production use"""
     
     def __init__(self):
-        self.service_name = "MockEmailService"
-        logger.info(f"🔧 {self.service_name} initialized - Development Mode (Logging Only)")
+        self.service_name = "SendGridEmailService"
+        self.api_key = os.environ.get('SENDGRID_API_KEY')
+        self.sender_email = os.environ.get('SENDER_EMAIL')
+        
+        if not self.api_key or not self.sender_email:
+            logger.error("❌ SendGrid configuration missing: SENDGRID_API_KEY or SENDER_EMAIL")
+            raise ValueError("Missing SendGrid configuration")
+        
+        self.client = SendGridAPIClient(api_key=self.api_key)
+        logger.info(f"🔧 {self.service_name} initialized - Production Mode")
     
     async def send_email(self, to: str, subject: str, content: str, metadata: Dict[str, Any] = None) -> bool:
-        """Mock send email - logs the email instead of sending"""
+        """Send real email using SendGrid"""
         try:
-            log_data = {
-                "service": self.service_name,
-                "to": to,
-                "subject": subject,
-                "content": content[:100] + "..." if len(content) > 100 else content,
-                "metadata": metadata or {},
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
+            message = Mail(
+                from_email=self.sender_email,
+                to_emails=to,
+                subject=subject,
+                html_content=content.replace('\n', '<br>')  # Convert to HTML
+            )
             
-            logger.info(f"📧 EMAIL SENT: {json.dumps(log_data, indent=2)}")
-            return True
+            # Add metadata as custom args if provided
+            if metadata:
+                for key, value in metadata.items():
+                    message.custom_arg = {key: str(value)}
             
+            response = self.client.send(message)
+            
+            # SendGrid returns 202 for successful queuing
+            if response.status_code in [200, 202]:
+                logger.info(f"📧 EMAIL SENT: to={to}, subject={subject[:50]}...")
+                return True
+            else:
+                logger.error(f"❌ SendGrid failed: {response.status_code} - {response.body}")
+                return False
+                
         except Exception as e:
             logger.error(f"❌ Email sending failed: {str(e)}")
             return False
@@ -268,10 +286,10 @@ class NotificationService:
     """Main notification service orchestrating email and SMS delivery"""
     
     def __init__(self):
-        self.email_service = MockEmailService()
+        self.email_service = SendGridEmailService()
         self.sms_service = MockSMSService()
         self.template_service = NotificationTemplateService()
-        logger.info("🔧 NotificationService initialized - Ready for mock notifications")
+        logger.info("🔧 NotificationService initialized - Ready for production notifications")
     
     async def send_notification(
         self,
