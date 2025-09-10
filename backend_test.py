@@ -7283,16 +7283,406 @@ class BackendTester:
         else:
             self.log_result("Data Structure Tests", False, f"Could not retrieve interests: {response.status_code}")
 
+    def test_tradespeople_apis(self):
+        """Test comprehensive tradespeople APIs for browse functionality"""
+        print("\n=== Testing Tradespeople APIs ===")
+        
+        # Test 1: Get all tradespeople (basic endpoint)
+        response = self.make_request("GET", "/tradespeople")
+        if response.status_code == 200:
+            data = response.json()
+            if 'tradespeople' in data and 'total' in data:
+                tradespeople = data['tradespeople']
+                self.log_result("Get all tradespeople", True, f"Found {len(tradespeople)} tradespeople, Total: {data['total']}")
+                
+                # Store first tradesperson for detailed testing
+                if tradespeople:
+                    self.test_data['sample_tradesperson'] = tradespeople[0]
+            else:
+                self.log_result("Get all tradespeople", False, "Invalid response structure")
+        else:
+            self.log_result("Get all tradespeople", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 2: Get tradespeople with category filter
+        response = self.make_request("GET", "/tradespeople", params={"category": "Plumbing"})
+        if response.status_code == 200:
+            data = response.json()
+            tradespeople = data.get('tradespeople', [])
+            # Verify all returned tradespeople have Plumbing in their categories
+            plumbing_tradespeople = [tp for tp in tradespeople if 'Plumbing' in tp.get('trade_categories', [])]
+            if len(plumbing_tradespeople) == len(tradespeople):
+                self.log_result("Category filter (Plumbing)", True, f"Found {len(tradespeople)} plumbing tradespeople")
+            else:
+                self.log_result("Category filter (Plumbing)", False, "Filter not working correctly")
+        else:
+            self.log_result("Category filter (Plumbing)", False, f"Status: {response.status_code}")
+        
+        # Test 3: Get tradespeople with location filter
+        response = self.make_request("GET", "/tradespeople", params={"location": "Lagos"})
+        if response.status_code == 200:
+            data = response.json()
+            tradespeople = data.get('tradespeople', [])
+            # Verify all returned tradespeople have Lagos in their location
+            lagos_tradespeople = [tp for tp in tradespeople if 'Lagos' in tp.get('location', '')]
+            if len(lagos_tradespeople) == len(tradespeople):
+                self.log_result("Location filter (Lagos)", True, f"Found {len(tradespeople)} Lagos tradespeople")
+            else:
+                self.log_result("Location filter (Lagos)", False, "Location filter not working correctly")
+        else:
+            self.log_result("Location filter (Lagos)", False, f"Status: {response.status_code}")
+        
+        # Test 4: Get tradespeople with minimum rating filter
+        response = self.make_request("GET", "/tradespeople", params={"min_rating": 4.0})
+        if response.status_code == 200:
+            data = response.json()
+            tradespeople = data.get('tradespeople', [])
+            # Verify all returned tradespeople have rating >= 4.0
+            high_rated = [tp for tp in tradespeople if tp.get('average_rating', 0) >= 4.0]
+            if len(high_rated) == len(tradespeople):
+                self.log_result("Minimum rating filter (4.0)", True, f"Found {len(tradespeople)} high-rated tradespeople")
+            else:
+                self.log_result("Minimum rating filter (4.0)", False, "Rating filter not working correctly")
+        else:
+            self.log_result("Minimum rating filter (4.0)", False, f"Status: {response.status_code}")
+        
+        # Test 5: Pagination testing
+        response = self.make_request("GET", "/tradespeople", params={"page": 1, "limit": 5})
+        if response.status_code == 200:
+            data = response.json()
+            tradespeople = data.get('tradespeople', [])
+            if len(tradespeople) <= 5:
+                self.log_result("Pagination (page=1, limit=5)", True, f"Returned {len(tradespeople)} tradespeople")
+            else:
+                self.log_result("Pagination (page=1, limit=5)", False, f"Expected ≤5, got {len(tradespeople)}")
+        else:
+            self.log_result("Pagination (page=1, limit=5)", False, f"Status: {response.status_code}")
+        
+        # Test 6: Combined filters
+        response = self.make_request("GET", "/tradespeople", params={
+            "category": "Plumbing", 
+            "location": "Lagos", 
+            "min_rating": 3.0,
+            "page": 1,
+            "limit": 10
+        })
+        if response.status_code == 200:
+            data = response.json()
+            tradespeople = data.get('tradespeople', [])
+            self.log_result("Combined filters", True, f"Found {len(tradespeople)} matching tradespeople")
+        else:
+            self.log_result("Combined filters", False, f"Status: {response.status_code}")
+        
+        # Test 7: Get individual tradesperson profile
+        if 'sample_tradesperson' in self.test_data:
+            tradesperson_id = self.test_data['sample_tradesperson']['id']
+            response = self.make_request("GET", f"/tradespeople/{tradesperson_id}")
+            if response.status_code == 200:
+                tradesperson = response.json()
+                required_fields = ['id', 'name', 'email', 'trade_categories', 'experience_years', 
+                                 'company_name', 'description', 'average_rating', 'total_reviews', 'location']
+                missing_fields = [field for field in required_fields if field not in tradesperson]
+                if not missing_fields:
+                    self.log_result("Get individual tradesperson", True, 
+                                   f"Name: {tradesperson['name']}, Rating: {tradesperson['average_rating']}")
+                else:
+                    self.log_result("Get individual tradesperson", False, f"Missing fields: {missing_fields}")
+            else:
+                self.log_result("Get individual tradesperson", False, f"Status: {response.status_code}")
+        
+        # Test 8: Get tradesperson with invalid ID
+        response = self.make_request("GET", "/tradespeople/invalid-id-12345")
+        if response.status_code == 404:
+            self.log_result("Invalid tradesperson ID", True, "Correctly returned 404")
+        else:
+            self.log_result("Invalid tradesperson ID", False, f"Expected 404, got {response.status_code}")
+        
+        # Test 9: Get tradesperson reviews
+        if 'sample_tradesperson' in self.test_data:
+            tradesperson_id = self.test_data['sample_tradesperson']['id']
+            response = self.make_request("GET", f"/tradespeople/{tradesperson_id}/reviews")
+            if response.status_code == 200:
+                data = response.json()
+                if 'reviews' in data and 'tradesperson' in data:
+                    reviews = data['reviews']
+                    self.log_result("Get tradesperson reviews", True, f"Found {len(reviews)} reviews")
+                else:
+                    self.log_result("Get tradesperson reviews", False, "Invalid response structure")
+            else:
+                self.log_result("Get tradesperson reviews", False, f"Status: {response.status_code}")
+        
+        # Test 10: Get tradesperson reviews with pagination
+        if 'sample_tradesperson' in self.test_data:
+            tradesperson_id = self.test_data['sample_tradesperson']['id']
+            response = self.make_request("GET", f"/tradespeople/{tradesperson_id}/reviews", 
+                                       params={"page": 1, "limit": 5})
+            if response.status_code == 200:
+                data = response.json()
+                reviews = data.get('reviews', [])
+                if len(reviews) <= 5:
+                    self.log_result("Tradesperson reviews pagination", True, f"Returned {len(reviews)} reviews")
+                else:
+                    self.log_result("Tradesperson reviews pagination", False, f"Expected ≤5, got {len(reviews)}")
+            else:
+                self.log_result("Tradesperson reviews pagination", False, f"Status: {response.status_code}")
+
+    def test_portfolio_apis(self):
+        """Test portfolio APIs for tradesperson profiles"""
+        print("\n=== Testing Portfolio APIs ===")
+        
+        # Test 1: Get all public portfolio items
+        response = self.make_request("GET", "/portfolio/")
+        if response.status_code == 200:
+            data = response.json()
+            if 'items' in data and 'total' in data:
+                items = data['items']
+                self.log_result("Get all public portfolio items", True, f"Found {len(items)} portfolio items")
+                
+                # Store sample portfolio item for testing
+                if items:
+                    self.test_data['sample_portfolio_item'] = items[0]
+            else:
+                self.log_result("Get all public portfolio items", False, "Invalid response structure")
+        else:
+            self.log_result("Get all public portfolio items", False, f"Status: {response.status_code}")
+        
+        # Test 2: Get portfolio with category filter
+        response = self.make_request("GET", "/portfolio/", params={"category": "bathroom_fitting"})
+        if response.status_code == 200:
+            data = response.json()
+            items = data.get('items', [])
+            # Verify all items have the correct category
+            bathroom_items = [item for item in items if item.get('category') == 'bathroom_fitting']
+            if len(bathroom_items) == len(items):
+                self.log_result("Portfolio category filter", True, f"Found {len(items)} bathroom fitting items")
+            else:
+                self.log_result("Portfolio category filter", False, "Category filter not working")
+        else:
+            self.log_result("Portfolio category filter", False, f"Status: {response.status_code}")
+        
+        # Test 3: Get portfolio with pagination
+        response = self.make_request("GET", "/portfolio/", params={"limit": 5, "offset": 0})
+        if response.status_code == 200:
+            data = response.json()
+            items = data.get('items', [])
+            if len(items) <= 5:
+                self.log_result("Portfolio pagination", True, f"Returned {len(items)} items")
+            else:
+                self.log_result("Portfolio pagination", False, f"Expected ≤5, got {len(items)}")
+        else:
+            self.log_result("Portfolio pagination", False, f"Status: {response.status_code}")
+        
+        # Test 4: Get tradesperson portfolio (if we have a tradesperson)
+        if 'sample_tradesperson' in self.test_data:
+            tradesperson_id = self.test_data['sample_tradesperson']['id']
+            response = self.make_request("GET", f"/portfolio/tradesperson/{tradesperson_id}")
+            if response.status_code == 200:
+                data = response.json()
+                if 'items' in data and 'total' in data:
+                    items = data['items']
+                    self.log_result("Get tradesperson portfolio", True, f"Found {len(items)} portfolio items")
+                    
+                    # Verify all items belong to this tradesperson
+                    if items:
+                        correct_owner = all(item.get('tradesperson_id') == tradesperson_id for item in items)
+                        if correct_owner:
+                            self.log_result("Portfolio ownership verification", True, "All items belong to correct tradesperson")
+                        else:
+                            self.log_result("Portfolio ownership verification", False, "Found items from wrong tradesperson")
+                else:
+                    self.log_result("Get tradesperson portfolio", False, "Invalid response structure")
+            else:
+                self.log_result("Get tradesperson portfolio", False, f"Status: {response.status_code}")
+        
+        # Test 5: Get portfolio for invalid tradesperson ID
+        response = self.make_request("GET", "/portfolio/tradesperson/invalid-id-12345")
+        if response.status_code == 200:
+            data = response.json()
+            items = data.get('items', [])
+            if len(items) == 0:
+                self.log_result("Invalid tradesperson portfolio", True, "Correctly returned empty portfolio")
+            else:
+                self.log_result("Invalid tradesperson portfolio", False, "Should return empty portfolio")
+        else:
+            self.log_result("Invalid tradesperson portfolio", False, f"Status: {response.status_code}")
+        
+        # Test 6: Portfolio image handling (check if image URLs are valid)
+        if 'sample_portfolio_item' in self.test_data:
+            portfolio_item = self.test_data['sample_portfolio_item']
+            image_url = portfolio_item.get('image_url')
+            if image_url:
+                # Test if image URL is accessible
+                full_image_url = f"{self.base_url.replace('/api', '')}{image_url}"
+                try:
+                    image_response = self.session.get(full_image_url, timeout=10)
+                    if image_response.status_code == 200:
+                        self.log_result("Portfolio image accessibility", True, "Image URL accessible")
+                    else:
+                        self.log_result("Portfolio image accessibility", False, f"Image status: {image_response.status_code}")
+                except Exception as e:
+                    self.log_result("Portfolio image accessibility", False, f"Image request failed: {str(e)}")
+            else:
+                self.log_result("Portfolio image accessibility", False, "No image URL found")
+
+    def test_reviews_apis(self):
+        """Test review APIs for tradesperson evaluation"""
+        print("\n=== Testing Reviews APIs ===")
+        
+        # Test 1: Get review summary for tradesperson
+        if 'sample_tradesperson' in self.test_data:
+            tradesperson_id = self.test_data['sample_tradesperson']['id']
+            response = self.make_request("GET", f"/reviews/summary/{tradesperson_id}")
+            if response.status_code == 200:
+                summary = response.json()
+                required_fields = ['total_reviews', 'average_rating', 'rating_distribution', 'category_ratings']
+                missing_fields = [field for field in required_fields if field not in summary]
+                if not missing_fields:
+                    self.log_result("Get review summary", True, 
+                                   f"Total: {summary['total_reviews']}, Avg: {summary['average_rating']}")
+                else:
+                    self.log_result("Get review summary", False, f"Missing fields: {missing_fields}")
+            else:
+                self.log_result("Get review summary", False, f"Status: {response.status_code}")
+        
+        # Test 2: Get review summary for invalid user ID
+        response = self.make_request("GET", "/reviews/summary/invalid-user-id-12345")
+        if response.status_code == 404:
+            self.log_result("Invalid user review summary", True, "Correctly returned 404")
+        else:
+            self.log_result("Invalid user review summary", False, f"Expected 404, got {response.status_code}")
+        
+        # Test 3: Get user reviews with pagination
+        if 'sample_tradesperson' in self.test_data:
+            tradesperson_id = self.test_data['sample_tradesperson']['id']
+            response = self.make_request("GET", f"/reviews/user/{tradesperson_id}", 
+                                       params={"page": 1, "limit": 5})
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ['reviews', 'total', 'page', 'limit', 'total_pages', 'average_rating', 'summary']
+                missing_fields = [field for field in required_fields if field not in data]
+                if not missing_fields:
+                    reviews = data['reviews']
+                    self.log_result("Get user reviews with pagination", True, 
+                                   f"Page {data['page']}, {len(reviews)} reviews, Total: {data['total']}")
+                else:
+                    self.log_result("Get user reviews with pagination", False, f"Missing fields: {missing_fields}")
+            else:
+                self.log_result("Get user reviews with pagination", False, f"Status: {response.status_code}")
+        
+        # Test 4: Get user reviews with type filter
+        if 'sample_tradesperson' in self.test_data:
+            tradesperson_id = self.test_data['sample_tradesperson']['id']
+            response = self.make_request("GET", f"/reviews/user/{tradesperson_id}", 
+                                       params={"review_type": "homeowner_to_tradesperson"})
+            if response.status_code == 200:
+                data = response.json()
+                reviews = data.get('reviews', [])
+                # Verify all reviews are of correct type
+                correct_type = all(review.get('review_type') == 'homeowner_to_tradesperson' for review in reviews)
+                if correct_type:
+                    self.log_result("Review type filter", True, f"Found {len(reviews)} homeowner-to-tradesperson reviews")
+                else:
+                    self.log_result("Review type filter", False, "Filter not working correctly")
+            else:
+                self.log_result("Review type filter", False, f"Status: {response.status_code}")
+        
+        # Test 5: Review data structure validation
+        if 'sample_tradesperson' in self.test_data:
+            tradesperson_id = self.test_data['sample_tradesperson']['id']
+            response = self.make_request("GET", f"/reviews/user/{tradesperson_id}", params={"limit": 1})
+            if response.status_code == 200:
+                data = response.json()
+                reviews = data.get('reviews', [])
+                if reviews:
+                    review = reviews[0]
+                    required_review_fields = ['id', 'reviewer_id', 'reviewee_id', 'rating', 'title', 
+                                            'content', 'review_type', 'created_at', 'job_id']
+                    missing_review_fields = [field for field in required_review_fields if field not in review]
+                    if not missing_review_fields:
+                        self.log_result("Review data structure validation", True, "All required fields present")
+                        
+                        # Test rating calculation
+                        rating = review.get('rating')
+                        if isinstance(rating, (int, float)) and 1 <= rating <= 5:
+                            self.log_result("Review rating validation", True, f"Rating: {rating}")
+                        else:
+                            self.log_result("Review rating validation", False, f"Invalid rating: {rating}")
+                    else:
+                        self.log_result("Review data structure validation", False, f"Missing fields: {missing_review_fields}")
+                else:
+                    self.log_result("Review data structure validation", True, "No reviews to validate")
+            else:
+                self.log_result("Review data structure validation", False, f"Status: {response.status_code}")
+
+    def test_search_and_filtering_edge_cases(self):
+        """Test edge cases for search and filtering"""
+        print("\n=== Testing Search and Filtering Edge Cases ===")
+        
+        # Test 1: Empty search results
+        response = self.make_request("GET", "/tradespeople", params={"category": "NonExistentCategory"})
+        if response.status_code == 200:
+            data = response.json()
+            tradespeople = data.get('tradespeople', [])
+            if len(tradespeople) == 0:
+                self.log_result("Empty search results", True, "Correctly returned empty results")
+            else:
+                self.log_result("Empty search results", False, f"Expected 0, got {len(tradespeople)}")
+        else:
+            self.log_result("Empty search results", False, f"Status: {response.status_code}")
+        
+        # Test 2: Invalid pagination parameters
+        response = self.make_request("GET", "/tradespeople", params={"page": 0, "limit": -1})
+        if response.status_code == 422:
+            self.log_result("Invalid pagination parameters", True, "Correctly rejected invalid parameters")
+        else:
+            self.log_result("Invalid pagination parameters", False, f"Expected 422, got {response.status_code}")
+        
+        # Test 3: Very high minimum rating
+        response = self.make_request("GET", "/tradespeople", params={"min_rating": 4.9})
+        if response.status_code == 200:
+            data = response.json()
+            tradespeople = data.get('tradespeople', [])
+            # All returned tradespeople should have rating >= 4.9
+            high_rated = [tp for tp in tradespeople if tp.get('average_rating', 0) >= 4.9]
+            if len(high_rated) == len(tradespeople):
+                self.log_result("Very high minimum rating", True, f"Found {len(tradespeople)} highly rated tradespeople")
+            else:
+                self.log_result("Very high minimum rating", False, "Rating filter not working correctly")
+        else:
+            self.log_result("Very high minimum rating", False, f"Status: {response.status_code}")
+        
+        # Test 4: Case insensitive location search
+        response = self.make_request("GET", "/tradespeople", params={"location": "lagos"})
+        if response.status_code == 200:
+            data = response.json()
+            tradespeople = data.get('tradespeople', [])
+            # Should find Lagos tradespeople even with lowercase
+            lagos_found = any('Lagos' in tp.get('location', '') for tp in tradespeople)
+            if lagos_found or len(tradespeople) == 0:
+                self.log_result("Case insensitive location search", True, f"Found {len(tradespeople)} results")
+            else:
+                self.log_result("Case insensitive location search", False, "Case insensitive search not working")
+        else:
+            self.log_result("Case insensitive location search", False, f"Status: {response.status_code}")
+
     def run_all_tests(self):
         """Run all test suites"""
-        print("🚀 Starting Comprehensive Backend Testing")
-        print("="*80)
+        print("🚀 Starting Comprehensive Backend API Testing - Tradesperson Profile & Browse Functionality")
+        print(f"Backend URL: {self.base_url}")
+        print("=" * 80)
         
-        # Run the specific interests API tests for My Interests page
-        self.test_interests_api_for_my_interests_page()
+        try:
+            # NEW: Tradesperson profile and browse functionality tests
+            self.test_tradespeople_apis()
+            self.test_portfolio_apis()
+            self.test_reviews_apis()
+            self.test_search_and_filtering_edge_cases()
+            
+        except Exception as e:
+            print(f"❌ Critical error during testing: {e}")
+            self.results['errors'].append(f"Critical error: {e}")
         
-        # Print final results
-        self.print_final_results()
+        finally:
+            self.print_final_results()
     
     def print_final_results(self):
         """Print comprehensive test results"""
