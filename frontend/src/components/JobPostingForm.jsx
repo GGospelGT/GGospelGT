@@ -101,6 +101,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
 
   const { loginWithToken, isAuthenticated, user: currentUser, loading } = useAuth();
   const { toast } = useToast();
+  const { states: nigerianStates, loading: statesLoading, error: statesError } = useStates();
   
   // Enhanced authentication check - avoiding immediate currentUser access
   const isUserAuthenticated = () => {
