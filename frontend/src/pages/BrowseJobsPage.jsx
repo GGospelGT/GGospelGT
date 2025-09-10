@@ -298,6 +298,11 @@ const BrowseJobsPage = () => {
     }).format(value);
   };
 
+  const handleViewJobDetails = (job) => {
+    setSelectedJobDetails(job);
+    setShowJobModal(true);
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
