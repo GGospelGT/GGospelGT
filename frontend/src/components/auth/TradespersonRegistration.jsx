@@ -28,7 +28,11 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
+import useStates from '../../hooks/useStates';
 import SkillsTestComponent from './SkillsTestComponent';
+
+// If needed, we can also create a separate hook for trade categories
+// For now, keeping them as constants since they're less frequently changed
 
 const TradespersonRegistration = ({ onClose, onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
