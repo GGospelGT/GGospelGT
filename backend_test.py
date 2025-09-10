@@ -460,8 +460,7 @@ class AdminJobManagementTester:
         job_id = test_job['id']
         
         # Test 1: Update job status to completed
-        status_data = {"status": "completed"}
-        response = self.make_request("PATCH", f"/admin/jobs/{job_id}/status", json=status_data, auth_token=admin_token)
+        response = self.make_request("PATCH", f"/admin/jobs/{job_id}/status?status=completed", auth_token=admin_token)
         if response.status_code == 200:
             status_response = response.json()
             if ('message' in status_response and 'job_id' in status_response and 
@@ -493,8 +492,7 @@ class AdminJobManagementTester:
         # Test 2: Test all valid statuses
         valid_statuses = ["active", "completed", "cancelled", "expired", "on_hold"]
         for status in valid_statuses:
-            status_data = {"status": status}
-            response = self.make_request("PATCH", f"/admin/jobs/{job_id}/status", json=status_data, auth_token=admin_token)
+            response = self.make_request("PATCH", f"/admin/jobs/{job_id}/status?status={status}", auth_token=admin_token)
             if response.status_code == 200:
                 self.log_result(f"Admin update job status - {status}", True, 
                                f"Successfully updated to {status}")
@@ -503,8 +501,7 @@ class AdminJobManagementTester:
                                f"Failed to update to {status}: {response.status_code}")
         
         # Test 3: Invalid status
-        invalid_status_data = {"status": "invalid_status"}
-        response = self.make_request("PATCH", f"/admin/jobs/{job_id}/status", json=invalid_status_data, auth_token=admin_token)
+        response = self.make_request("PATCH", f"/admin/jobs/{job_id}/status?status=invalid_status", auth_token=admin_token)
         if response.status_code == 400:
             self.log_result("Admin update job status - invalid status", True, 
                            "Correctly rejected invalid status")
@@ -513,8 +510,7 @@ class AdminJobManagementTester:
                            f"Expected 400, got {response.status_code}")
         
         # Test 4: Invalid job ID
-        status_data = {"status": "active"}
-        response = self.make_request("PATCH", "/admin/jobs/invalid-job-id/status", json=status_data, auth_token=admin_token)
+        response = self.make_request("PATCH", "/admin/jobs/invalid-job-id/status?status=active", auth_token=admin_token)
         if response.status_code == 404:
             self.log_result("Admin update job status - invalid ID", True, 
                            "Correctly returned 404 for invalid job ID")
