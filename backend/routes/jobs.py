@@ -43,8 +43,23 @@ async def create_job(
         # Convert to dict and prepare for database
         job_dict = job_data.dict()
         
-        # Validate LGA belongs to the specified state
-        if not validate_lga_for_state(job_data.state, job_data.lga):
+        # Validate LGA belongs to the specified state (check both static and dynamic LGAs)
+        static_valid = validate_lga_for_state(job_data.state, job_data.lga)
+        
+        # Also check dynamic LGAs from database
+        dynamic_valid = False
+        try:
+            custom_lgas_cursor = database.database.system_locations.find({
+                "state": job_data.state,
+                "type": "lga"
+            })
+            custom_lgas_docs = await custom_lgas_cursor.to_list(length=None)
+            custom_lgas = [lga["name"] for lga in custom_lgas_docs]
+            dynamic_valid = job_data.lga in custom_lgas
+        except Exception as e:
+            logger.warning(f"Error checking dynamic LGAs: {e}")
+        
+        if not (static_valid or dynamic_valid):
             raise HTTPException(
                 status_code=400, 
                 detail=f"LGA '{job_data.lga}' does not belong to state '{job_data.state}'"
