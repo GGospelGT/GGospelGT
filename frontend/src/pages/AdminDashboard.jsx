@@ -99,10 +99,14 @@ const AdminDashboard = () => {
           const data = await adminAPI.getAllTowns();
           setTowns(data.towns || {});
         } else if (activeLocationTab === 'trades') {
+          console.log('Loading trade categories data...');
           const data = await adminAPI.getAllTrades();
+          console.log('Trade data received:', data);
           setTrades(data.trades || []);
           // Extract group names from the groups object
-          setTradeGroups(data.groups ? Object.keys(data.groups) : []);
+          const groupNames = data.groups ? Object.keys(data.groups) : [];
+          console.log('Extracted group names:', groupNames);
+          setTradeGroups(groupNames);
         }
       } else if (activeTab === 'questions') {
         // Load both skills questions and available trade categories
