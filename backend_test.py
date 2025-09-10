@@ -94,13 +94,13 @@ class DynamicLocationTester:
         """Test admin authentication for location management"""
         print("\n=== Testing Admin Authentication ===")
         
-        # Test admin login
+        # Test admin login using form data
         admin_credentials = {
             "username": "admin",
             "password": "servicehub2024"
         }
         
-        response = self.make_request("POST", "/admin/login", json=admin_credentials)
+        response = self.make_request("POST", "/admin/login", data=admin_credentials)
         if response.status_code == 200:
             admin_data = response.json()
             if 'access_token' in admin_data:
