@@ -111,6 +111,40 @@ export const adminAPI = {
     return response.data;
   },
 
+  // Comprehensive Job Management Methods
+  async getAllJobsAdmin(skip = 0, limit = 50, status = null) {
+    const params = { skip, limit };
+    if (status) params.status = status;
+    
+    const response = await apiClient.get('/admin/jobs/all', { params });
+    return response.data;
+  },
+
+  async getJobDetailsAdmin(jobId) {
+    const response = await apiClient.get(`/admin/jobs/${jobId}/details`);
+    return response.data;
+  },
+
+  async updateJobAdmin(jobId, jobData) {
+    const response = await apiClient.put(`/admin/jobs/${jobId}`, jobData);
+    return response.data;
+  },
+
+  async updateJobStatus(jobId, status) {
+    const response = await apiClient.patch(`/admin/jobs/${jobId}/status`, { status });
+    return response.data;
+  },
+
+  async deleteJob(jobId) {
+    const response = await apiClient.delete(`/admin/jobs/${jobId}`);
+    return response.data;
+  },
+
+  async getJobStatsAdmin() {
+    const response = await apiClient.get('/admin/jobs/stats');
+    return response.data;
+  },
+
   // Get admin dashboard stats
   async getDashboardStats() {
     const response = await apiClient.get('/admin/dashboard/stats');
