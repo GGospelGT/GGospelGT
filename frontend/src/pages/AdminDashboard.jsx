@@ -2743,6 +2743,250 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Job Details Modal */}
+      {showJobDetailsModal && selectedJobDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h3 className="text-xl font-semibold">Job Details</h3>
+              <button
+                onClick={() => setShowJobDetailsModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-medium mb-2">Basic Information</h4>
+                  <div className="space-y-2 text-sm">
+                    <div><strong>Title:</strong> {selectedJobDetails.title}</div>
+                    <div><strong>Category:</strong> {selectedJobDetails.category}</div>
+                    <div><strong>Location:</strong> {selectedJobDetails.location}</div>
+                    <div><strong>Status:</strong> <span className={`px-2 py-1 rounded text-xs ${getJobStatusColor(selectedJobDetails.status)}`}>{selectedJobDetails.status}</span></div>
+                    <div><strong>Timeline:</strong> {selectedJobDetails.timeline || 'Not specified'}</div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Budget & Fees</h4>
+                  <div className="space-y-2 text-sm">
+                    <div><strong>Budget:</strong> {selectedJobDetails.budget_min && selectedJobDetails.budget_max ? `₦${selectedJobDetails.budget_min.toLocaleString()} - ₦${selectedJobDetails.budget_max.toLocaleString()}` : 'Negotiable'}</div>
+                    <div><strong>Access Fee:</strong> ₦{selectedJobDetails.access_fee_naira?.toLocaleString() || '1,000'} ({selectedJobDetails.access_fee_coins || 10} coins)</div>
+                    <div><strong>Interests:</strong> {selectedJobDetails.interests_count || 0} tradespeople</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-medium mb-2">Description</h4>
+                <div className="bg-gray-50 p-3 rounded text-sm">
+                  {selectedJobDetails.description}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-medium mb-2">Homeowner Information</h4>
+                <div className="space-y-2 text-sm">
+                  <div><strong>Name:</strong> {selectedJobDetails.homeowner?.name || 'Unknown'}</div>
+                  <div><strong>Email:</strong> {selectedJobDetails.homeowner?.email || 'Not available'}</div>
+                  <div><strong>Phone:</strong> {selectedJobDetails.homeowner?.phone || 'Not available'}</div>
+                </div>
+              </div>
+
+              {selectedJobDetails.interested_tradespeople && selectedJobDetails.interested_tradespeople.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-2">Interested Tradespeople</h4>
+                  <div className="space-y-2">
+                    {selectedJobDetails.interested_tradespeople.map((tp, index) => (
+                      <div key={index} className="bg-gray-50 p-3 rounded text-sm">
+                        <div className="flex justify-between">
+                          <span><strong>{tp.tradesperson_name}</strong> ({tp.tradesperson_email})</span>
+                          <span className={`px-2 py-1 rounded text-xs ${tp.status === 'paid_access' ? 'bg-green-100 text-green-800' : tp.status === 'contact_shared' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                            {tp.status}
+                          </span>
+                        </div>
+                        <div className="text-gray-500 text-xs mt-1">
+                          Applied: {new Date(tp.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Job Modal */}
+      {showEditJobModal && editingJobData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h3 className="text-xl font-semibold">Edit Job</h3>
+              <button
+                onClick={() => setShowEditJobModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const jobData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                category: formData.get('category'),
+                location: formData.get('location'),
+                timeline: formData.get('timeline'),
+                budget_min: formData.get('budget_min') ? parseInt(formData.get('budget_min')) : null,
+                budget_max: formData.get('budget_max') ? parseInt(formData.get('budget_max')) : null,
+                access_fee_naira: formData.get('access_fee_naira') ? parseInt(formData.get('access_fee_naira')) : null,
+                status: formData.get('status')
+              };
+              
+              try {
+                await adminAPI.updateJobAdmin(editingJobData.id, jobData);
+                toast({
+                  title: "Success",
+                  description: "Job updated successfully",
+                });
+                setShowEditJobModal(false);
+                fetchData();
+              } catch (error) {
+                toast({
+                  title: "Error",
+                  description: "Failed to update job",
+                  variant: "destructive",
+                });
+              }
+            }}>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Title</label>
+                  <input
+                    name="title"
+                    type="text"
+                    defaultValue={editingJobData.title}
+                    className="w-full px-3 py-2 border rounded-md"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    rows={4}
+                    defaultValue={editingJobData.description}
+                    className="w-full px-3 py-2 border rounded-md"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Category</label>
+                    <input
+                      name="category"
+                      type="text"
+                      defaultValue={editingJobData.category}
+                      className="w-full px-3 py-2 border rounded-md"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Location</label>
+                    <input
+                      name="location"
+                      type="text"
+                      defaultValue={editingJobData.location}
+                      className="w-full px-3 py-2 border rounded-md"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Timeline</label>
+                  <input
+                    name="timeline"
+                    type="text"
+                    defaultValue={editingJobData.timeline}
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Min Budget (₦)</label>
+                    <input
+                      name="budget_min"
+                      type="number"
+                      defaultValue={editingJobData.budget_min}
+                      className="w-full px-3 py-2 border rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Max Budget (₦)</label>
+                    <input
+                      name="budget_max"
+                      type="number"
+                      defaultValue={editingJobData.budget_max}
+                      className="w-full px-3 py-2 border rounded-md"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Access Fee (₦)</label>
+                    <input
+                      name="access_fee_naira"
+                      type="number"
+                      defaultValue={editingJobData.access_fee_naira}
+                      className="w-full px-3 py-2 border rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Status</label>
+                    <select
+                      name="status"
+                      defaultValue={editingJobData.status}
+                      className="w-full px-3 py-2 border rounded-md"
+                    >
+                      <option value="active">Active</option>
+                      <option value="completed">Completed</option>
+                      <option value="cancelled">Cancelled</option>
+                      <option value="expired">Expired</option>
+                      <option value="on_hold">On Hold</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 p-6 border-t">
+                <button
+                  type="button"
+                  onClick={() => setShowEditJobModal(false)}
+                  className="px-4 py-2 text-gray-600 border rounded hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Update Job
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
