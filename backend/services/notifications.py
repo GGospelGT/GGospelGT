@@ -3,10 +3,16 @@ from typing import Dict, Any, Optional
 from datetime import datetime, timezone
 import uuid
 import json
+import os
 from models.notifications import (
     NotificationType, NotificationChannel, NotificationStatus,
     Notification, NotificationTemplate, NotificationPreferences
 )
+
+# Third-party imports for real services
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+import requests
 
 # Configure logging for notifications
 logging.basicConfig(level=logging.INFO)
