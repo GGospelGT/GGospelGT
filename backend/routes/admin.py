@@ -166,6 +166,117 @@ async def update_job_access_fee(
     }
 
 # ==========================================
+# COMPREHENSIVE JOB MANAGEMENT
+# ==========================================
+
+@router.get("/jobs/all")
+async def get_all_jobs_for_admin(skip: int = 0, limit: int = 50, status: str = None):
+    """Get all jobs with comprehensive details for admin management"""
+    
+    jobs = await database.get_all_jobs_admin(skip=skip, limit=limit, status=status)
+    total_count = await database.get_jobs_count_admin(status=status)
+    
+    return {
+        "jobs": jobs,
+        "pagination": {
+            "skip": skip,
+            "limit": limit,
+            "total": total_count
+        }
+    }
+
+@router.get("/jobs/{job_id}/details")
+async def get_job_details_for_admin(job_id: str):
+    """Get detailed job information for admin editing"""
+    
+    job = await database.get_job_by_id_admin(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    return {"job": job}
+
+@router.put("/jobs/{job_id}")
+async def update_job_admin(
+    job_id: str,
+    job_data: dict
+):
+    """Update job details (admin only)"""
+    
+    # Check if job exists
+    existing_job = await database.get_job_by_id(job_id)
+    if not existing_job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Update job
+    success = await database.update_job_admin(job_id, job_data)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update job")
+    
+    return {
+        "message": "Job updated successfully",
+        "job_id": job_id
+    }
+
+@router.patch("/jobs/{job_id}/status")
+async def update_job_status_admin(
+    job_id: str,
+    status: str
+):
+    """Update job status (activate, deactivate, complete, etc.)"""
+    
+    valid_statuses = ["active", "completed", "cancelled", "expired", "on_hold"]
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+    
+    # Check if job exists
+    existing_job = await database.get_job_by_id(job_id)
+    if not existing_job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Update job status
+    success = await database.update_job_status_admin(job_id, status)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update job status")
+    
+    return {
+        "message": "Job status updated successfully",
+        "job_id": job_id,
+        "new_status": status
+    }
+
+@router.delete("/jobs/{job_id}")
+async def delete_job_admin(job_id: str):
+    """Delete a job (admin only) - soft delete recommended"""
+    
+    # Check if job exists
+    existing_job = await database.get_job_by_id(job_id)
+    if not existing_job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Soft delete job
+    success = await database.soft_delete_job_admin(job_id)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete job")
+    
+    return {
+        "message": "Job deleted successfully",
+        "job_id": job_id
+    }
+
+@router.get("/jobs/stats")
+async def get_jobs_statistics_admin():
+    """Get comprehensive job statistics for admin dashboard"""
+    
+    stats = await database.get_jobs_statistics_admin()
+    
+    return {
+        "job_stats": stats
+    }
+
+# ==========================================
 # ADMIN DASHBOARD STATS
 # ==========================================
 
