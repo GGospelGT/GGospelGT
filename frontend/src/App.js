@@ -7,6 +7,7 @@ import MyJobsPage from "./pages/MyJobsPage";
 import MyInterestsPage from "./pages/MyInterestsPage";
 import TradespersonProfilePage from "./pages/TradespersonProfilePage";
 import BrowseTradespeopleePage from "./pages/BrowseTradespeopleePage";
+import InterestedTradespeopleePage from "./pages/InterestedTradespeopleePage";
 import BrowseJobsPage from "./pages/BrowseJobsPage";
 import ProfilePage from "./pages/ProfilePage";
 import TradespersonPortfolioPage from "./pages/TradespersonPortfolioPage";
