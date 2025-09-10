@@ -84,11 +84,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
 
   const { registerTradesperson } = useAuth();
   const { toast } = useToast();
-
-  // Nigerian states and trade categories
-  const nigerianStates = [
-    'Abuja', 'Lagos', 'Delta', 'Rivers State', 'Benin', 'Bayelsa', 'Enugu', 'Cross Rivers'
-  ];
+  const { states: nigerianStates, loading: statesLoading } = useStates();
 
   const tradeCategories = [
     "Building", "Concrete Works", "Tiling", "CCTV & Security Systems",
