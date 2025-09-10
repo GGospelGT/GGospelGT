@@ -430,7 +430,7 @@ class InterestsAPITester:
             "email": f"kemi.adebayo.{uuid.uuid4().hex[:8]}@email.com",
             "password": "SecurePass123",
             "phone": "08198765432",
-            "location": "Abuja, FCT",
+            "location": "Abuja",
             "postcode": "900001"
         }
         
