@@ -14,6 +14,22 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
+# Public endpoints for location data
+@router.get("/locations/states")
+async def get_states_public():
+    """Get all available states for job posting and registration (public endpoint)"""
+    # Get states from database (new ones added by admin)
+    custom_states = await database.get_custom_states()
+    
+    # Get default states from constants
+    from models.nigerian_states import NIGERIAN_STATES
+    
+    # Combine both lists and remove duplicates
+    all_states = list(set(NIGERIAN_STATES + custom_states))
+    all_states.sort()  # Sort alphabetically
+    
+    return {"states": all_states}
+
 @router.post("/", response_model=Job)
 async def create_job(
     job_data: JobCreate,
