@@ -111,9 +111,16 @@ class NotificationSystemTester:
         response = self.make_request("POST", "/auth/register/tradesperson", json=tradesperson_data)
         if response.status_code == 200:
             tradesperson_profile = response.json()
-            self.log_result("Create test tradesperson", True, f"ID: {tradesperson_profile['user']['id']}")
-            self.auth_tokens['tradesperson'] = tradesperson_profile['access_token']
-            self.test_data['tradesperson_user'] = tradesperson_profile['user']
+            # Handle different response structures
+            if 'access_token' in tradesperson_profile:
+                self.auth_tokens['tradesperson'] = tradesperson_profile['access_token']
+                self.test_data['tradesperson_user'] = tradesperson_profile.get('user', tradesperson_profile)
+                user_id = tradesperson_profile.get('user', {}).get('id', tradesperson_profile.get('id', 'unknown'))
+            else:
+                # Direct user object response
+                self.test_data['tradesperson_user'] = tradesperson_profile
+                user_id = tradesperson_profile.get('id', 'unknown')
+            self.log_result("Create test tradesperson", True, f"ID: {user_id}")
         else:
             self.log_result("Create test tradesperson", False, f"Status: {response.status_code}, Response: {response.text}")
         
