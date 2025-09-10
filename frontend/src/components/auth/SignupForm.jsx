@@ -34,20 +34,9 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
   const { registerHomeowner, registerTradesperson } = useAuth();
   const { toast } = useToast();
 
-  // Nigerian States - Updated service coverage areas
-  const nigerianStates = [
-    'Abuja',
-    'Lagos', 
-    'Delta',
-    'Rivers State',
-    'Benin',
-    'Bayelsa',
-    'Enugu',
-    'Cross Rivers'
-  ];
-
-  // Nigerian Trade Categories - Updated comprehensive list
-  const tradeCategories = [
+  const { signup } = useAuth();
+  const { toast } = useToast();
+  const { states: nigerianStates, loading: statesLoading } = useStates();
     "Building",
     "Concrete Works", 
     "Tiling",
