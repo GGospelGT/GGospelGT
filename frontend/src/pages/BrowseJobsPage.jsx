@@ -719,6 +719,166 @@ const BrowseJobsPage = () => {
         </div>
       </section>
 
+      {/* Job Details Modal */}
+      {showJobModal && selectedJobDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b p-6 z-10">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold font-montserrat" style={{color: '#121E3C'}}>
+                    {selectedJobDetails.title}
+                  </h2>
+                  <Badge className="bg-blue-100 text-blue-800 mt-2">
+                    {selectedJobDetails.category}
+                  </Badge>
+                </div>
+                <button
+                  onClick={() => setShowJobModal(false)}
+                  className="text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* Job Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <h3 className="font-semibold mb-3 font-montserrat">Job Details</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center">
+                      <MapPin size={16} className="mr-2 text-gray-500" />
+                      <span><strong>Location:</strong> {selectedJobDetails.location}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar size={16} className="mr-2 text-gray-500" />
+                      <span><strong>Posted:</strong> {formatDate(selectedJobDetails.created_at)}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Clock size={16} className="mr-2 text-gray-500" />
+                      <span><strong>Timeline:</strong> {selectedJobDetails.timeline || 'Flexible'}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <User size={16} className="mr-2 text-gray-500" />
+                      <span><strong>Posted by:</strong> {selectedJobDetails.homeowner?.name || 'Homeowner'}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Heart size={16} className="mr-2 text-gray-500" />
+                      <span><strong>Interest:</strong> {selectedJobDetails.interests_count || 0} tradespeople interested</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-3 font-montserrat">Budget & Payment</h3>
+                  <div className="space-y-3">
+                    {selectedJobDetails.budget_min && selectedJobDetails.budget_max ? (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="text-2xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                          {formatCurrency(selectedJobDetails.budget_min)} - {formatCurrency(selectedJobDetails.budget_max)}
+                        </div>
+                        <div className="text-sm text-gray-600">Budget Range</div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div className="text-lg font-medium text-gray-700">Budget Negotiable</div>
+                        <div className="text-sm text-gray-600">Discuss pricing with homeowner</div>
+                      </div>
+                    )}
+
+                    {/* Access Fee - Only visible to tradespeople */}
+                    {isTradesperson() && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div className="font-semibold text-yellow-800">
+                          Access Fee: {selectedJobDetails.access_fee_coins || 10} coins
+                        </div>
+                        <div className="text-sm text-yellow-600">
+                          ₦{(selectedJobDetails.access_fee_naira || 1000).toLocaleString()} for contact details
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Full Description */}
+              <div className="mb-6">
+                <h3 className="font-semibold mb-3 font-montserrat">Job Description</h3>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-700 font-lato leading-relaxed whitespace-pre-wrap">
+                    {selectedJobDetails.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Additional Details */}
+              {(selectedJobDetails.town || selectedJobDetails.zip_code || selectedJobDetails.home_address) && (
+                <div className="mb-6">
+                  <h3 className="font-semibold mb-3 font-montserrat">Additional Location Details</h3>
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                    {selectedJobDetails.town && (
+                      <div><strong>Town/Area:</strong> {selectedJobDetails.town}</div>
+                    )}
+                    {selectedJobDetails.zip_code && (
+                      <div><strong>Zip Code:</strong> {selectedJobDetails.zip_code}</div>
+                    )}
+                    {selectedJobDetails.home_address && (
+                      <div><strong>Address:</strong> {selectedJobDetails.home_address}</div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-between items-center pt-6 border-t">
+                <div className="text-sm text-gray-500 font-lato">
+                  Posted {getTimeAgo(selectedJobDetails.created_at)}
+                </div>
+                
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowJobModal(false)}
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShowInterest(selectedJobDetails.id);
+                      setShowJobModal(false);
+                    }}
+                    disabled={loadingStates.showInterest[selectedJobDetails.id] || 
+                             (userInterests && userInterests.includes(selectedJobDetails.id))}
+                    className="text-white font-lato"
+                    style={{backgroundColor: '#2F8140'}}
+                  >
+                    {loadingStates.showInterest[selectedJobDetails.id] ? (
+                      <>
+                        <Clock size={16} className="mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : userInterests && userInterests.includes(selectedJobDetails.id) ? (
+                      <>
+                        <HandHeart size={16} className="mr-2" />
+                        Already Interested
+                      </>
+                    ) : (
+                      <>
+                        <Heart size={16} className="mr-2" />
+                        Show Interest
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
       
       {/* Location Settings Modal */}
