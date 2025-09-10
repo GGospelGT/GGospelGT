@@ -6,7 +6,7 @@ import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
 
-const LoginForm = ({ onClose, onSwitchToSignup }) => {
+const LoginForm = ({ onClose, onSwitchToSignup, onSwitchToForgotPassword }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
