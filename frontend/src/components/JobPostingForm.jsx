@@ -232,7 +232,22 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const isValid = Object.keys(newErrors).length === 0;
+    
+    // Debug logging for Step 1 validation
+    if (step === 1) {
+      console.log('Step 1 validation:', {
+        title: formData.title,
+        titleLength: formData.title.length,
+        description: formData.description,
+        descriptionLength: formData.description.length,
+        category: formData.category,
+        errors: newErrors,
+        isValid
+      });
+    }
+    
+    return isValid;
   };
 
   const nextStep = () => {
