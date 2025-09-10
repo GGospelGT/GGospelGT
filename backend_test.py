@@ -198,7 +198,7 @@ class AdminJobManagementTester:
             "trade_categories": ["Plumbing", "Electrical"],
             "experience_years": 8,
             "company_name": "Okafor Services",
-            "description": "Professional tradesperson with 8 years experience.",
+            "description": "Professional tradesperson with 8 years experience in residential and commercial projects across Nigeria.",
             "certifications": ["Licensed Professional"]
         }
         
