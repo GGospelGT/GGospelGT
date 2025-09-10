@@ -77,9 +77,8 @@ const MyJobsPage = () => {
   };
 
   const handleViewInterestedTradespeople = (job) => {
-    setSelectedJob(job);
-    setShowInterestedModal(true);
-    loadJobInterests(job.id);
+    // Navigate to the dedicated interested tradespeople page
+    navigate(`/job/${job.id}/interested-tradespeople`);
   };
 
   const handleCloseInterestedModal = () => {
