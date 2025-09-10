@@ -57,15 +57,17 @@ const ForgotPasswordForm = ({ onClose, onBackToLogin }) => {
       console.error('Password reset request failed:', error);
       
       // Handle different error scenarios
-      if (error.response?.status === 404) {
-        setErrors({ 
-          submit: 'If an account with this email exists, you will receive a password reset link.' 
-        });
-      } else if (error.response?.status === 422) {
+      if (error.response?.status === 422) {
         setErrors({ email: 'Please enter a valid email address' });
       } else {
-        setErrors({ 
-          submit: 'An error occurred while processing your request. Please try again.' 
+        // For any other error (including network errors), just show generic success message
+        // This is intentional for security - don't reveal if email exists or not
+        setIsSuccess(true);
+        setShowSuccess(true);
+        
+        toast({
+          title: "Password Reset Requested",
+          description: "If an account with this email exists, you will receive a password reset link.",
         });
       }
     } finally {
