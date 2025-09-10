@@ -467,13 +467,26 @@ const AdminDashboard = () => {
               {activeTab === 'jobs' && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold">Job Access Fees</h2>
-                    <button
-                      onClick={fetchData}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      Refresh
-                    </button>
+                    <h2 className="text-xl font-semibold">Jobs Management</h2>
+                    <div className="flex space-x-2">
+                      <select
+                        value={jobsFilter}
+                        onChange={(e) => setJobsFilter(e.target.value)}
+                        className="px-3 py-1 border rounded text-sm"
+                      >
+                        <option value="">All Jobs</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="expired">Expired</option>
+                      </select>
+                      <button
+                        onClick={fetchData}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Refresh
+                      </button>
+                    </div>
                   </div>
 
                   {loading ? (
@@ -494,7 +507,10 @@ const AdminDashboard = () => {
                               Job Details
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Access Fee
+                              Status
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Budget
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Interests
@@ -506,8 +522,8 @@ const AdminDashboard = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                           {jobs.map((job) => (
-                            <tr key={job.id}>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                            <tr key={job.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4">
                                 <div>
                                   <div className="text-sm font-medium text-gray-900">
                                     {job.title}
@@ -516,52 +532,69 @@ const AdminDashboard = () => {
                                     {job.category} • {job.location}
                                   </div>
                                   <div className="text-xs text-gray-400">
-                                    By {job.homeowner_name}
+                                    By {job.homeowner?.name || 'Unknown'} • {new Date(job.created_at).toLocaleDateString()}
                                   </div>
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                {editingJob === job.id ? (
-                                  <div className="flex space-x-2">
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      max="10000"
-                                      defaultValue={job.access_fee_naira}
-                                      className="w-20 px-2 py-1 border rounded text-sm"
-                                      onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                          handleUpdateJobFee(job.id, parseInt(e.target.value));
-                                        }
-                                      }}
-                                    />
-                                    <button
-                                      onClick={() => setEditingJob(null)}
-                                      className="text-gray-500 hover:text-gray-700"
-                                    >
-                                      ×
-                                    </button>
+                                {editingJobStatus === job.id ? (
+                                  <select
+                                    defaultValue={job.status}
+                                    onChange={(e) => handleUpdateJobStatus(job.id, e.target.value)}
+                                    className="text-sm border rounded px-2 py-1"
+                                  >
+                                    <option value="active">Active</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                    <option value="expired">Expired</option>
+                                    <option value="on_hold">On Hold</option>
+                                  </select>
+                                ) : (
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getJobStatusColor(job.status)}`}>
+                                    {job.status || 'active'}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                {job.budget_min && job.budget_max ? (
+                                  <div>
+                                    <div className="font-medium">₦{job.budget_min.toLocaleString()} - ₦{job.budget_max.toLocaleString()}</div>
                                   </div>
                                 ) : (
-                                  <div>
-                                    <div className="text-sm font-medium text-gray-900">
-                                      ₦{job.access_fee_naira.toLocaleString()}
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                      {job.access_fee_coins} coins
-                                    </div>
-                                  </div>
+                                  <span className="text-gray-500">Negotiable</span>
                                 )}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {job.interests_count}
+                                <div className="flex items-center">
+                                  <span className="font-medium">{job.interests_count || 0}</span>
+                                  <span className="text-gray-500 ml-1">interested</span>
+                                </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                 <button
-                                  onClick={() => setEditingJob(job.id)}
+                                  onClick={() => handleViewJobDetails(job)}
                                   className="text-blue-600 hover:text-blue-900"
                                 >
-                                  Edit Fee
+                                  View
+                                </button>
+                                <button
+                                  onClick={() => handleEditJob(job)}
+                                  className="text-indigo-600 hover:text-indigo-900"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => setEditingJobStatus(job.id)}
+                                  className="text-green-600 hover:text-green-900"
+                                >
+                                  Status
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteJob(job.id)}
+                                  className="text-red-600 hover:text-red-900"
+                                  disabled={job.status === 'deleted'}
+                                >
+                                  Delete
                                 </button>
                               </td>
                             </tr>
