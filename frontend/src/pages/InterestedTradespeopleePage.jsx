@@ -676,21 +676,13 @@ const InterestedTradespeopleePage = () => {
                       </div>
                     )}
 
-                    {/* Contact Details */}
+                    {/* Service Areas */}
                     <div>
-                      <h4 className="font-semibold mb-2">Contact Information</h4>
+                      <h4 className="font-semibold mb-2">Service Areas</h4>
                       <div className="bg-gray-50 rounded-lg p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Mail size={16} className="text-gray-500" />
-                            <span>{selectedTradesperson.tradesperson_email}</span>
-                          </div>
-                          {selectedTradesperson.tradesperson_phone && (
-                            <div className="flex items-center gap-2">
-                              <Phone size={16} className="text-gray-500" />
-                              <span>{selectedTradesperson.tradesperson_phone}</span>
-                            </div>
-                          )}
+                        <div className="flex items-center gap-2">
+                          <MapPin size={16} className="text-gray-500" />
+                          <span>{selectedTradesperson.location}</span>
                         </div>
                       </div>
                     </div>
