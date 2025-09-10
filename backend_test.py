@@ -75,21 +75,21 @@ class AdminJobManagementTester:
         """Test admin authentication system"""
         print("\n=== Testing Admin Authentication ===")
         
-        # Test admin login
+        # Test admin login with form data
         admin_credentials = {
             "username": "admin",
             "password": "servicehub2024"
         }
         
-        response = self.make_request("POST", "/admin/login", json=admin_credentials)
+        response = self.make_request("POST", "/admin/login", data=admin_credentials)
         if response.status_code == 200:
             login_response = response.json()
-            if 'access_token' in login_response:
+            if 'token' in login_response:
                 self.log_result("Admin login", True, "Admin authentication successful")
-                self.auth_tokens['admin'] = login_response['access_token']
-                self.test_data['admin_user'] = login_response.get('user', {})
+                self.auth_tokens['admin'] = login_response['token']
+                self.test_data['admin_user'] = login_response.get('admin', {})
             else:
-                self.log_result("Admin login", False, "No access token in response")
+                self.log_result("Admin login", False, "No token in response")
         else:
             self.log_result("Admin login", False, f"Status: {response.status_code}, Response: {response.text}")
         
@@ -99,7 +99,7 @@ class AdminJobManagementTester:
             "password": "wrongpassword"
         }
         
-        response = self.make_request("POST", "/admin/login", json=invalid_credentials)
+        response = self.make_request("POST", "/admin/login", data=invalid_credentials)
         if response.status_code == 401:
             self.log_result("Invalid admin credentials", True, "Correctly rejected invalid credentials")
         else:
