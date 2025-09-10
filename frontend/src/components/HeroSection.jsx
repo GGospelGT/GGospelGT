@@ -5,6 +5,7 @@ import { Search, MapPin, Plus, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { jobsAPI } from '../api/services';
 import { useToast } from '../hooks/use-toast';
+import useStates from '../hooks/useStates';
 
 // Nigerian Trade Categories
 const NIGERIAN_TRADE_CATEGORIES = [
