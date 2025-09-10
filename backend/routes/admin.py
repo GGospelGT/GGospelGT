@@ -754,8 +754,17 @@ async def update_user_status(
 @router.get("/locations/states")
 async def get_all_states():
     """Get all Nigerian states"""
+    # Get states from database (new ones added by admin)
+    custom_states = await database.get_custom_states()
+    
+    # Get default states from constants
     from models.nigerian_states import NIGERIAN_STATES
-    return {"states": NIGERIAN_STATES}
+    
+    # Combine both lists and remove duplicates
+    all_states = list(set(NIGERIAN_STATES + custom_states))
+    all_states.sort()  # Sort alphabetically
+    
+    return {"states": all_states}
 
 @router.post("/locations/states")
 async def add_new_state(
