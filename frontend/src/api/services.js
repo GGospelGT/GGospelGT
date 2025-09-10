@@ -170,6 +170,11 @@ export const tradespeopleAPI = {
     return response.data;
   },
 
+  getAllTradespeople: async (params = {}) => {
+    const response = await apiClient.get('/tradespeople/', { params });
+    return response.data;
+  },
+
   getTradesperson: async (tradespersonId) => {
     const response = await apiClient.get(`/tradespeople/${tradespersonId}`);
     return response.data;
