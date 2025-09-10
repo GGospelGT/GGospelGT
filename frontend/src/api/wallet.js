@@ -199,7 +199,11 @@ export const adminAPI = {
     formData.append('region', region);
     formData.append('postcode_samples', postcodes);
     
-    const response = await apiClient.post('/admin/locations/states', formData);
+    const response = await apiClient.post('/admin/locations/states', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 
