@@ -8646,5 +8646,5 @@ class BackendTester:
     
 if __name__ == "__main__":
     tester = BackendTester()
-    # Run the Interests API tests for My Interests page as requested in review
-    tester.test_interests_api_for_my_interests_page()
+    # Run the new tradesperson profile and browse functionality tests
+    tester.run_all_tests()
