@@ -2509,6 +2509,25 @@ class Database:
     # LOCATION MANAGEMENT METHODS (Admin)
     # ==========================================
     
+    async def get_custom_lgas(self):
+        """Get custom LGAs added by admin, organized by state"""
+        try:
+            lgas_cursor = self.database.system_locations.find({"type": "lga"})
+            lgas = await lgas_cursor.to_list(length=None)
+            
+            # Organize by state
+            lgas_by_state = {}
+            for lga in lgas:
+                state = lga["state"]
+                if state not in lgas_by_state:
+                    lgas_by_state[state] = []
+                lgas_by_state[state].append(lga["name"])
+            
+            return lgas_by_state
+        except Exception as e:
+            print(f"Error getting custom LGAs: {e}")
+            return {}
+    
     async def get_custom_states(self):
         """Get custom states added by admin"""
         try:
