@@ -23,6 +23,7 @@ import {
 import { jobsAPI, authAPI } from '../api/services';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import useStates from '../hooks/useStates';
 import LocationPicker from './maps/LocationPicker';
 
 // Nigerian Trade Categories
