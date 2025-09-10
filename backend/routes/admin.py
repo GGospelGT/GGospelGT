@@ -913,16 +913,8 @@ async def delete_lga(state_name: str, lga_name: str):
 @router.get("/locations/towns")
 async def get_all_towns():
     """Get all towns organized by state and LGA"""
-    # Get static towns (empty by default)
-    static_towns = {}
-    
-    # Get custom towns from database
-    custom_towns = await database.get_custom_towns()
-    
-    # Since there are typically no static towns, just return custom ones
-    all_towns = custom_towns
-    
-    return {"towns": all_towns}
+    towns = await database.get_all_towns()
+    return {"towns": towns}
 
 @router.post("/locations/towns")
 async def add_new_town(
