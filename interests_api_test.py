@@ -78,7 +78,7 @@ class InterestsAPITester:
             "email": f"adebayo.johnson.{uuid.uuid4().hex[:8]}@email.com",
             "password": "SecurePass123",
             "phone": "08123456789",
-            "location": "Lagos, Lagos State",
+            "location": "Lagos",
             "postcode": "100001"
         }
         
@@ -106,9 +106,9 @@ class InterestsAPITester:
             "email": f"emeka.okafor.{uuid.uuid4().hex[:8]}@tradework.com",
             "password": "SecurePass123",
             "phone": "08187654321",
-            "location": "Abuja, FCT",
+            "location": "Abuja",
             "postcode": "900001",
-            "trade_categories": ["Plumbing", "Heating & Gas"],
+            "trade_categories": ["Plumbing"],
             "experience_years": 8,
             "company_name": "Okafor Plumbing Services",
             "description": "Professional plumber with 8 years experience in residential and commercial projects.",
