@@ -103,8 +103,8 @@ class DynamicLocationTester:
         response = self.make_request("POST", "/admin/login", data=admin_credentials)
         if response.status_code == 200:
             admin_data = response.json()
-            if 'access_token' in admin_data:
-                self.auth_tokens['admin'] = admin_data['access_token']
+            if 'token' in admin_data:
+                self.auth_tokens['admin'] = admin_data['token']
                 self.log_result("Admin authentication", True, "Admin login successful")
             else:
                 self.log_result("Admin authentication", False, "No access token in response")
