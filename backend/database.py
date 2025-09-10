@@ -115,6 +115,203 @@ class Database:
             job['_id'] = str(job['_id'])
         return jobs
 
+    # ==========================================
+    # ADMIN JOB MANAGEMENT METHODS
+    # ==========================================
+
+    async def get_all_jobs_admin(self, skip: int = 0, limit: int = 50, status: str = None) -> List[dict]:
+        """Get all jobs for admin management with comprehensive details"""
+        query = {}
+        if status:
+            query["status"] = status
+        
+        # Include soft-deleted jobs for admin (where deleted_at exists)
+        cursor = self.database.jobs.find(query).sort("created_at", -1).skip(skip).limit(limit)
+        
+        jobs = []
+        async for job in cursor:
+            job["_id"] = str(job["_id"])
+            
+            # Get homeowner details
+            homeowner = await self.database.users.find_one({"id": job["homeowner_id"]})
+            if homeowner:
+                job["homeowner"] = {
+                    "id": homeowner["id"],
+                    "name": homeowner.get("name", "Unknown"),
+                    "email": homeowner.get("email", ""),
+                    "phone": homeowner.get("phone", "")
+                }
+            
+            # Get interests count
+            interests_count = await self.database.interests.count_documents({"job_id": job["id"]})
+            job["interests_count"] = interests_count
+            
+            # Set default access fees if not present
+            if "access_fee_naira" not in job:
+                job["access_fee_naira"] = 1000
+                job["access_fee_coins"] = 10
+            
+            jobs.append(job)
+        
+        return jobs
+
+    async def get_jobs_count_admin(self, status: str = None) -> int:
+        """Get total count of jobs for pagination"""
+        query = {}
+        if status:
+            query["status"] = status
+        
+        return await self.database.jobs.count_documents(query)
+
+    async def get_job_by_id_admin(self, job_id: str) -> Optional[dict]:
+        """Get job details by ID for admin editing"""
+        job = await self.database.jobs.find_one({"id": job_id})
+        if not job:
+            return None
+        
+        job["_id"] = str(job["_id"])
+        
+        # Get homeowner details
+        homeowner = await self.database.users.find_one({"id": job["homeowner_id"]})
+        if homeowner:
+            job["homeowner"] = {
+                "id": homeowner["id"],
+                "name": homeowner.get("name", "Unknown"),
+                "email": homeowner.get("email", ""),
+                "phone": homeowner.get("phone", "")
+            }
+        
+        # Get interests count and details
+        interests_count = await self.database.interests.count_documents({"job_id": job["id"]})
+        job["interests_count"] = interests_count
+        
+        # Get interested tradespeople
+        interests_cursor = self.database.interests.find({"job_id": job["id"]})
+        interested_tradespeople = []
+        async for interest in interests_cursor:
+            tradesperson = await self.database.users.find_one({"id": interest["tradesperson_id"]})
+            if tradesperson:
+                interested_tradespeople.append({
+                    "interest_id": interest["id"],
+                    "tradesperson_name": tradesperson.get("name", "Unknown"),
+                    "tradesperson_email": tradesperson.get("email", ""),
+                    "status": interest.get("status", "pending"),
+                    "created_at": interest.get("created_at")
+                })
+        
+        job["interested_tradespeople"] = interested_tradespeople
+        
+        return job
+
+    async def update_job_admin(self, job_id: str, job_data: dict) -> bool:
+        """Update job details (admin only)"""
+        # Prepare update data
+        update_data = {}
+        allowed_fields = [
+            "title", "description", "category", "location", "state", "lga", 
+            "town", "zip_code", "home_address", "timeline", "budget_min", 
+            "budget_max", "access_fee_naira", "access_fee_coins", "status"
+        ]
+        
+        for field in allowed_fields:
+            if field in job_data:
+                update_data[field] = job_data[field]
+        
+        # Add update timestamp
+        update_data["updated_at"] = datetime.utcnow()
+        
+        if not update_data:
+            return False
+        
+        result = await self.database.jobs.update_one(
+            {"id": job_id},
+            {"$set": update_data}
+        )
+        
+        return result.modified_count > 0
+
+    async def update_job_status_admin(self, job_id: str, status: str) -> bool:
+        """Update job status (admin only)"""
+        result = await self.database.jobs.update_one(
+            {"id": job_id},
+            {"$set": {
+                "status": status,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        return result.modified_count > 0
+
+    async def soft_delete_job_admin(self, job_id: str) -> bool:
+        """Soft delete job (admin only)"""
+        result = await self.database.jobs.update_one(
+            {"id": job_id},
+            {"$set": {
+                "status": "deleted",
+                "deleted_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        
+        return result.modified_count > 0
+
+    async def get_jobs_statistics_admin(self) -> dict:
+        """Get comprehensive job statistics for admin dashboard"""
+        # Total jobs count
+        total_jobs = await self.database.jobs.count_documents({})
+        
+        # Jobs by status
+        active_jobs = await self.database.jobs.count_documents({"status": "active"})
+        completed_jobs = await self.database.jobs.count_documents({"status": "completed"})
+        cancelled_jobs = await self.database.jobs.count_documents({"status": "cancelled"})
+        expired_jobs = await self.database.jobs.count_documents({"status": "expired"})
+        
+        # Total interests
+        total_interests = await self.database.interests.count_documents({})
+        
+        # Jobs with most interests (top 10)
+        pipeline = [
+            {"$group": {
+                "_id": "$job_id",
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"count": -1}},
+            {"$limit": 10}
+        ]
+        top_jobs_interests = await self.database.interests.aggregate(pipeline).to_list(length=10)
+        
+        # Jobs created in last 30 days
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        recent_jobs = await self.database.jobs.count_documents({
+            "created_at": {"$gte": thirty_days_ago}
+        })
+        
+        # Average budget ranges
+        pipeline = [
+            {"$match": {"budget_min": {"$exists": True}, "budget_max": {"$exists": True}}},
+            {"$group": {
+                "_id": None,
+                "avg_min": {"$avg": "$budget_min"},
+                "avg_max": {"$avg": "$budget_max"}
+            }}
+        ]
+        budget_stats = await self.database.jobs.aggregate(pipeline).to_list(length=1)
+        avg_budget_min = budget_stats[0]["avg_min"] if budget_stats else 0
+        avg_budget_max = budget_stats[0]["avg_max"] if budget_stats else 0
+        
+        return {
+            "total_jobs": total_jobs,
+            "active_jobs": active_jobs,
+            "completed_jobs": completed_jobs,
+            "cancelled_jobs": cancelled_jobs,
+            "expired_jobs": expired_jobs,
+            "total_interests": total_interests,
+            "top_jobs_interests": top_jobs_interests,
+            "recent_jobs": recent_jobs,
+            "avg_budget_min": avg_budget_min,
+            "avg_budget_max": avg_budget_max
+        }
+
     async def get_jobs_count(self, filters: dict = None) -> int:
         query = filters or {}
         if 'status' not in query:
