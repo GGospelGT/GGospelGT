@@ -75,6 +75,10 @@ const BrowseJobsPage = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [showLocationSettings, setShowLocationSettings] = useState(false);
+  const [loadingStates, setLoadingStates] = useState({
+    showInterest: {}
+  });
+  const [userInterests, setUserInterests] = useState(null);
 
   const { user, isAuthenticated, isTradesperson } = useAuth();
   
