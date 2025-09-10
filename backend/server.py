@@ -33,8 +33,8 @@ async def lifespan(app: FastAPI):
 # Create the main app with lifespan events  
 app = FastAPI(lifespan=lifespan, redirect_slashes=False)
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+# Create a router without prefix for health endpoints
+api_router = APIRouter()
 
 # Add CORS middleware
 app.add_middleware(
