@@ -1,39 +1,44 @@
 #!/usr/bin/env python3
 """
-COMPREHENSIVE BACKEND API TESTING - POST BUG FIXES VERIFICATION
+COMPREHENSIVE SHOW INTEREST FUNCTIONALITY TESTING - BUG FIXES VERIFICATION
 
 **Review Request Focus Areas:**
 
-1. **Critical API Endpoints:**
-   - Test `/api/reviews/featured` endpoint to ensure it returns proper JSON without 500 errors
-   - Test `/api/auth/lgas/{state}` endpoint for LGA functionality
-   - Test job-related endpoints for CRUD operations
+1. **Show Interest System Testing:**
+   - Test `/api/interests/show-interest` endpoint with various scenarios
+   - Test with valid authentication and job IDs
+   - Test validation responses for different error conditions
+   - Verify proper error messages for business logic validation
 
-2. **Model Import Verification:**
-   - Verify that JobUpdate and JobCloseRequest models are properly imported and accessible
-   - Test any endpoints that use these models
+2. **Error Scenario Testing:**
+   - Test showing interest in inactive/completed jobs (should return 400 with specific message)
+   - Test duplicate interest attempts (should return 400 with "already shown interest" message)
+   - Test with non-existent job IDs (should return 404)
+   - Test with insufficient wallet balance scenarios
 
-3. **Database Integration:**
-   - Test featured reviews filtering (should only return advanced format reviews)
-   - Verify that mixed review formats in database are handled correctly
+3. **User Authentication Flow:**
+   - Test with tradesperson authentication (should work)
+   - Test with homeowner authentication (should be rejected)
+   - Test with invalid/expired tokens
 
-4. **Service Health:**
-   - Verify backend service is running properly
-   - Check for any import errors or startup issues
-   - Test basic authentication endpoints
+4. **Database Consistency:**
+   - Verify interest records are created correctly
+   - Test duplicate prevention at database level
+   - Verify job status validation
 
-**Recent Changes Made:**
-- Fixed missing JobUpdate and JobCloseRequest imports in models/__init__.py
-- Updated /api/reviews/featured endpoint to use AdvancedReview model and filter for advanced format reviews only
-- Enhanced database.py get_featured_reviews method with proper filtering
+**Recent Fixes Applied:**
+- Enhanced frontend validation to check job status and duplicate interests before API calls
+- Added client-side interest tracking and loading
+- Improved error handling with specific messages for different 400 error types
+- Added local state updates to prevent repeated attempts
 
-**Test Coverage:**
-- Featured reviews endpoint functionality
-- LGA endpoints for Nigerian states
-- Job management endpoints (edit/close functionality)
-- Authentication endpoints
-- Model import verification
-- Database consistency checks
+**Expected Results:**
+- ✅ Show interest should work for valid scenarios (active jobs, authenticated tradespeople, sufficient balance)
+- ✅ 400 errors should return specific, helpful error messages
+- ✅ Frontend should handle and display appropriate error messages
+- ✅ No more uncaught JavaScript runtime errors
+- ✅ Duplicate attempts should be prevented both client-side and server-side
+- ✅ Job status validation should work correctly
 """
 
 import requests
