@@ -256,7 +256,7 @@ class ShowInterestTester:
             "lga": "Ikeja",
             "town": "Ikeja",
             "zip_code": "101001",
-            "home_address": "456 Broad Street, Victoria Island",
+            "home_address": "456 Broad Street, Ikeja",
             "budget_min": 75000,
             "budget_max": 200000,
             "timeline": "Within 1 week",
