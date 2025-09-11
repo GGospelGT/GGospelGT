@@ -10,19 +10,19 @@ const StatsSection = () => {
   const defaultStats = [
     {
       icon: Users,
-      number: '251,959',
+      number: '201',
       label: 'registered tradespeople',
       color: '#2F8140'
     },
     {
       icon: Wrench,
-      number: '40+',
+      number: '28+',
       label: 'trade categories',
       color: '#121E3C'
     },
     {
       icon: Star,
-      number: '2,630,834',
+      number: '403',
       label: 'customer reviews',
       color: '#2F8140'
     }
