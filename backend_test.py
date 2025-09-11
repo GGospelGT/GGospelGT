@@ -282,46 +282,64 @@ class MyInterestsPageTester:
             self.log_result("Show interest", False, 
                           f"Status: {response.status_code}, Response: {response.text}")
     
-    def test_contact_sharing_api_endpoint(self):
-        """CRITICAL TEST: Test the contact sharing API endpoint"""
-        print("\n=== CRITICAL TEST: Contact Sharing API Endpoint ===")
+    def test_my_interests_api_endpoint(self):
+        """CRITICAL TEST: Test the My Interests API endpoint"""
+        print("\n=== CRITICAL TEST: My Interests API Endpoint ===")
         
-        if 'homeowner' not in self.auth_tokens or 'interest_id' not in self.test_data:
-            self.log_result("Contact sharing setup", False, "Missing homeowner token or interest ID")
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("My interests API setup", False, "Missing tradesperson token")
             return
         
-        homeowner_token = self.auth_tokens['homeowner']
-        interest_id = self.test_data['interest_id']
+        tradesperson_token = self.auth_tokens['tradesperson']
         
-        print(f"🔍 Testing contact sharing for Interest ID: {interest_id}")
+        print(f"🔍 Testing GET /api/interests/my-interests for tradesperson")
         
-        # Test the share-contact endpoint
-        response = self.make_request("PUT", f"/interests/share-contact/{interest_id}", 
-                                   auth_token=homeowner_token)
+        # Test the my-interests endpoint
+        start_time = time.time()
+        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+        response_time = time.time() - start_time
+        
+        print(f"⏱️ Response time: {response_time:.2f} seconds")
         
         if response.status_code == 200:
-            share_response = response.json()
-            required_fields = ['interest_id', 'status', 'message', 'contact_shared_at']
-            missing_fields = [field for field in required_fields if field not in share_response]
-            
-            if not missing_fields:
-                # Verify response data
-                if (share_response.get('interest_id') == interest_id and 
-                    share_response.get('status') == 'contact_shared'):
-                    self.test_data['contact_shared_response'] = share_response
-                    self.log_result("Contact sharing API - successful response", True, 
-                                  f"Status updated to: {share_response.get('status')}, "
-                                  f"Shared at: {share_response.get('contact_shared_at')}")
+            try:
+                interests_data = response.json()
+                
+                # Verify response is a list
+                if isinstance(interests_data, list):
+                    self.log_result("My interests API - response format", True, 
+                                  f"Returned {len(interests_data)} interests as list")
+                    
+                    # Store for further testing
+                    self.test_data['my_interests_response'] = interests_data
+                    
+                    # Test response structure if we have interests
+                    if len(interests_data) > 0:
+                        self.test_interest_data_structure(interests_data[0])
+                        self.test_datetime_serialization(interests_data)
+                        self.test_new_fields_presence(interests_data)
+                    else:
+                        self.log_result("My interests API - data availability", True, 
+                                      "No interests found (empty list) - this is valid")
+                        
                 else:
-                    self.log_result("Contact sharing API - response data", False, 
-                                  f"Interest ID: {share_response.get('interest_id')}, "
-                                  f"Status: {share_response.get('status')}")
-            else:
-                self.log_result("Contact sharing API - response structure", False, 
-                              f"Missing fields: {missing_fields}")
+                    self.log_result("My interests API - response format", False, 
+                                  f"Expected list, got {type(interests_data)}")
+                    
+            except json.JSONDecodeError as e:
+                self.log_result("My interests API - JSON parsing", False, 
+                              f"Failed to parse JSON response: {str(e)}")
         else:
-            self.log_result("Contact sharing API", False, 
+            self.log_result("My interests API", False, 
                           f"Status: {response.status_code}, Response: {response.text}")
+            
+        # Test response time performance
+        if response_time > 5.0:
+            self.log_result("My interests API - performance", False, 
+                          f"Slow response time: {response_time:.2f}s (>5s)")
+        else:
+            self.log_result("My interests API - performance", True, 
+                          f"Good response time: {response_time:.2f}s")
     
     def test_tradesperson_status_visibility(self):
         """CRITICAL TEST: Verify tradesperson can see updated status"""
