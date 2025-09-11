@@ -308,7 +308,7 @@ const JobEditModal = ({
                     <SelectValue placeholder="Select LGA" />
                   </SelectTrigger>
                   <SelectContent>
-                    {lgas.map((lga) => (
+                    {(lgas || []).map((lga) => (
                       <SelectItem key={lga} value={lga}>
                         {lga}
                       </SelectItem>
