@@ -100,7 +100,7 @@ async def get_featured_reviews(limit: int = Query(6, ge=1, le=20)):
     """Get featured reviews for homepage"""
     try:
         reviews = await database.get_featured_reviews(limit=limit)
-        return [models.Review(**review) for review in reviews]
+        return [AdvancedReview(**review) for review in reviews]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
