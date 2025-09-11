@@ -683,9 +683,24 @@ const BrowseJobsPage = () => {
                           </div>
 
                           {/* Job title */}
-                          <h3 className="text-lg font-semibold text-purple-900 leading-tight">
+                          <h3 className="text-lg font-semibold text-purple-900 leading-tight mb-3">
                             {job.title}
                           </h3>
+
+                          {/* Show Interest Button */}
+                          <div className="flex justify-end">
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent card click
+                                handleShowInterest(job);
+                              }}
+                              disabled={showingInterest === job.id}
+                              className="text-white font-lato"
+                              style={{backgroundColor: '#2F8140'}}
+                            >
+                              {showingInterest === job.id ? 'Showing Interest...' : 'Show Interest'}
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
