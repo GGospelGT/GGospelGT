@@ -1416,5 +1416,5 @@ class MessagingSystemTester:
         return success_rate >= 85  # Consider 85%+ as successful
 
 if __name__ == "__main__":
-    tester = ShowInterestTester()
-    tester.run_show_interest_tests()
+    tester = MessagingSystemTester()
+    tester.run_messaging_system_tests()
