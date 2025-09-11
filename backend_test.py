@@ -231,7 +231,10 @@ class ShowInterestTester:
             "home_address": "123 Allen Avenue, Ikeja",
             "budget_min": 50000,
             "budget_max": 150000,
-            "timeline": "Within 2 weeks"
+            "timeline": "Within 2 weeks",
+            "homeowner_name": homeowner_user['name'],
+            "homeowner_email": homeowner_user['email'],
+            "homeowner_phone": homeowner_user['phone']
         }
         
         response = self.make_request("POST", "/jobs/", json=active_job_data, auth_token=homeowner_token)
