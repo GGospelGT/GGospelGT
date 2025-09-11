@@ -259,7 +259,10 @@ class ShowInterestTester:
             "home_address": "456 Broad Street, Victoria Island",
             "budget_min": 75000,
             "budget_max": 200000,
-            "timeline": "Within 1 week"
+            "timeline": "Within 1 week",
+            "homeowner_name": homeowner_user['name'],
+            "homeowner_email": homeowner_user['email'],
+            "homeowner_phone": homeowner_user['phone']
         }
         
         response = self.make_request("POST", "/jobs/", json=duplicate_test_job_data, auth_token=homeowner_token)
