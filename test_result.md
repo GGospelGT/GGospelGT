@@ -57,8 +57,8 @@
 ##   test_priority: "high_first"  # or "sequential" or "stuck_first"
 ##
 ## agent_communication:
-##     -agent: "main"  # or "testing" or "user"
-##     -message: "Communication message between agents"
+##     -agent: "main" 
+##     -message: "SHOW INTEREST MODAL BUG FIX COMPLETE: Fixed the issue where job details modal was closing immediately after clicking 'Show Interest' button. Modified handleShowInterest function to re-throw errors after handling them internally. Now the modal's try-catch block can properly catch API failures and keep modal open for user retry, while still closing on successful API calls. Ready for frontend testing to verify modal behavior on both success and failure scenarios."
 
 # Protocol Guidelines for Main agent
 #
