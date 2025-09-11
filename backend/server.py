@@ -70,6 +70,7 @@ app.include_router(reviews_advanced.router, prefix="/api/reviews", tags=["review
 app.include_router(wallet.router)
 app.include_router(admin.router)
 app.include_router(referrals.router)
+app.include_router(messages.router)
 
 # Include the main api router
 app.include_router(api_router)
