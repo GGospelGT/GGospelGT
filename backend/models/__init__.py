@@ -1,6 +1,6 @@
 # Models package
 from .base import (
-    JobCreate, Job, JobsResponse, JobStatus,
+    JobCreate, Job, JobsResponse, JobStatus, JobUpdate, JobCloseRequest,
     TradespersonCreate, Tradesperson, TradespeopleResponse,
     QuoteCreate, Quote, QuotesResponse, QuoteStatus,
     ReviewCreate, Review, ReviewsResponse,
