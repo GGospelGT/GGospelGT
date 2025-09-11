@@ -34,6 +34,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
 
   const { registerHomeowner, registerTradesperson } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { states: nigerianStates, loading: statesLoading } = useStates();
 
   // Nigerian Trade Categories - Updated comprehensive list
