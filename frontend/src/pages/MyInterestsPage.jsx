@@ -636,6 +636,8 @@ const MyInterestsPage = () => {
           jobId={selectedInterestForChat.jobId}
           jobTitle={selectedInterestForChat.jobTitle}
           otherParty={selectedInterestForChat.homeowner}
+          contactDetails={selectedInterestForChat.contactDetails}
+          showContactDetails={selectedInterestForChat.showContactDetails}
         />
       )}
 
