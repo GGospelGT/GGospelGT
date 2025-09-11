@@ -527,7 +527,7 @@ const MyInterestsPage = () => {
                                   </Button>
                                 )}
                                 
-                                {interest.status === 'paid' && (
+                                {interest.status === 'paid_access' && (
                                   <Button
                                     onClick={() => handleStartChatAfterPayment(interest)}
                                     className="text-white"
