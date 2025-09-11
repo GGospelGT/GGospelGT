@@ -878,7 +878,7 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "Messaging System API - Comprehensive In-App Messaging for Lead Generation"
+    - "Contact Sharing & In-App Messaging System - Frontend Integration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
