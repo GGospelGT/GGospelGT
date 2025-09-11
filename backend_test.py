@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import time
 """
 CRITICAL BUG INVESTIGATION: Send button not working in ChatModal
 
