@@ -143,30 +143,68 @@ const Header = () => {
                       <Search size={16} />
                       <span>Browse Jobs</span>
                     </Button>
-                    <Button 
-                      variant="ghost"
-                      onClick={() => navigate('/my-interests')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
-                    >
-                      <Heart size={16} />
-                      <span>My Interests</span>
-                    </Button>
-                    <Button 
-                      variant="ghost"
-                      onClick={() => navigate('/wallet')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
-                    >
-                      <span>💰</span>
-                      <span>Wallet</span>
-                    </Button>
-                    <Button 
-                      variant="ghost"
-                      onClick={() => navigate('/referrals')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
-                    >
-                      <span>🎁</span>
-                      <span>Referrals</span>
-                    </Button>
+                    
+                    {/* Tradesperson User Menu Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost"
+                          className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                        >
+                          <User size={16} />
+                          <span>Menu</span>
+                          <ChevronDown size={14} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56" align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem onClick={() => navigate('/my-interests')}>
+                          <Heart size={16} />
+                          <span>My Interests</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem onClick={() => navigate('/wallet')}>
+                          <span className="mr-2">💰</span>
+                          <span>Wallet</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem onClick={() => navigate('/referrals')}>
+                          <span className="mr-2">🎁</span>
+                          <span>Referrals</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem onClick={() => navigate('/reviews')}>
+                          <Star size={16} />
+                          <span>My Reviews</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem onClick={() => navigate('/help')}>
+                          <HelpCircle size={16} />
+                          <span>Help</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem onClick={() => navigate('/contact')}>
+                          <MessageSquare size={16} />
+                          <span>Contact</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem onClick={() => navigate('/profile')}>
+                          <User size={16} />
+                          <span>Profile</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem onClick={handleLogout} className="text-red-600 hover:text-red-700">
+                          <LogOut size={16} />
+                          <span>Logout</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </>
                 )}
                 
