@@ -849,10 +849,15 @@ const BrowseJobsPage = () => {
                     Close
                   </Button>
                   <Button
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.stopPropagation();
-                      handleShowInterest(selectedJobDetails); // Pass full job object, not just ID
-                      setShowJobModal(false);
+                      try {
+                        await handleShowInterest(selectedJobDetails); // Wait for API call to complete
+                        setShowJobModal(false); // Only close modal on success
+                      } catch (error) {
+                        // Keep modal open on error so user can retry
+                        console.error('Show interest failed, keeping modal open:', error);
+                      }
                     }}
                     disabled={loadingStates.showInterest[selectedJobDetails.id] || 
                              (userInterests && userInterests.includes(selectedJobDetails.id))}
