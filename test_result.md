@@ -95,6 +95,9 @@
       - working: "NA"
         agent: "main"
         comment: "🚀 ENHANCED PAYMENT FLOW IMPLEMENTED: After tradespeople pay coins for job access, they are now automatically redirected to chat interface with homeowner contact details visible. FEATURES ADDED: 1) Modified `handlePayForAccess` to automatically open chat after successful payment, 2) Created `handleStartChatAfterPayment` function to load contact details and open enhanced chat, 3) Enhanced ChatModal component to display contact details (phone, email) prominently in header, 4) Updated paid interests to show 'Chat with Homeowner' button instead of separate contact/chat buttons, 5) Auto-loads homeowner contact details in chat interface after payment. WORKFLOW: Pay coins → Success toast → Chat opens automatically with homeowner contact details visible → Can message immediately. Streamlined UX eliminates manual steps after payment."
+      - working: false
+        agent: "user"
+        comment: "❌ CRITICAL BUG: Send button in chat interface is not working. Users cannot send messages in the ChatModal component. This breaks the entire messaging functionality that was just implemented."
 
 ## agent_communication:
     -agent: "main" 
