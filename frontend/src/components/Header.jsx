@@ -110,6 +110,24 @@ const Header = () => {
                     >
                       Post a job
                     </Button>
+                    
+                    {/* Help and Contact for homeowners */}
+                    <Button 
+                      variant="ghost"
+                      onClick={() => navigate('/help')}
+                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                    >
+                      <HelpCircle size={16} />
+                      <span>Help</span>
+                    </Button>
+                    <Button 
+                      variant="ghost"
+                      onClick={() => navigate('/contact')}
+                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                    >
+                      <MessageSquare size={16} />
+                      <span>Contact</span>
+                    </Button>
                   </>
                 )}
                 
