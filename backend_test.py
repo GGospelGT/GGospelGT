@@ -1,39 +1,50 @@
 #!/usr/bin/env python3
 """
-CRITICAL BUG INVESTIGATION: Contact sharing status not reflecting in tradesperson account
+CRITICAL BUG INVESTIGATION: My Interests page not loading for tradespeople
 
 **Problem Description:**
-A homeowner shared contact with an interested tradesperson, but the status change is not appearing 
-in the tradesperson's account. This breaks the core workflow where the tradesperson should see 
-the status change from "interested" to "contact_shared" and be able to pay for access.
+User reports that the My Interests page is not loading for tradespeople accounts. The backend logs show 
+that `/api/interests/my-interests` API calls are returning 200 OK, but the page might still not be loading properly.
 
-**Specific API Endpoints to Test:**
-1. POST /api/interests/share-contact/{interest_id} - The main contact sharing endpoint
-2. GET /api/interests/my-interests - To verify tradesperson can see updated status
-3. GET /api/interests/job/{job_id} - To verify homeowner can see updated status
+**Recent Changes Context:**
+Recently modified the `get_tradesperson_interests` method in `/app/backend/database.py` lines 1028-1029 to add:
+- `"contact_shared_at": 1`  
+- `"payment_made_at": 1`
 
-**Investigation Areas:**
-1. API Functionality - Test the share-contact endpoint with valid interest IDs
-2. Database Updates - Check if interest status is actually updating from "interested" to "contact_shared"
-3. Status Synchronization - Test that status changes are immediately visible via GET endpoints
-4. Notification System - Verify background notification task is triggered
+This fix resolved contact sharing status visibility but may have introduced a regression.
+
+**Specific Testing Focus:**
+
+1. **API Endpoint Testing:**
+   - Test GET `/api/interests/my-interests` with valid tradesperson authentication
+   - Verify response structure and data format
+   - Check if the recent database fix caused any data format issues
+   - Test response time and any potential timeout issues
+
+2. **Database Query Testing:**
+   - Test the `get_tradesperson_interests` method that was recently modified
+   - Verify the MongoDB projection is working correctly with the new fields
+   - Check if the aggregation pipeline is functioning properly
+   - Test with different interest statuses and data scenarios
+
+3. **Data Structure Validation:**
+   - Verify the response contains all expected fields
+   - Check if new fields `contact_shared_at` and `payment_made_at` are properly serialized
+   - Test with different interest statuses (pending, contact_shared, paid)
 
 **Test Scenarios:**
-1. Create a complete interest flow: job creation → show interest → share contact
-2. Test the share-contact API from homeowner perspective
-3. Immediately check status from tradesperson perspective
-4. Verify notification delivery
-5. Test edge cases (already shared, non-existent interest, wrong permissions)
+1. Login as tradesperson (john.plumber.d553d0b3@tradework.com)
+2. Call GET `/api/interests/my-interests` 
+3. Verify response structure and all required fields
+4. Test with different interest statuses
+5. Check response time and potential errors
+6. Validate JSON serialization of datetime fields
 
 **Expected Behavior:**
-- Homeowner can successfully share contact details
-- Interest status updates from "interested" to "contact_shared" immediately
-- Tradesperson sees updated status in their interests list
-- Notification is sent to tradesperson
-- Tradesperson can then proceed to pay for access
-
-Using existing test credentials (john.plumber.d553d0b3@tradework.com) and create a complete test scenario 
-to identify where the breakdown is occurring.
+- API should return 200 OK with properly formatted interest data
+- Response should include all interest records for the tradesperson
+- New fields should be properly serialized (null/empty if not set)
+- Page should load with interest data displayed correctly
 """
 
 import requests
