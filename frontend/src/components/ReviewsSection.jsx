@@ -64,6 +64,7 @@ const ReviewsSection = () => {
   };
 
   const getInitials = (name) => {
+    if (!name || typeof name !== 'string') return 'U'; // Unknown/undefined name
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
