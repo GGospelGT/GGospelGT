@@ -975,20 +975,32 @@ class MessagingSystemTester:
         # Create test data with paid access
         self.test_show_interest_for_contact_sharing()
         
-        # Simulate payment for access (this would normally be done through payment flow)
-        if 'interest_id' in self.test_data and 'tradesperson' in self.auth_tokens:
-            print("\n--- Simulating Payment for Access ---")
-            tradesperson_token = self.auth_tokens['tradesperson']
+        # Complete the workflow: share contact → pay for access
+        if 'interest_id' in self.test_data and 'homeowner' in self.auth_tokens:
+            print("\n--- Completing Contact Sharing Workflow ---")
+            homeowner_token = self.auth_tokens['homeowner']
             interest_id = self.test_data['interest_id']
             
-            # Try to pay for access
-            response = self.make_request("POST", f"/interests/pay-access/{interest_id}", 
-                                       auth_token=tradesperson_token)
+            # Step 1: Homeowner shares contact details
+            response = self.make_request("PUT", f"/interests/share-contact/{interest_id}", 
+                                       auth_token=homeowner_token)
             if response.status_code == 200:
-                self.log_result("Payment simulation", True, "Payment successful - access granted")
+                self.log_result("Contact sharing", True, "Homeowner shared contact details")
+                
+                # Step 2: Tradesperson pays for access
+                if 'tradesperson' in self.auth_tokens:
+                    tradesperson_token = self.auth_tokens['tradesperson']
+                    
+                    response = self.make_request("POST", f"/interests/pay-access/{interest_id}", 
+                                               auth_token=tradesperson_token)
+                    if response.status_code == 200:
+                        self.log_result("Payment for access", True, "Payment successful - access granted")
+                    else:
+                        self.log_result("Payment for access", False, 
+                                      f"Payment failed: {response.status_code} - {response.text}")
             else:
-                self.log_result("Payment simulation", False, 
-                              f"Payment failed: {response.status_code} - {response.text}")
+                self.log_result("Contact sharing", False, 
+                              f"Contact sharing failed: {response.status_code} - {response.text}")
         
         # Core messaging system testing
         self.test_interest_status_verification()
