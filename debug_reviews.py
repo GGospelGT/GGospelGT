@@ -48,14 +48,25 @@ async def debug_reviews():
             print(f"\nAre they the same? {featured_reviews[0] == reviews[0]}")
         
         # Try to create Review objects
-        print("\n=== Testing Review Model Creation ===")
-        if reviews:
+        print("\n=== Testing Advanced Review Model Creation ===")
+        if featured_reviews:
             try:
-                review_obj = Review(**reviews[0])
-                print("Successfully created Review object")
+                review_obj = AdvancedReview(**featured_reviews[0])
+                print("Successfully created Advanced Review object")
+                print(f"Review title: {review_obj.title}")
+                print(f"Review rating: {review_obj.rating}")
             except Exception as e:
-                print(f"Failed to create Review object: {e}")
+                print(f"Failed to create Advanced Review object: {e}")
                 print(f"Missing fields in data: {e}")
+        
+        # Try old model too for comparison
+        print("\n=== Testing Base Review Model Creation (for comparison) ===")
+        if featured_reviews:
+            try:
+                review_obj = Review(**featured_reviews[0])
+                print("Successfully created Base Review object")
+            except Exception as e:
+                print(f"Failed to create Base Review object: {e}")
                 
     except Exception as e:
         print(f"Error: {e}")
