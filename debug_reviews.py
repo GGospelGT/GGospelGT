@@ -12,7 +12,9 @@ async def debug_reviews():
     db = Database()
     
     try:
-        # Try to get featured reviews directly
+        # Connect to database first
+        await db.connect_to_mongo()
+        
         print("=== Debugging Featured Reviews ===")
         
         # Test the database query directly  
@@ -39,8 +41,7 @@ async def debug_reviews():
         print(f"Error: {e}")
     finally:
         # Close connection
-        if hasattr(db, 'client') and db.client:
-            db.client.close()
+        await db.close_mongo_connection()
 
 if __name__ == "__main__":
     asyncio.run(debug_reviews())
