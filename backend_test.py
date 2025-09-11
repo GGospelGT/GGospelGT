@@ -667,46 +667,14 @@ class MyInterestsPageTester:
                               f"Expected 403, got {response.status_code}")
     
     def run_all_tests(self):
-        """Run all contact sharing bug investigation tests"""
-        print("🚨 STARTING CRITICAL BUG INVESTIGATION: Contact Sharing Status Not Reflecting")
+        """Run all My Interests page investigation tests"""
+        print("🚨 STARTING CRITICAL BUG INVESTIGATION: My Interests Page Not Loading")
         print("=" * 80)
         
         # Setup phase
         self.test_tradesperson_authentication()
         self.test_homeowner_authentication()
         self.test_job_creation_for_contact_sharing_test()
-        
-        # Core workflow phase
-        self.test_show_interest_for_contact_sharing()
-        
-        # Critical bug investigation phase
-        self.test_contact_sharing_api_endpoint()
-        self.test_tradesperson_status_visibility()
-        self.test_homeowner_status_visibility()
-        self.test_database_consistency_check()
-        
-        # Additional verification
-        self.test_notification_system_integration()
-        self.test_edge_cases()
-        
-        # Summary
-        print("\n" + "=" * 80)
-        print("🔍 CONTACT SHARING BUG INVESTIGATION SUMMARY")
-        print("=" * 80)
-        print(f"✅ Tests Passed: {self.results['passed']}")
-        print(f"❌ Tests Failed: {self.results['failed']}")
-        print(f"📊 Success Rate: {(self.results['passed'] / (self.results['passed'] + self.results['failed']) * 100):.1f}%")
-        
-        if self.results['errors']:
-            print("\n🚨 CRITICAL ISSUES FOUND:")
-            for error in self.results['errors']:
-                print(f"   • {error}")
-        
-        print("\n🎯 KEY INVESTIGATION POINTS:")
-        print("   1. Contact sharing API endpoint functionality")
-        print("   2. Database status update consistency")
-        print("   3. Real-time status synchronization between homeowner and tradesperson views")
-        print("   4. Notification system integration")
         
         # Create test data
         self.test_create_test_interests_for_testing()
