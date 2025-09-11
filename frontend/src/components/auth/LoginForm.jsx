@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = ({ onClose, onSwitchToSignup, onSwitchToForgotPassword }) => {
   const [formData, setFormData] = useState({
