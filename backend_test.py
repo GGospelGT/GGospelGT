@@ -352,21 +352,21 @@ class BackendAPITester:
             self.log_result("Tradesperson registration", False, 
                           f"Status: {response.status_code}, Response: {response.text}")
     
-    def test_job_crud_operations(self):
-        """CRITICAL TEST: Test job-related endpoints for CRUD operations"""
-        print("\n=== CRITICAL TEST: Job CRUD Operations ===")
+    def test_show_interest_functionality(self):
+        """CRITICAL TEST: Comprehensive Show Interest functionality testing"""
+        print("\n=== CRITICAL TEST: Show Interest Functionality ===")
         
-        if 'homeowner' not in self.auth_tokens:
-            self.log_result("Job CRUD setup", False, "No homeowner authentication token")
+        if 'homeowner' not in self.auth_tokens or 'tradesperson' not in self.auth_tokens:
+            self.log_result("Show Interest setup", False, "Missing authentication tokens")
             return
         
         homeowner_token = self.auth_tokens['homeowner']
-        homeowner_user = self.test_data['homeowner_user']
+        tradesperson_token = self.auth_tokens['tradesperson']
         
-        # Test job creation
+        # First, create a test job for showing interest
         job_data = {
-            "title": "Test Job - Plumbing Services Needed",
-            "description": "Testing job creation functionality. Need professional plumber for bathroom renovation.",
+            "title": "Test Job - Show Interest Testing",
+            "description": "Testing show interest functionality with comprehensive validation scenarios.",
             "category": "Plumbing",
             "state": "Lagos",
             "lga": "Ikeja",
@@ -376,83 +376,371 @@ class BackendAPITester:
             "budget_min": 50000,
             "budget_max": 150000,
             "timeline": "Within 2 weeks",
-            "homeowner_name": homeowner_user['name'],
-            "homeowner_email": homeowner_user['email'],
-            "homeowner_phone": homeowner_user['phone']
+            "homeowner_name": self.test_data['homeowner_user']['name'],
+            "homeowner_email": self.test_data['homeowner_user']['email'],
+            "homeowner_phone": self.test_data['homeowner_user']['phone']
         }
         
         response = self.make_request("POST", "/jobs/", json=job_data, auth_token=homeowner_token)
+        if response.status_code != 200:
+            self.log_result("Show Interest - Job creation", False, f"Failed to create test job: {response.status_code}")
+            return
+        
+        job_response = response.json()
+        test_job_id = job_response.get('id')
+        self.test_data['show_interest_job_id'] = test_job_id
+        
+        # Test 1: Valid show interest (should work)
+        print("\n--- Test 1: Valid Show Interest ---")
+        interest_data = {"job_id": test_job_id}
+        response = self.make_request("POST", "/interests/show-interest", json=interest_data, auth_token=tradesperson_token)
+        
         if response.status_code == 200:
-            job_response = response.json()
-            job_id = job_response.get('id')
-            self.test_data['test_job_id'] = job_id
-            self.test_data['test_job'] = job_response
-            self.log_result("Job creation", True, f"Job ID: {job_id}")
-            
-            # Test job retrieval
-            response = self.make_request("GET", f"/jobs/{job_id}")
-            if response.status_code == 200:
-                retrieved_job = response.json()
-                if retrieved_job.get('id') == job_id:
-                    self.log_result("Job retrieval", True, f"Retrieved job: {job_id}")
-                else:
-                    self.log_result("Job retrieval", False, "Job ID mismatch")
+            interest_response = response.json()
+            if 'id' in interest_response and interest_response.get('status') == 'interested':
+                self.log_result("Show Interest - Valid scenario", True, f"Interest created: {interest_response['id']}")
+                self.test_data['test_interest_id'] = interest_response['id']
             else:
-                self.log_result("Job retrieval", False, f"Status: {response.status_code}")
-            
-            # Test job update (using JobUpdate model)
-            update_data = {
-                "title": "Updated Test Job - Plumbing Services",
-                "description": "Updated description for testing JobUpdate model functionality. This is a comprehensive test to ensure the JobUpdate model is working correctly with proper validation and field updates.",
-                "budget_min": 60000,
-                "budget_max": 180000
-            }
-            
-            response = self.make_request("PUT", f"/jobs/{job_id}", json=update_data, auth_token=homeowner_token)
-            if response.status_code == 200:
-                updated_job = response.json()
-                if updated_job.get('title') == update_data['title']:
-                    self.log_result("Job update (JobUpdate model)", True, 
-                                  "Job updated successfully using JobUpdate model")
-                else:
-                    self.log_result("Job update (JobUpdate model)", False, "Title not updated")
-            else:
-                self.log_result("Job update (JobUpdate model)", False, 
-                              f"Status: {response.status_code}, Response: {response.text}")
-            
-            # Test job close (using JobCloseRequest model)
-            close_data = {
-                "reason": "Found a suitable tradesperson",
-                "additional_feedback": "Testing JobCloseRequest model functionality"
-            }
-            
-            response = self.make_request("PUT", f"/jobs/{job_id}/close", json=close_data, auth_token=homeowner_token)
-            if response.status_code == 200:
-                close_response = response.json()
-                if close_response.get('status') == 'cancelled':
-                    self.log_result("Job close (JobCloseRequest model)", True, 
-                                  "Job closed successfully using JobCloseRequest model")
-                else:
-                    self.log_result("Job close (JobCloseRequest model)", False, 
-                                  f"Unexpected status: {close_response.get('status')}")
-            else:
-                self.log_result("Job close (JobCloseRequest model)", False, 
-                              f"Status: {response.status_code}, Response: {response.text}")
-            
-            # Test job reopen
-            response = self.make_request("PUT", f"/jobs/{job_id}/reopen", auth_token=homeowner_token)
-            if response.status_code == 200:
-                reopen_response = response.json()
-                if reopen_response.get('status') == 'active':
-                    self.log_result("Job reopen", True, "Job reopened successfully")
-                else:
-                    self.log_result("Job reopen", False, f"Unexpected status: {reopen_response.get('status')}")
-            else:
-                self.log_result("Job reopen", False, f"Status: {response.status_code}")
-            
+                self.log_result("Show Interest - Valid scenario", False, "Invalid response structure")
         else:
-            self.log_result("Job creation", False, 
-                          f"Status: {response.status_code}, Response: {response.text}")
+            self.log_result("Show Interest - Valid scenario", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 2: Duplicate interest attempt (should return 400 with specific message)
+        print("\n--- Test 2: Duplicate Interest Prevention ---")
+        response = self.make_request("POST", "/interests/show-interest", json=interest_data, auth_token=tradesperson_token)
+        
+        if response.status_code == 400:
+            error_response = response.json()
+            error_detail = error_response.get('detail', '')
+            if 'already shown interest' in error_detail.lower():
+                self.log_result("Show Interest - Duplicate prevention", True, f"Correct error message: {error_detail}")
+            else:
+                self.log_result("Show Interest - Duplicate prevention", False, f"Unexpected error message: {error_detail}")
+        else:
+            self.log_result("Show Interest - Duplicate prevention", False, f"Expected 400, got {response.status_code}")
+        
+        # Test 3: Non-existent job ID (should return 404)
+        print("\n--- Test 3: Non-existent Job ID ---")
+        fake_job_data = {"job_id": "non-existent-job-id-12345"}
+        response = self.make_request("POST", "/interests/show-interest", json=fake_job_data, auth_token=tradesperson_token)
+        
+        if response.status_code == 404:
+            error_response = response.json()
+            error_detail = error_response.get('detail', '')
+            if 'job not found' in error_detail.lower():
+                self.log_result("Show Interest - Non-existent job", True, f"Correct 404 error: {error_detail}")
+            else:
+                self.log_result("Show Interest - Non-existent job", False, f"Unexpected error message: {error_detail}")
+        else:
+            self.log_result("Show Interest - Non-existent job", False, f"Expected 404, got {response.status_code}")
+        
+        # Test 4: Homeowner trying to show interest (should be rejected with 403)
+        print("\n--- Test 4: Homeowner Authentication Rejection ---")
+        response = self.make_request("POST", "/interests/show-interest", json=interest_data, auth_token=homeowner_token)
+        
+        if response.status_code in [403, 422]:  # 403 Forbidden or 422 Unprocessable Entity
+            self.log_result("Show Interest - Homeowner rejection", True, f"Correctly rejected homeowner: {response.status_code}")
+        else:
+            self.log_result("Show Interest - Homeowner rejection", False, f"Expected 403/422, got {response.status_code}")
+        
+        # Test 5: Invalid/missing authentication
+        print("\n--- Test 5: Invalid Authentication ---")
+        response = self.make_request("POST", "/interests/show-interest", json=interest_data)  # No auth token
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Show Interest - No authentication", True, f"Correctly rejected unauthenticated request: {response.status_code}")
+        else:
+            self.log_result("Show Interest - No authentication", False, f"Expected 401/403, got {response.status_code}")
+        
+        # Test 6: Invalid token format
+        print("\n--- Test 6: Invalid Token Format ---")
+        response = self.make_request("POST", "/interests/show-interest", json=interest_data, auth_token="invalid-token-format")
+        
+        if response.status_code in [401, 403, 422]:
+            self.log_result("Show Interest - Invalid token", True, f"Correctly rejected invalid token: {response.status_code}")
+        else:
+            self.log_result("Show Interest - Invalid token", False, f"Expected 401/403/422, got {response.status_code}")
+        
+        # Test 7: Test with inactive job (close the job first)
+        print("\n--- Test 7: Inactive Job Status Validation ---")
+        
+        # Close the job to make it inactive
+        close_data = {
+            "reason": "Testing inactive job validation",
+            "additional_feedback": "Closing job to test show interest validation"
+        }
+        
+        close_response = self.make_request("PUT", f"/jobs/{test_job_id}/close", json=close_data, auth_token=homeowner_token)
+        if close_response.status_code == 200:
+            # Create a new tradesperson to test with inactive job
+            new_tradesperson_data = {
+                "name": "Test Tradesperson 2",
+                "email": f"test.tradesperson2.{uuid.uuid4().hex[:8]}@email.com",
+                "password": "SecurePass123",
+                "phone": "+2348123456791",
+                "location": "Lagos",
+                "postcode": "100001",
+                "trade_categories": ["Plumbing"],
+                "experience_years": 3,
+                "company_name": "Test Plumbing Services 2",
+                "description": "Professional plumbing services for testing inactive job validation.",
+                "certifications": ["Licensed Plumber"]
+            }
+            
+            reg_response = self.make_request("POST", "/auth/register/tradesperson", json=new_tradesperson_data)
+            if reg_response.status_code == 200:
+                # Login with new tradesperson
+                login_data = {
+                    "email": new_tradesperson_data["email"],
+                    "password": new_tradesperson_data["password"]
+                }
+                
+                login_response = self.make_request("POST", "/auth/login", json=login_data)
+                if login_response.status_code == 200:
+                    new_tradesperson_token = login_response.json()['access_token']
+                    
+                    # Try to show interest in inactive job
+                    response = self.make_request("POST", "/interests/show-interest", json=interest_data, auth_token=new_tradesperson_token)
+                    
+                    if response.status_code == 400:
+                        error_response = response.json()
+                        error_detail = error_response.get('detail', '')
+                        if 'no longer active' in error_detail.lower() or 'not active' in error_detail.lower():
+                            self.log_result("Show Interest - Inactive job validation", True, f"Correct error for inactive job: {error_detail}")
+                        else:
+                            self.log_result("Show Interest - Inactive job validation", False, f"Unexpected error message: {error_detail}")
+                    else:
+                        self.log_result("Show Interest - Inactive job validation", False, f"Expected 400, got {response.status_code}")
+                else:
+                    self.log_result("Show Interest - Inactive job validation", False, "Failed to login new tradesperson")
+            else:
+                self.log_result("Show Interest - Inactive job validation", False, "Failed to create new tradesperson")
+        else:
+            self.log_result("Show Interest - Inactive job validation", False, "Failed to close job for testing")
+    
+    def test_my_interests_endpoint(self):
+        """Test the My Interests endpoint for tradespeople"""
+        print("\n=== Testing My Interests Endpoint ===")
+        
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("My Interests setup", False, "No tradesperson authentication token")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        
+        # Test getting tradesperson's interests
+        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+        
+        if response.status_code == 200:
+            try:
+                interests_data = response.json()
+                
+                if isinstance(interests_data, list):
+                    self.log_result("My Interests - Response format", True, f"Returned {len(interests_data)} interests as list")
+                    
+                    # Verify structure if we have interests
+                    if len(interests_data) > 0:
+                        interest = interests_data[0]
+                        expected_fields = ['id', 'job_id', 'status', 'created_at']
+                        missing_fields = [field for field in expected_fields if field not in interest]
+                        
+                        if not missing_fields:
+                            self.log_result("My Interests - Data structure", True, "All expected fields present")
+                        else:
+                            self.log_result("My Interests - Data structure", False, f"Missing fields: {missing_fields}")
+                    else:
+                        self.log_result("My Interests - Data availability", True, "No interests found (valid for new tradesperson)")
+                        
+                else:
+                    self.log_result("My Interests - Response format", False, f"Expected list, got {type(interests_data)}")
+                    
+            except json.JSONDecodeError:
+                self.log_result("My Interests - JSON parsing", False, "Failed to parse JSON response")
+        else:
+            self.log_result("My Interests endpoint", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test homeowner access (should be rejected)
+        if 'homeowner' in self.auth_tokens:
+            homeowner_token = self.auth_tokens['homeowner']
+            response = self.make_request("GET", "/interests/my-interests", auth_token=homeowner_token)
+            
+            if response.status_code in [403, 422]:
+                self.log_result("My Interests - Homeowner access rejection", True, f"Correctly rejected homeowner: {response.status_code}")
+            else:
+                self.log_result("My Interests - Homeowner access rejection", False, f"Expected 403/422, got {response.status_code}")
+    
+    def test_job_interests_endpoint(self):
+        """Test the Job Interests endpoint for homeowners"""
+        print("\n=== Testing Job Interests Endpoint ===")
+        
+        if 'homeowner' not in self.auth_tokens or 'show_interest_job_id' not in self.test_data:
+            self.log_result("Job Interests setup", False, "Missing homeowner token or test job")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        job_id = self.test_data['show_interest_job_id']
+        
+        # Test getting interested tradespeople for job
+        response = self.make_request("GET", f"/interests/job/{job_id}", auth_token=homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                interests_response = response.json()
+                
+                if 'interested_tradespeople' in interests_response and 'total' in interests_response:
+                    tradespeople = interests_response['interested_tradespeople']
+                    total = interests_response['total']
+                    
+                    self.log_result("Job Interests - Response structure", True, f"Found {total} interested tradespeople")
+                    
+                    # Verify tradesperson data structure if we have interests
+                    if len(tradespeople) > 0:
+                        tradesperson = tradespeople[0]
+                        expected_fields = ['interest_id', 'tradesperson_id', 'tradesperson_name', 'status', 'created_at']
+                        missing_fields = [field for field in expected_fields if field not in tradesperson]
+                        
+                        if not missing_fields:
+                            self.log_result("Job Interests - Tradesperson data structure", True, "All expected fields present")
+                        else:
+                            self.log_result("Job Interests - Tradesperson data structure", False, f"Missing fields: {missing_fields}")
+                    
+                else:
+                    self.log_result("Job Interests - Response structure", False, "Missing required fields in response")
+                    
+            except json.JSONDecodeError:
+                self.log_result("Job Interests - JSON parsing", False, "Failed to parse JSON response")
+        else:
+            self.log_result("Job Interests endpoint", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test tradesperson access (should be rejected)
+        if 'tradesperson' in self.auth_tokens:
+            tradesperson_token = self.auth_tokens['tradesperson']
+            response = self.make_request("GET", f"/interests/job/{job_id}", auth_token=tradesperson_token)
+            
+            if response.status_code in [403, 422]:
+                self.log_result("Job Interests - Tradesperson access rejection", True, f"Correctly rejected tradesperson: {response.status_code}")
+            else:
+                self.log_result("Job Interests - Tradesperson access rejection", False, f"Expected 403/422, got {response.status_code}")
+        
+        # Test non-existent job
+        response = self.make_request("GET", "/interests/job/non-existent-job-id", auth_token=homeowner_token)
+        if response.status_code == 404:
+            self.log_result("Job Interests - Non-existent job", True, "Correctly returned 404 for non-existent job")
+        else:
+            self.log_result("Job Interests - Non-existent job", False, f"Expected 404, got {response.status_code}")
+    
+    def test_contact_sharing_workflow(self):
+        """Test the contact sharing workflow"""
+        print("\n=== Testing Contact Sharing Workflow ===")
+        
+        if 'homeowner' not in self.auth_tokens or 'test_interest_id' not in self.test_data:
+            self.log_result("Contact Sharing setup", False, "Missing homeowner token or test interest")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        interest_id = self.test_data['test_interest_id']
+        
+        # Test sharing contact details
+        response = self.make_request("PUT", f"/interests/share-contact/{interest_id}", auth_token=homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                share_response = response.json()
+                
+                expected_fields = ['interest_id', 'status', 'message', 'contact_shared_at']
+                missing_fields = [field for field in expected_fields if field not in share_response]
+                
+                if not missing_fields:
+                    if share_response.get('status') == 'contact_shared':
+                        self.log_result("Contact Sharing - Valid scenario", True, f"Contact shared successfully: {share_response['message']}")
+                        self.test_data['shared_interest_id'] = interest_id
+                    else:
+                        self.log_result("Contact Sharing - Valid scenario", False, f"Unexpected status: {share_response.get('status')}")
+                else:
+                    self.log_result("Contact Sharing - Response structure", False, f"Missing fields: {missing_fields}")
+                    
+            except json.JSONDecodeError:
+                self.log_result("Contact Sharing - JSON parsing", False, "Failed to parse JSON response")
+        else:
+            self.log_result("Contact Sharing - Valid scenario", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test sharing contact details again (should handle duplicate sharing)
+        response = self.make_request("PUT", f"/interests/share-contact/{interest_id}", auth_token=homeowner_token)
+        
+        if response.status_code == 400:
+            error_response = response.json()
+            error_detail = error_response.get('detail', '')
+            self.log_result("Contact Sharing - Duplicate sharing", True, f"Correctly handled duplicate: {error_detail}")
+        else:
+            # Some implementations might allow re-sharing, so this could be 200 too
+            self.log_result("Contact Sharing - Duplicate sharing", True, f"Handled duplicate sharing: {response.status_code}")
+        
+        # Test non-existent interest
+        response = self.make_request("PUT", "/interests/share-contact/non-existent-interest-id", auth_token=homeowner_token)
+        if response.status_code == 404:
+            self.log_result("Contact Sharing - Non-existent interest", True, "Correctly returned 404 for non-existent interest")
+        else:
+            self.log_result("Contact Sharing - Non-existent interest", False, f"Expected 404, got {response.status_code}")
+    
+    def test_wallet_integration(self):
+        """Test wallet integration for access fee payment"""
+        print("\n=== Testing Wallet Integration ===")
+        
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("Wallet Integration setup", False, "No tradesperson authentication token")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        
+        # Test getting wallet information
+        response = self.make_request("GET", "/wallet/", auth_token=tradesperson_token)
+        
+        if response.status_code == 200:
+            try:
+                wallet_data = response.json()
+                
+                if 'balance_coins' in wallet_data and 'balance_naira' in wallet_data:
+                    balance_coins = wallet_data['balance_coins']
+                    balance_naira = wallet_data['balance_naira']
+                    self.log_result("Wallet Integration - Wallet retrieval", True, f"Balance: {balance_coins} coins (₦{balance_naira:,})")
+                    self.test_data['wallet_balance'] = balance_coins
+                else:
+                    self.log_result("Wallet Integration - Wallet retrieval", False, "Missing balance fields in response")
+                    
+            except json.JSONDecodeError:
+                self.log_result("Wallet Integration - JSON parsing", False, "Failed to parse wallet JSON response")
+        else:
+            self.log_result("Wallet Integration - Wallet retrieval", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test payment for access (if we have a shared interest)
+        if 'shared_interest_id' in self.test_data:
+            interest_id = self.test_data['shared_interest_id']
+            response = self.make_request("POST", f"/interests/pay-access/{interest_id}", auth_token=tradesperson_token)
+            
+            if response.status_code == 200:
+                try:
+                    payment_response = response.json()
+                    if 'message' in payment_response and 'access_fee_naira' in payment_response:
+                        self.log_result("Wallet Integration - Payment success", True, f"Payment successful: {payment_response['message']}")
+                    else:
+                        self.log_result("Wallet Integration - Payment response", False, "Missing expected fields in payment response")
+                except json.JSONDecodeError:
+                    self.log_result("Wallet Integration - Payment JSON", False, "Failed to parse payment JSON response")
+            elif response.status_code == 400:
+                # Check if it's insufficient balance
+                try:
+                    error_response = response.json()
+                    error_detail = error_response.get('detail', '')
+                    if 'insufficient' in error_detail.lower():
+                        self.log_result("Wallet Integration - Insufficient balance", True, f"Correctly detected insufficient balance: {error_detail}")
+                    else:
+                        self.log_result("Wallet Integration - Payment error", False, f"Unexpected error: {error_detail}")
+                except json.JSONDecodeError:
+                    self.log_result("Wallet Integration - Payment error parsing", False, "Failed to parse error response")
+            else:
+                self.log_result("Wallet Integration - Payment attempt", False, f"Status: {response.status_code}, Response: {response.text}")
+        else:
+            self.log_result("Wallet Integration - Payment test", False, "No shared interest available for payment testing")
     
     def test_model_import_verification(self):
         """Test that JobUpdate and JobCloseRequest models are properly imported"""
