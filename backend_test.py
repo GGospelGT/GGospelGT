@@ -862,9 +862,9 @@ class BackendAPITester:
 
 if __name__ == "__main__":
     tester = BackendAPITester()
-    success = tester.run_comprehensive_backend_tests()
+    success = tester.run_comprehensive_show_interest_tests()
     
     if success:
-        print("\n🎉 BACKEND TESTING COMPLETE: All systems operational!")
+        print("\n🎉 SHOW INTEREST TESTING COMPLETE: All functionality operational!")
     else:
-        print("\n⚠️  BACKEND TESTING COMPLETE: Issues found - review above")
+        print("\n⚠️  SHOW INTEREST TESTING COMPLETE: Issues found - review above")
