@@ -505,24 +505,14 @@ const MyInterestsPage = () => {
                                 )}
                                 
                                 {interest.status === 'paid' && (
-                                  <>
-                                    <Button
-                                      onClick={() => handleViewContactDetails(interest.job_id, interest.id)}
-                                      variant="outline"
-                                      className="mr-2"
-                                    >
-                                      <Eye className="w-4 h-4 mr-2" />
-                                      View Contact Details
-                                    </Button>
-                                    <Button
-                                      onClick={() => handleStartChat(interest)}
-                                      className="text-white"
-                                      style={{backgroundColor: '#2F8140'}}
-                                    >
-                                      <MessageCircle className="w-4 h-4 mr-2" />
-                                      Start Chat
-                                    </Button>
-                                  </>
+                                  <Button
+                                    onClick={() => handleStartChatAfterPayment(interest)}
+                                    className="text-white"
+                                    style={{backgroundColor: '#2F8140'}}
+                                  >
+                                    <MessageCircle className="w-4 h-4 mr-2" />
+                                    Chat with Homeowner
+                                  </Button>
                                 )}
                               </div>
                             </div>
