@@ -403,6 +403,74 @@ class MyInterestsPageTester:
         
         return len(serialization_issues) == 0
     
+    def test_create_test_interests_for_testing(self):
+        """Create some test interests to ensure we have data to test with"""
+        print("\n=== Creating Test Interests for Testing ===")
+        
+        if ('tradesperson' not in self.auth_tokens or 
+            'homeowner' not in self.auth_tokens or 
+            'test_job_id' not in self.test_data):
+            self.log_result("Test interests creation setup", False, "Missing required tokens or job ID")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        homeowner_token = self.auth_tokens['homeowner']
+        job_id = self.test_data['test_job_id']
+        
+        # Create an interest
+        interest_data = {"job_id": job_id}
+        response = self.make_request("POST", "/interests/show-interest", 
+                                   json=interest_data, auth_token=tradesperson_token)
+        
+        if response.status_code == 200:
+            interest_response = response.json()
+            self.test_data['test_interest_id'] = interest_response.get('id')
+            self.log_result("Create test interest", True, f"Interest ID: {interest_response.get('id')}")
+            
+            # Optionally share contact to create different status scenarios
+            if self.test_data.get('test_interest_id'):
+                share_response = self.make_request("PUT", f"/interests/share-contact/{self.test_data['test_interest_id']}", 
+                                                 auth_token=homeowner_token)
+                if share_response.status_code == 200:
+                    self.log_result("Create contact shared scenario", True, "Contact shared for testing")
+                else:
+                    self.log_result("Create contact shared scenario", False, 
+                                  f"Status: {share_response.status_code}")
+        else:
+            self.log_result("Create test interest", False, 
+                          f"Status: {response.status_code}, Response: {response.text}")
+    
+    def test_authentication_and_authorization(self):
+        """Test authentication and authorization for My Interests endpoint"""
+        print("\n=== Testing Authentication and Authorization ===")
+        
+        # Test without authentication
+        response = self.make_request("GET", "/interests/my-interests")
+        if response.status_code in [401, 403]:
+            self.log_result("My interests - no auth", True, f"Correctly rejected: {response.status_code}")
+        else:
+            self.log_result("My interests - no auth", False, f"Expected 401/403, got {response.status_code}")
+        
+        # Test with homeowner token (should be rejected)
+        if 'homeowner' in self.auth_tokens:
+            homeowner_token = self.auth_tokens['homeowner']
+            response = self.make_request("GET", "/interests/my-interests", auth_token=homeowner_token)
+            if response.status_code == 403:
+                self.log_result("My interests - homeowner auth", True, "Correctly rejected homeowner")
+            else:
+                self.log_result("My interests - homeowner auth", False, 
+                              f"Expected 403, got {response.status_code}")
+        
+        # Test with tradesperson token (should succeed)
+        if 'tradesperson' in self.auth_tokens:
+            tradesperson_token = self.auth_tokens['tradesperson']
+            response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+            if response.status_code == 200:
+                self.log_result("My interests - tradesperson auth", True, "Correctly allowed tradesperson")
+            else:
+                self.log_result("My interests - tradesperson auth", False, 
+                              f"Expected 200, got {response.status_code}")
+    
     def test_new_fields_presence(self, interests_data):
         """Test that the recently added fields are present and working"""
         print("\n=== Testing New Fields Presence (contact_shared_at, payment_made_at) ===")
