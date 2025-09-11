@@ -36,6 +36,11 @@ const MyJobsPage = () => {
   const [loading, setLoading] = useState(true);
   const [interestsLoading, setInterestsLoading] = useState(false);
   const [showInterestedModal, setShowInterestedModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [jobToEdit, setJobToEdit] = useState(null);
+  const [jobToClose, setJobToClose] = useState(null);
+  const [reopeningJobId, setReopeningJobId] = useState(null);
 
   const { user, isAuthenticated, isHomeowner } = useAuth();
   const { toast } = useToast();
