@@ -18,6 +18,7 @@ const LoginForm = ({ onClose, onSwitchToSignup, onSwitchToForgotPassword }) => {
 
   const { login } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
