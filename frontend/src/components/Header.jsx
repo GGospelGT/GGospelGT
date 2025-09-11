@@ -293,9 +293,6 @@ const Header = () => {
                   Join as tradesperson
                 </a>
               ) : null}
-              <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]">
-                Help
-              </a>
               <div className="flex flex-col space-y-2 pt-4">
                 {isAuthenticated() ? (
                   <>
