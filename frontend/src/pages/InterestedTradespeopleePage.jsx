@@ -199,6 +199,18 @@ const InterestedTradespeopleePage = () => {
     setShowImageModal(true);
   };
 
+  const handleStartChat = (tradesperson) => {
+    setSelectedTradespersonForChat({
+      id: tradesperson.tradesperson_id,
+      name: tradesperson.tradesperson_name,
+      type: 'tradesperson',
+      email: tradesperson.email,
+      phone: tradesperson.phone,
+      location: tradesperson.location
+    });
+    setShowChatModal(true);
+  };
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
