@@ -157,20 +157,7 @@ export const jobsAPI = {
     return response.data;
   },
 
-  updateJob: async (jobId, jobData) => {
-    const response = await apiClient.put(`/jobs/${jobId}`, jobData);
-    return response.data;
-  },
 
-  closeJob: async (jobId) => {
-    const response = await apiClient.put(`/jobs/${jobId}/close`);
-    return response.data;
-  },
-
-  reopenJob: async (jobId) => {
-    const response = await apiClient.put(`/jobs/${jobId}/reopen`);
-    return response.data;
-  },
 };
 
 // Tradespeople API
