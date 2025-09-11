@@ -223,7 +223,7 @@ const MyInterestsPage = () => {
       case 'contact_shared':
         return interests.filter(interest => interest.status === 'contact_shared');
       case 'paid':
-        return interests.filter(interest => interest.status === 'paid');
+        return interests.filter(interest => interest.status === 'paid_access');
       default:
         return interests;
     }
