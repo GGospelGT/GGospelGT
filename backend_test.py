@@ -693,7 +693,7 @@ class BackendAPITester:
         tradesperson_token = self.auth_tokens['tradesperson']
         
         # Test getting wallet information
-        response = self.make_request("GET", "/wallet/", auth_token=tradesperson_token)
+        response = self.make_request("GET", "/wallet/balance", auth_token=tradesperson_token)
         
         if response.status_code == 200:
             try:
