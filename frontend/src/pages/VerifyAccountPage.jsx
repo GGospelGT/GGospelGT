@@ -107,16 +107,28 @@ const VerifyAccountPage = () => {
     } catch (error) {
       console.error('Failed to submit verification:', error);
       
-      if (error.response?.status === 400 && error.response?.data?.detail?.includes('already')) {
+      let errorMessage = "Failed to submit verification documents";
+      
+      if (error.response?.data?.detail) {
+        if (typeof error.response.data.detail === 'string') {
+          errorMessage = error.response.data.detail;
+        } else if (Array.isArray(error.response.data.detail)) {
+          errorMessage = error.response.data.detail.map(err => err.msg || err.message || 'Validation error').join(', ');
+        } else if (typeof error.response.data.detail === 'object') {
+          errorMessage = error.response.data.detail.msg || error.response.data.detail.message || 'Unknown error';
+        }
+      }
+      
+      if (error.response?.status === 400 && errorMessage.includes('already')) {
         toast({
           title: "Already Submitted",
-          description: error.response.data.detail,
+          description: errorMessage,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Submission Failed",
-          description: error.response?.data?.detail || "Failed to submit verification documents",
+          title: "Submission Failed", 
+          description: errorMessage,
           variant: "destructive"
         });
       }
