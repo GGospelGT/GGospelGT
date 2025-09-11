@@ -851,7 +851,7 @@ const BrowseJobsPage = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleShowInterest(selectedJobDetails.id);
+                      handleShowInterest(selectedJobDetails); // Pass full job object, not just ID
                       setShowJobModal(false);
                     }}
                     disabled={loadingStates.showInterest[selectedJobDetails.id] || 
