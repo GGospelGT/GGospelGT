@@ -845,6 +845,8 @@ const InterestedTradespeopleePage = () => {
           jobId={jobId}
           jobTitle={job.title}
           otherParty={selectedTradespersonForChat}
+          contactDetails={selectedTradespersonForChat.contactDetails}
+          showContactDetails={selectedTradespersonForChat.showContactDetails}
         />
       )}
 
