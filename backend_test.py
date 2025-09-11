@@ -47,7 +47,7 @@ import time
 # Get backend URL from environment
 BACKEND_URL = "https://servicehub-fixes.preview.emergentagent.com/api"
 
-class MessagingSystemTester:
+class ContactSharingBugTester:
     def __init__(self):
         self.base_url = BACKEND_URL
         self.session = requests.Session()
