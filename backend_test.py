@@ -253,7 +253,7 @@ class ShowInterestTester:
             "description": "Need electrical installation for new office space.",
             "category": "Electrical",
             "state": "Lagos",
-            "lga": "Victoria Island",
+            "lga": "Ikeja",
             "town": "Victoria Island",
             "zip_code": "101001",
             "home_address": "456 Broad Street, Victoria Island",
