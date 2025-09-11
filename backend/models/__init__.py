@@ -22,7 +22,7 @@ from .auth import (
 # Re-export all models for easy importing
 __all__ = [
     # Base models
-    'JobCreate', 'Job', 'JobsResponse', 'JobStatus',
+    'JobCreate', 'Job', 'JobsResponse', 'JobStatus', 'JobUpdate', 'JobCloseRequest',
     'TradespersonCreate', 'Tradesperson', 'TradespeopleResponse',
     'QuoteCreate', 'Quote', 'QuotesResponse', 'QuoteStatus',
     'ReviewCreate', 'Review', 'ReviewsResponse',
