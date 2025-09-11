@@ -708,11 +708,42 @@ class MyInterestsPageTester:
         print("   3. Real-time status synchronization between homeowner and tradesperson views")
         print("   4. Notification system integration")
         
+        # Create test data
+        self.test_create_test_interests_for_testing()
+        
+        # Core My Interests API testing
+        self.test_authentication_and_authorization()
+        self.test_my_interests_api_endpoint()
+        
+        # Additional verification if we have existing interests
+        if self.test_data.get('my_interests_response'):
+            self.test_database_consistency_check()
+        
+        # Summary
+        print("\n" + "=" * 80)
+        print("🔍 MY INTERESTS PAGE BUG INVESTIGATION SUMMARY")
+        print("=" * 80)
+        print(f"✅ Tests Passed: {self.results['passed']}")
+        print(f"❌ Tests Failed: {self.results['failed']}")
+        print(f"📊 Success Rate: {(self.results['passed'] / (self.results['passed'] + self.results['failed']) * 100):.1f}%")
+        
+        if self.results['errors']:
+            print("\n🚨 CRITICAL ISSUES FOUND:")
+            for error in self.results['errors']:
+                print(f"   • {error}")
+        
+        print("\n🎯 KEY INVESTIGATION POINTS:")
+        print("   1. My Interests API endpoint functionality and response structure")
+        print("   2. Database projection working correctly with new fields")
+        print("   3. JSON serialization of datetime fields")
+        print("   4. Authentication and authorization controls")
+        print("   5. Response time and performance")
+        
         if self.results['failed'] > 0:
-            print("\n⚠️  INVESTIGATION RESULT: Issues found that may explain the reported bug")
+            print("\n⚠️  INVESTIGATION RESULT: Issues found that may explain the My Interests page loading problem")
         else:
-            print("\n✅ INVESTIGATION RESULT: All tests passed - bug may be environment-specific")
+            print("\n✅ INVESTIGATION RESULT: All tests passed - My Interests API is working correctly")
 
 if __name__ == "__main__":
-    tester = ContactSharingBugTester()
+    tester = MyInterestsPageTester()
     tester.run_all_tests()
