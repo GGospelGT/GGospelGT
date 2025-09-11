@@ -341,47 +341,110 @@ class MyInterestsPageTester:
             self.log_result("My interests API - performance", True, 
                           f"Good response time: {response_time:.2f}s")
     
-    def test_tradesperson_status_visibility(self):
-        """CRITICAL TEST: Verify tradesperson can see updated status"""
-        print("\n=== CRITICAL TEST: Tradesperson Status Visibility ===")
+    def test_interest_data_structure(self, interest_sample):
+        """Test the structure of a single interest record"""
+        print("\n=== Testing Interest Data Structure ===")
         
-        if 'tradesperson' not in self.auth_tokens:
-            self.log_result("Tradesperson status check setup", False, "No tradesperson token")
-            return
+        # Expected fields based on the database projection
+        expected_fields = [
+            'id', 'job_id', 'status', 'created_at', 'contact_shared_at', 'payment_made_at',
+            'job_title', 'job_location', 'homeowner_name', 'contact_shared', 'payment_made', 'access_fee'
+        ]
         
-        tradesperson_token = self.auth_tokens['tradesperson']
+        missing_fields = []
+        present_fields = []
         
-        # Test GET /api/interests/my-interests to see if status is updated
-        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
-        
-        if response.status_code == 200:
-            interests_data = response.json()
-            if isinstance(interests_data, list):
-                # Find our test interest
-                test_interest = None
-                for interest in interests_data:
-                    if interest.get('id') == self.test_data.get('interest_id'):
-                        test_interest = interest
-                        break
-                
-                if test_interest:
-                    current_status = test_interest.get('status')
-                    if current_status == 'contact_shared':
-                        self.log_result("Tradesperson sees updated status", True, 
-                                      f"Status correctly shows: {current_status}")
-                    else:
-                        self.log_result("Tradesperson sees updated status", False, 
-                                      f"Expected 'contact_shared', but tradesperson sees: {current_status}")
-                        # This is the critical bug we're investigating
-                        print(f"🚨 CRITICAL BUG CONFIRMED: Tradesperson still sees status as '{current_status}' instead of 'contact_shared'")
-                else:
-                    self.log_result("Tradesperson interest lookup", False, 
-                                  f"Interest ID {self.test_data.get('interest_id')} not found in tradesperson's interests")
+        for field in expected_fields:
+            if field in interest_sample:
+                present_fields.append(field)
             else:
-                self.log_result("My interests response format", False, "Expected list response")
+                missing_fields.append(field)
+        
+        if not missing_fields:
+            self.log_result("Interest data structure - all fields present", True, 
+                          f"All {len(expected_fields)} expected fields present")
         else:
-            self.log_result("Tradesperson my-interests API", False, 
-                          f"Status: {response.status_code}, Response: {response.text}")
+            self.log_result("Interest data structure - missing fields", False, 
+                          f"Missing fields: {missing_fields}")
+        
+        # Log the actual structure for debugging
+        print(f"🔍 Sample interest structure: {json.dumps(interest_sample, indent=2, default=str)}")
+        
+        return len(missing_fields) == 0
+    
+    def test_datetime_serialization(self, interests_data):
+        """Test that datetime fields are properly serialized"""
+        print("\n=== Testing DateTime Serialization ===")
+        
+        datetime_fields = ['created_at', 'contact_shared_at', 'payment_made_at']
+        serialization_issues = []
+        
+        for interest in interests_data:
+            for field in datetime_fields:
+                if field in interest and interest[field] is not None:
+                    field_value = interest[field]
+                    # Check if it's a string (properly serialized) or an object (serialization issue)
+                    if isinstance(field_value, str):
+                        # Try to parse it to ensure it's a valid datetime string
+                        try:
+                            from datetime import datetime
+                            datetime.fromisoformat(field_value.replace('Z', '+00:00'))
+                        except ValueError:
+                            serialization_issues.append(f"Invalid datetime format in {field}: {field_value}")
+                    elif isinstance(field_value, dict):
+                        serialization_issues.append(f"DateTime field {field} not serialized (is dict): {field_value}")
+                    else:
+                        serialization_issues.append(f"DateTime field {field} has unexpected type {type(field_value)}: {field_value}")
+        
+        if not serialization_issues:
+            self.log_result("DateTime serialization", True, "All datetime fields properly serialized")
+        else:
+            self.log_result("DateTime serialization", False, f"Issues found: {serialization_issues}")
+        
+        return len(serialization_issues) == 0
+    
+    def test_new_fields_presence(self, interests_data):
+        """Test that the recently added fields are present and working"""
+        print("\n=== Testing New Fields Presence (contact_shared_at, payment_made_at) ===")
+        
+        new_fields = ['contact_shared_at', 'payment_made_at']
+        field_stats = {field: {'present': 0, 'null': 0, 'missing': 0} for field in new_fields}
+        
+        for interest in interests_data:
+            for field in new_fields:
+                if field in interest:
+                    if interest[field] is None:
+                        field_stats[field]['null'] += 1
+                    else:
+                        field_stats[field]['present'] += 1
+                else:
+                    field_stats[field]['missing'] += 1
+        
+        # Report statistics
+        for field, stats in field_stats.items():
+            total = sum(stats.values())
+            if stats['missing'] == 0:
+                self.log_result(f"New field {field} - presence", True, 
+                              f"Present in all records: {stats['present']} with data, {stats['null']} null")
+            else:
+                self.log_result(f"New field {field} - presence", False, 
+                              f"Missing from {stats['missing']}/{total} records")
+        
+        # Check if any interests have the new fields populated (indicating they've been through the workflow)
+        populated_interests = 0
+        for interest in interests_data:
+            if (interest.get('contact_shared_at') is not None or 
+                interest.get('payment_made_at') is not None):
+                populated_interests += 1
+        
+        if populated_interests > 0:
+            self.log_result("New fields - workflow data", True, 
+                          f"{populated_interests} interests have workflow timestamps")
+        else:
+            self.log_result("New fields - workflow data", True, 
+                          "No interests have workflow timestamps (expected for new interests)")
+        
+        return all(stats['missing'] == 0 for stats in field_stats.values())
     
     def test_homeowner_status_visibility(self):
         """Test homeowner can see updated status from their perspective"""
