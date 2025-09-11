@@ -334,6 +334,11 @@ const Header = () => {
                       </>
                     )}
                     
+                    {/* Mobile Notification Indicator */}
+                    <div className="px-3 py-2">
+                      <NotificationIndicator />
+                    </div>
+                    
                     {/* Link to Reviews */}
                     <button
                       onClick={() => navigate('/reviews')}
