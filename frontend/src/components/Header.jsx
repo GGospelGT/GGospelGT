@@ -474,38 +474,52 @@ const Header = () => {
                       </>
                     )}
                     
-                    {/* Mobile Notification Indicator */}
+                    {/* Mobile Notification Indicator for all authenticated users */}
                     <div className="px-3 py-2">
                       <NotificationIndicator />
                     </div>
                     
-                    {/* Link to Reviews */}
-                    <button
-                      onClick={() => navigate('/reviews')}
-                      className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 font-lato justify-start px-3 py-2"
-                    >
-                      <Star size={16} />
-                      <span>My Reviews</span>
-                    </button>
-                    
-                    {/* Profile Link for all authenticated users */}
-                    <Button 
-                      variant="ghost"
-                      onClick={() => navigate('/profile')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
-                    >
-                      <User size={16} />
-                      <span>Profile</span>
-                    </Button>
-                    
-                    <Button
-                      variant="ghost"
-                      onClick={handleLogout}
-                      className="text-gray-700 font-lato hover:text-red-600 justify-start flex items-center space-x-1"
-                    >
-                      <LogOut size={16} />
-                      <span>Logout</span>
-                    </Button>
+                    {/* Items for homeowners only (tradespeople have all items in their dedicated section above) */}
+                    {isHomeowner() && (
+                      <>
+                        {/* Link to Reviews */}
+                        <button
+                          onClick={() => {
+                            navigate('/reviews');
+                            setIsMenuOpen(false);
+                          }}
+                          className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 font-lato justify-start px-3 py-2"
+                        >
+                          <Star size={16} />
+                          <span>My Reviews</span>
+                        </button>
+                        
+                        {/* Profile Link for homeowners */}
+                        <Button 
+                          variant="ghost"
+                          onClick={() => {
+                            navigate('/profile');
+                            setIsMenuOpen(false);
+                          }}
+                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                        >
+                          <User size={16} />
+                          <span>Profile</span>
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          onClick={() => {
+                            handleLogout();
+                            setIsMenuOpen(false);
+                          }}
+                          className="text-gray-700 font-lato hover:text-red-600 justify-start flex items-center space-x-1"
+                        >
+                          <LogOut size={16} />
+                          <span>Logout</span>
+                        </Button>
+                      </>
+                    )}
                   </>
                 ) : (
                   <>
