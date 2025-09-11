@@ -398,7 +398,7 @@ class BackendAPITester:
             # Test job update (using JobUpdate model)
             update_data = {
                 "title": "Updated Test Job - Plumbing Services",
-                "description": "Updated description for testing JobUpdate model",
+                "description": "Updated description for testing JobUpdate model functionality. This is a comprehensive test to ensure the JobUpdate model is working correctly with proper validation and field updates.",
                 "budget_min": 60000,
                 "budget_max": 180000
             }
