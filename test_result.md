@@ -301,6 +301,18 @@ frontend:
         agent: "main"
         comment: "🔧 MODAL CLOSING BUG FIX: Identified issue where the job details modal closes immediately after clicking 'Show Interest' button, potentially before the API call completes. The handleShowInterest function handles errors internally but doesn't re-throw them, so the modal's try-catch never catches failures and always closes the modal. Need to modify handleShowInterest to re-throw errors so the modal stays open on API failures, providing proper user feedback."
 
+  - task: "Show Interest Modal Bug Fix - Prevent Premature Modal Closure"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/pages/BrowseJobsPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "🔧 BUG IDENTIFIED: Job details modal closes immediately after clicking 'Show Interest' button instead of waiting for API call to complete. This prevents proper user feedback when the API call fails. Root cause: handleShowInterest function catches errors internally and doesn't re-throw them, so the modal's try-catch block never catches failures. Need to modify handleShowInterest to re-throw errors so modal stays open on failures and only closes on successful API calls."
+
   - task: "React Child Rendering Error Fix - Show Interest System"
     implemented: true
     working: true
