@@ -64,11 +64,21 @@ const ChatModal = ({
       
     } catch (error) {
       console.error('Failed to initialize conversation:', error);
-      toast({
-        title: "Error",
-        description: "Failed to initialize conversation. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Handle specific error cases
+      if (error.response?.status === 403) {
+        toast({
+          title: "Access Required",
+          description: "You need to complete payment before starting a conversation. Please pay for access first.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to initialize conversation. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
       setInitialLoad(false);
