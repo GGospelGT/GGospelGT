@@ -83,6 +83,24 @@ const BrowseJobsPage = () => {
 
   const { user, isAuthenticated, isTradesperson } = useAuth();
   
+  // Load user interests for tradespeople
+  const loadUserInterests = async () => {
+    if (!isAuthenticated() || !isTradesperson()) return;
+    
+    try {
+      setUserInterestsLoading(true);
+      const interests = await interestsAPI.getMyInterests();
+      // Extract job IDs from interests
+      const jobIds = interests.map(interest => interest.job_id);
+      setUserInterests(jobIds);
+    } catch (error) {
+      console.error('Failed to load user interests:', error);
+      setUserInterests([]);
+    } finally {
+      setUserInterestsLoading(false);
+    }
+  };
+  
   const [filters, setFilters] = useState({
     search: '',
     category: '',
