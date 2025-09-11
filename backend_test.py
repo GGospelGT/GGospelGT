@@ -682,9 +682,289 @@ class MessagingSystemTester:
                 self.log_result("Edge case - unauthorized access", False, 
                               f"Expected 403, got {response.status_code}")
     
+    def test_messaging_system_endpoints(self):
+        """Test core messaging system API endpoints"""
+        print("\n=== CRITICAL TEST: Messaging System API Endpoints ===")
+        
+        if 'tradesperson' not in self.auth_tokens or 'test_job_id' not in self.test_data:
+            self.log_result("Messaging system setup", False, "Missing tradesperson token or test job ID")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        tradesperson_id = self.test_data['tradesperson_user']['id']
+        job_id = self.test_data['test_job_id']
+        
+        # Test 1: Get or create conversation for job
+        print(f"🔍 Testing GET /api/messages/conversations/job/{job_id}")
+        
+        response = self.make_request(
+            "GET", 
+            f"/messages/conversations/job/{job_id}",
+            auth_token=tradesperson_token,
+            params={"tradesperson_id": tradesperson_id}
+        )
+        
+        if response.status_code == 200:
+            conversation_data = response.json()
+            if 'conversation_id' in conversation_data:
+                self.test_data['conversation_id'] = conversation_data['conversation_id']
+                self.log_result("Conversation creation/retrieval", True, 
+                              f"Conversation ID: {conversation_data['conversation_id']}, Exists: {conversation_data.get('exists', False)}")
+            else:
+                self.log_result("Conversation creation/retrieval", False, 
+                              f"Missing conversation_id in response: {conversation_data}")
+        else:
+            self.log_result("Conversation creation/retrieval", False, 
+                          f"Status: {response.status_code}, Response: {response.text}")
+    
+    def test_message_sending(self):
+        """Test sending messages in conversation"""
+        print("\n=== CRITICAL TEST: Message Sending ===")
+        
+        if 'conversation_id' not in self.test_data or 'tradesperson' not in self.auth_tokens:
+            self.log_result("Message sending setup", False, "Missing conversation ID or tradesperson token")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        conversation_id = self.test_data['conversation_id']
+        
+        # Test sending a text message
+        message_data = {
+            "conversation_id": conversation_id,
+            "message_type": "text",
+            "content": "Hello! I'm interested in discussing this job with you. When would be a good time to start?"
+        }
+        
+        print(f"🔍 Testing POST /api/messages/conversations/{conversation_id}/messages")
+        
+        response = self.make_request(
+            "POST",
+            f"/messages/conversations/{conversation_id}/messages",
+            auth_token=tradesperson_token,
+            json=message_data
+        )
+        
+        if response.status_code == 200:
+            message_response = response.json()
+            required_fields = ['id', 'conversation_id', 'sender_id', 'sender_name', 'sender_type', 'content', 'created_at']
+            missing_fields = [field for field in required_fields if field not in message_response]
+            
+            if not missing_fields:
+                self.test_data['sent_message_id'] = message_response.get('id')
+                self.log_result("Message sending", True, 
+                              f"Message sent successfully. ID: {message_response.get('id')}")
+                
+                # Verify message content
+                if message_response.get('content') == message_data['content']:
+                    self.log_result("Message content verification", True, "Message content matches")
+                else:
+                    self.log_result("Message content verification", False, 
+                                  f"Content mismatch. Expected: {message_data['content']}, Got: {message_response.get('content')}")
+            else:
+                self.log_result("Message sending - response structure", False, 
+                              f"Missing fields: {missing_fields}")
+        else:
+            self.log_result("Message sending", False, 
+                          f"Status: {response.status_code}, Response: {response.text}")
+    
+    def test_conversation_messages_retrieval(self):
+        """Test retrieving messages from conversation"""
+        print("\n=== Testing Conversation Messages Retrieval ===")
+        
+        if 'conversation_id' not in self.test_data or 'tradesperson' not in self.auth_tokens:
+            self.log_result("Messages retrieval setup", False, "Missing conversation ID or tradesperson token")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        conversation_id = self.test_data['conversation_id']
+        
+        print(f"🔍 Testing GET /api/messages/conversations/{conversation_id}/messages")
+        
+        response = self.make_request(
+            "GET",
+            f"/messages/conversations/{conversation_id}/messages",
+            auth_token=tradesperson_token
+        )
+        
+        if response.status_code == 200:
+            messages_data = response.json()
+            if 'messages' in messages_data and isinstance(messages_data['messages'], list):
+                messages = messages_data['messages']
+                self.log_result("Messages retrieval", True, 
+                              f"Retrieved {len(messages)} messages")
+                
+                # Verify our sent message is in the list
+                if self.test_data.get('sent_message_id'):
+                    sent_message_found = any(
+                        msg.get('id') == self.test_data['sent_message_id'] 
+                        for msg in messages
+                    )
+                    if sent_message_found:
+                        self.log_result("Sent message verification", True, "Sent message found in conversation")
+                    else:
+                        self.log_result("Sent message verification", False, "Sent message not found in conversation")
+            else:
+                self.log_result("Messages retrieval", False, 
+                              f"Invalid response structure: {messages_data}")
+        else:
+            self.log_result("Messages retrieval", False, 
+                          f"Status: {response.status_code}, Response: {response.text}")
+    
+    def test_paid_access_requirement(self):
+        """Test that conversation creation requires paid access"""
+        print("\n=== Testing Paid Access Requirement ===")
+        
+        if 'homeowner' not in self.auth_tokens:
+            self.log_result("Paid access test setup", False, "Missing homeowner token")
+            return
+        
+        # Create a new job and try to create conversation without paid access
+        homeowner_token = self.auth_tokens['homeowner']
+        homeowner_user = self.test_data['homeowner_user']
+        
+        # Create a new job for this test
+        job_data = {
+            "title": "PAID ACCESS TEST - Electrical Work Needed",
+            "description": "Testing paid access requirement for messaging. Need electrical installation work.",
+            "category": "Electrical Installation",
+            "state": "Lagos",
+            "lga": "Ikeja",
+            "town": "Computer Village",
+            "zip_code": "100001",
+            "home_address": "456 Test Street, Ikeja",
+            "budget_min": 30000,
+            "budget_max": 80000,
+            "timeline": "Within 1 week",
+            "homeowner_name": homeowner_user['name'],
+            "homeowner_email": homeowner_user['email'],
+            "homeowner_phone": homeowner_user['phone']
+        }
+        
+        response = self.make_request("POST", "/jobs/", json=job_data, auth_token=homeowner_token)
+        if response.status_code == 200:
+            test_job_id = response.json().get('id')
+            
+            # Try to create conversation without showing interest first
+            if 'tradesperson' in self.auth_tokens:
+                tradesperson_token = self.auth_tokens['tradesperson']
+                tradesperson_id = self.test_data['tradesperson_user']['id']
+                
+                response = self.make_request(
+                    "GET",
+                    f"/messages/conversations/job/{test_job_id}",
+                    auth_token=tradesperson_token,
+                    params={"tradesperson_id": tradesperson_id}
+                )
+                
+                if response.status_code == 403:
+                    self.log_result("Paid access requirement", True, 
+                                  "Correctly rejected conversation creation without paid access")
+                else:
+                    self.log_result("Paid access requirement", False, 
+                                  f"Expected 403, got {response.status_code}: {response.text}")
+        else:
+            self.log_result("Paid access test job creation", False, 
+                          f"Failed to create test job: {response.status_code}")
+    
+    def test_interest_status_verification(self):
+        """Verify interest status is 'paid_access' for messaging"""
+        print("\n=== Testing Interest Status Verification ===")
+        
+        if 'tradesperson' not in self.auth_tokens or 'interest_id' not in self.test_data:
+            self.log_result("Interest status verification setup", False, "Missing tradesperson token or interest ID")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        
+        # Get tradesperson's interests to check status
+        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+        
+        if response.status_code == 200:
+            interests = response.json()
+            if isinstance(interests, list) and len(interests) > 0:
+                # Find our test interest
+                test_interest = None
+                for interest in interests:
+                    if interest.get('id') == self.test_data.get('interest_id'):
+                        test_interest = interest
+                        break
+                
+                if test_interest:
+                    status = test_interest.get('status')
+                    if status == 'paid_access':
+                        self.log_result("Interest status verification", True, 
+                                      f"Interest has correct status: {status}")
+                    else:
+                        self.log_result("Interest status verification", False, 
+                                      f"Interest status is '{status}', expected 'paid_access'")
+                else:
+                    self.log_result("Interest status verification", False, 
+                                  "Test interest not found in interests list")
+            else:
+                self.log_result("Interest status verification", False, 
+                              "No interests found or invalid response format")
+        else:
+            self.log_result("Interest status verification", False, 
+                          f"Failed to get interests: {response.status_code}")
+    
+    def test_error_scenarios(self):
+        """Test various error scenarios"""
+        print("\n=== Testing Error Scenarios ===")
+        
+        if 'tradesperson' not in self.auth_tokens:
+            self.log_result("Error scenarios setup", False, "Missing tradesperson token")
+            return
+        
+        tradesperson_token = self.auth_tokens['tradesperson']
+        
+        # Test 1: Invalid conversation ID for message sending
+        fake_conversation_id = str(uuid.uuid4())
+        message_data = {
+            "conversation_id": fake_conversation_id,
+            "message_type": "text",
+            "content": "This should fail"
+        }
+        
+        response = self.make_request(
+            "POST",
+            f"/messages/conversations/{fake_conversation_id}/messages",
+            auth_token=tradesperson_token,
+            json=message_data
+        )
+        
+        if response.status_code == 404:
+            self.log_result("Error scenario - invalid conversation ID", True, 
+                          "Correctly rejected message to non-existent conversation")
+        else:
+            self.log_result("Error scenario - invalid conversation ID", False, 
+                          f"Expected 404, got {response.status_code}")
+        
+        # Test 2: Missing message content
+        if 'conversation_id' in self.test_data:
+            conversation_id = self.test_data['conversation_id']
+            invalid_message_data = {
+                "conversation_id": conversation_id,
+                "message_type": "text"
+                # Missing content
+            }
+            
+            response = self.make_request(
+                "POST",
+                f"/messages/conversations/{conversation_id}/messages",
+                auth_token=tradesperson_token,
+                json=invalid_message_data
+            )
+            
+            if response.status_code in [400, 422]:
+                self.log_result("Error scenario - missing message content", True, 
+                              "Correctly rejected message without content")
+            else:
+                self.log_result("Error scenario - missing message content", False, 
+                              f"Expected 400/422, got {response.status_code}")
+    
     def run_all_tests(self):
-        """Run all My Interests page investigation tests"""
-        print("🚨 STARTING CRITICAL BUG INVESTIGATION: My Interests Page Not Loading")
+        """Run all messaging system investigation tests"""
+        print("🚨 STARTING CRITICAL BUG INVESTIGATION: Send Button Not Working in ChatModal")
         print("=" * 80)
         
         # Setup phase
@@ -692,20 +972,37 @@ class MessagingSystemTester:
         self.test_homeowner_authentication()
         self.test_job_creation_for_contact_sharing_test()
         
-        # Create test data
-        self.test_create_test_interests_for_testing()
+        # Create test data with paid access
+        self.test_show_interest_for_contact_sharing()
         
-        # Core My Interests API testing
-        self.test_authentication_and_authorization()
-        self.test_my_interests_api_endpoint()
+        # Simulate payment for access (this would normally be done through payment flow)
+        if 'interest_id' in self.test_data and 'tradesperson' in self.auth_tokens:
+            print("\n--- Simulating Payment for Access ---")
+            tradesperson_token = self.auth_tokens['tradesperson']
+            interest_id = self.test_data['interest_id']
+            
+            # Try to pay for access
+            response = self.make_request("POST", f"/interests/pay-access/{interest_id}", 
+                                       auth_token=tradesperson_token)
+            if response.status_code == 200:
+                self.log_result("Payment simulation", True, "Payment successful - access granted")
+            else:
+                self.log_result("Payment simulation", False, 
+                              f"Payment failed: {response.status_code} - {response.text}")
         
-        # Additional verification if we have existing interests
-        if self.test_data.get('my_interests_response'):
-            self.test_database_consistency_check()
+        # Core messaging system testing
+        self.test_interest_status_verification()
+        self.test_messaging_system_endpoints()
+        self.test_message_sending()
+        self.test_conversation_messages_retrieval()
+        
+        # Additional tests
+        self.test_paid_access_requirement()
+        self.test_error_scenarios()
         
         # Summary
         print("\n" + "=" * 80)
-        print("🔍 MY INTERESTS PAGE BUG INVESTIGATION SUMMARY")
+        print("🔍 MESSAGING SYSTEM BUG INVESTIGATION SUMMARY")
         print("=" * 80)
         print(f"✅ Tests Passed: {self.results['passed']}")
         print(f"❌ Tests Failed: {self.results['failed']}")
@@ -717,16 +1014,16 @@ class MessagingSystemTester:
                 print(f"   • {error}")
         
         print("\n🎯 KEY INVESTIGATION POINTS:")
-        print("   1. My Interests API endpoint functionality and response structure")
-        print("   2. Database projection working correctly with new fields")
-        print("   3. JSON serialization of datetime fields")
+        print("   1. Messaging API endpoints functionality and response structure")
+        print("   2. Conversation creation with paid access verification")
+        print("   3. Message sending and retrieval workflow")
         print("   4. Authentication and authorization controls")
-        print("   5. Response time and performance")
+        print("   5. Error handling for invalid scenarios")
         
         if self.results['failed'] > 0:
-            print("\n⚠️  INVESTIGATION RESULT: Issues found that may explain the My Interests page loading problem")
+            print("\n⚠️  INVESTIGATION RESULT: Issues found that may explain the send button problem")
         else:
-            print("\n✅ INVESTIGATION RESULT: All tests passed - My Interests API is working correctly")
+            print("\n✅ INVESTIGATION RESULT: All tests passed - Messaging system is working correctly")
 
 if __name__ == "__main__":
     tester = MyInterestsPageTester()
