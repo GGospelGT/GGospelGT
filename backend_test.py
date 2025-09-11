@@ -1026,5 +1026,5 @@ class MessagingSystemTester:
             print("\n✅ INVESTIGATION RESULT: All tests passed - Messaging system is working correctly")
 
 if __name__ == "__main__":
-    tester = MyInterestsPageTester()
+    tester = MessagingSystemTester()
     tester.run_all_tests()
