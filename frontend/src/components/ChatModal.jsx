@@ -1,0 +1,286 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import { Textarea } from './ui/textarea';
+import { 
+  X, Send, MessageCircle, User, Clock, CheckCircle2, 
+  Phone, Mail, MapPin, Briefcase, Loader2
+} from 'lucide-react';
+import { messagesAPI } from '../api/messages';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../hooks/use-toast';
+
+const ChatModal = ({ 
+  isOpen, 
+  onClose, 
+  jobId, 
+  jobTitle, 
+  otherParty, // { id, name, type: 'homeowner'|'tradesperson', email, phone, location }
+  conversationId: initialConversationId = null 
+}) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const messagesEndRef = useRef(null);
+  const [conversationId, setConversationId] = useState(initialConversationId);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  // Auto-scroll to bottom when new messages arrive
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (isOpen && jobId && otherParty) {
+      initializeConversation();
+    }
+  }, [isOpen, jobId, otherParty]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const initializeConversation = async () => {
+    try {
+      setLoading(true);
+      
+      // Get or create conversation
+      if (!conversationId) {
+        const response = await messagesAPI.getOrCreateConversationForJob(jobId, otherParty.id);
+        setConversationId(response.conversation_id);
+      }
+      
+      // Load messages if we have a conversation ID
+      const currentConvId = conversationId || initialConversationId;
+      if (currentConvId) {
+        await loadMessages(currentConvId);
+      }
+      
+    } catch (error) {
+      console.error('Failed to initialize conversation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize conversation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+      setInitialLoad(false);
+    }
+  };
+
+  const loadMessages = async (convId) => {
+    try {
+      const response = await messagesAPI.getConversationMessages(convId);
+      setMessages(response.messages || []);
+      
+      // Mark messages as read
+      await messagesAPI.markConversationAsRead(convId);
+      
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load messages. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !conversationId || sending) return;
+
+    try {
+      setSending(true);
+      
+      const messageData = {
+        conversation_id: conversationId,
+        message_type: 'text',
+        content: newMessage.trim()
+      };
+
+      const response = await messagesAPI.sendMessage(conversationId, messageData);
+      
+      // Add message to local state immediately
+      setMessages(prev => [...prev, response]);
+      setNewMessage('');
+      
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    if (isToday) {
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit'
+      });
+    }
+    
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+  };
+
+  const getMessageAlignment = (message) => {
+    return message.sender_id === user?.id ? 'justify-end' : 'justify-start';
+  };
+
+  const getMessageStyle = (message) => {
+    return message.sender_id === user?.id 
+      ? 'bg-green-600 text-white' 
+      : 'bg-gray-100 text-gray-900';
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg w-full max-w-2xl h-[600px] flex flex-col">
+        {/* Header */}
+        <div className="border-b p-4 flex justify-between items-start">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <MessageCircle className="w-5 h-5 text-green-600" />
+              <h2 className="text-lg font-semibold font-montserrat">
+                Chat with {otherParty?.name}
+              </h2>
+            </div>
+            
+            <div className="text-sm text-gray-600 space-y-1">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4" />
+                <span className="font-medium">{jobTitle}</span>
+              </div>
+              
+              {otherParty?.location && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>{otherParty.location}</span>
+                </div>
+              )}
+              
+              {otherParty?.type && (
+                <Badge variant="outline" className="text-xs">
+                  {otherParty.type === 'homeowner' ? 'Job Owner' : 'Tradesperson'}
+                </Badge>
+              )}
+            </div>
+          </div>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {loading && initialLoad ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              <span className="ml-2 text-gray-500">Loading conversation...</span>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="text-center py-8">
+              <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">No messages yet. Start the conversation!</p>
+            </div>
+          ) : (
+            messages.map((message, index) => (
+              <div key={message.id || index} className={`flex ${getMessageAlignment(message)}`}>
+                <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${getMessageStyle(message)}`}>
+                  <div className="flex items-start gap-2">
+                    {message.sender_id !== user?.id && (
+                      <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-gray-600" />
+                      </div>
+                    )}
+                    
+                    <div className="flex-1">
+                      <p className="text-sm break-words">{message.content}</p>
+                      
+                      <div className={`flex items-center gap-1 mt-1 text-xs ${
+                        message.sender_id === user?.id ? 'text-green-100' : 'text-gray-500'
+                      }`}>
+                        <Clock className="w-3 h-3" />
+                        <span>{formatTime(message.created_at)}</span>
+                        
+                        {message.sender_id === user?.id && message.status === 'read' && (
+                          <CheckCircle2 className="w-3 h-3 ml-1" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Message Input */}
+        <div className="border-t p-4">
+          <div className="flex gap-3">
+            <Textarea
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message..."
+              className="flex-1 min-h-[44px] max-h-32 resize-none"
+              disabled={sending}
+            />
+            
+            <Button
+              onClick={sendMessage}
+              disabled={!newMessage.trim() || sending}
+              className="self-end bg-green-600 hover:bg-green-700 text-white"
+            >
+              {sending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
+          
+          <p className="text-xs text-gray-500 mt-2">
+            Press Enter to send, Shift+Enter for new line
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatModal;
