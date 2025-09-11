@@ -671,7 +671,10 @@ class ShowInterestTester:
             "home_address": "789 Bode Thomas Street, Surulere",
             "budget_min": 60000,
             "budget_max": 120000,
-            "timeline": "Within 3 days"
+            "timeline": "Within 3 days",
+            "homeowner_name": self.test_data['homeowner_user']['name'],
+            "homeowner_email": self.test_data['homeowner_user']['email'],
+            "homeowner_phone": self.test_data['homeowner_user']['phone']
         }
         
         response = self.make_request("POST", "/jobs/", json=notification_test_job, 
