@@ -61,7 +61,20 @@ const LoginForm = ({ onClose, onSwitchToSignup, onSwitchToForgotPassword }) => {
           description: `Successfully logged in as ${result.user.name}`,
         });
         
+        // Close the modal first
         if (onClose) onClose();
+        
+        // Redirect based on user role
+        if (result.user.role === 'tradesperson') {
+          // Redirect tradespeople to Browse Jobs page
+          navigate('/browse-jobs');
+        } else if (result.user.role === 'homeowner') {
+          // Keep homeowners on homepage or redirect to their dashboard
+          navigate('/');
+        } else {
+          // Default redirect for any other roles
+          navigate('/');
+        }
       } else {
         // Ensure error is a string, not an object
         const errorMessage = typeof result.error === 'string' 
