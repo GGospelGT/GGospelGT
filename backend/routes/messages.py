@@ -81,7 +81,7 @@ async def get_conversations(
     try:
         conversations = await database.get_user_conversations(
             user_id=current_user.id,
-            user_type=current_user.account_type,
+            user_type=current_user.role,
             skip=skip,
             limit=limit
         )
