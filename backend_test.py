@@ -790,33 +790,35 @@ class BackendAPITester:
         else:
             self.log_result("Database integration", False, f"Status: {response.status_code}")
     
-    def run_comprehensive_backend_tests(self):
-        """Run all comprehensive backend tests based on review request"""
-        print("🚀 STARTING COMPREHENSIVE BACKEND API TESTING - POST BUG FIXES VERIFICATION")
+    def run_comprehensive_show_interest_tests(self):
+        """Run comprehensive Show Interest functionality tests based on review request"""
+        print("🚀 STARTING COMPREHENSIVE SHOW INTEREST FUNCTIONALITY TESTING")
         print("=" * 80)
         
         # 1. Service Health Check
         self.test_service_health()
         
-        # 2. Critical API Endpoints
-        self.test_featured_reviews_endpoint()
-        self.test_lga_endpoints()
-        
-        # 3. Authentication Endpoints
+        # 2. Authentication Setup
         self.test_authentication_endpoints()
         
-        # 4. Job CRUD Operations (tests JobUpdate and JobCloseRequest models)
-        self.test_job_crud_operations()
+        # 3. Core Show Interest Functionality Testing
+        self.test_show_interest_functionality()
         
-        # 5. Model Import Verification
-        self.test_model_import_verification()
+        # 4. My Interests Endpoint Testing
+        self.test_my_interests_endpoint()
         
-        # 6. Database Integration
-        self.test_database_integration()
+        # 5. Job Interests Endpoint Testing
+        self.test_job_interests_endpoint()
+        
+        # 6. Contact Sharing Workflow Testing
+        self.test_contact_sharing_workflow()
+        
+        # 7. Wallet Integration Testing
+        self.test_wallet_integration()
         
         # Summary
         print("\n" + "=" * 80)
-        print("🔍 COMPREHENSIVE BACKEND TESTING SUMMARY")
+        print("🔍 COMPREHENSIVE SHOW INTEREST TESTING SUMMARY")
         print("=" * 80)
         print(f"✅ Tests Passed: {self.results['passed']}")
         print(f"❌ Tests Failed: {self.results['failed']}")
@@ -830,28 +832,31 @@ class BackendAPITester:
                 print(f"   • {error}")
         
         print("\n🎯 KEY VERIFICATION POINTS:")
-        print("   1. ✅ Service health and availability")
-        print("   2. ✅ Featured reviews endpoint functionality")
-        print("   3. ✅ LGA endpoints for Nigerian states")
-        print("   4. ✅ Job CRUD operations with model verification")
-        print("   5. ✅ Authentication system functionality")
-        print("   6. ✅ Database integration and filtering")
+        print("   1. ✅ Show Interest API endpoint functionality")
+        print("   2. ✅ Error scenario handling (400 Bad Request errors)")
+        print("   3. ✅ User authentication flow validation")
+        print("   4. ✅ Database consistency and duplicate prevention")
+        print("   5. ✅ Job status validation (active vs inactive)")
+        print("   6. ✅ Contact sharing workflow")
+        print("   7. ✅ Wallet integration for access fees")
         
         # Analysis
         print("\n🔍 ANALYSIS:")
         print("=" * 50)
         
         if self.results['failed'] == 0:
-            print("✅ ALL TESTS PASSED: Backend API is functioning correctly after bug fixes")
-            print("   - Featured reviews endpoint working without 500 errors")
-            print("   - LGA functionality operational")
-            print("   - JobUpdate and JobCloseRequest models properly imported")
-            print("   - Database filtering working correctly")
-            print("   - Service health confirmed")
+            print("✅ ALL TESTS PASSED: Show Interest functionality working correctly after bug fixes")
+            print("   - Show interest endpoint handling all scenarios properly")
+            print("   - 400 errors returning specific, helpful error messages")
+            print("   - Authentication and authorization working correctly")
+            print("   - Database consistency maintained")
+            print("   - Contact sharing workflow operational")
+            print("   - Wallet integration functional")
         else:
             print("⚠️  SOME ISSUES FOUND: Review failed tests above")
             print("   - Check specific error messages for details")
-            print("   - Verify recent changes are properly deployed")
+            print("   - Verify recent bug fixes are properly deployed")
+            print("   - Review error handling implementation")
         
         return self.results['failed'] == 0
 
