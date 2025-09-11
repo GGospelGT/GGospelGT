@@ -172,13 +172,23 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
         toast({
           title: "Account created successfully!",
           description: `Welcome to serviceHub, ${result.user.name}! ${
-            activeTab === 'tradesperson' 
+            currentTab === 'tradesperson' 
               ? 'Your account is pending verification.' 
               : 'You can now start posting jobs.'
           }`,
         });
         
+        // Close the modal first
         if (onClose) onClose();
+        
+        // Redirect based on user role
+        if (currentTab === 'tradesperson') {
+          // Redirect new tradespeople to Browse Jobs page
+          navigate('/browse-jobs');
+        } else {
+          // Keep homeowners on homepage
+          navigate('/');
+        }
       } else {
         // Ensure error is a string, not an object
         const errorMessage = typeof result.error === 'string' 
