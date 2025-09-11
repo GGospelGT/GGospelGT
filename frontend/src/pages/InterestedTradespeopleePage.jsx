@@ -379,9 +379,18 @@ const InterestedTradespeopleePage = () => {
                 )}
 
                 {tradesperson.status === 'paid_access' && (
-                  <Badge className="bg-purple-50 text-purple-700 border-purple-200">
-                    Access granted - Tradesperson can contact you
-                  </Badge>
+                  <>
+                    <Badge className="bg-purple-50 text-purple-700 border-purple-200">
+                      Access granted - Tradesperson can contact you
+                    </Badge>
+                    <Button
+                      onClick={() => handleStartChat(tradesperson)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                    >
+                      <MessageCircle size={16} />
+                      Start Chat
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
