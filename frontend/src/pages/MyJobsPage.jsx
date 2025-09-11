@@ -124,6 +124,54 @@ const MyJobsPage = () => {
     setShowInterestedModal(false);
   };
 
+  const handleEditJob = (job) => {
+    setJobToEdit(job);
+    setShowEditModal(true);
+  };
+
+  const handleJobUpdated = (updatedJob) => {
+    setJobs(prevJobs => 
+      prevJobs.map(job => 
+        job.id === updatedJob.id ? updatedJob : job
+      )
+    );
+  };
+
+  const handleCloseJob = (job) => {
+    setJobToClose(job);
+    setShowCloseModal(true);
+  };
+
+  const handleJobClosed = async (jobId) => {
+    // Refresh jobs list to show updated status
+    await loadMyJobs();
+  };
+
+  const handleReopenJob = async (jobId) => {
+    try {
+      setReopeningJobId(jobId);
+      await jobsAPI.reopenJob(jobId);
+      
+      toast({
+        title: "Job Reopened",
+        description: "Your job has been reopened and is now active.",
+      });
+      
+      // Refresh jobs list
+      await loadMyJobs();
+      
+    } catch (error) {
+      console.error('Failed to reopen job:', error);
+      toast({
+        title: "Failed to Reopen Job",
+        description: error.response?.data?.detail || "There was an error reopening the job.",
+        variant: "destructive",
+      });
+    } finally {
+      setReopeningJobId(null);
+    }
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
