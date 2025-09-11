@@ -967,11 +967,31 @@ async def delete_town(state_name: str, lga_name: str, town_name: str):
 
 @router.get("/trades")
 async def get_all_trades():
-    """Get all trade categories"""
+    """Get all trade categories (static + custom)"""
     from models.trade_categories import NIGERIAN_TRADE_CATEGORIES, TRADE_CATEGORY_GROUPS
+    
+    # Get custom trades from database
+    custom_data = await database.get_custom_trades()
+    custom_trades = custom_data.get("trades", [])
+    custom_groups = custom_data.get("groups", {})
+    
+    # Combine static and custom trades
+    all_trades = list(set(NIGERIAN_TRADE_CATEGORIES + custom_trades))
+    all_trades.sort()  # Sort alphabetically
+    
+    # Combine static and custom groups
+    all_groups = TRADE_CATEGORY_GROUPS.copy()
+    for group, trades in custom_groups.items():
+        if group in all_groups:
+            # Merge with existing group
+            all_groups[group] = list(set(all_groups[group] + trades))
+        else:
+            # Add new group
+            all_groups[group] = trades
+    
     return {
-        "trades": NIGERIAN_TRADE_CATEGORIES,
-        "groups": TRADE_CATEGORY_GROUPS
+        "trades": all_trades,
+        "groups": all_groups
     }
 
 @router.post("/trades")
