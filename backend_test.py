@@ -1,55 +1,36 @@
 #!/usr/bin/env python3
 """
-COMPREHENSIVE SHOW INTEREST FUNCTIONALITY TESTING
+COMPREHENSIVE MESSAGING SYSTEM API TESTING
 
-Testing the complete show interest functionality that users are reporting as failing.
+Testing the new messaging system API endpoints for the lead generation marketplace.
 
 Focus Areas:
-1. Authentication Flow:
-   - Test tradesperson login with credentials: john.plumber.d553d0b3@tradework.com / SecurePass123
-   - Verify JWT token generation and validation
-   - Test tradesperson role verification
-   - Confirm token is being properly included in API requests
+1. **Backend APIs to test:**
+   - POST /api/messages/conversations - Create conversation between homeowner and tradesperson
+   - GET /api/messages/conversations - Get user's conversations 
+   - GET /api/messages/conversations/{conversation_id}/messages - Get messages for a conversation
+   - POST /api/messages/conversations/{conversation_id}/messages - Send a message
+   - PUT /api/messages/conversations/{conversation_id}/read - Mark messages as read
+   - GET /api/messages/conversations/job/{job_id} - Get or create conversation for specific job
 
-2. Show Interest API Endpoint:
-   - Test POST /api/interests/show-interest with valid tradesperson token
-   - Test with different job IDs to verify job lookup
-   - Test duplicate interest prevention (same tradesperson, same job)
-   - Test with inactive/non-existent jobs
-   - Verify proper error responses and status codes
+2. **Test Scenarios:**
+   - Authentication: Test that all endpoints require authentication
+   - Homeowner Flow: After payment, both can create conversations and send messages
+   - Conversation Creation: Test creating conversations between homeowner and tradesperson
+   - Message Exchange: Test sending messages back and forth
+   - Message Status: Test marking messages as read
+   - Access Control: Ensure only conversation participants can access messages
 
-3. Job Data Integration:
-   - Test GET /api/jobs/for-tradesperson to ensure jobs are available
-   - Verify job IDs are valid and can be used for showing interest
-   - Test job status validation (active vs inactive)
-   - Confirm job-tradesperson matching logic
-
-4. Database Operations:
-   - Test interest record creation in database
-   - Verify interest status and metadata
-   - Test interest retrieval and querying
-   - Check for database constraint violations
-
-5. Background Tasks & Notifications:
-   - Test notification system integration when interest is shown
-   - Verify background task processing
-   - Test homeowner notification delivery
-
-SPECIFIC ERROR SCENARIOS TO TEST:
-1. Authentication Errors: Invalid token, expired token, wrong role
-2. Validation Errors: Missing job_id, invalid job_id format
-3. Business Logic Errors: Job not found, job inactive, duplicate interest
-4. Database Errors: Connection issues, constraint violations
-
-EXPECTED BEHAVIORS:
-- ✅ Valid tradesperson can show interest in active jobs
-- ✅ Duplicate interests are prevented with clear error message
-- ✅ Invalid/inactive jobs return proper error responses
-- ✅ Interest records are properly stored in database
-- ✅ Homeowner notifications are triggered
+3. **Expected Behavior:**
+   - Only users with paid access can create conversations
+   - Messages are properly stored and retrieved
+   - Notifications are sent for new messages
+   - Unread counts are tracked correctly
+   - Proper access control for conversations
 
 CRITICAL VALIDATION:
-Users are reporting that "showing interest for jobs failed" - please identify the root cause of this failure.
+Test the complete flow including the existing interest/payment system integration using 
+existing user credentials (john.plumber.d553d0b3@tradework.com for tradesperson and homeowner accounts).
 """
 
 import requests
