@@ -68,6 +68,8 @@ const InterestedTradespeopleePage = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [activeProfileTab, setActiveProfileTab] = useState('overview');
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [selectedTradespersonForChat, setSelectedTradespersonForChat] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated()) {
