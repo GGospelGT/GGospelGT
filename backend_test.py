@@ -192,9 +192,9 @@ class ContactSharingBugTester:
             self.log_result("Create test homeowner", False, 
                           f"Status: {response.status_code}, Response: {response.text}")
     
-    def test_job_creation_for_interest_testing(self):
-        """Create test jobs for interest testing"""
-        print("\n=== Creating Test Jobs for Interest Testing ===")
+    def test_job_creation_for_contact_sharing_test(self):
+        """Create test job for contact sharing investigation"""
+        print("\n=== Creating Test Job for Contact Sharing Investigation ===")
         
         if 'homeowner' not in self.auth_tokens:
             self.log_result("Job creation setup", False, "No homeowner authentication token")
@@ -203,10 +203,10 @@ class ContactSharingBugTester:
         homeowner_token = self.auth_tokens['homeowner']
         homeowner_user = self.test_data['homeowner_user']
         
-        # Create active job
-        active_job_data = {
-            "title": "Plumbing Services Needed - Active Job",
-            "description": "Need professional plumber for bathroom renovation. Includes pipe installation and fixture replacement.",
+        # Create job specifically for contact sharing test
+        job_data = {
+            "title": "CONTACT SHARING BUG TEST - Plumbing Services Needed",
+            "description": "Testing contact sharing functionality. Need professional plumber for bathroom renovation. Includes pipe installation and fixture replacement.",
             "category": "Plumbing",
             "state": "Lagos",
             "lga": "Ikeja",
@@ -221,41 +221,14 @@ class ContactSharingBugTester:
             "homeowner_phone": homeowner_user['phone']
         }
         
-        response = self.make_request("POST", "/jobs/", json=active_job_data, auth_token=homeowner_token)
+        response = self.make_request("POST", "/jobs/", json=job_data, auth_token=homeowner_token)
         if response.status_code == 200:
             job_response = response.json()
-            self.test_data['active_job_id'] = job_response.get('id')
-            self.test_data['active_job'] = job_response
-            self.log_result("Create active test job", True, f"Job ID: {job_response.get('id')}")
+            self.test_data['test_job_id'] = job_response.get('id')
+            self.test_data['test_job'] = job_response
+            self.log_result("Create contact sharing test job", True, f"Job ID: {job_response.get('id')}")
         else:
-            self.log_result("Create active test job", False, 
-                          f"Status: {response.status_code}, Response: {response.text}")
-        
-        # Create another active job for duplicate testing
-        duplicate_test_job_data = {
-            "title": "Electrical Work - Duplicate Test Job",
-            "description": "Need electrical installation for new office space.",
-            "category": "Electrical",
-            "state": "Lagos",
-            "lga": "Ikeja",
-            "town": "Ikeja",
-            "zip_code": "101001",
-            "home_address": "456 Broad Street, Ikeja",
-            "budget_min": 75000,
-            "budget_max": 200000,
-            "timeline": "Within 1 week",
-            "homeowner_name": homeowner_user['name'],
-            "homeowner_email": homeowner_user['email'],
-            "homeowner_phone": homeowner_user['phone']
-        }
-        
-        response = self.make_request("POST", "/jobs/", json=duplicate_test_job_data, auth_token=homeowner_token)
-        if response.status_code == 200:
-            job_response = response.json()
-            self.test_data['duplicate_test_job_id'] = job_response.get('id')
-            self.log_result("Create duplicate test job", True, f"Job ID: {job_response.get('id')}")
-        else:
-            self.log_result("Create duplicate test job", False, 
+            self.log_result("Create contact sharing test job", False, 
                           f"Status: {response.status_code}, Response: {response.text}")
     
     def test_jobs_for_tradesperson_endpoint(self):
