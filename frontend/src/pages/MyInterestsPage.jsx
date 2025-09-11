@@ -44,6 +44,8 @@ const MyInterestsPage = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [selectedInterestForChat, setSelectedInterestForChat] = useState(null);
 
   const { user, isAuthenticated, isTradesperson } = useAuth();
   const { toast } = useToast();
