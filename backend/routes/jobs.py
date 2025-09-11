@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query, Depends, BackgroundTasks
 from typing import Optional
-from models import JobCreate, JobUpdate, Job, JobsResponse
-from models.base import JobStatus
+from models import JobCreate, Job, JobsResponse
 from models.auth import User
 from models.notifications import NotificationType
 from auth.dependencies import get_current_active_user, get_current_homeowner
