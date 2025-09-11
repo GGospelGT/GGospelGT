@@ -97,13 +97,13 @@ const BrowseJobsPage = () => {
     }
     loadWalletBalance();
     loadUserLocationData();
-  }, []);
+  }, [isAuthenticated, isTradesperson]); // Add authentication dependencies
 
   useEffect(() => {
     if (isAuthenticated() && isTradesperson()) {
       loadJobsBasedOnFilters();
     }
-  }, [filters, userLocation]);
+  }, [filters, userLocation, isAuthenticated, isTradesperson]); // Add authentication dependencies
 
   const loadWalletBalance = async () => {
     try {
