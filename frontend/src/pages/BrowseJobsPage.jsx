@@ -305,6 +305,9 @@ const BrowseJobsPage = () => {
         description: errorMessage,
         variant: "destructive",
       });
+      
+      // Re-throw the error so modal can catch it and stay open
+      throw error;
     } finally {
       setShowingInterest(null);
     }
