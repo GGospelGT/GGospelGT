@@ -236,7 +236,27 @@ const MyInterestsPage = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
+  const handleManualRefresh = async () => {
+    console.log('=== MANUAL REFRESH TRIGGERED ===');
+    setLoading(true);
+    try {
+      await loadMyInterests();
+      await loadWalletBalance();
+      toast({
+        title: "Refreshed Successfully",
+        description: "Your interests and wallet balance have been updated.",
+      });
+      console.log('✅ Manual refresh completed successfully');
+    } catch (error) {
+      console.error('❌ Manual refresh failed:', error);
+      toast({
+        title: "Refresh Failed",
+        description: "Failed to refresh data. Please try again.",
+        variant: "destructive",
+      });
+    }
+    setLoading(false);
+  };
     return new Date(dateString).toLocaleDateString('en-NG', {
       year: 'numeric',
       month: 'short',
