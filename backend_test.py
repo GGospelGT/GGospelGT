@@ -1323,14 +1323,15 @@ class BackendAPITester:
 
 if __name__ == "__main__":
     tester = BackendAPITester()
-    success = tester.run_critical_messaging_access_control_tests()
+    success = tester.run_urgent_payment_status_investigation()
     
     if success:
-        print("\n🎉 CRITICAL ACCESS CONTROL TESTING COMPLETE: All critical bugs fixed!")
-        print("✅ Messaging system properly secured with paid_access requirement")
-        print("✅ Homeowner bypass prevention working correctly")
-        print("✅ User validation returning proper error codes")
-        print("✅ Consistent access control enforced for all users")
+        print("\n🎉 PAYMENT STATUS INVESTIGATION COMPLETE: No critical issues found!")
+        print("✅ Payment workflow working correctly")
+        print("✅ Status updates persisting to database")
+        print("✅ Conversation creation working after payment")
+        print("✅ Message sending working after payment")
     else:
-        print("\n⚠️  CRITICAL ACCESS CONTROL TESTING COMPLETE: Issues found - review above")
-        print("🔧 Immediate action required to fix critical security bugs")
+        print("\n⚠️  PAYMENT STATUS INVESTIGATION COMPLETE: Critical issues found!")
+        print("🔧 Immediate action required to fix payment workflow bugs")
+        print("📋 Review the detailed analysis above for specific issues")
