@@ -129,14 +129,29 @@ const ChatModal = ({
 
   const loadMessages = async (convId) => {
     try {
+      console.log('=== LOADING MESSAGES ===');
+      console.log('Conversation ID:', convId);
+      
       const response = await messagesAPI.getConversationMessages(convId);
-      setMessages(response.messages || []);
+      
+      console.log('=== MESSAGES LOADED ===');
+      console.log('Response:', response);
+      console.log('Messages:', response.messages);
+      console.log('Messages length:', response.messages?.length);
+      
+      if (response.messages) {
+        setMessages(response.messages);
+        console.log('✅ Messages set to state:', response.messages.length);
+      } else {
+        setMessages(response || []);
+        console.log('✅ Messages set to state (fallback):', (response || []).length);
+      }
       
       // Mark messages as read
       await messagesAPI.markConversationAsRead(convId);
       
     } catch (error) {
-      console.error('Failed to load messages:', error);
+      console.error('❌ FAILED TO LOAD MESSAGES:', error);
       toast({
         title: "Error",
         description: "Failed to load messages. Please try again.",
