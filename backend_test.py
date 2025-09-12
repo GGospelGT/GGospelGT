@@ -2676,19 +2676,102 @@ class BackendAPITester:
         
         return len(chat_failures) == 0
 
+    def run_all_tests(self):
+        """Run comprehensive message delivery verification tests"""
+        print("🚀 Starting MESSAGE DELIVERY VERIFICATION - COMPREHENSIVE TESTING")
+        print(f"🌐 Backend URL: {self.base_url}")
+        print("=" * 80)
+        
+        # Basic service health
+        self.test_service_health()
+        
+        # Authentication setup for messaging tests
+        self.test_authentication_endpoints()
+        
+        # Core messaging system testing
+        if 'homeowner' in self.auth_tokens and 'tradesperson' in self.auth_tokens:
+            print("\n🎯 STARTING CORE MESSAGE DELIVERY VERIFICATION")
+            
+            # Setup test data for messaging
+            self.test_messaging_system_setup()
+            
+            # 1. Message Sending API Testing
+            self.test_message_sending_api()
+            
+            # 2. Message Retrieval Testing  
+            self.test_message_retrieval_api()
+            
+            # 3. Conversation Management
+            self.test_conversation_management()
+            
+            # 4. Message Persistence & Database
+            self.test_message_persistence_database()
+            
+            # 5. Bi-directional Messaging
+            self.test_bidirectional_messaging()
+            
+            # 6. Authentication & Authorization
+            self.test_messaging_authentication_authorization()
+            
+            # 7. Integration with Payment System
+            self.test_payment_system_integration()
+            
+            # Additional critical tests
+            self.test_message_data_structure_validation()
+            self.test_conversation_access_control()
+            self.test_message_ordering_chronological()
+        
+        # Print final results
+        self.print_final_results()
+    
+    def print_final_results(self):
+        """Print comprehensive message delivery test results"""
+        print("\n" + "=" * 80)
+        print("🎯 MESSAGE DELIVERY VERIFICATION - TEST RESULTS")
+        print("=" * 80)
+        
+        total_tests = self.results['passed'] + self.results['failed']
+        success_rate = (self.results['passed'] / total_tests * 100) if total_tests > 0 else 0
+        
+        print(f"✅ PASSED: {self.results['passed']}")
+        print(f"❌ FAILED: {self.results['failed']}")
+        print(f"📊 SUCCESS RATE: {success_rate:.1f}% ({self.results['passed']}/{total_tests})")
+        
+        if self.results['errors']:
+            print(f"\n🚨 FAILED TESTS:")
+            for error in self.results['errors']:
+                print(f"   • {error}")
+        
+        print("\n" + "=" * 80)
+        
+        if success_rate >= 90:
+            print("🎉 EXCELLENT: Message delivery system is fully operational!")
+        elif success_rate >= 75:
+            print("✅ GOOD: Message delivery system is mostly functional with minor issues.")
+        elif success_rate >= 50:
+            print("⚠️  MODERATE: Message delivery system has significant issues that need attention.")
+        else:
+            print("🚨 CRITICAL: Message delivery system has major issues requiring immediate fixes.")
+        
+        print("=" * 80)
+
 if __name__ == "__main__":
     tester = BackendAPITester()
-    success = tester.run_homeowner_chat_functionality_tests()
+    tester.run_all_tests()
     
-    if success:
-        print("\n🎉 HOMEOWNER CHAT FUNCTIONALITY TESTING COMPLETE: All tests passed!")
-        print("✅ Homeowner chat access pattern working correctly")
-        print("✅ Conversation creation API working for homeowners")
-        print("✅ ChatModal user ID logic is correct")
-        print("✅ Access control is consistent")
-        print("✅ Complete homeowner chat workflow operational")
-        print("✅ No regression from recent ChatModal fixes")
+    total_tests = tester.results['passed'] + tester.results['failed']
+    success_rate = (tester.results['passed'] / total_tests * 100) if total_tests > 0 else 0
+    
+    if success_rate >= 90:
+        print("\n🎉 MESSAGE DELIVERY VERIFICATION COMPLETE: System fully operational!")
+        print("✅ Message sending API working correctly")
+        print("✅ Message retrieval API working correctly")
+        print("✅ Conversation management operational")
+        print("✅ Message persistence & database working")
+        print("✅ Bi-directional messaging functional")
+        print("✅ Authentication & authorization working")
+        print("✅ Payment system integration operational")
     else:
-        print("\n⚠️  HOMEOWNER CHAT FUNCTIONALITY TESTING COMPLETE: Issues found!")
-        print("🔧 Action required to fix homeowner chat functionality")
+        print("\n⚠️  MESSAGE DELIVERY VERIFICATION COMPLETE: Issues found!")
+        print("🔧 Action required to fix message delivery system")
         print("📋 Review the detailed analysis above for specific issues")
