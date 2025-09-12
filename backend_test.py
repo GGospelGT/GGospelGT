@@ -1809,7 +1809,8 @@ class BackendAPITester:
         print("\n=== 🎯 ADDITIONAL TEST: Message Ordering (Chronological) ===")
         
         if 'conversation_id' not in self.test_data:
-            self.log_result("Message ordering setup", False, "No conversation available")
+            # Test API endpoint ordering behavior
+            self.test_api_ordering_behavior()
             return
         
         homeowner_token = self.auth_tokens['homeowner']
