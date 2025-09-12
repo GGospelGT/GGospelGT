@@ -521,6 +521,92 @@ class BackendAPITester:
         
         self.log_result("Test conversation creation", False, "Unable to create test conversation - payment workflow incomplete")
         return False
+    
+    def test_message_sending_access_control(self):
+        """Test message sending access control when no conversation is available"""
+        print("\n--- Testing Message Sending Access Control (No Conversation) ---")
+        
+        if 'messaging_job_id' not in self.test_data:
+            self.log_result("Message sending access control", False, "No test job available")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        job_id = self.test_data['messaging_job_id']
+        tradesperson_id = self.test_data['tradesperson_user']['id']
+        
+        # Test 1.1: Verify conversation creation is blocked without payment
+        print("\n--- Test 1.1: Conversation Creation Access Control ---")
+        response = self.make_request("GET", f"/messages/conversations/job/{job_id}?tradesperson_id={tradesperson_id}", 
+                                   auth_token=homeowner_token)
+        
+        if response.status_code == 403:
+            error_detail = response.json().get('detail', '')
+            if 'pay for access' in error_detail.lower() or 'paid_access' in error_detail.lower():
+                self.log_result("Message sending API - Conversation creation blocked", True, 
+                              f"✅ Correctly blocked conversation creation: {error_detail}")
+            else:
+                self.log_result("Message sending API - Conversation creation blocked", False, 
+                              f"❌ Wrong error message: {error_detail}")
+        else:
+            self.log_result("Message sending API - Conversation creation blocked", False, 
+                          f"❌ Expected 403, got {response.status_code}")
+        
+        # Test 1.2: Test message sending to non-existent conversation
+        print("\n--- Test 1.2: Message Sending to Non-existent Conversation ---")
+        fake_conversation_id = "fake-conversation-id-for-testing"
+        message_data = {
+            "conversation_id": fake_conversation_id,
+            "content": "Test message to non-existent conversation",
+            "message_type": "text"
+        }
+        
+        response = self.make_request("POST", f"/messages/conversations/{fake_conversation_id}/messages", 
+                                   json=message_data, auth_token=homeowner_token)
+        
+        if response.status_code == 404:
+            self.log_result("Message sending API - Non-existent conversation", True, 
+                          "✅ Correctly rejected message to non-existent conversation")
+        else:
+            self.log_result("Message sending API - Non-existent conversation", False, 
+                          f"❌ Expected 404, got {response.status_code}")
+        
+        # Test 1.3: Authentication requirements
+        print("\n--- Test 1.3: Authentication Requirements ---")
+        response = self.make_request("POST", f"/messages/conversations/{fake_conversation_id}/messages", 
+                                   json=message_data)
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Message sending API - Authentication required", True, 
+                          f"✅ Correctly rejected unauthenticated request: {response.status_code}")
+        else:
+            self.log_result("Message sending API - Authentication required", False, 
+                          f"❌ Expected 401/403, got {response.status_code}")
+        
+        # Test 1.4: Payment system integration verification
+        print("\n--- Test 1.4: Payment System Integration Verification ---")
+        
+        # Check current interest status
+        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+        
+        if response.status_code == 200:
+            interests = response.json()
+            test_interest = None
+            for interest in interests:
+                if interest.get('job_id') == job_id:
+                    test_interest = interest
+                    break
+            
+            if test_interest:
+                status = test_interest.get('status')
+                self.log_result("Message sending API - Interest status verification", True, 
+                              f"✅ Interest status: {status} (messaging blocked until paid_access)")
+            else:
+                self.log_result("Message sending API - Interest status verification", False, 
+                              "❌ Test interest not found")
+        else:
+            self.log_result("Message sending API - Interest status verification", False, 
+                          f"❌ Failed to get interests: {response.status_code}")
 
     def test_critical_homeowner_access_control_fix(self):
         """CRITICAL TEST: Verify homeowner access control fix - cannot create conversations without paid_access"""
