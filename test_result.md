@@ -84,7 +84,17 @@
         agent: "testing"
         comment: "🎉 CRITICAL CONTACT SHARING BUG INVESTIGATION COMPLETE: Contact sharing functionality fully operational with 100% success rate (12/12 tests passed). ROOT CAUSE IDENTIFIED AND FIXED: The issue was in the database method `get_tradesperson_interests` where the `contact_shared_at` field was not being included in the MongoDB projection, so it wasn't being returned to tradespeople when they checked their interests. COMPREHENSIVE TESTING VERIFIED: ✅ Contact Sharing API Endpoint (PUT /api/interests/share-contact/{interest_id}) working correctly with proper response structure (interest_id, status, message, contact_shared_at), ✅ Database Status Updates working correctly (interest status properly updated from 'interested' to 'contact_shared', contact_shared_at timestamp correctly set), ✅ Tradesperson Status Visibility working correctly (tradespeople can see updated status as 'contact_shared' in their interests list), ✅ Homeowner Status Visibility working correctly (homeowners can see updated status in their job interests view), ✅ Database Consistency verified (contact_shared_at timestamp properly stored and retrieved), ✅ Notification System Integration working (contact shared notifications sent to tradespeople successfully), ✅ Edge Cases handled properly (non-existent interest IDs rejected with 404, duplicate sharing handled appropriately with 400, unauthorized access prevented with 403). CRITICAL FIX APPLIED: Updated database.py line 1023-1034 to include 'contact_shared_at': 1 and 'payment_made_at': 1 in the MongoDB projection for get_tradesperson_interests method. This ensures all timestamp fields are returned to the frontend. PRODUCTION READY: Complete contact sharing workflow operational for Nigerian marketplace with proper status synchronization, notification delivery, and comprehensive error handling. The reported bug has been resolved and all contact sharing functionality is working correctly."
 
-  - task: "Enhanced Payment-to-Chat Flow - Auto-redirect After Payment"
+  - task: "Message Delivery Verification - Tradesperson and Homeowner"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ChatModal.jsx, /app/backend/routes/messages.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "🔍 MESSAGE DELIVERY VERIFICATION REQUESTED: User requested verification that messages are being properly delivered when tradespeople or homeowners send messages in the chat system. Need to comprehensively test: 1) Message sending functionality for both user types, 2) Message delivery and storage in database, 3) Real-time message display in chat interface, 4) Bi-directional messaging between homeowners and tradespeople, 5) Message persistence and retrieval. This is critical to ensure the recent contact details visibility fix didn't break core messaging functionality."
     implemented: true
     working: true
     file: "/app/frontend/src/pages/MyInterestsPage.jsx, /app/frontend/src/components/ChatModal.jsx, /app/backend/routes/messages.py"
