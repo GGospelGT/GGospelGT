@@ -438,25 +438,26 @@ const MyInterestsPage = () => {
               
               {/* Wallet Balance Card */}
               <Card className="min-w-[200px]">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 font-lato">Wallet Balance</p>
-                    <p className="text-xl font-bold font-montserrat" style={{color: '#2F8140'}}>
-                      {walletBalance} coins
-                    </p>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 font-lato">Wallet Balance</p>
+                      <p className="text-xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                        {walletBalance} coins
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/wallet')}
+                      className="text-sm"
+                    >
+                      Fund Wallet
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/wallet')}
-                    className="text-sm"
-                  >
-                    Fund Wallet
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
 
