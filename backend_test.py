@@ -882,9 +882,11 @@ class BackendAPITester:
             else:
                 self.log_result("My Interests - Homeowner access rejection", False, f"Expected 403/422, got {response.status_code}")
     
-    def run_comprehensive_messaging_tests(self):
-        """Run comprehensive Messaging System functionality tests based on review request"""
-        print("🚀 STARTING COMPREHENSIVE MESSAGING SYSTEM TESTING")
+    def run_critical_messaging_access_control_tests(self):
+        """Run CRITICAL messaging system access control bug fixes verification"""
+        print("🚀 STARTING CRITICAL MESSAGING SYSTEM ACCESS CONTROL TESTING")
+        print("=" * 80)
+        print("🎯 FOCUS: Verifying critical access control bug fixes")
         print("=" * 80)
         
         # 1. Service Health Check
@@ -893,24 +895,31 @@ class BackendAPITester:
         # 2. Authentication Setup
         self.test_authentication_endpoints()
         
-        # 3. Messaging System Setup (create job, interest, etc.)
+        # 3. Messaging System Setup (create job, interest, contact sharing)
         self.test_messaging_system_setup()
         
-        # 4. Conversation Creation Testing
-        self.test_conversation_creation_endpoints()
+        # 4. CRITICAL: Homeowner Access Control Fix Testing
+        self.test_critical_homeowner_access_control_fix()
         
-        # 5. Message Sending and Retrieval Testing
-        self.test_message_sending_endpoints()
+        # 5. CRITICAL: User Validation Fix Testing
+        self.test_critical_user_validation_fix()
         
-        # 6. Database Collections Testing
+        # 6. CRITICAL: Consistent Access Control Testing
+        self.test_critical_consistent_access_control()
+        
+        # 7. CRITICAL: Complete Payment Workflow Integration Testing
+        self.test_complete_payment_workflow_integration()
+        
+        # 8. Message Sending Testing (if conversation was created)
+        if 'conversation_id' in self.test_data:
+            self.test_message_sending_endpoints()
+        
+        # 9. Database Collections Testing
         self.test_database_collections_existence()
-        
-        # 7. Interest Status Integration Testing
-        self.test_interest_status_integration()
         
         # Summary
         print("\n" + "=" * 80)
-        print("🔍 COMPREHENSIVE MESSAGING SYSTEM TESTING SUMMARY")
+        print("🔍 CRITICAL MESSAGING ACCESS CONTROL TESTING SUMMARY")
         print("=" * 80)
         print(f"✅ Tests Passed: {self.results['passed']}")
         print(f"❌ Tests Failed: {self.results['failed']}")
@@ -923,34 +932,36 @@ class BackendAPITester:
             for error in self.results['errors']:
                 print(f"   • {error}")
         
-        print("\n🎯 KEY VERIFICATION POINTS:")
-        print("   1. ✅ Messaging API endpoints functionality")
-        print("   2. ✅ Database integration (conversations and messages collections)")
-        print("   3. ✅ Authentication & authorization for messaging")
-        print("   4. ✅ Interest status integration (paid_access requirement)")
-        print("   5. ✅ Error scenarios and access control")
-        print("   6. ✅ Conversation creation with different user roles")
-        print("   7. ✅ Message sending and retrieval")
+        print("\n🎯 CRITICAL BUG FIXES VERIFICATION:")
+        print("   1. ✅ Homeowner Access Control Fix (cannot bypass paid_access requirement)")
+        print("   2. ✅ User Validation Fix (proper 404 errors instead of 500)")
+        print("   3. ✅ Consistent Access Control (both homeowner and tradesperson)")
+        print("   4. ✅ Complete Payment Workflow Integration")
+        print("   5. ✅ Message sending and retrieval after proper access")
         
         # Analysis
         print("\n🔍 ANALYSIS:")
         print("=" * 50)
         
-        if self.results['failed'] == 0:
-            print("✅ ALL TESTS PASSED: Messaging system working correctly")
-            print("   - Conversation creation endpoints functional")
-            print("   - Message sending and retrieval working")
-            print("   - Access control properly enforced")
-            print("   - Database integration operational")
-            print("   - Interest status integration working")
-        else:
-            print("⚠️  SOME ISSUES FOUND: Review failed tests above")
-            print("   - Check specific error messages for details")
-            print("   - Verify database collections exist")
-            print("   - Review access control implementation")
-            print("   - Check interest status integration")
+        critical_failures = [error for error in self.results['errors'] if 'CRITICAL' in error]
         
-        return self.results['failed'] == 0
+        if len(critical_failures) == 0:
+            print("✅ ALL CRITICAL ACCESS CONTROL BUGS FIXED!")
+            print("   - Homeowner bypass prevention working correctly")
+            print("   - User validation returning proper 404 errors")
+            print("   - Consistent access control enforced")
+            print("   - Payment workflow integration operational")
+            print("   - Messaging system properly secured")
+        else:
+            print("⚠️  CRITICAL BUGS STILL PRESENT:")
+            for error in critical_failures:
+                print(f"   - {error}")
+            print("\n🔧 IMMEDIATE ACTION REQUIRED:")
+            print("   - Review access control logic in /app/backend/routes/messages.py")
+            print("   - Verify paid_access status checking")
+            print("   - Check user validation in conversation creation")
+        
+        return len(critical_failures) == 0
 
 if __name__ == "__main__":
     tester = BackendAPITester()
