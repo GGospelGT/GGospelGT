@@ -47,6 +47,8 @@ const ChatModal = ({
   }, [messages]);
 
   const initializeConversation = async () => {
+    let response = null;
+    
     try {
       setLoading(true);
       
@@ -78,7 +80,7 @@ const ChatModal = ({
         console.log('   jobId:', jobId);
         console.log('   tradespersonId:', tradespersonId);
         
-        const response = await messagesAPI.getOrCreateConversationForJob(jobId, tradespersonId);
+        response = await messagesAPI.getOrCreateConversationForJob(jobId, tradespersonId);
         console.log('✅ Conversation API response:', response);
         setConversationId(response.conversation_id);
       }
