@@ -959,9 +959,9 @@ class BackendAPITester:
         else:
             self.log_result("Database integration", False, f"Status: {response.status_code}")
     
-    def run_comprehensive_show_interest_tests(self):
-        """Run comprehensive Show Interest functionality tests based on review request"""
-        print("🚀 STARTING COMPREHENSIVE SHOW INTEREST FUNCTIONALITY TESTING")
+    def run_comprehensive_messaging_tests(self):
+        """Run comprehensive Messaging System functionality tests based on review request"""
+        print("🚀 STARTING COMPREHENSIVE MESSAGING SYSTEM TESTING")
         print("=" * 80)
         
         # 1. Service Health Check
@@ -970,24 +970,24 @@ class BackendAPITester:
         # 2. Authentication Setup
         self.test_authentication_endpoints()
         
-        # 3. Core Show Interest Functionality Testing
-        self.test_show_interest_functionality()
+        # 3. Messaging System Setup (create job, interest, etc.)
+        self.test_messaging_system_setup()
         
-        # 4. My Interests Endpoint Testing
-        self.test_my_interests_endpoint()
+        # 4. Conversation Creation Testing
+        self.test_conversation_creation_endpoints()
         
-        # 5. Job Interests Endpoint Testing
-        self.test_job_interests_endpoint()
+        # 5. Message Sending and Retrieval Testing
+        self.test_message_sending_endpoints()
         
-        # 6. Contact Sharing Workflow Testing
-        self.test_contact_sharing_workflow()
+        # 6. Database Collections Testing
+        self.test_database_collections_existence()
         
-        # 7. Wallet Integration Testing
-        self.test_wallet_integration()
+        # 7. Interest Status Integration Testing
+        self.test_interest_status_integration()
         
         # Summary
         print("\n" + "=" * 80)
-        print("🔍 COMPREHENSIVE SHOW INTEREST TESTING SUMMARY")
+        print("🔍 COMPREHENSIVE MESSAGING SYSTEM TESTING SUMMARY")
         print("=" * 80)
         print(f"✅ Tests Passed: {self.results['passed']}")
         print(f"❌ Tests Failed: {self.results['failed']}")
@@ -1001,39 +1001,39 @@ class BackendAPITester:
                 print(f"   • {error}")
         
         print("\n🎯 KEY VERIFICATION POINTS:")
-        print("   1. ✅ Show Interest API endpoint functionality")
-        print("   2. ✅ Error scenario handling (400 Bad Request errors)")
-        print("   3. ✅ User authentication flow validation")
-        print("   4. ✅ Database consistency and duplicate prevention")
-        print("   5. ✅ Job status validation (active vs inactive)")
-        print("   6. ✅ Contact sharing workflow")
-        print("   7. ✅ Wallet integration for access fees")
+        print("   1. ✅ Messaging API endpoints functionality")
+        print("   2. ✅ Database integration (conversations and messages collections)")
+        print("   3. ✅ Authentication & authorization for messaging")
+        print("   4. ✅ Interest status integration (paid_access requirement)")
+        print("   5. ✅ Error scenarios and access control")
+        print("   6. ✅ Conversation creation with different user roles")
+        print("   7. ✅ Message sending and retrieval")
         
         # Analysis
         print("\n🔍 ANALYSIS:")
         print("=" * 50)
         
         if self.results['failed'] == 0:
-            print("✅ ALL TESTS PASSED: Show Interest functionality working correctly after bug fixes")
-            print("   - Show interest endpoint handling all scenarios properly")
-            print("   - 400 errors returning specific, helpful error messages")
-            print("   - Authentication and authorization working correctly")
-            print("   - Database consistency maintained")
-            print("   - Contact sharing workflow operational")
-            print("   - Wallet integration functional")
+            print("✅ ALL TESTS PASSED: Messaging system working correctly")
+            print("   - Conversation creation endpoints functional")
+            print("   - Message sending and retrieval working")
+            print("   - Access control properly enforced")
+            print("   - Database integration operational")
+            print("   - Interest status integration working")
         else:
             print("⚠️  SOME ISSUES FOUND: Review failed tests above")
             print("   - Check specific error messages for details")
-            print("   - Verify recent bug fixes are properly deployed")
-            print("   - Review error handling implementation")
+            print("   - Verify database collections exist")
+            print("   - Review access control implementation")
+            print("   - Check interest status integration")
         
         return self.results['failed'] == 0
 
 if __name__ == "__main__":
     tester = BackendAPITester()
-    success = tester.run_comprehensive_show_interest_tests()
+    success = tester.run_comprehensive_messaging_tests()
     
     if success:
-        print("\n🎉 SHOW INTEREST TESTING COMPLETE: All functionality operational!")
+        print("\n🎉 MESSAGING SYSTEM TESTING COMPLETE: All functionality operational!")
     else:
-        print("\n⚠️  SHOW INTEREST TESTING COMPLETE: Issues found - review above")
+        print("\n⚠️  MESSAGING SYSTEM TESTING COMPLETE: Issues found - review above")
