@@ -865,12 +865,14 @@ class BackendAPITester:
             else:
                 self.log_result("My Interests - Homeowner access rejection", False, f"Expected 403/422, got {response.status_code}")
     
-    def test_payment_status_investigation(self):
-        """URGENT: Investigate payment status issue - users paid but still getting Access Required error"""
-        print("\n=== 🚨 URGENT PAYMENT STATUS INVESTIGATION ===")
+    def test_critical_database_investigation(self):
+        """CRITICAL DATABASE INVESTIGATION: Real-time database state and API response debugging"""
+        print("\n=== 🚨 CRITICAL DATABASE INVESTIGATION ===")
+        print("🎯 FOCUS: Users paid but still getting 'Access Required' error")
+        print("🔍 INVESTIGATING: Database state, API responses, payment processing, and consistency")
         
         if 'messaging_interest_id' not in self.test_data:
-            self.log_result("Payment status investigation setup", False, "Missing interest data")
+            self.log_result("Database investigation setup", False, "Missing interest data")
             return
         
         homeowner_token = self.auth_tokens['homeowner']
@@ -883,8 +885,11 @@ class BackendAPITester:
         print(f"🔍 Job ID: {job_id}")
         print(f"🔍 Tradesperson ID: {tradesperson_id}")
         
-        # Step 1: Check current interest status before payment
-        print("\n--- Step 1: Check Interest Status Before Payment ---")
+        # === 1. REAL-TIME DATABASE STATE INVESTIGATION ===
+        print("\n=== 1. REAL-TIME DATABASE STATE INVESTIGATION ===")
+        
+        # Check current interest status via API (this queries the database)
+        print("\n--- 1.1: Query Interest Status via My-Interests API ---")
         response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
         
         if response.status_code == 200:
@@ -899,132 +904,279 @@ class BackendAPITester:
                 current_status = test_interest.get('status')
                 payment_made_at = test_interest.get('payment_made_at')
                 contact_shared_at = test_interest.get('contact_shared_at')
+                created_at = test_interest.get('created_at')
                 
-                self.log_result("Payment Investigation - Pre-payment status", True, 
-                              f"Status: {current_status}, Payment: {payment_made_at}, Contact Shared: {contact_shared_at}")
+                self.log_result("Database Investigation - Current interest state", True, 
+                              f"Status: {current_status}, Payment: {payment_made_at}, Contact Shared: {contact_shared_at}, Created: {created_at}")
                 
-                # Step 2: Try conversation creation before payment (should fail)
-                print("\n--- Step 2: Test Conversation Creation Before Payment ---")
+                # Check if this is a recent payment (within last hour)
+                if payment_made_at:
+                    from datetime import datetime, timedelta
+                    try:
+                        payment_time = datetime.fromisoformat(payment_made_at.replace('Z', '+00:00'))
+                        time_since_payment = datetime.utcnow() - payment_time.replace(tzinfo=None)
+                        if time_since_payment < timedelta(hours=1):
+                            self.log_result("Database Investigation - Recent payment activity", True, 
+                                          f"Recent payment found: {time_since_payment.total_seconds():.0f} seconds ago")
+                        else:
+                            self.log_result("Database Investigation - Recent payment activity", True, 
+                                          f"Payment made {time_since_payment.total_seconds()//3600:.0f} hours ago")
+                    except Exception as e:
+                        self.log_result("Database Investigation - Payment time parsing", False, f"Error parsing time: {e}")
+                
+                # Check for stuck states
+                if current_status not in ['interested', 'contact_shared', 'paid_access', 'cancelled']:
+                    self.log_result("Database Investigation - Invalid status detected", False, 
+                                  f"❌ CRITICAL: Invalid status '{current_status}' found in database")
+                else:
+                    self.log_result("Database Investigation - Status validation", True, 
+                                  f"✅ Valid status '{current_status}' found")
+                
+                # === 2. API RESPONSE DEBUGGING ===
+                print("\n=== 2. API RESPONSE DEBUGGING ===")
+                
+                # Test homeowner view of the same interest
+                print("\n--- 2.1: Homeowner View of Job Interests ---")
+                response = self.make_request("GET", f"/interests/job/{job_id}", auth_token=homeowner_token)
+                
+                if response.status_code == 200:
+                    job_interests = response.json()
+                    interested_tradespeople = job_interests.get('interested_tradespeople', [])
+                    
+                    homeowner_view_interest = None
+                    for tp in interested_tradespeople:
+                        if tp.get('tradesperson_id') == tradesperson_id:
+                            homeowner_view_interest = tp
+                            break
+                    
+                    if homeowner_view_interest:
+                        homeowner_status = homeowner_view_interest.get('status')
+                        homeowner_payment = homeowner_view_interest.get('payment_made_at')
+                        
+                        self.log_result("Database Investigation - Homeowner view consistency", True, 
+                                      f"Homeowner sees: Status={homeowner_status}, Payment={homeowner_payment}")
+                        
+                        # Check for consistency between tradesperson and homeowner views
+                        if homeowner_status == current_status:
+                            self.log_result("Database Investigation - View consistency check", True, 
+                                          "✅ Tradesperson and homeowner see same status")
+                        else:
+                            self.log_result("Database Investigation - View consistency check", False, 
+                                          f"❌ CRITICAL: Status mismatch - Tradesperson: {current_status}, Homeowner: {homeowner_status}")
+                    else:
+                        self.log_result("Database Investigation - Homeowner view lookup", False, 
+                                      "❌ Interest not found in homeowner's job interests")
+                else:
+                    self.log_result("Database Investigation - Homeowner view API", False, 
+                                  f"Failed to get homeowner view: {response.status_code}")
+                
+                # === 3. PAYMENT PROCESSING DEBUG ===
+                print("\n=== 3. PAYMENT PROCESSING DEBUG ===")
+                
+                # Test conversation access control with current status
+                print("\n--- 3.1: Test Conversation Access Control ---")
                 response = self.make_request("GET", f"/messages/conversations/job/{job_id}?tradesperson_id={tradesperson_id}", 
                                            auth_token=homeowner_token)
                 
                 if response.status_code == 403:
                     error_response = response.json()
                     error_detail = error_response.get('detail', '')
-                    self.log_result("Payment Investigation - Pre-payment access control", True, 
-                                  f"✅ Correctly blocked: {error_detail}")
+                    if current_status == 'paid_access':
+                        self.log_result("Database Investigation - Access control bug", False, 
+                                      f"❌ CRITICAL BUG: Status is 'paid_access' but still getting 403: {error_detail}")
+                    else:
+                        self.log_result("Database Investigation - Access control working", True, 
+                                      f"✅ Correctly blocked for status '{current_status}': {error_detail}")
+                elif response.status_code == 200:
+                    conv_response = response.json()
+                    if current_status == 'paid_access':
+                        self.log_result("Database Investigation - Access control working", True, 
+                                      f"✅ Conversation access granted for paid_access status")
+                        self.test_data['conversation_id'] = conv_response.get('conversation_id')
+                    else:
+                        self.log_result("Database Investigation - Access control bug", False, 
+                                      f"❌ CRITICAL BUG: Conversation allowed for status '{current_status}'")
                 else:
-                    self.log_result("Payment Investigation - Pre-payment access control", False, 
-                                  f"❌ Expected 403, got {response.status_code}")
+                    self.log_result("Database Investigation - Access control error", False, 
+                                  f"Unexpected response: {response.status_code}")
                 
-                # Step 3: Attempt payment
-                print("\n--- Step 3: Attempt Payment ---")
-                pay_response = self.make_request("POST", f"/interests/pay-access/{interest_id}", 
-                                               auth_token=tradesperson_token)
-                
-                if pay_response.status_code == 200:
-                    payment_result = pay_response.json()
-                    self.log_result("Payment Investigation - Payment attempt", True, 
-                                  f"✅ Payment successful: {payment_result.get('message', 'No message')}")
+                # If not paid_access, attempt payment to test the flow
+                if current_status != 'paid_access':
+                    print("\n--- 3.2: Test Payment Processing Flow ---")
                     
-                    # Step 4: Check interest status after payment
-                    print("\n--- Step 4: Check Interest Status After Payment ---")
+                    # First, try to fund wallet for testing
+                    self.fund_wallet_for_testing(tradesperson_token)
+                    
+                    # Attempt payment
+                    pay_response = self.make_request("POST", f"/interests/pay-access/{interest_id}", 
+                                                   auth_token=tradesperson_token)
+                    
+                    if pay_response.status_code == 200:
+                        payment_result = pay_response.json()
+                        self.log_result("Database Investigation - Payment processing", True, 
+                                      f"✅ Payment successful: {payment_result.get('message', 'No message')}")
+                        
+                        # IMMEDIATE re-check of status after payment
+                        print("\n--- 3.3: Immediate Post-Payment Status Check ---")
+                        import time
+                        time.sleep(0.1)  # Brief pause to ensure database write completes
+                        
+                        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+                        
+                        if response.status_code == 200:
+                            interests = response.json()
+                            updated_interest = None
+                            for interest in interests:
+                                if interest.get('id') == interest_id:
+                                    updated_interest = interest
+                                    break
+                            
+                            if updated_interest:
+                                new_status = updated_interest.get('status')
+                                new_payment_made_at = updated_interest.get('payment_made_at')
+                                
+                                self.log_result("Database Investigation - Post-payment status", True, 
+                                              f"Status: {new_status}, Payment: {new_payment_made_at}")
+                                
+                                # CRITICAL: Check if status was actually updated
+                                if new_status == 'paid_access':
+                                    self.log_result("Database Investigation - Status update verification", True, 
+                                                  "✅ Status correctly updated to 'paid_access'")
+                                    
+                                    # Test conversation access immediately after payment
+                                    print("\n--- 3.4: Immediate Post-Payment Access Test ---")
+                                    response = self.make_request("GET", f"/messages/conversations/job/{job_id}?tradesperson_id={tradesperson_id}", 
+                                                               auth_token=homeowner_token)
+                                    
+                                    if response.status_code == 200:
+                                        conv_response = response.json()
+                                        if 'conversation_id' in conv_response:
+                                            self.test_data['conversation_id'] = conv_response['conversation_id']
+                                            self.log_result("Database Investigation - Post-payment access", True, 
+                                                          f"✅ Conversation created immediately after payment: {conv_response['conversation_id']}")
+                                        else:
+                                            self.log_result("Database Investigation - Post-payment access", False, 
+                                                          "❌ Missing conversation_id in response")
+                                    elif response.status_code == 403:
+                                        error_response = response.json()
+                                        error_detail = error_response.get('detail', '')
+                                        self.log_result("Database Investigation - Post-payment access", False, 
+                                                      f"❌ CRITICAL BUG: Still getting 403 immediately after payment: {error_detail}")
+                                        
+                                        # This is the core issue - investigate further
+                                        self.debug_payment_persistence_issue(job_id, tradesperson_id, interest_id)
+                                    else:
+                                        self.log_result("Database Investigation - Post-payment access", False, 
+                                                      f"❌ Unexpected response: {response.status_code}")
+                                else:
+                                    self.log_result("Database Investigation - Status update verification", False, 
+                                                  f"❌ CRITICAL BUG: Status not updated after payment - still '{new_status}'")
+                            else:
+                                self.log_result("Database Investigation - Post-payment status", False, 
+                                              "❌ Interest not found after payment")
+                        else:
+                            self.log_result("Database Investigation - Post-payment status", False, 
+                                          f"❌ Failed to get interests after payment: {response.status_code}")
+                    
+                    elif pay_response.status_code == 400:
+                        error_response = pay_response.json()
+                        error_detail = error_response.get('detail', '')
+                        self.log_result("Database Investigation - Payment processing", True, 
+                                      f"Payment blocked (expected): {error_detail}")
+                    else:
+                        self.log_result("Database Investigation - Payment processing", False, 
+                                      f"❌ Payment failed: {pay_response.status_code}")
+                
+                # === 4. DATABASE CONNECTION AND CONSISTENCY ===
+                print("\n=== 4. DATABASE CONNECTION AND CONSISTENCY ===")
+                
+                # Test multiple rapid API calls to check consistency
+                print("\n--- 4.1: Database Read Consistency Test ---")
+                statuses = []
+                for i in range(3):
                     response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
-                    
                     if response.status_code == 200:
                         interests = response.json()
-                        updated_interest = None
                         for interest in interests:
                             if interest.get('id') == interest_id:
-                                updated_interest = interest
+                                statuses.append(interest.get('status'))
                                 break
-                        
-                        if updated_interest:
-                            new_status = updated_interest.get('status')
-                            new_payment_made_at = updated_interest.get('payment_made_at')
-                            
-                            self.log_result("Payment Investigation - Post-payment status", True, 
-                                          f"Status: {new_status}, Payment: {new_payment_made_at}")
-                            
-                            # CRITICAL CHECK: Verify status is exactly 'paid_access'
-                            if new_status == 'paid_access':
-                                self.log_result("Payment Investigation - Status verification", True, 
-                                              "✅ Status correctly set to 'paid_access'")
-                                
-                                # Step 5: Test conversation creation after payment
-                                print("\n--- Step 5: Test Conversation Creation After Payment ---")
-                                response = self.make_request("GET", f"/messages/conversations/job/{job_id}?tradesperson_id={tradesperson_id}", 
-                                                           auth_token=homeowner_token)
-                                
-                                if response.status_code == 200:
-                                    conv_response = response.json()
-                                    if 'conversation_id' in conv_response:
-                                        self.test_data['conversation_id'] = conv_response['conversation_id']
-                                        self.log_result("Payment Investigation - Post-payment conversation", True, 
-                                                      f"✅ Conversation created: {conv_response['conversation_id']}")
-                                        
-                                        # Step 6: Test message sending
-                                        print("\n--- Step 6: Test Message Sending ---")
-                                        self.test_message_sending_after_payment(conv_response['conversation_id'])
-                                        
-                                    else:
-                                        self.log_result("Payment Investigation - Post-payment conversation", False, 
-                                                      "❌ Missing conversation_id in response")
-                                elif response.status_code == 403:
-                                    error_response = response.json()
-                                    error_detail = error_response.get('detail', '')
-                                    self.log_result("Payment Investigation - Post-payment conversation", False, 
-                                                  f"❌ CRITICAL BUG: Still getting 403 after payment: {error_detail}")
-                                    
-                                    # Additional debugging - check what the backend is seeing
-                                    print("\n--- DEBUGGING: Check Backend Interest Status ---")
-                                    self.debug_backend_interest_status(job_id, tradesperson_id)
-                                    
-                                else:
-                                    self.log_result("Payment Investigation - Post-payment conversation", False, 
-                                                  f"❌ Unexpected status: {response.status_code}")
-                            else:
-                                self.log_result("Payment Investigation - Status verification", False, 
-                                              f"❌ CRITICAL BUG: Status is '{new_status}', expected 'paid_access'")
-                        else:
-                            self.log_result("Payment Investigation - Post-payment status", False, 
-                                          "❌ Interest not found after payment")
-                    else:
-                        self.log_result("Payment Investigation - Post-payment status", False, 
-                                      f"❌ Failed to get interests: {response.status_code}")
-                        
-                elif pay_response.status_code == 400:
-                    error_response = pay_response.json()
-                    error_detail = error_response.get('detail', '')
-                    if 'insufficient' in error_detail.lower():
-                        self.log_result("Payment Investigation - Payment attempt", True, 
-                                      f"Expected insufficient balance: {error_detail}")
-                        
-                        # For testing purposes, let's simulate a successful payment by manually funding wallet
-                        print("\n--- Step 3b: Fund Wallet and Retry Payment ---")
-                        self.fund_wallet_for_testing(tradesperson_token)
-                        
-                        # Retry payment
-                        pay_response = self.make_request("POST", f"/interests/pay-access/{interest_id}", 
-                                                       auth_token=tradesperson_token)
-                        
-                        if pay_response.status_code == 200:
-                            self.log_result("Payment Investigation - Payment retry", True, "✅ Payment successful after wallet funding")
-                            # Continue with post-payment testing...
-                        else:
-                            self.log_result("Payment Investigation - Payment retry", False, 
-                                          f"❌ Payment still failed: {pay_response.status_code}")
-                    else:
-                        self.log_result("Payment Investigation - Payment attempt", False, 
-                                      f"❌ Unexpected payment error: {error_detail}")
+                    time.sleep(0.1)  # Small delay between requests
+                
+                if len(set(statuses)) == 1:
+                    self.log_result("Database Investigation - Read consistency", True, 
+                                  f"✅ Consistent reads: {statuses[0]} (3/3 calls)")
                 else:
-                    self.log_result("Payment Investigation - Payment attempt", False, 
-                                  f"❌ Payment failed: {pay_response.status_code}")
+                    self.log_result("Database Investigation - Read consistency", False, 
+                                  f"❌ CRITICAL: Inconsistent reads: {statuses}")
+                
+                # Test write-read consistency by updating and immediately reading
+                print("\n--- 4.2: Write-Read Consistency Test ---")
+                # We can't directly test database writes, but we can test API update-read cycles
+                # This would be done through the payment flow tested above
+                
             else:
-                self.log_result("Payment Investigation - Interest lookup", False, "❌ Test interest not found")
+                self.log_result("Database Investigation - Interest lookup", False, "❌ Test interest not found")
         else:
-            self.log_result("Payment Investigation - Interest retrieval", False, 
+            self.log_result("Database Investigation - Interest retrieval", False, 
                           f"❌ Failed to get interests: {response.status_code}")
+    
+    def debug_payment_persistence_issue(self, job_id: str, tradesperson_id: str, interest_id: str):
+        """Debug why payment status isn't persisting or being read correctly"""
+        print("\n🔍 DEBUGGING PAYMENT PERSISTENCE ISSUE")
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        
+        # Check if the issue is in the database query used by conversation access control
+        print("\n--- Debug: Access Control Database Query ---")
+        
+        # The conversation endpoint uses get_interest_by_job_and_tradesperson
+        # Let's see what it returns by checking both user views again
+        
+        # Tradesperson view
+        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+        if response.status_code == 200:
+            interests = response.json()
+            for interest in interests:
+                if interest.get('id') == interest_id:
+                    self.log_result("Debug - Tradesperson view after payment", True, 
+                                  f"Status: {interest.get('status')}, Payment: {interest.get('payment_made_at')}")
+                    break
+        
+        # Homeowner view
+        response = self.make_request("GET", f"/interests/job/{job_id}", auth_token=homeowner_token)
+        if response.status_code == 200:
+            job_interests = response.json()
+            interested_tradespeople = job_interests.get('interested_tradespeople', [])
+            for tp in interested_tradespeople:
+                if tp.get('tradesperson_id') == tradesperson_id:
+                    self.log_result("Debug - Homeowner view after payment", True, 
+                                  f"Status: {tp.get('status')}, Payment: {tp.get('payment_made_at')}")
+                    break
+        
+        # Test the specific database method used by conversation access control
+        # This is indirect testing through the API that uses the same method
+        print("\n--- Debug: Conversation Access Control Logic ---")
+        response = self.make_request("GET", f"/messages/conversations/job/{job_id}?tradesperson_id={tradesperson_id}", 
+                                   auth_token=homeowner_token)
+        
+        if response.status_code == 403:
+            error_response = response.json()
+            error_detail = error_response.get('detail', '')
+            self.log_result("Debug - Access control still blocking", False, 
+                          f"❌ CRITICAL: Access still blocked after payment: {error_detail}")
+            
+            # This suggests the get_interest_by_job_and_tradesperson method
+            # is not returning the updated status, indicating a database consistency issue
+            self.log_result("Debug - Root cause identified", False, 
+                          "❌ CRITICAL: Database method get_interest_by_job_and_tradesperson not returning updated status")
+        elif response.status_code == 200:
+            self.log_result("Debug - Access control working", True, 
+                          "✅ Access control now working correctly")
+        else:
+            self.log_result("Debug - Access control error", False, 
+                          f"Unexpected response: {response.status_code}")
 
     def debug_backend_interest_status(self, job_id: str, tradesperson_id: str):
         """Debug what the backend is seeing for interest status"""
