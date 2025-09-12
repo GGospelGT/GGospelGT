@@ -212,13 +212,7 @@ const InterestedTradespeopleePage = () => {
     });
     
     try {
-      // For homeowners chatting with tradespeople, show tradesperson's contact details
-      const tradespersonContactDetails = {
-        homeowner_name: tradesperson.tradesperson_name, // Using homeowner_name field for consistency with ChatModal
-        homeowner_email: tradesperson.email || 'Not provided',
-        homeowner_phone: tradesperson.phone || 'Not provided'
-      };
-      
+      // Simplified chat data setup
       const chatData = {
         id: tradesperson.tradesperson_id,
         name: tradesperson.tradesperson_name,
@@ -226,7 +220,11 @@ const InterestedTradespeopleePage = () => {
         email: tradesperson.email || '',
         phone: tradesperson.phone || '',
         location: tradesperson.location || '',
-        contactDetails: tradespersonContactDetails, // Show tradesperson's contact details
+        contactDetails: {
+          homeowner_name: user?.name || '',
+          homeowner_email: user?.email || '',
+          homeowner_phone: user?.phone || ''
+        },
         showContactDetails: true
       };
       
