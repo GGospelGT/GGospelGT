@@ -34,10 +34,10 @@ This is CRITICAL - users who have paid should immediately see updated status. If
 import requests
 import json
 import os
+import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
 import uuid
-import time
 
 # Get backend URL from environment
 BACKEND_URL = "https://servicehub-connect-1.preview.emergentagent.com/api"
