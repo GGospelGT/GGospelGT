@@ -97,6 +97,9 @@ class HomeownerChatTester:
         }
         
         response = self.make_request("POST", "/auth/register/tradesperson", json=tradesperson_data)
+        if response.status_code != 200:
+            print(f"Tradesperson registration failed: {response.status_code}")
+            print(f"Response: {response.text}")
         if response.status_code == 200:
             # Login with the created tradesperson
             login_data = {
