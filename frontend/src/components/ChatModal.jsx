@@ -50,29 +50,69 @@ const ChatModal = ({
     try {
       setLoading(true);
       
+      console.log('=== CHAT MODAL DEBUG ===');
+      console.log('Current user:', user);
+      console.log('Current user role:', user?.role);
+      console.log('Job ID:', jobId);
+      console.log('Other party:', otherParty);
+      
       // Get or create conversation
       if (!conversationId) {
-        const response = await messagesAPI.getOrCreateConversationForJob(jobId, otherParty.id);
+        // CRITICAL FIX: Determine the correct tradesperson ID based on user role
+        let tradespersonId;
+        
+        if (user?.role === 'tradesperson') {
+          // Current user is tradesperson, so use current user's ID
+          tradespersonId = user.id;
+          console.log('✅ User is tradesperson, using user ID:', tradespersonId);
+        } else if (user?.role === 'homeowner') {
+          // Current user is homeowner, so otherParty should be the tradesperson
+          tradespersonId = otherParty.id;
+          console.log('✅ User is homeowner, using otherParty ID:', tradespersonId);
+        } else {
+          console.error('❌ Invalid user role:', user?.role);
+          throw new Error('Invalid user role for chat');
+        }
+        
+        console.log('🔧 Making API call: getOrCreateConversationForJob');
+        console.log('   jobId:', jobId);
+        console.log('   tradespersonId:', tradespersonId);
+        
+        const response = await messagesAPI.getOrCreateConversationForJob(jobId, tradespersonId);
+        console.log('✅ Conversation API response:', response);
         setConversationId(response.conversation_id);
       }
       
       // Load messages if we have a conversation ID
-      const currentConvId = conversationId || initialConversationId;
+      const currentConvId = conversationId || response?.conversation_id;
       if (currentConvId) {
+        console.log('✅ Loading messages for conversation:', currentConvId);
         await loadMessages(currentConvId);
       }
       
     } catch (error) {
-      console.error('Failed to initialize conversation:', error);
+      console.error('❌ CHAT MODAL ERROR:', error);
+      console.error('Full error details:', error.response || error);
       
       // Handle specific error cases
       if (error.response?.status === 403) {
+        const detail = error.response.data?.detail || "Access required";
+        console.error('❌ 403 ERROR DETAILS:', detail);
+        
         toast({
           title: "Access Required",
           description: "You need to complete payment before starting a conversation. Please pay for access first.",
           variant: "destructive",
         });
+      } else if (error.response?.status === 404) {
+        console.error('❌ 404 ERROR: Job or user not found');
+        toast({
+          title: "Not Found",
+          description: "Job or conversation not found. Please try again.",
+          variant: "destructive",
+        });
       } else {
+        console.error('❌ UNKNOWN ERROR:', error.message);
         toast({
           title: "Error",
           description: "Failed to initialize conversation. Please try again.",
