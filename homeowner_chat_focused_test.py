@@ -92,7 +92,7 @@ class HomeownerChatTester:
             "trade_categories": ["Plumbing"],
             "experience_years": 5,
             "company_name": "Test Chat Plumbing Services",
-            "description": "Professional plumbing services for chat testing",
+            "description": "Professional plumbing services for chat testing with comprehensive experience in residential and commercial plumbing installations, repairs, and maintenance across Lagos State.",
             "certifications": ["Licensed Plumber"]
         }
         
