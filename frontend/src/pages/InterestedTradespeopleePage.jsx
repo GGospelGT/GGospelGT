@@ -890,20 +890,34 @@ const InterestedTradespeopleePage = () => {
       )}
 
       {/* Chat Modal */}
+      {console.log('🔍 CHAT MODAL DEBUG:')}
+      {console.log('   showChatModal:', showChatModal)}
+      {console.log('   selectedTradespersonForChat:', selectedTradespersonForChat)}
+      {console.log('   job:', job)}
+      {console.log('   jobId:', jobId)}
+      
       {showChatModal && selectedTradespersonForChat && job && (
-        <ChatModal
-          isOpen={showChatModal}
-          onClose={() => {
-            setShowChatModal(false);
-            setSelectedTradespersonForChat(null);
-          }}
-          jobId={jobId}
-          jobTitle={job.title}
-          otherParty={selectedTradespersonForChat}
-          contactDetails={selectedTradespersonForChat.contactDetails}
-          showContactDetails={selectedTradespersonForChat.showContactDetails}
-        />
+        <>
+          {console.log('✅ RENDERING CHAT MODAL - All conditions met')}
+          <ChatModal
+            isOpen={showChatModal}
+            onClose={() => {
+              console.log('🔥 CHAT MODAL CLOSE CLICKED');
+              setShowChatModal(false);
+              setSelectedTradespersonForChat(null);
+            }}
+            jobId={jobId}
+            jobTitle={job.title}
+            otherParty={selectedTradespersonForChat}
+            contactDetails={selectedTradespersonForChat.contactDetails}
+            showContactDetails={selectedTradespersonForChat.showContactDetails}
+          />
+        </>
       )}
+      
+      {!showChatModal && console.log('❌ Chat modal not shown - showChatModal is false')}
+      {!selectedTradespersonForChat && console.log('❌ Chat modal not shown - selectedTradespersonForChat is null')}
+      {!job && console.log('❌ Chat modal not shown - job is null')}
 
       <Footer />
     </div>
