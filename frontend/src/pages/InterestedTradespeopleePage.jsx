@@ -444,7 +444,13 @@ const InterestedTradespeopleePage = () => {
                       Access granted - Tradesperson can contact you
                     </Badge>
                     <Button
-                      onClick={() => handleStartChat(tradesperson)}
+                      onClick={(e) => {
+                        console.log('🔥 HOMEOWNER START CHAT BUTTON CLICKED!');
+                        console.log('Button click event:', e);
+                        console.log('Tradesperson data for chat:', tradesperson);
+                        e.preventDefault();
+                        handleStartChat(tradesperson);
+                      }}
                       className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
                     >
                       <MessageCircle size={16} />
