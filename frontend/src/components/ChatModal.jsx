@@ -157,14 +157,42 @@ const ChatModal = ({
         content: newMessage.trim()
       };
 
+      console.log('=== SENDING MESSAGE ===');
+      console.log('Conversation ID:', conversationId);
+      console.log('Message data:', messageData);
+      console.log('Current messages count:', messages.length);
+
       const response = await messagesAPI.sendMessage(conversationId, messageData);
       
-      // Add message to local state immediately
-      setMessages(prev => [...prev, response]);
-      setNewMessage('');
+      console.log('=== MESSAGE SENT RESPONSE ===');
+      console.log('Response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response keys:', Object.keys(response));
+      
+      // Add message to local state immediately with better error handling
+      if (response && response.id) {
+        setMessages(prev => {
+          const newMessages = [...prev, response];
+          console.log('=== UPDATING MESSAGE STATE ===');
+          console.log('Previous messages:', prev.length);
+          console.log('New messages:', newMessages.length);
+          console.log('Added message:', response);
+          return newMessages;
+        });
+        setNewMessage('');
+        console.log('✅ Message added to state and input cleared');
+      } else {
+        console.error('❌ Invalid message response format:', response);
+        throw new Error('Invalid message response format');
+      }
       
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('❌ FAILED TO SEND MESSAGE:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       
       // Handle specific error cases
       if (error.response?.status === 403) {
@@ -182,7 +210,7 @@ const ChatModal = ({
       } else {
         toast({
           title: "Error",
-          description: "Failed to send message. Please try again.",
+          description: `Failed to send message: ${error.message}. Please try again.`,
           variant: "destructive",
         });
       }
