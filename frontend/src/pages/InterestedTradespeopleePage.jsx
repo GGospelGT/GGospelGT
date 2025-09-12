@@ -917,16 +917,10 @@ const InterestedTradespeopleePage = () => {
         </div>
       )}
 
-      {/* Chat Modal */}
-      {console.log('🔍 CHAT MODAL DEBUG:')}
-      {console.log('   showChatModal:', showChatModal)}
-      {console.log('   selectedTradespersonForChat:', selectedTradespersonForChat)}
-      {console.log('   job:', job)}
-      {console.log('   jobId:', jobId)}
-      
-      {showChatModal && selectedTradespersonForChat && job && (
+      {/* Chat Modal - Fixed to work without full job object */}
+      {showChatModal && selectedTradespersonForChat && jobId && (
         <>
-          {console.log('✅ RENDERING CHAT MODAL - All conditions met')}
+          {console.log('✅ RENDERING CHAT MODAL - All conditions met (removed job requirement)')}
           <ChatModal
             isOpen={showChatModal}
             onClose={() => {
@@ -935,17 +929,13 @@ const InterestedTradespeopleePage = () => {
               setSelectedTradespersonForChat(null);
             }}
             jobId={jobId}
-            jobTitle={job.title}
+            jobTitle={job?.title || 'Job Discussion'} 
             otherParty={selectedTradespersonForChat}
             contactDetails={selectedTradespersonForChat.contactDetails}
             showContactDetails={selectedTradespersonForChat.showContactDetails}
           />
         </>
       )}
-      
-      {!showChatModal && console.log('❌ Chat modal not shown - showChatModal is false')}
-      {!selectedTradespersonForChat && console.log('❌ Chat modal not shown - selectedTradespersonForChat is null')}
-      {!job && console.log('❌ Chat modal not shown - job is null')}
 
       <Footer />
     </div>
