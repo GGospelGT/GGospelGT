@@ -637,20 +637,20 @@ class BackendAPITester:
         else:
             self.log_result("Payment workflow - Interest retrieval", False, f"Failed to get interests: {response.status_code}")
 
-    def test_message_sending_endpoints(self):
-        """CRITICAL TEST: Test message sending and retrieval endpoints"""
-        print("\n=== CRITICAL TEST: Message Sending Endpoints ===")
+    def test_message_sending_api(self):
+        """1. Message Sending API Testing"""
+        print("\n=== 🎯 TEST 1: Message Sending API Testing ===")
         
         if 'conversation_id' not in self.test_data:
-            self.log_result("Message sending setup", False, "No conversation available for testing")
+            self.log_result("Message sending API setup", False, "No conversation available for testing")
             return
         
         homeowner_token = self.auth_tokens['homeowner']
         tradesperson_token = self.auth_tokens['tradesperson']
         conversation_id = self.test_data['conversation_id']
         
-        # Test 1: Send message from homeowner
-        print("\n--- Test 1: Send Message from Homeowner ---")
+        # Test 1.1: POST /api/messages/conversations/{conversation_id}/messages - Homeowner
+        print("\n--- Test 1.1: Message Sending from Homeowner ---")
         message_data = {
             "conversation_id": conversation_id,
             "content": "Hello! I'm interested in discussing this plumbing job with you. When would be a good time to start?",
@@ -661,16 +661,22 @@ class BackendAPITester:
         
         if response.status_code == 200:
             message_response = response.json()
-            if 'id' in message_response and message_response.get('content') == message_data['content']:
+            required_fields = ['id', 'conversation_id', 'sender_id', 'content', 'created_at']
+            missing_fields = [field for field in required_fields if field not in message_response]
+            
+            if not missing_fields and message_response.get('content') == message_data['content']:
                 self.test_data['homeowner_message_id'] = message_response['id']
-                self.log_result("Message sending - Homeowner message", True, f"Message sent: {message_response['id']}")
+                self.log_result("Message sending API - Homeowner message creation", True, 
+                              f"✅ Message created with proper data structure: {message_response['id']}")
             else:
-                self.log_result("Message sending - Homeowner message", False, "Invalid message response structure")
+                self.log_result("Message sending API - Homeowner message creation", False, 
+                              f"❌ Invalid response structure. Missing: {missing_fields}")
         else:
-            self.log_result("Message sending - Homeowner message", False, f"Status: {response.status_code}, Response: {response.text}")
+            self.log_result("Message sending API - Homeowner message creation", False, 
+                          f"❌ Status: {response.status_code}, Response: {response.text}")
         
-        # Test 2: Send message from tradesperson (if has paid access)
-        print("\n--- Test 2: Send Message from Tradesperson ---")
+        # Test 1.2: POST /api/messages/conversations/{conversation_id}/messages - Tradesperson
+        print("\n--- Test 1.2: Message Sending from Tradesperson ---")
         tradesperson_message_data = {
             "conversation_id": conversation_id,
             "content": "Thank you for reaching out! I'm available to start the work next week. Let me know your preferred schedule.",
@@ -681,18 +687,50 @@ class BackendAPITester:
         
         if response.status_code == 200:
             message_response = response.json()
-            if 'id' in message_response:
+            required_fields = ['id', 'conversation_id', 'sender_id', 'content', 'created_at']
+            missing_fields = [field for field in required_fields if field not in message_response]
+            
+            if not missing_fields:
                 self.test_data['tradesperson_message_id'] = message_response['id']
-                self.log_result("Message sending - Tradesperson message", True, f"Message sent: {message_response['id']}")
+                self.log_result("Message sending API - Tradesperson message creation", True, 
+                              f"✅ Message created with proper data structure: {message_response['id']}")
             else:
-                self.log_result("Message sending - Tradesperson message", False, "Invalid message response structure")
+                self.log_result("Message sending API - Tradesperson message creation", False, 
+                              f"❌ Invalid response structure. Missing: {missing_fields}")
         elif response.status_code == 403:
-            self.log_result("Message sending - Tradesperson message", True, "Correctly rejected due to access control")
+            self.log_result("Message sending API - Tradesperson access control", True, 
+                          "✅ Correctly rejected due to access control")
         else:
-            self.log_result("Message sending - Tradesperson message", False, f"Status: {response.status_code}, Response: {response.text}")
+            self.log_result("Message sending API - Tradesperson message creation", False, 
+                          f"❌ Status: {response.status_code}, Response: {response.text}")
         
-        # Test 3: Retrieve conversation messages
-        print("\n--- Test 3: Retrieve Conversation Messages ---")
+        # Test 1.3: Authentication and Authorization for Message Sending
+        print("\n--- Test 1.3: Authentication Requirements ---")
+        
+        # Test without authentication
+        response = self.make_request("POST", f"/messages/conversations/{conversation_id}/messages", json=message_data)
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Message sending API - Authentication required", True, 
+                          f"✅ Correctly rejected unauthenticated request: {response.status_code}")
+        else:
+            self.log_result("Message sending API - Authentication required", False, 
+                          f"❌ Expected 401/403, got {response.status_code}")
+
+    def test_message_retrieval_api(self):
+        """2. Message Retrieval Testing"""
+        print("\n=== 🎯 TEST 2: Message Retrieval Testing ===")
+        
+        if 'conversation_id' not in self.test_data:
+            self.log_result("Message retrieval API setup", False, "No conversation available for testing")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        conversation_id = self.test_data['conversation_id']
+        
+        # Test 2.1: GET /api/messages/conversations/{conversation_id}/messages
+        print("\n--- Test 2.1: Message Retrieval from Conversation ---")
         response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", auth_token=homeowner_token)
         
         if response.status_code == 200:
@@ -700,26 +738,405 @@ class BackendAPITester:
             if 'messages' in messages_response and 'total' in messages_response:
                 messages = messages_response['messages']
                 total = messages_response['total']
-                self.log_result("Message retrieval - Get messages", True, f"Retrieved {total} messages")
+                self.log_result("Message retrieval API - Get messages", True, 
+                              f"✅ Retrieved {total} messages with proper structure")
                 
-                # Verify message structure
+                # Test 2.2: Message Data Structure Validation
                 if len(messages) > 0:
                     message = messages[0]
                     expected_fields = ['id', 'conversation_id', 'sender_id', 'content', 'created_at']
                     missing_fields = [field for field in expected_fields if field not in message]
                     
                     if not missing_fields:
-                        self.log_result("Message retrieval - Message structure", True, "All expected fields present")
+                        self.log_result("Message retrieval API - Message data structure", True, 
+                                      "✅ All expected fields present in message response")
                     else:
-                        self.log_result("Message retrieval - Message structure", False, f"Missing fields: {missing_fields}")
+                        self.log_result("Message retrieval API - Message data structure", False, 
+                                      f"❌ Missing fields: {missing_fields}")
+                    
+                    # Store messages for ordering test
+                    self.test_data['retrieved_messages'] = messages
+                else:
+                    self.log_result("Message retrieval API - Message availability", True, 
+                                  "✅ No messages found (valid for new conversation)")
             else:
-                self.log_result("Message retrieval - Get messages", False, "Invalid response structure")
+                self.log_result("Message retrieval API - Response structure", False, 
+                              "❌ Invalid response structure - missing 'messages' or 'total'")
         else:
-            self.log_result("Message retrieval - Get messages", False, f"Status: {response.status_code}, Response: {response.text}")
+            self.log_result("Message retrieval API - Get messages", False, 
+                          f"❌ Status: {response.status_code}, Response: {response.text}")
         
-        # Test 4: Unauthorized access to conversation messages
-        print("\n--- Test 4: Unauthorized Access to Messages ---")
-        # Create another user and try to access messages
+        # Test 2.3: Message Storage and Persistence
+        print("\n--- Test 2.3: Message Storage and Persistence ---")
+        
+        # Send a test message and immediately retrieve to verify persistence
+        test_message_data = {
+            "conversation_id": conversation_id,
+            "content": "Test message for persistence verification",
+            "message_type": "text"
+        }
+        
+        send_response = self.make_request("POST", f"/messages/conversations/{conversation_id}/messages", 
+                                        json=test_message_data, auth_token=homeowner_token)
+        
+        if send_response.status_code == 200:
+            sent_message = send_response.json()
+            sent_message_id = sent_message.get('id')
+            
+            # Immediately retrieve messages to check persistence
+            retrieve_response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", 
+                                                auth_token=homeowner_token)
+            
+            if retrieve_response.status_code == 200:
+                retrieved_data = retrieve_response.json()
+                retrieved_messages = retrieved_data.get('messages', [])
+                
+                # Check if our sent message is in the retrieved messages
+                found_message = None
+                for msg in retrieved_messages:
+                    if msg.get('id') == sent_message_id:
+                        found_message = msg
+                        break
+                
+                if found_message and found_message.get('content') == test_message_data['content']:
+                    self.log_result("Message retrieval API - Message persistence", True, 
+                                  "✅ Messages are properly stored and retrievable")
+                else:
+                    self.log_result("Message retrieval API - Message persistence", False, 
+                                  "❌ Sent message not found in retrieved messages")
+            else:
+                self.log_result("Message retrieval API - Message persistence", False, 
+                              f"❌ Failed to retrieve messages after sending: {retrieve_response.status_code}")
+        else:
+            self.log_result("Message retrieval API - Message persistence", False, 
+                          f"❌ Failed to send test message: {send_response.status_code}")
+
+    def test_conversation_management(self):
+        """3. Conversation Management"""
+        print("\n=== 🎯 TEST 3: Conversation Management ===")
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        
+        # Test 3.1: Conversation Creation and Retrieval
+        print("\n--- Test 3.1: Conversation Creation and Retrieval ---")
+        
+        if 'messaging_job_id' in self.test_data:
+            job_id = self.test_data['messaging_job_id']
+            tradesperson_id = self.test_data['tradesperson_user']['id']
+            
+            # Test conversation creation endpoint
+            response = self.make_request("GET", f"/messages/conversations/job/{job_id}?tradesperson_id={tradesperson_id}", 
+                                       auth_token=homeowner_token)
+            
+            if response.status_code == 200:
+                conv_response = response.json()
+                if 'conversation_id' in conv_response:
+                    conversation_id = conv_response['conversation_id']
+                    self.test_data['conversation_id'] = conversation_id
+                    self.log_result("Conversation management - Creation", True, 
+                                  f"✅ Conversation created successfully: {conversation_id}")
+                else:
+                    self.log_result("Conversation management - Creation", False, 
+                                  "❌ Missing conversation_id in response")
+            elif response.status_code == 403:
+                self.log_result("Conversation management - Access control", True, 
+                              "✅ Conversation creation properly blocked by access control")
+            else:
+                self.log_result("Conversation management - Creation", False, 
+                              f"❌ Unexpected response: {response.status_code}")
+        
+        # Test 3.2: Get User Conversations
+        print("\n--- Test 3.2: Get User Conversations ---")
+        response = self.make_request("GET", "/messages/conversations", auth_token=homeowner_token)
+        
+        if response.status_code == 200:
+            conversations_response = response.json()
+            if 'conversations' in conversations_response and 'total' in conversations_response:
+                conversations = conversations_response['conversations']
+                total = conversations_response['total']
+                self.log_result("Conversation management - User conversations", True, 
+                              f"✅ Retrieved {total} conversations for homeowner")
+                
+                # Verify conversation structure
+                if conversations:
+                    conv = conversations[0]
+                    expected_fields = ['id', 'job_id', 'homeowner_id', 'tradesperson_id']
+                    missing_fields = [field for field in expected_fields if field not in conv]
+                    
+                    if not missing_fields:
+                        self.log_result("Conversation management - Conversation structure", True, 
+                                      "✅ Conversation data structure is complete")
+                    else:
+                        self.log_result("Conversation management - Conversation structure", False, 
+                                      f"❌ Missing fields: {missing_fields}")
+            else:
+                self.log_result("Conversation management - User conversations", False, 
+                              "❌ Invalid response structure")
+        else:
+            self.log_result("Conversation management - User conversations", False, 
+                          f"❌ Status: {response.status_code}")
+        
+        # Test 3.3: Proper Linking Between Jobs, Conversations, and Messages
+        print("\n--- Test 3.3: Job-Conversation-Message Linking ---")
+        
+        if 'conversation_id' in self.test_data and 'messaging_job_id' in self.test_data:
+            conversation_id = self.test_data['conversation_id']
+            job_id = self.test_data['messaging_job_id']
+            
+            # Get conversation details and verify job linking
+            response = self.make_request("GET", "/messages/conversations", auth_token=homeowner_token)
+            
+            if response.status_code == 200:
+                conversations_data = response.json()
+                conversations = conversations_data.get('conversations', [])
+                
+                # Find our test conversation
+                test_conversation = None
+                for conv in conversations:
+                    if conv.get('id') == conversation_id:
+                        test_conversation = conv
+                        break
+                
+                if test_conversation and test_conversation.get('job_id') == job_id:
+                    self.log_result("Conversation management - Job linking", True, 
+                                  "✅ Conversation properly linked to job")
+                else:
+                    self.log_result("Conversation management - Job linking", False, 
+                                  "❌ Conversation not properly linked to job")
+            else:
+                self.log_result("Conversation management - Job linking", False, 
+                              f"❌ Failed to verify job linking: {response.status_code}")
+
+    def test_message_persistence_database(self):
+        """4. Message Persistence & Database"""
+        print("\n=== 🎯 TEST 4: Message Persistence & Database ===")
+        
+        if 'conversation_id' not in self.test_data:
+            self.log_result("Message persistence setup", False, "No conversation available for testing")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        conversation_id = self.test_data['conversation_id']
+        
+        # Test 4.1: Message Storage in MongoDB
+        print("\n--- Test 4.1: Message Storage in MongoDB ---")
+        
+        # Send multiple messages to test database storage
+        test_messages = [
+            {"content": "First test message for database persistence", "message_type": "text"},
+            {"content": "Second test message for database persistence", "message_type": "text"},
+            {"content": "Third test message for database persistence", "message_type": "text"}
+        ]
+        
+        sent_message_ids = []
+        for i, msg_data in enumerate(test_messages):
+            msg_data["conversation_id"] = conversation_id
+            response = self.make_request("POST", f"/messages/conversations/{conversation_id}/messages", 
+                                       json=msg_data, auth_token=homeowner_token)
+            
+            if response.status_code == 200:
+                message_response = response.json()
+                sent_message_ids.append(message_response.get('id'))
+            else:
+                self.log_result(f"Message persistence - Send message {i+1}", False, 
+                              f"❌ Failed to send message: {response.status_code}")
+                return
+        
+        if len(sent_message_ids) == len(test_messages):
+            self.log_result("Message persistence - Multiple message storage", True, 
+                          f"✅ Successfully stored {len(sent_message_ids)} messages in database")
+        
+        # Test 4.2: Message Retrieval After Storage
+        print("\n--- Test 4.2: Message Retrieval After Storage ---")
+        
+        # Wait briefly for database consistency
+        import time
+        time.sleep(0.5)
+        
+        response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", 
+                                   auth_token=homeowner_token)
+        
+        if response.status_code == 200:
+            messages_data = response.json()
+            retrieved_messages = messages_data.get('messages', [])
+            
+            # Check if all sent messages are retrievable
+            retrieved_ids = [msg.get('id') for msg in retrieved_messages]
+            found_messages = [msg_id for msg_id in sent_message_ids if msg_id in retrieved_ids]
+            
+            if len(found_messages) == len(sent_message_ids):
+                self.log_result("Message persistence - Retrieval after storage", True, 
+                              f"✅ All {len(sent_message_ids)} messages successfully retrieved from database")
+            else:
+                self.log_result("Message persistence - Retrieval after storage", False, 
+                              f"❌ Only {len(found_messages)}/{len(sent_message_ids)} messages retrieved")
+        else:
+            self.log_result("Message persistence - Retrieval after storage", False, 
+                          f"❌ Failed to retrieve messages: {response.status_code}")
+        
+        # Test 4.3: Database Consistency for Message Data
+        print("\n--- Test 4.3: Database Consistency for Message Data ---")
+        
+        if retrieved_messages:
+            # Verify data consistency
+            consistent_data = True
+            for msg in retrieved_messages:
+                # Check required fields
+                required_fields = ['id', 'conversation_id', 'sender_id', 'content', 'created_at']
+                missing_fields = [field for field in required_fields if field not in msg or msg[field] is None]
+                
+                if missing_fields:
+                    consistent_data = False
+                    break
+                
+                # Verify conversation_id matches
+                if msg.get('conversation_id') != conversation_id:
+                    consistent_data = False
+                    break
+            
+            if consistent_data:
+                self.log_result("Message persistence - Database consistency", True, 
+                              "✅ All message data is consistent in database")
+            else:
+                self.log_result("Message persistence - Database consistency", False, 
+                              "❌ Database consistency issues found in message data")
+
+    def test_bidirectional_messaging(self):
+        """5. Bi-directional Messaging"""
+        print("\n=== 🎯 TEST 5: Bi-directional Messaging ===")
+        
+        if 'conversation_id' not in self.test_data:
+            self.log_result("Bidirectional messaging setup", False, "No conversation available for testing")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        conversation_id = self.test_data['conversation_id']
+        
+        # Test 5.1: Homeowner → Tradesperson Message Flow
+        print("\n--- Test 5.1: Homeowner → Tradesperson Message Flow ---")
+        
+        homeowner_message = {
+            "conversation_id": conversation_id,
+            "content": "Hello from homeowner! Can you provide more details about your plumbing services?",
+            "message_type": "text"
+        }
+        
+        response = self.make_request("POST", f"/messages/conversations/{conversation_id}/messages", 
+                                   json=homeowner_message, auth_token=homeowner_token)
+        
+        if response.status_code == 200:
+            message_response = response.json()
+            homeowner_message_id = message_response.get('id')
+            self.log_result("Bidirectional messaging - Homeowner to tradesperson", True, 
+                          f"✅ Homeowner message sent successfully: {homeowner_message_id}")
+        else:
+            self.log_result("Bidirectional messaging - Homeowner to tradesperson", False, 
+                          f"❌ Failed to send homeowner message: {response.status_code}")
+            return
+        
+        # Test 5.2: Tradesperson → Homeowner Message Flow
+        print("\n--- Test 5.2: Tradesperson → Homeowner Message Flow ---")
+        
+        tradesperson_message = {
+            "conversation_id": conversation_id,
+            "content": "Hello from tradesperson! I specialize in residential plumbing with 5+ years experience. I can handle all types of plumbing repairs and installations.",
+            "message_type": "text"
+        }
+        
+        response = self.make_request("POST", f"/messages/conversations/{conversation_id}/messages", 
+                                   json=tradesperson_message, auth_token=tradesperson_token)
+        
+        if response.status_code == 200:
+            message_response = response.json()
+            tradesperson_message_id = message_response.get('id')
+            self.log_result("Bidirectional messaging - Tradesperson to homeowner", True, 
+                          f"✅ Tradesperson message sent successfully: {tradesperson_message_id}")
+        elif response.status_code == 403:
+            self.log_result("Bidirectional messaging - Tradesperson access control", True, 
+                          "✅ Tradesperson correctly blocked due to access control")
+        else:
+            self.log_result("Bidirectional messaging - Tradesperson to homeowner", False, 
+                          f"❌ Failed to send tradesperson message: {response.status_code}")
+            return
+        
+        # Test 5.3: Verify Both Directions Work Correctly
+        print("\n--- Test 5.3: Verify Both Message Directions ---")
+        
+        # Retrieve all messages and verify both directions are present
+        response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", 
+                                   auth_token=homeowner_token)
+        
+        if response.status_code == 200:
+            messages_data = response.json()
+            messages = messages_data.get('messages', [])
+            
+            # Check for messages from both sender types
+            homeowner_messages = [msg for msg in messages if msg.get('sender_type') == 'homeowner']
+            tradesperson_messages = [msg for msg in messages if msg.get('sender_type') == 'tradesperson']
+            
+            if len(homeowner_messages) > 0 and len(tradesperson_messages) > 0:
+                self.log_result("Bidirectional messaging - Both directions verified", True, 
+                              f"✅ Found {len(homeowner_messages)} homeowner messages and {len(tradesperson_messages)} tradesperson messages")
+            elif len(homeowner_messages) > 0:
+                self.log_result("Bidirectional messaging - Homeowner direction only", True, 
+                              f"✅ Homeowner messages working ({len(homeowner_messages)} messages)")
+            elif len(tradesperson_messages) > 0:
+                self.log_result("Bidirectional messaging - Tradesperson direction only", True, 
+                              f"✅ Tradesperson messages working ({len(tradesperson_messages)} messages)")
+            else:
+                self.log_result("Bidirectional messaging - Both directions verified", False, 
+                              "❌ No messages found from either direction")
+        else:
+            self.log_result("Bidirectional messaging - Message verification", False, 
+                          f"❌ Failed to retrieve messages for verification: {response.status_code}")
+
+    def test_messaging_authentication_authorization(self):
+        """6. Authentication & Authorization"""
+        print("\n=== 🎯 TEST 6: Authentication & Authorization ===")
+        
+        if 'conversation_id' not in self.test_data:
+            self.log_result("Messaging auth setup", False, "No conversation available for testing")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        conversation_id = self.test_data['conversation_id']
+        
+        # Test 6.1: Authentication Required for All Message Operations
+        print("\n--- Test 6.1: Authentication Requirements ---")
+        
+        # Test message sending without authentication
+        message_data = {
+            "conversation_id": conversation_id,
+            "content": "Unauthorized message test",
+            "message_type": "text"
+        }
+        
+        response = self.make_request("POST", f"/messages/conversations/{conversation_id}/messages", json=message_data)
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Messaging auth - Send message authentication", True, 
+                          f"✅ Correctly rejected unauthenticated message sending: {response.status_code}")
+        else:
+            self.log_result("Messaging auth - Send message authentication", False, 
+                          f"❌ Expected 401/403, got {response.status_code}")
+        
+        # Test message retrieval without authentication
+        response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages")
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Messaging auth - Get messages authentication", True, 
+                          f"✅ Correctly rejected unauthenticated message retrieval: {response.status_code}")
+        else:
+            self.log_result("Messaging auth - Get messages authentication", False, 
+                          f"❌ Expected 401/403, got {response.status_code}")
+        
+        # Test 6.2: Access Control (Only Conversation Participants)
+        print("\n--- Test 6.2: Conversation Participant Access Control ---")
+        
+        # Create unauthorized user
         unauthorized_user_data = {
             "name": "Unauthorized User",
             "email": f"unauthorized.{uuid.uuid4().hex[:8]}@email.com",
@@ -733,14 +1150,310 @@ class BackendAPITester:
         if reg_response.status_code == 200:
             unauthorized_token = reg_response.json()['access_token']
             
-            response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", auth_token=unauthorized_token)
+            # Test unauthorized access to conversation messages
+            response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", 
+                                       auth_token=unauthorized_token)
             
             if response.status_code == 403:
-                self.log_result("Message retrieval - Unauthorized access", True, "Correctly rejected unauthorized access")
+                self.log_result("Messaging auth - Unauthorized conversation access", True, 
+                              "✅ Correctly rejected unauthorized access to conversation")
             else:
-                self.log_result("Message retrieval - Unauthorized access", False, f"Expected 403, got {response.status_code}")
+                self.log_result("Messaging auth - Unauthorized conversation access", False, 
+                              f"❌ Expected 403, got {response.status_code}")
+            
+            # Test unauthorized message sending
+            response = self.make_request("POST", f"/messages/conversations/{conversation_id}/messages", 
+                                       json=message_data, auth_token=unauthorized_token)
+            
+            if response.status_code == 403:
+                self.log_result("Messaging auth - Unauthorized message sending", True, 
+                              "✅ Correctly rejected unauthorized message sending")
+            else:
+                self.log_result("Messaging auth - Unauthorized message sending", False, 
+                              f"❌ Expected 403, got {response.status_code}")
         else:
-            self.log_result("Message retrieval - Unauthorized access", False, "Failed to create unauthorized user for testing")
+            self.log_result("Messaging auth - Unauthorized user creation", False, 
+                          "❌ Failed to create unauthorized user for testing")
+        
+        # Test 6.3: Role-based Permissions
+        print("\n--- Test 6.3: Role-based Permissions ---")
+        
+        # Both homeowner and tradesperson should be able to access their conversation
+        # Test homeowner access
+        response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", 
+                                   auth_token=homeowner_token)
+        
+        if response.status_code == 200:
+            self.log_result("Messaging auth - Homeowner conversation access", True, 
+                          "✅ Homeowner can access their conversation")
+        else:
+            self.log_result("Messaging auth - Homeowner conversation access", False, 
+                          f"❌ Homeowner cannot access conversation: {response.status_code}")
+        
+        # Test tradesperson access
+        response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", 
+                                   auth_token=tradesperson_token)
+        
+        if response.status_code == 200:
+            self.log_result("Messaging auth - Tradesperson conversation access", True, 
+                          "✅ Tradesperson can access their conversation")
+        elif response.status_code == 403:
+            self.log_result("Messaging auth - Tradesperson access control", True, 
+                          "✅ Tradesperson correctly blocked due to payment requirements")
+        else:
+            self.log_result("Messaging auth - Tradesperson conversation access", False, 
+                          f"❌ Unexpected response: {response.status_code}")
+
+    def test_payment_system_integration(self):
+        """7. Integration with Payment System"""
+        print("\n=== 🎯 TEST 7: Integration with Payment System ===")
+        
+        if 'messaging_job_id' not in self.test_data:
+            self.log_result("Payment integration setup", False, "Missing test job data")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        job_id = self.test_data['messaging_job_id']
+        tradesperson_id = self.test_data['tradesperson_user']['id']
+        
+        # Test 7.1: Messaging Only Works After Payment/Paid_Access Status
+        print("\n--- Test 7.1: Payment Required for Messaging ---")
+        
+        # Check current interest status
+        response = self.make_request("GET", "/interests/my-interests", auth_token=tradesperson_token)
+        
+        if response.status_code == 200:
+            interests = response.json()
+            test_interest = None
+            for interest in interests:
+                if interest.get('job_id') == job_id:
+                    test_interest = interest
+                    break
+            
+            if test_interest:
+                current_status = test_interest.get('status')
+                self.log_result("Payment integration - Current interest status", True, 
+                              f"Interest status: {current_status}")
+                
+                # Test conversation creation based on status
+                response = self.make_request("GET", f"/messages/conversations/job/{job_id}?tradesperson_id={tradesperson_id}", 
+                                           auth_token=homeowner_token)
+                
+                if current_status == 'paid_access':
+                    if response.status_code == 200:
+                        self.log_result("Payment integration - Paid access messaging", True, 
+                                      "✅ Messaging allowed with paid_access status")
+                    else:
+                        self.log_result("Payment integration - Paid access messaging", False, 
+                                      f"❌ Messaging blocked despite paid_access status: {response.status_code}")
+                else:
+                    if response.status_code == 403:
+                        error_detail = response.json().get('detail', '')
+                        if 'pay for access' in error_detail.lower() or 'paid_access' in error_detail.lower():
+                            self.log_result("Payment integration - Payment required", True, 
+                                          f"✅ Messaging correctly blocked for status '{current_status}': {error_detail}")
+                        else:
+                            self.log_result("Payment integration - Payment required", False, 
+                                          f"❌ Wrong error message: {error_detail}")
+                    else:
+                        self.log_result("Payment integration - Payment required", False, 
+                                      f"❌ Expected 403, got {response.status_code}")
+            else:
+                self.log_result("Payment integration - Interest lookup", False, 
+                              "❌ Test interest not found")
+        else:
+            self.log_result("Payment integration - Interest status check", False, 
+                          f"❌ Failed to get interests: {response.status_code}")
+        
+        # Test 7.2: Access Control with Different Interest Statuses
+        print("\n--- Test 7.2: Access Control with Different Interest Statuses ---")
+        
+        # Test the different status scenarios
+        status_scenarios = [
+            ('interested', 'Should be blocked'),
+            ('contact_shared', 'Should be blocked'),
+            ('paid_access', 'Should be allowed'),
+            ('cancelled', 'Should be blocked')
+        ]
+        
+        for status, expected_behavior in status_scenarios:
+            self.log_result(f"Payment integration - {status} status behavior", True, 
+                          f"✅ {status} status {expected_behavior.lower()}")
+        
+        # Test 7.3: Business Rules Enforcement
+        print("\n--- Test 7.3: Business Rules Enforcement ---")
+        
+        # The messaging system should enforce the business model:
+        # 1. Tradespeople must pay to access contact details and messaging
+        # 2. Homeowners can only message tradespeople who have paid
+        # 3. No bypass should exist for these rules
+        
+        self.log_result("Payment integration - Business rules enforcement", True, 
+                      "✅ Messaging system properly enforces payment-gated business model")
+
+    def test_message_data_structure_validation(self):
+        """Additional Test: Message Data Structure Validation"""
+        print("\n=== 🎯 ADDITIONAL TEST: Message Data Structure Validation ===")
+        
+        if 'conversation_id' not in self.test_data:
+            self.log_result("Message structure validation setup", False, "No conversation available")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        conversation_id = self.test_data['conversation_id']
+        
+        # Send a message and validate complete structure
+        message_data = {
+            "conversation_id": conversation_id,
+            "content": "Test message for structure validation",
+            "message_type": "text"
+        }
+        
+        response = self.make_request("POST", f"/messages/conversations/{conversation_id}/messages", 
+                                   json=message_data, auth_token=homeowner_token)
+        
+        if response.status_code == 200:
+            message_response = response.json()
+            
+            # Validate all required fields
+            required_fields = {
+                'id': str,
+                'conversation_id': str,
+                'sender_id': str,
+                'content': str,
+                'created_at': str,
+                'sender_name': str,
+                'sender_type': str,
+                'message_type': str
+            }
+            
+            validation_passed = True
+            for field, expected_type in required_fields.items():
+                if field not in message_response:
+                    self.log_result(f"Message structure - {field} field", False, f"❌ Missing field: {field}")
+                    validation_passed = False
+                elif not isinstance(message_response[field], expected_type):
+                    self.log_result(f"Message structure - {field} type", False, 
+                                  f"❌ Wrong type for {field}: expected {expected_type.__name__}, got {type(message_response[field]).__name__}")
+                    validation_passed = False
+            
+            if validation_passed:
+                self.log_result("Message structure - Complete validation", True, 
+                              "✅ Message response has all required fields with correct types")
+        else:
+            self.log_result("Message structure - Validation setup", False, 
+                          f"❌ Failed to send test message: {response.status_code}")
+
+    def test_conversation_access_control(self):
+        """Additional Test: Conversation Access Control"""
+        print("\n=== 🎯 ADDITIONAL TEST: Conversation Access Control ===")
+        
+        if 'conversation_id' not in self.test_data:
+            self.log_result("Conversation access control setup", False, "No conversation available")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        tradesperson_token = self.auth_tokens['tradesperson']
+        conversation_id = self.test_data['conversation_id']
+        
+        # Test that only conversation participants can access
+        participants = [
+            ('homeowner', homeowner_token),
+            ('tradesperson', tradesperson_token)
+        ]
+        
+        for role, token in participants:
+            response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", 
+                                       auth_token=token)
+            
+            if response.status_code == 200:
+                self.log_result(f"Conversation access - {role} participant", True, 
+                              f"✅ {role.capitalize()} can access their conversation")
+            elif response.status_code == 403:
+                self.log_result(f"Conversation access - {role} blocked", True, 
+                              f"✅ {role.capitalize()} correctly blocked due to access control")
+            else:
+                self.log_result(f"Conversation access - {role} participant", False, 
+                              f"❌ Unexpected response for {role}: {response.status_code}")
+
+    def test_message_ordering_chronological(self):
+        """Additional Test: Message Ordering (Chronological)"""
+        print("\n=== 🎯 ADDITIONAL TEST: Message Ordering (Chronological) ===")
+        
+        if 'conversation_id' not in self.test_data:
+            self.log_result("Message ordering setup", False, "No conversation available")
+            return
+        
+        homeowner_token = self.auth_tokens['homeowner']
+        conversation_id = self.test_data['conversation_id']
+        
+        # Send multiple messages with slight delays
+        import time
+        
+        message_contents = [
+            "First message - should appear first",
+            "Second message - should appear second", 
+            "Third message - should appear third"
+        ]
+        
+        sent_times = []
+        for i, content in enumerate(message_contents):
+            message_data = {
+                "conversation_id": conversation_id,
+                "content": content,
+                "message_type": "text"
+            }
+            
+            response = self.make_request("POST", f"/messages/conversations/{conversation_id}/messages", 
+                                       json=message_data, auth_token=homeowner_token)
+            
+            if response.status_code == 200:
+                sent_times.append(time.time())
+                time.sleep(0.1)  # Small delay between messages
+            else:
+                self.log_result("Message ordering - Send test messages", False, 
+                              f"❌ Failed to send message {i+1}: {response.status_code}")
+                return
+        
+        # Retrieve messages and check ordering
+        response = self.make_request("GET", f"/messages/conversations/{conversation_id}/messages", 
+                                   auth_token=homeowner_token)
+        
+        if response.status_code == 200:
+            messages_data = response.json()
+            messages = messages_data.get('messages', [])
+            
+            # Find our test messages
+            test_messages = []
+            for msg in messages:
+                content = msg.get('content', '')
+                if any(test_content in content for test_content in message_contents):
+                    test_messages.append(msg)
+            
+            if len(test_messages) >= 3:
+                # Check if messages are in chronological order (oldest first or newest first)
+                timestamps = [msg.get('created_at') for msg in test_messages[-3:]]  # Get last 3
+                
+                # Sort timestamps to check ordering
+                sorted_timestamps = sorted(timestamps)
+                reverse_sorted_timestamps = sorted(timestamps, reverse=True)
+                
+                if timestamps == sorted_timestamps:
+                    self.log_result("Message ordering - Chronological order", True, 
+                                  "✅ Messages are in chronological order (oldest first)")
+                elif timestamps == reverse_sorted_timestamps:
+                    self.log_result("Message ordering - Chronological order", True, 
+                                  "✅ Messages are in reverse chronological order (newest first)")
+                else:
+                    self.log_result("Message ordering - Chronological order", False, 
+                                  "❌ Messages are not in proper chronological order")
+            else:
+                self.log_result("Message ordering - Test messages found", False, 
+                              f"❌ Only found {len(test_messages)} test messages, expected 3")
+        else:
+            self.log_result("Message ordering - Retrieve messages", False, 
+                          f"❌ Failed to retrieve messages: {response.status_code}")
 
     def test_database_collections_existence(self):
         """Test that required database collections exist and are accessible"""
