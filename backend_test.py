@@ -1365,8 +1365,8 @@ class BackendAPITester:
         # 3. Messaging System Setup (create job, interest, contact sharing)
         self.test_messaging_system_setup()
         
-        # 4. URGENT: Payment Status Investigation
-        self.test_payment_status_investigation()
+        # 4. CRITICAL: Database Investigation
+        self.test_critical_database_investigation()
         
         # 5. Enum Consistency Check
         self.test_enum_consistency_check()
