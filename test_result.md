@@ -90,7 +90,7 @@
     file: "/app/frontend/src/pages/MyInterestsPage.jsx, /app/frontend/src/components/ChatModal.jsx, /app/backend/routes/messages.py"
     stuck_count: 2
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
