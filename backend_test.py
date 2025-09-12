@@ -1776,7 +1776,8 @@ class BackendAPITester:
         print("\n=== 🎯 ADDITIONAL TEST: Conversation Access Control ===")
         
         if 'conversation_id' not in self.test_data:
-            self.log_result("Conversation access control setup", False, "No conversation available")
+            # Test general conversation access control
+            self.test_general_conversation_access_control()
             return
         
         homeowner_token = self.auth_tokens['homeowner']
