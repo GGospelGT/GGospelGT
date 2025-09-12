@@ -123,17 +123,47 @@ const MyInterestsPage = () => {
         description: "Opening chat with homeowner...",
       });
 
+      // CRITICAL FIX: Add delay and multiple refresh attempts to ensure status update
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second for backend to process
+      
       // Refresh interests and wallet balance
       await loadMyInterests();
       await loadWalletBalance();
       
-      // Find the updated interest after payment
-      const updatedInterests = await interestsAPI.getMyInterests();
-      const paidInterest = updatedInterests.find(interest => interest.id === interestId);
+      // CRITICAL FIX: Add another delay and refresh to ensure we get the updated status
+      await new Promise(resolve => setTimeout(resolve, 500)); // Additional wait
+      
+      // Find the updated interest after payment with multiple attempts
+      let paidInterest = null;
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      while (!paidInterest && attempts < maxAttempts) {
+        const updatedInterests = await interestsAPI.getMyInterests();
+        paidInterest = updatedInterests.find(interest => 
+          interest.id === interestId && interest.status === 'paid_access'
+        );
+        
+        if (!paidInterest) {
+          attempts++;
+          console.log(`Attempt ${attempts}: Interest status not yet updated, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between attempts
+        }
+      }
       
       if (paidInterest) {
+        console.log(`Payment confirmed! Interest status: ${paidInterest.status}`);
         // Automatically open chat with homeowner after successful payment
         await handleStartChatAfterPayment(paidInterest);
+      } else {
+        console.error('Payment processed but status not updated. Manual refresh may be needed.');
+        toast({
+          title: "Payment Processed",
+          description: "Payment successful! Please refresh the page and try starting the chat again.",
+          variant: "default",
+        });
+        // Trigger a final refresh
+        await loadMyInterests();
       }
       
     } catch (error) {
