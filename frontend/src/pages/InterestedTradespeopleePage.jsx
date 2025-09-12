@@ -443,6 +443,7 @@ const InterestedTradespeopleePage = () => {
                     <Badge className="bg-purple-50 text-purple-700 border-purple-200">
                       Access granted - Tradesperson can contact you
                     </Badge>
+                    {console.log('🔥 RENDERING START CHAT BUTTON for tradesperson:', tradesperson.tradesperson_id)}
                     <Button
                       onClick={(e) => {
                         console.log('🔥 HOMEOWNER START CHAT BUTTON CLICKED!');
