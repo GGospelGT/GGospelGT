@@ -149,7 +149,7 @@ const AdminDashboard = () => {
           console.log('Extracted group names:', groupNames);
           setTradeGroups(groupNames);
         }
-      } else if (activeTab === 'questions') {
+      } else if (activeTab === 'skills') {
         // Load both skills questions and available trade categories
         const [questionsData, tradesData] = await Promise.all([
           adminAPI.getAllSkillsQuestions(),
