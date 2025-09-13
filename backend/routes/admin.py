@@ -280,6 +280,144 @@ async def get_jobs_statistics_admin():
     }
 
 # ==========================================
+# JOB APPROVAL MANAGEMENT
+# ==========================================
+
+@router.get("/jobs/pending")
+async def get_pending_jobs(
+    skip: int = 0,
+    limit: int = 50
+):
+    """Get all jobs pending approval"""
+    
+    pending_jobs = await database.get_pending_jobs_admin(skip=skip, limit=limit)
+    total_count = await database.get_pending_jobs_count()
+    
+    return {
+        "jobs": pending_jobs,
+        "pagination": {
+            "skip": skip,
+            "limit": limit,
+            "total": total_count
+        }
+    }
+
+@router.put("/jobs/{job_id}/approve")
+async def approve_job(
+    job_id: str,
+    approval_data: dict,
+    current_user = None  # Will be populated by admin auth
+):
+    """Approve or reject a job posting"""
+    
+    action = approval_data.get("action")  # "approve" or "reject"
+    notes = approval_data.get("notes", "")
+    
+    if action not in ["approve", "reject"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Action must be 'approve' or 'reject'"
+        )
+    
+    # Get job details
+    job = await database.get_job_by_id(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    if job["status"] != "pending_approval":
+        raise HTTPException(
+            status_code=400,
+            detail="Job is not pending approval"
+        )
+    
+    # Update job status
+    new_status = "active" if action == "approve" else "rejected"
+    approval_data_db = {
+        "status": new_status,
+        "approved_by": "admin",  # Use actual admin ID when auth is implemented
+        "approved_at": datetime.utcnow(),
+        "approval_notes": notes,
+        "updated_at": datetime.utcnow()
+    }
+    
+    success = await database.update_job_approval_status(job_id, approval_data_db)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update job status")
+    
+    # Send notification to homeowner
+    try:
+        from services.notifications import notification_service
+        from models.notifications import NotificationType
+        
+        homeowner = await database.get_user_by_email(job["homeowner"]["email"])
+        if homeowner:
+            if action == "approve":
+                await notification_service.send_notification(
+                    user_id=homeowner["id"],
+                    notification_type=NotificationType.JOB_APPROVED,
+                    data={
+                        "job_title": job["title"],
+                        "job_id": job_id,
+                        "admin_notes": notes
+                    }
+                )
+            else:
+                await notification_service.send_notification(
+                    user_id=homeowner["id"],
+                    notification_type=NotificationType.JOB_REJECTED,
+                    data={
+                        "job_title": job["title"],
+                        "job_id": job_id,
+                        "rejection_reason": notes
+                    }
+                )
+    except Exception as e:
+        logger.warning(f"Failed to send approval notification: {str(e)}")
+    
+    return {
+        "message": f"Job {action}d successfully",
+        "job_id": job_id,
+        "action": action,
+        "approved_by": "admin",
+        "approved_at": datetime.utcnow().isoformat(),
+        "notes": notes
+    }
+
+@router.get("/jobs/all-admin")
+async def get_all_jobs_admin(
+    skip: int = 0,
+    limit: int = 50,
+    status: Optional[str] = None
+):
+    """Get all jobs for admin management (all statuses)"""
+    
+    jobs = await database.get_all_jobs_admin(skip=skip, limit=limit, status=status)
+    total_count = await database.get_jobs_count_admin(status=status)
+    
+    return {
+        "jobs": jobs,
+        "pagination": {
+            "skip": skip,
+            "limit": limit,
+            "total": total_count
+        },
+        "filters": {
+            "status": status
+        }
+    }
+
+@router.get("/jobs/statistics")
+async def get_job_statistics_admin():
+    """Get comprehensive job statistics for admin dashboard"""
+    
+    stats = await database.get_jobs_statistics_admin()
+    
+    return {
+        "statistics": stats
+    }
+
+# ==========================================
 # ADMIN DASHBOARD STATS
 # ==========================================
 
