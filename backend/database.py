@@ -3728,5 +3728,414 @@ class Database:
         except Exception as e:
             print(f"Error initializing default contacts: {e}")
 
+    # ==========================================
+    # ADMIN NOTIFICATION MANAGEMENT METHODS
+    # ==========================================
+    
+    async def get_admin_notifications(self, filters: dict = None, skip: int = 0, limit: int = 50) -> List[dict]:
+        """Get notifications for admin management with filtering"""
+        query = filters or {}
+        
+        cursor = self.notifications_collection.find(query).sort("created_at", -1).skip(skip).limit(limit)
+        
+        notifications = []
+        async for doc in cursor:
+            # Get user info for each notification
+            user = await self.get_user_by_id(doc["user_id"])
+            
+            notification = {
+                "id": str(doc["_id"]),
+                "user_id": doc["user_id"],
+                "user_name": user.get("name", "Unknown") if user else "Unknown",
+                "user_email": user.get("email", "Unknown") if user else "Unknown",
+                "type": doc["type"],
+                "channel": doc["channel"],
+                "status": doc["status"],
+                "subject": doc.get("subject", ""),
+                "content": doc.get("content", "")[:100] + "..." if len(doc.get("content", "")) > 100 else doc.get("content", ""),
+                "recipient_email": doc.get("recipient_email"),
+                "recipient_phone": doc.get("recipient_phone"),
+                "created_at": doc["created_at"],
+                "sent_at": doc.get("sent_at"),
+                "delivered_at": doc.get("delivered_at"),
+                "metadata": doc.get("metadata", {})
+            }
+            notifications.append(notification)
+        
+        return notifications
+    
+    async def get_notifications_count(self, filters: dict = None) -> int:
+        """Get count of notifications matching filters"""
+        query = filters or {}
+        return await self.notifications_collection.count_documents(query)
+    
+    async def get_notification_by_id(self, notification_id: str) -> Optional[dict]:
+        """Get detailed notification by ID"""
+        try:
+            from bson import ObjectId
+            doc = await self.notifications_collection.find_one({"_id": ObjectId(notification_id)})
+            
+            if doc:
+                # Get user info
+                user = await self.get_user_by_id(doc["user_id"])
+                
+                notification = {
+                    "id": str(doc["_id"]),
+                    "user_id": doc["user_id"],
+                    "user_name": user.get("name", "Unknown") if user else "Unknown",
+                    "user_email": user.get("email", "Unknown") if user else "Unknown",
+                    "user_role": user.get("role", "Unknown") if user else "Unknown",
+                    "type": doc["type"],
+                    "channel": doc["channel"],
+                    "status": doc["status"],
+                    "subject": doc.get("subject", ""),
+                    "content": doc.get("content", ""),
+                    "recipient_email": doc.get("recipient_email"),
+                    "recipient_phone": doc.get("recipient_phone"),
+                    "created_at": doc["created_at"],
+                    "sent_at": doc.get("sent_at"),
+                    "delivered_at": doc.get("delivered_at"),
+                    "metadata": doc.get("metadata", {}),
+                    "admin_notes": doc.get("admin_notes", "")
+                }
+                return notification
+        except Exception as e:
+            logger.error(f"Error getting notification {notification_id}: {str(e)}")
+        
+        return None
+    
+    async def update_notification_status_admin(self, notification_id: str, status: str, admin_notes: str = "") -> bool:
+        """Update notification status with admin notes"""
+        try:
+            from bson import ObjectId
+            update_data = {
+                "status": status,
+                "updated_at": datetime.utcnow(),
+                "admin_notes": admin_notes
+            }
+            
+            if status == "sent":
+                update_data["sent_at"] = datetime.utcnow()
+            elif status == "delivered":
+                update_data["delivered_at"] = datetime.utcnow()
+            
+            result = await self.notifications_collection.update_one(
+                {"_id": ObjectId(notification_id)},
+                {"$set": update_data}
+            )
+            
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f"Error updating notification status: {str(e)}")
+            return False
+    
+    async def resend_notification(self, notification_id: str) -> bool:
+        """Queue notification for resending"""
+        try:
+            from bson import ObjectId
+            result = await self.notifications_collection.update_one(
+                {"_id": ObjectId(notification_id), "status": {"$in": ["failed", "cancelled"]}},
+                {"$set": {
+                    "status": "pending",
+                    "updated_at": datetime.utcnow(),
+                    "resend_count": {"$inc": 1}
+                }}
+            )
+            
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f"Error resending notification: {str(e)}")
+            return False
+    
+    async def delete_notification_admin(self, notification_id: str) -> bool:
+        """Delete notification (admin only)"""
+        try:
+            from bson import ObjectId
+            result = await self.notifications_collection.delete_one({"_id": ObjectId(notification_id)})
+            return result.deleted_count > 0
+        except Exception as e:
+            logger.error(f"Error deleting notification: {str(e)}")
+            return False
+    
+    # ==========================================
+    # NOTIFICATION TEMPLATES MANAGEMENT
+    # ==========================================
+    
+    async def get_all_notification_templates(self) -> List[dict]:
+        """Get all notification templates for admin management"""
+        # For now, return the built-in templates from the service
+        # In production, these could be stored in database for dynamic editing
+        try:
+            from services.notifications import NotificationTemplateService
+            template_service = NotificationTemplateService()
+            
+            templates = []
+            template_types = ["new_interest", "contact_shared", "job_posted", "payment_confirmation", "new_message"]
+            channels = ["email", "sms"]
+            
+            for template_type in template_types:
+                for channel in channels:
+                    template = template_service.get_template(template_type, channel)
+                    if template:
+                        templates.append({
+                            "id": template.id,
+                            "type": template.type,
+                            "channel": template.channel,
+                            "subject_template": template.subject_template,
+                            "content_template": template.content_template,
+                            "variables": template.variables
+                        })
+            
+            return templates
+        except Exception as e:
+            logger.error(f"Error getting notification templates: {str(e)}")
+            return []
+    
+    async def get_notification_template_by_id(self, template_id: str) -> Optional[dict]:
+        """Get specific notification template by ID"""
+        templates = await self.get_all_notification_templates()
+        return next((t for t in templates if t["id"] == template_id), None)
+    
+    async def update_notification_template(self, template_id: str, template_data: dict) -> bool:
+        """Update notification template (for now, just validate - templates are built-in)"""
+        # In production, templates could be stored in database for dynamic editing
+        template = await self.get_notification_template_by_id(template_id)
+        return template is not None
+    
+    async def create_notification_template(self, template_data: dict) -> Optional[str]:
+        """Create notification template (for now, return generated ID)"""
+        # In production, save to database
+        return str(uuid.uuid4())
+    
+    async def test_notification_template(self, template_id: str, test_data: dict) -> dict:
+        """Test notification template with sample data"""
+        try:
+            from services.notifications import NotificationTemplateService
+            template_service = NotificationTemplateService()
+            
+            template = await self.get_notification_template_by_id(template_id)
+            if not template:
+                raise Exception("Template not found")
+            
+            # Create template object for testing
+            from models.notifications import NotificationTemplate, NotificationType, NotificationChannel
+            test_template = NotificationTemplate(
+                id=template["id"],
+                type=NotificationType(template["type"]),
+                channel=NotificationChannel(template["channel"]),
+                subject_template=template["subject_template"],
+                content_template=template["content_template"],
+                variables=template["variables"]
+            )
+            
+            subject, content = template_service.render_template(test_template, test_data)
+            
+            return {
+                "subject": subject,
+                "content": content,
+                "variables_used": list(test_data.keys())
+            }
+        except Exception as e:
+            raise Exception(f"Template test failed: {str(e)}")
+    
+    # ==========================================
+    # NOTIFICATION PREFERENCES MANAGEMENT
+    # ==========================================
+    
+    async def get_all_user_preferences(self, skip: int = 0, limit: int = 50, user_role: str = None) -> List[dict]:
+        """Get all user notification preferences for admin review"""
+        # Build query
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "user_id",
+                    "foreignField": "id",
+                    "as": "user"
+                }
+            },
+            {"$unwind": "$user"}
+        ]
+        
+        if user_role:
+            pipeline.append({"$match": {"user.role": user_role}})
+        
+        pipeline.extend([
+            {"$skip": skip},
+            {"$limit": limit},
+            {
+                "$project": {
+                    "user_id": 1,
+                    "user_name": "$user.name",
+                    "user_email": "$user.email",
+                    "user_role": "$user.role",
+                    "new_interest": 1,
+                    "contact_shared": 1,
+                    "job_posted": 1,
+                    "payment_confirmation": 1,
+                    "job_expiring": 1,
+                    "new_matching_job": 1,
+                    "new_message": 1,
+                    "created_at": 1,
+                    "updated_at": 1
+                }
+            }
+        ])
+        
+        preferences = await self.notification_preferences_collection.aggregate(pipeline).to_list(length=None)
+        
+        # Convert ObjectId to string
+        for pref in preferences:
+            pref["id"] = str(pref["_id"])
+            del pref["_id"]
+        
+        return preferences
+    
+    async def get_notification_preferences_stats(self) -> dict:
+        """Get aggregated notification preferences statistics"""
+        pipeline = [
+            {
+                "$group": {
+                    "_id": None,
+                    "total_users": {"$sum": 1},
+                    "email_only": {"$sum": {"$cond": [{"$eq": ["$new_interest", "email"]}, 1, 0]}},
+                    "sms_only": {"$sum": {"$cond": [{"$eq": ["$new_interest", "sms"]}, 1, 0]}},
+                    "both_channels": {"$sum": {"$cond": [{"$eq": ["$new_interest", "both"]}, 1, 0]}}
+                }
+            }
+        ]
+        
+        result = await self.notification_preferences_collection.aggregate(pipeline).to_list(1)
+        
+        if result:
+            return result[0]
+        else:
+            return {
+                "total_users": 0,
+                "email_only": 0,
+                "sms_only": 0,
+                "both_channels": 0
+            }
+    
+    async def update_user_notification_preferences_admin(self, user_id: str, preferences_data: dict) -> bool:
+        """Update user notification preferences (admin override)"""
+        preferences_data["updated_at"] = datetime.utcnow()
+        
+        result = await self.notification_preferences_collection.update_one(
+            {"user_id": user_id},
+            {"$set": preferences_data}
+        )
+        
+        return result.modified_count > 0
+    
+    # ==========================================
+    # NOTIFICATION ANALYTICS
+    # ==========================================
+    
+    async def get_notification_analytics(self, date_from: str = None, date_to: str = None) -> dict:
+        """Get comprehensive notification analytics"""
+        match_stage = {}
+        
+        if date_from or date_to:
+            date_filter = {}
+            if date_from:
+                date_filter["$gte"] = datetime.fromisoformat(date_from)
+            if date_to:
+                date_filter["$lte"] = datetime.fromisoformat(date_to)
+            match_stage["created_at"] = date_filter
+        
+        pipeline = [
+            {"$match": match_stage},
+            {
+                "$group": {
+                    "_id": None,
+                    "total_notifications": {"$sum": 1},
+                    "sent_count": {"$sum": {"$cond": [{"$eq": ["$status", "sent"]}, 1, 0]}},
+                    "delivered_count": {"$sum": {"$cond": [{"$eq": ["$status", "delivered"]}, 1, 0]}},
+                    "failed_count": {"$sum": {"$cond": [{"$eq": ["$status", "failed"]}, 1, 0]}},
+                    "pending_count": {"$sum": {"$cond": [{"$eq": ["$status", "pending"]}, 1, 0]}},
+                    "email_count": {"$sum": {"$cond": [{"$eq": ["$channel", "email"]}, 1, 0]}},
+                    "sms_count": {"$sum": {"$cond": [{"$eq": ["$channel", "sms"]}, 1, 0]}},
+                    "both_count": {"$sum": {"$cond": [{"$eq": ["$channel", "both"]}, 1, 0]}}
+                }
+            }
+        ]
+        
+        result = await self.notifications_collection.aggregate(pipeline).to_list(1)
+        
+        if result:
+            analytics = result[0]
+            # Calculate delivery rate
+            total_sent = analytics["sent_count"] + analytics["delivered_count"]
+            analytics["delivery_rate"] = (total_sent / analytics["total_notifications"] * 100) if analytics["total_notifications"] > 0 else 0
+            return analytics
+        else:
+            return {
+                "total_notifications": 0,
+                "sent_count": 0,
+                "delivered_count": 0,
+                "failed_count": 0,
+                "pending_count": 0,
+                "email_count": 0,
+                "sms_count": 0,
+                "both_count": 0,
+                "delivery_rate": 0
+            }
+    
+    async def get_notification_delivery_report(self, notification_type: str = None, date_from: str = None, date_to: str = None) -> dict:
+        """Get detailed delivery report for notifications"""
+        match_stage = {}
+        
+        if notification_type:
+            match_stage["type"] = notification_type
+        
+        if date_from or date_to:
+            date_filter = {}
+            if date_from:
+                date_filter["$gte"] = datetime.fromisoformat(date_from)  
+            if date_to:
+                date_filter["$lte"] = datetime.fromisoformat(date_to)
+            match_stage["created_at"] = date_filter
+        
+        # Group by type and status
+        pipeline = [
+            {"$match": match_stage},
+            {
+                "$group": {
+                    "_id": {
+                        "type": "$type",
+                        "status": "$status",
+                        "channel": "$channel"
+                    },
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id.type",
+                    "channels": {
+                        "$push": {
+                            "channel": "$_id.channel",
+                            "status": "$_id.status",
+                            "count": "$count"
+                        }
+                    }
+                }
+            }
+        ]
+        
+        results = await self.notifications_collection.aggregate(pipeline).to_list(length=None)
+        
+        # Format results
+        report = {}
+        for result in results:
+            notification_type = result["_id"]
+            report[notification_type] = {
+                "channels": result["channels"],
+                "total": sum(channel["count"] for channel in result["channels"])
+            }
+        
+        return report
+
 # Global database instance
 database = Database()
