@@ -326,6 +326,43 @@ export const adminAPI = {
   },
 
   // ==========================================
+  // JOB APPROVAL MANAGEMENT
+  // ==========================================
+  
+  // Get pending jobs for approval
+  getPendingJobs: async (skip = 0, limit = 50) => {
+    const response = await apiClient.get(`/admin/jobs/pending?skip=${skip}&limit=${limit}`);
+    return response.data;
+  },
+
+  // Approve or reject a job
+  approveJob: async (jobId, approvalData) => {
+    const response = await apiClient.put(`/admin/jobs/${jobId}/approve`, approvalData);
+    return response.data;
+  },
+
+  // Get all jobs for admin (all statuses)
+  getAllJobsAdmin: async (skip = 0, limit = 50, status = null) => {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString()
+    });
+    
+    if (status) {
+      params.append('status', status);
+    }
+    
+    const response = await apiClient.get(`/admin/jobs/all-admin?${params}`);
+    return response.data;
+  },
+
+  // Get job statistics for admin
+  getJobStatistics: async () => {
+    const response = await apiClient.get('/admin/jobs/statistics');
+    return response.data;
+  },
+
+  // ==========================================
   // NOTIFICATION MANAGEMENT
   // ==========================================
   
