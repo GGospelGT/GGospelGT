@@ -339,8 +339,8 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
       const jobResponse = await jobsAPI.createJob(jobData);
 
       toast({
-        title: "Success!",
-        description: "Your job has been posted successfully! Tradespeople will start showing interest soon.",
+        title: "Job Submitted for Review!",
+        description: "Your job has been submitted and is pending admin approval. You'll receive a notification once it's reviewed and approved.",
       });
 
       if (onJobPosted) {
