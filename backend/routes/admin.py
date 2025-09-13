@@ -1055,6 +1055,341 @@ async def delete_trade(trade_name: str):
     
     return {"message": f"Trade category '{trade_name}' deleted successfully"}
 
+# ==========================================
+# NOTIFICATION MANAGEMENT
+# ==========================================
+
+@router.get("/notifications")
+async def get_all_notifications(
+    skip: int = 0,
+    limit: int = 50,
+    notification_type: Optional[str] = None,
+    status: Optional[str] = None,
+    channel: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None
+):
+    """Get all notifications with filtering options for admin management"""
+    
+    # Build filters
+    filters = {}
+    if notification_type:
+        filters["type"] = notification_type
+    if status:
+        filters["status"] = status
+    if channel:
+        filters["channel"] = channel
+    if date_from:
+        filters["created_at"] = {"$gte": datetime.fromisoformat(date_from)}
+    if date_to:
+        if "created_at" in filters:
+            filters["created_at"]["$lte"] = datetime.fromisoformat(date_to)
+        else:
+            filters["created_at"] = {"$lte": datetime.fromisoformat(date_to)}
+    
+    notifications = await database.get_admin_notifications(
+        filters=filters,
+        skip=skip,
+        limit=limit
+    )
+    
+    # Get stats
+    total_count = await database.get_notifications_count(filters)
+    stats = await database.get_notification_stats()
+    
+    return {
+        "notifications": notifications,
+        "pagination": {
+            "skip": skip,
+            "limit": limit,
+            "total": total_count
+        },
+        "stats": stats
+    }
+
+@router.get("/notifications/{notification_id}")
+async def get_notification_details(notification_id: str):
+    """Get detailed information about a specific notification"""
+    
+    notification = await database.get_notification_by_id(notification_id)
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    
+    return {"notification": notification}
+
+@router.put("/notifications/{notification_id}/status")
+async def update_notification_status(
+    notification_id: str,
+    status: str = Form(...),
+    admin_notes: str = Form("")
+):
+    """Update notification status (resend, mark as failed, etc.)"""
+    
+    valid_statuses = ["pending", "sent", "delivered", "failed", "cancelled"]
+    if status not in valid_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+        )
+    
+    success = await database.update_notification_status_admin(
+        notification_id, 
+        status, 
+        admin_notes
+    )
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    
+    return {
+        "message": f"Notification status updated to {status}",
+        "notification_id": notification_id,
+        "new_status": status
+    }
+
+@router.post("/notifications/{notification_id}/resend")
+async def resend_notification(notification_id: str):
+    """Resend a failed or cancelled notification"""
+    
+    success = await database.resend_notification(notification_id)
+    
+    if not success:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot resend notification. It may not exist or may not be in a resendable state."
+        )
+    
+    return {
+        "message": "Notification queued for resending",
+        "notification_id": notification_id
+    }
+
+@router.delete("/notifications/{notification_id}")
+async def delete_notification(notification_id: str):
+    """Delete a notification (admin only)"""
+    
+    success = await database.delete_notification_admin(notification_id)
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    
+    return {
+        "message": "Notification deleted successfully",
+        "notification_id": notification_id
+    }
+
+# ==========================================
+# NOTIFICATION TEMPLATES MANAGEMENT
+# ==========================================
+
+@router.get("/notifications/templates")
+async def get_notification_templates():
+    """Get all notification templates for admin management"""
+    
+    templates = await database.get_all_notification_templates()
+    
+    return {
+        "templates": templates,
+        "types": [
+            {"value": "new_interest", "label": "New Interest"},
+            {"value": "contact_shared", "label": "Contact Shared"},
+            {"value": "job_posted", "label": "Job Posted"},
+            {"value": "payment_confirmation", "label": "Payment Confirmation"},
+            {"value": "new_message", "label": "New Message"}
+        ],
+        "channels": [
+            {"value": "email", "label": "Email"},
+            {"value": "sms", "label": "SMS"},
+            {"value": "both", "label": "Both"}
+        ]
+    }
+
+@router.get("/notifications/templates/{template_id}")
+async def get_notification_template(template_id: str):
+    """Get specific notification template by ID"""
+    
+    template = await database.get_notification_template_by_id(template_id)
+    
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    return {"template": template}
+
+@router.put("/notifications/templates/{template_id}")
+async def update_notification_template(
+    template_id: str,
+    template_data: dict
+):
+    """Update notification template"""
+    
+    # Validate required fields
+    required_fields = ['subject_template', 'content_template']
+    for field in required_fields:
+        if field not in template_data:
+            raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+    
+    # Validate template content
+    if len(template_data['subject_template']) < 5:
+        raise HTTPException(status_code=400, detail="Subject template must be at least 5 characters")
+    
+    if len(template_data['content_template']) < 20:
+        raise HTTPException(status_code=400, detail="Content template must be at least 20 characters")
+    
+    success = await database.update_notification_template(template_id, template_data)
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Template not found or update failed")
+    
+    return {
+        "message": "Template updated successfully",
+        "template_id": template_id
+    }
+
+@router.post("/notifications/templates")
+async def create_notification_template(template_data: dict):
+    """Create a new notification template"""
+    
+    # Validate required fields
+    required_fields = ['type', 'channel', 'subject_template', 'content_template', 'variables']
+    for field in required_fields:
+        if field not in template_data:
+            raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+    
+    # Validate template content
+    if len(template_data['subject_template']) < 5:
+        raise HTTPException(status_code=400, detail="Subject template must be at least 5 characters")
+    
+    if len(template_data['content_template']) < 20:
+        raise HTTPException(status_code=400, detail="Content template must be at least 20 characters")
+    
+    template_id = await database.create_notification_template(template_data)
+    
+    if not template_id:
+        raise HTTPException(status_code=500, detail="Failed to create template")
+    
+    return {
+        "message": "Template created successfully",
+        "template_id": template_id,
+        "template_type": template_data['type']
+    }
+
+@router.post("/notifications/templates/{template_id}/test")
+async def test_notification_template(
+    template_id: str,
+    test_data: dict
+):
+    """Test a notification template with sample data"""
+    
+    try:
+        result = await database.test_notification_template(template_id, test_data)
+        
+        return {
+            "message": "Template test successful",
+            "rendered_subject": result["subject"],
+            "rendered_content": result["content"],
+            "variables_used": result["variables_used"]
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Template test failed: {str(e)}"
+        )
+
+# ==========================================
+# NOTIFICATION PREFERENCES MANAGEMENT
+# ==========================================
+
+@router.get("/notifications/preferences")
+async def get_user_notification_preferences_admin(
+    skip: int = 0,
+    limit: int = 50,
+    user_role: Optional[str] = None
+):
+    """Get user notification preferences for admin review"""
+    
+    preferences = await database.get_all_user_preferences(
+        skip=skip,
+        limit=limit,
+        user_role=user_role
+    )
+    
+    # Get aggregated stats
+    stats = await database.get_notification_preferences_stats()
+    
+    return {
+        "preferences": preferences,
+        "pagination": {
+            "skip": skip,
+            "limit": limit,
+            "total": len(preferences)
+        },
+        "stats": stats
+    }
+
+@router.put("/notifications/preferences/{user_id}")
+async def update_user_notification_preferences_admin(
+    user_id: str,
+    preferences_data: dict
+):
+    """Update user notification preferences (admin override)"""
+    
+    success = await database.update_user_notification_preferences_admin(
+        user_id,
+        preferences_data
+    )
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="User preferences not found")
+    
+    return {
+        "message": "User notification preferences updated successfully",
+        "user_id": user_id
+    }
+
+# ==========================================
+# NOTIFICATION ANALYTICS
+# ==========================================
+
+@router.get("/notifications/analytics")
+async def get_notification_analytics(
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None
+):
+    """Get comprehensive notification analytics for admin dashboard"""
+    
+    analytics = await database.get_notification_analytics(date_from, date_to)
+    
+    return {
+        "analytics": analytics,
+        "date_range": {
+            "from": date_from,
+            "to": date_to
+        }
+    }
+
+@router.get("/notifications/delivery-report")
+async def get_notification_delivery_report(
+    notification_type: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None
+):
+    """Get detailed delivery report for notifications"""
+    
+    report = await database.get_notification_delivery_report(
+        notification_type,
+        date_from,
+        date_to
+    )
+    
+    return {
+        "delivery_report": report,
+        "filters": {
+            "type": notification_type,
+            "date_from": date_from,
+            "date_to": date_to
+        }
+    }
+
 # Skills Test Questions Management
 @router.get("/skills-questions")
 async def get_all_skills_questions():
