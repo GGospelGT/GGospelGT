@@ -116,7 +116,7 @@ class Job(BaseModel):
     budget_max: Optional[int] = None
     timeline: str
     homeowner: Homeowner
-    status: JobStatus = JobStatus.ACTIVE
+    status: JobStatus = JobStatus.PENDING_APPROVAL  # Default to pending approval
     quotes_count: int = 0
     interests_count: int = 0  # Add interests count field
     
@@ -127,6 +127,11 @@ class Job(BaseModel):
     # Location fields
     latitude: Optional[float] = None           # Job location latitude
     longitude: Optional[float] = None          # Job location longitude
+    
+    # Approval fields
+    approved_by: Optional[str] = None          # Admin who approved/rejected
+    approved_at: Optional[datetime] = None     # When approved/rejected
+    approval_notes: Optional[str] = None       # Admin notes for approval/rejection
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
