@@ -4224,23 +4224,47 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Access Fee (₦)</label>
-                    <input
-                      name="access_fee_naira"
-                      type="number"
-                      defaultValue={editingJobData.access_fee_naira}
-                      className="w-full px-3 py-2 border rounded-md"
-                    />
+                {/* Enhanced Access Fee Controls */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-3">Access Fee Settings</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-blue-800">Access Fee (₦)</label>
+                      <input
+                        name="access_fee_naira"
+                        type="number"
+                        min="500"
+                        max="10000"
+                        defaultValue={editingJobData.access_fees?.naira || editingJobData.access_fee_naira || 1000}
+                        className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      />
+                      <p className="text-xs text-blue-600 mt-1">Range: ₦500 - ₦10,000</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-blue-800">Access Fee (Coins)</label>
+                      <input
+                        name="access_fee_coins"
+                        type="number"
+                        min="5"
+                        max="100"
+                        defaultValue={editingJobData.access_fees?.coins || editingJobData.access_fee_coins || 10}
+                        className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      />
+                      <p className="text-xs text-blue-600 mt-1">Range: 5 - 100 coins</p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Status</label>
-                    <select
-                      name="status"
-                      defaultValue={editingJobData.status}
-                      className="w-full px-3 py-2 border rounded-md"
-                    >
+                </div>
+
+                {/* Admin Notes */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Admin Notes (Optional)</label>
+                  <textarea
+                    name="admin_notes"
+                    rows={3}
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="Optional notes about this edit that will be sent to the homeowner..."
+                  />
+                </div>
                       <option value="active">Active</option>
                       <option value="completed">Completed</option>
                       <option value="cancelled">Cancelled</option>
