@@ -95,6 +95,12 @@ const AdminDashboard = () => {
   const [processingEdit, setProcessingEdit] = useState(false);
   const [editJobErrors, setEditJobErrors] = useState({});
   
+  // Job Access Fees Management state
+  const [jobsWithFees, setJobsWithFees] = useState([]);
+  const [feesLoading, setFeesLoading] = useState(false);
+  const [editingJobFee, setEditingJobFee] = useState(null);
+  const [feeUpdateInProgress, setFeeUpdateInProgress] = useState(false);
+  
   // Jobs Management state
   const [jobsFilter, setJobsFilter] = useState('');
   const [editingJobStatus, setEditingJobStatus] = useState(null);
