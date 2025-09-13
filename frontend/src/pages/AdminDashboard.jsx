@@ -3230,6 +3230,23 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, items: [], type: 'single' })}
+        onConfirm={() => {
+          if (confirmDelete.type === 'bulk') {
+            handleBulkDelete(confirmDelete.items, activeLocationTab === 'states' ? 'state' : 'unknown');
+          } else {
+            handleSingleDelete(confirmDelete.items[0], activeLocationTab === 'states' ? 'state' : 'unknown');
+          }
+        }}
+        items={confirmDelete.items}
+        type={confirmDelete.type}
+        entityName={activeLocationTab === 'states' ? 'state' : 'item'}
+        isProcessing={isProcessing}
+      />
+
       <Footer />
     </div>
   );
