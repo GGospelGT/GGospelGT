@@ -89,11 +89,11 @@ const AdminDashboard = () => {
   const [approvalNotes, setApprovalNotes] = useState('');
   const [processingApproval, setProcessingApproval] = useState(false);
   
-  // Job Editing state
-  const [editingJob, setEditingJob] = useState(null);
-  const [jobEditForm, setJobEditForm] = useState({});
-  const [processingJobEdit, setProcessingJobEdit] = useState(false);
-  const [jobEditErrors, setJobEditErrors] = useState({});
+  // Enhanced Job Editing state
+  const [editJobModal, setEditJobModal] = useState(null);
+  const [editJobForm, setEditJobForm] = useState({});
+  const [processingEdit, setProcessingEdit] = useState(false);
+  const [editJobErrors, setEditJobErrors] = useState({});
   
   // Jobs Management state
   const [jobsFilter, setJobsFilter] = useState('');
