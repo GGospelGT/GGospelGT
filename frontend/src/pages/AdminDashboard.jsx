@@ -443,6 +443,9 @@ const AdminDashboard = () => {
     if (isLoggedIn && activeTab === 'approvals') {
       handleJobApprovalsDataLoad();
     }
+    if (isLoggedIn && activeTab === 'fees') {
+      handleJobAccessFeesDataLoad();
+    }
   }, [isLoggedIn, activeTab]);
 
   // ==========================================
