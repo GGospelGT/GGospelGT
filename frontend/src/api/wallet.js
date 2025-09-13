@@ -325,6 +325,134 @@ export const adminAPI = {
     return response.data;
   },
 
+  // ==========================================
+  // NOTIFICATION MANAGEMENT
+  // ==========================================
+  
+  // Get all notifications with filtering
+  getAllNotifications: async (filters = {}, skip = 0, limit = 50) => {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString(),
+      ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v))
+    });
+    
+    const response = await apiClient.get(`/admin/notifications?${params}`);
+    return response.data;
+  },
+
+  // Get notification details by ID
+  getNotificationById: async (notificationId) => {
+    const response = await apiClient.get(`/admin/notifications/${notificationId}`);
+    return response.data;
+  },
+
+  // Update notification status
+  updateNotificationStatus: async (notificationId, status, adminNotes = '') => {
+    const formData = new FormData();
+    formData.append('status', status);
+    formData.append('admin_notes', adminNotes);
+    
+    const response = await apiClient.put(`/admin/notifications/${notificationId}/status`, formData);
+    return response.data;
+  },
+
+  // Resend notification
+  resendNotification: async (notificationId) => {
+    const response = await apiClient.post(`/admin/notifications/${notificationId}/resend`);
+    return response.data;
+  },
+
+  // Delete notification
+  deleteNotification: async (notificationId) => {
+    const response = await apiClient.delete(`/admin/notifications/${notificationId}`);
+    return response.data;
+  },
+
+  // ==========================================
+  // NOTIFICATION TEMPLATES MANAGEMENT
+  // ==========================================
+
+  // Get all notification templates
+  getNotificationTemplates: async () => {
+    const response = await apiClient.get('/admin/notifications/templates');
+    return response.data;
+  },
+
+  // Get notification template by ID
+  getNotificationTemplate: async (templateId) => {
+    const response = await apiClient.get(`/admin/notifications/templates/${templateId}`);
+    return response.data;
+  },
+
+  // Update notification template
+  updateNotificationTemplate: async (templateId, templateData) => {
+    const response = await apiClient.put(`/admin/notifications/templates/${templateId}`, templateData);
+    return response.data;
+  },
+
+  // Create notification template
+  createNotificationTemplate: async (templateData) => {
+    const response = await apiClient.post('/admin/notifications/templates', templateData);
+    return response.data;
+  },
+
+  // Test notification template
+  testNotificationTemplate: async (templateId, testData) => {
+    const response = await apiClient.post(`/admin/notifications/templates/${templateId}/test`, testData);
+    return response.data;
+  },
+
+  // ==========================================
+  // NOTIFICATION PREFERENCES MANAGEMENT
+  // ==========================================
+
+  // Get user notification preferences
+  getUserNotificationPreferences: async (skip = 0, limit = 50, userRole = null) => {
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString()
+    });
+    
+    if (userRole) {
+      params.append('user_role', userRole);
+    }
+    
+    const response = await apiClient.get(`/admin/notifications/preferences?${params}`);
+    return response.data;
+  },
+
+  // Update user notification preferences
+  updateUserNotificationPreferences: async (userId, preferencesData) => {
+    const response = await apiClient.put(`/admin/notifications/preferences/${userId}`, preferencesData);
+    return response.data;
+  },
+
+  // ==========================================
+  // NOTIFICATION ANALYTICS
+  // ==========================================
+
+  // Get notification analytics
+  getNotificationAnalytics: async (dateFrom = null, dateTo = null) => {
+    const params = new URLSearchParams();
+    if (dateFrom) params.append('date_from', dateFrom);
+    if (dateTo) params.append('date_to', dateTo);
+    
+    const response = await apiClient.get(`/admin/notifications/analytics?${params}`);
+    return response.data;
+  },
+
+  // Get notification delivery report
+  getNotificationDeliveryReport: async (notificationType = null, dateFrom = null, dateTo = null) => {
+    const params = new URLSearchParams();
+    if (notificationType) params.append('notification_type', notificationType);
+    if (dateFrom) params.append('date_from', dateFrom);
+    if (dateTo) params.append('date_to', dateTo);
+    
+    const response = await apiClient.get(`/admin/notifications/delivery-report?${params}`);
+    return response.data;
+  },
+
   // Skills Test Questions Management
   async getAllSkillsQuestions() {
     const response = await apiClient.get('/admin/skills-questions');
