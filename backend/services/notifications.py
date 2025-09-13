@@ -437,6 +437,47 @@ serviceHub Admin Team
             )
         }
         
+        # Job Update templates
+        templates[NotificationType.JOB_UPDATED] = {
+            NotificationChannel.EMAIL: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_UPDATED,
+                channel=NotificationChannel.EMAIL,
+                subject_template="Job Updated: {job_title}",
+                content_template="""
+Hello {homeowner_name},
+
+Your job posting has been updated by our admin team to improve its quality and visibility.
+
+📋 Job Title: {job_title}
+✏️ Updated Fields: {updated_fields}
+📅 Updated: {updated_at}
+👨‍💼 Updated by: Admin Team
+
+{admin_notes}
+
+What This Means:
+Your job posting now has better visibility and improved details to attract more qualified tradespeople. These updates help ensure you get the best possible responses to your job.
+
+To view your updated job posting, visit: https://app.emergent.sh/my-jobs
+
+If you have any questions about these updates, please don't hesitate to contact our support team.
+
+Best regards,
+serviceHub Admin Team
+                """,
+                variables=["homeowner_name", "job_title", "updated_fields", "updated_at", "admin_notes"]
+            ),
+            NotificationChannel.SMS: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_UPDATED,
+                channel=NotificationChannel.SMS,
+                subject_template="Job Updated - serviceHub",
+                content_template="✏️ Your job '{job_title}' has been updated by our admin team to improve visibility. Check details: https://app.emergent.sh/my-jobs",
+                variables=["job_title"]
+            )
+        }
+        
         return templates
     
     def get_template(self, notification_type: NotificationType, channel: NotificationChannel) -> Optional[NotificationTemplate]:
