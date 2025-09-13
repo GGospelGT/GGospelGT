@@ -570,6 +570,19 @@ class PolicyListResponse(BaseModel):
     policies: List[Policy]
     total_count: int
 
+# Job Approval Models
+class JobApprovalRequest(BaseModel):
+    action: str = Field(..., description="approve or reject")
+    notes: Optional[str] = Field(None, max_length=500, description="Admin notes")
+
+class JobApprovalResponse(BaseModel):
+    job_id: str
+    action: str
+    approved_by: str
+    approved_at: datetime
+    notes: Optional[str] = None
+    message: str
+
 # Contact Management Models
 class ContactType(str, Enum):
     PHONE_SUPPORT = "phone_support"
