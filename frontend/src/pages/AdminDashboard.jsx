@@ -3807,6 +3807,131 @@ const AdminDashboard = () => {
         isProcessing={isProcessing}
       />
       
+      {/* Notification Details Modal */}
+      {selectedNotification && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h3 className="text-lg font-semibold">Notification Details</h3>
+              <button
+                onClick={() => setSelectedNotification(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-gray-700">Basic Information</h4>
+                  <div className="mt-2 space-y-2 text-sm">
+                    <div><strong>ID:</strong> {selectedNotification.id}</div>
+                    <div><strong>Type:</strong> {selectedNotification.type}</div>
+                    <div><strong>Channel:</strong> {selectedNotification.channel}</div>
+                    <div>
+                      <strong>Status:</strong> 
+                      <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getNotificationStatusColor(selectedNotification.status)}`}>
+                        {selectedNotification.status?.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-700">User Information</h4>
+                  <div className="mt-2 space-y-2 text-sm">
+                    <div><strong>Name:</strong> {selectedNotification.user_name}</div>
+                    <div><strong>Email:</strong> {selectedNotification.user_email}</div>
+                    <div><strong>Role:</strong> {selectedNotification.user_role}</div>
+                    <div><strong>User ID:</strong> {selectedNotification.user_id}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-gray-700">Recipient Details</h4>
+                  <div className="mt-2 space-y-2 text-sm">
+                    {selectedNotification.recipient_email && (
+                      <div><strong>Email:</strong> {selectedNotification.recipient_email}</div>
+                    )}
+                    {selectedNotification.recipient_phone && (
+                      <div><strong>Phone:</strong> {selectedNotification.recipient_phone}</div>
+                    )}
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-700">Timestamps</h4>
+                  <div className="mt-2 space-y-2 text-sm">
+                    <div><strong>Created:</strong> {new Date(selectedNotification.created_at).toLocaleString()}</div>
+                    {selectedNotification.sent_at && (
+                      <div><strong>Sent:</strong> {new Date(selectedNotification.sent_at).toLocaleString()}</div>
+                    )}
+                    {selectedNotification.delivered_at && (
+                      <div><strong>Delivered:</strong> {new Date(selectedNotification.delivered_at).toLocaleString()}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-gray-700">Subject</h4>
+                <div className="mt-2 p-3 bg-gray-50 rounded border text-sm">
+                  {selectedNotification.subject || 'No subject'}
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-gray-700">Content</h4>
+                <div className="mt-2 p-3 bg-gray-50 rounded border text-sm whitespace-pre-wrap max-h-40 overflow-y-auto">
+                  {selectedNotification.content || 'No content'}
+                </div>
+              </div>
+              
+              {selectedNotification.admin_notes && (
+                <div>
+                  <h4 className="font-semibold text-gray-700">Admin Notes</h4>
+                  <div className="mt-2 p-3 bg-yellow-50 rounded border text-sm">
+                    {selectedNotification.admin_notes}
+                  </div>
+                </div>
+              )}
+              
+              {selectedNotification.metadata && Object.keys(selectedNotification.metadata).length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-gray-700">Metadata</h4>
+                  <div className="mt-2 p-3 bg-gray-50 rounded border text-sm">
+                    <pre>{JSON.stringify(selectedNotification.metadata, null, 2)}</pre>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end space-x-2 p-6 border-t bg-gray-50">
+              <button
+                onClick={() => setSelectedNotification(null)}
+                className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Close
+              </button>
+              {selectedNotification.status === 'failed' && (
+                <button
+                  onClick={() => {
+                    handleResendNotification(selectedNotification.id);
+                    setSelectedNotification(null);
+                  }}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                >
+                  Resend
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Enhanced Delete Confirmation Modal */}
       <ConfirmDeleteModal
         isOpen={confirmDelete.isOpen}
