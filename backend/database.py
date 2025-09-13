@@ -183,6 +183,62 @@ class Database:
         
         return jobs
 
+    async def get_pending_jobs_admin(self, skip: int = 0, limit: int = 50) -> List[dict]:
+        """Get jobs pending admin approval"""
+        query = {"status": "pending_approval"}
+        
+        cursor = self.database.jobs.find(query).sort("created_at", -1).skip(skip).limit(limit)
+        
+        jobs = []
+        async for job in cursor:
+            job["_id"] = str(job["_id"])
+            # Get homeowner details
+            if "homeowner_id" in job:
+                homeowner = await self.database.users.find_one({"id": job["homeowner_id"]})
+                if homeowner:
+                    job["homeowner"] = {
+                        "id": homeowner["id"],
+                        "name": homeowner.get("name", "Unknown"),
+                        "email": homeowner.get("email", ""),
+                        "phone": homeowner.get("phone", "")
+                    }
+                    job["homeowner"]["verification_status"] = homeowner.get("verification_status", "pending")
+                    job["homeowner"]["join_date"] = homeowner.get("created_at")
+                    job["homeowner"]["total_jobs"] = await self.database.jobs.count_documents({
+                        "homeowner_id": job["homeowner_id"]
+                    })
+                else:
+                    job["homeowner"] = {
+                        "id": job.get("homeowner_id", "unknown"),
+                        "name": "Unknown",
+                        "email": "",
+                        "phone": ""
+                    }
+            else:
+                # Handle legacy jobs without homeowner_id
+                job["homeowner"] = {
+                    "id": "unknown",
+                    "name": job.get("homeowner_name", "Unknown"),
+                    "email": job.get("homeowner_email", ""),
+                    "phone": job.get("homeowner_phone", "")
+                }
+            
+            jobs.append(job)
+        
+        return jobs
+
+    async def get_pending_jobs_count(self) -> int:
+        """Get count of jobs pending approval"""
+        return await self.database.jobs.count_documents({"status": "pending_approval"})
+
+    async def update_job_approval_status(self, job_id: str, approval_data: dict) -> bool:
+        """Update job approval status with admin details"""
+        result = await self.database.jobs.update_one(
+            {"id": job_id},
+            {"$set": approval_data}
+        )
+        return result.modified_count > 0
+
     async def get_jobs_count_admin(self, status: str = None) -> int:
         """Get total count of jobs for pagination"""
         query = {}
