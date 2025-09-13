@@ -318,6 +318,42 @@ serviceHub Team
             )
         }
         
+        # New Message templates  
+        templates[NotificationType.NEW_MESSAGE] = {
+            NotificationChannel.EMAIL: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.NEW_MESSAGE,
+                channel=NotificationChannel.EMAIL,
+                subject_template="New Message: {job_title}",
+                content_template="""
+Hello {recipient_name},
+
+You have received a new message regarding your job:
+
+📋 Job: {job_title}
+👤 From: {sender_name}
+💬 Message: {message_preview}
+
+To view the full conversation and reply, please visit your messages:
+{conversation_url}
+
+Keep the conversation going to finalize your project details!
+
+Best regards,
+serviceHub Team
+                """,
+                variables=["recipient_name", "sender_name", "job_title", "message_preview", "conversation_url"]
+            ),
+            NotificationChannel.SMS: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.NEW_MESSAGE,
+                channel=NotificationChannel.SMS,
+                subject_template="New Message - serviceHub",
+                content_template="💬 New message from {sender_name} about {job_title}: {message_preview} Reply at: {conversation_url}",
+                variables=["sender_name", "job_title", "message_preview", "conversation_url"]
+            )
+        }
+        
         return templates
     
     def get_template(self, notification_type: NotificationType, channel: NotificationChannel) -> Optional[NotificationTemplate]:
