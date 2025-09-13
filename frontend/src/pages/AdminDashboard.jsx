@@ -3246,7 +3246,68 @@ const AdminDashboard = () => {
         entityName={activeLocationTab === 'states' ? 'state' : 'item'}
         isProcessing={isProcessing}
       />
-
+      
+      {/* Enhanced Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, items: [], type: 'single' })}
+        onConfirm={() => {
+          if (confirmDelete.type === 'bulk') {
+            // Determine entity type based on active tab
+            let entityType = 'item';
+            if (activeTab === 'locations') {
+              if (activeLocationTab === 'states') entityType = 'state';
+              else if (activeLocationTab === 'lgas') entityType = 'lga';
+              else if (activeLocationTab === 'towns') entityType = 'town';
+              else if (activeLocationTab === 'trades') entityType = 'trade';
+            } else if (activeTab === 'contacts') {
+              entityType = 'contact';
+            } else if (activeTab === 'policies') {
+              entityType = 'policy';
+            } else if (activeTab === 'jobs') {
+              entityType = 'job';
+            }
+            
+            handleBulkDelete(confirmDelete.items, entityType);
+          } else {
+            // Single delete
+            let entityType = 'item';
+            if (activeTab === 'locations') {
+              if (activeLocationTab === 'states') entityType = 'state';
+              else if (activeLocationTab === 'lgas') entityType = 'lga';
+              else if (activeLocationTab === 'towns') entityType = 'town';
+              else if (activeLocationTab === 'trades') entityType = 'trade';
+            } else if (activeTab === 'contacts') {
+              entityType = 'contact';
+            } else if (activeTab === 'policies') {
+              entityType = 'policy';
+            } else if (activeTab === 'jobs') {
+              entityType = 'job';
+            }
+            
+            handleSingleDelete(confirmDelete.items[0], entityType);
+          }
+        }}
+        title={confirmDelete.type === 'bulk' ? `Delete ${confirmDelete.items.length} Items` : 'Delete Item'}
+        message={
+          confirmDelete.type === 'bulk' 
+            ? `Are you sure you want to delete ${confirmDelete.items.length} selected items? This action cannot be undone.`
+            : 'Are you sure you want to delete this item? This action cannot be undone.'
+        }
+        itemName={
+          confirmDelete.items.length === 1 
+            ? confirmDelete.items[0]?.name || confirmDelete.items[0]?.title || confirmDelete.items[0]?.id
+            : undefined
+        }
+        itemType={
+          confirmDelete.type === 'bulk' 
+            ? `${confirmDelete.items.length} items`
+            : (confirmDelete.items[0]?.type || 'item')
+        }
+        isDeleting={isProcessing}
+        dangerLevel="high"
+      />
+      
       <Footer />
     </div>
   );
