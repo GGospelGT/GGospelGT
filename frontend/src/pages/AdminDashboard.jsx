@@ -58,6 +58,13 @@ const AdminDashboard = () => {
   const [showAddContact, setShowAddContact] = useState(false);
   const [editingContact, setEditingContact] = useState(null);
   
+  // Enhanced CRUD state
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [bulkActionInProgress, setBulkActionInProgress] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, items: [], type: 'single' });
+  const [editingInline, setEditingInline] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
   // Jobs Management state
   const [jobsFilter, setJobsFilter] = useState('');
   const [editingJobStatus, setEditingJobStatus] = useState(null);
