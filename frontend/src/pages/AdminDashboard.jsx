@@ -653,6 +653,7 @@ const AdminDashboard = () => {
                   { id: 'questions', label: 'Skills Questions', icon: '📝' },
                   { id: 'policies', label: 'Policy Management', icon: '📄' },
                   { id: 'contacts', label: 'Contact Management', icon: '📞' },
+                  { id: 'notifications', label: 'Notifications', icon: '🔔' },
                   { id: 'stats', label: 'Dashboard Stats', icon: '📊' }
                 ].map((tab) => (
                   <button
