@@ -441,16 +441,16 @@ backend:
 
 frontend:
   - task: "Admin Dashboard CRUD Enhancement - Update, Edit, Delete Frontend"
-    implemented: true
+    implemented: false
     working: "NA"
-    file: "/app/frontend/src/components/ChatModal.jsx, /app/backend/routes/messages.py"
+    file: "/app/frontend/src/pages/AdminDashboard.jsx, /app/frontend/src/api/wallet.js"
     stuck_count: 0
-    priority: "critical"
-    needs_retesting: false
+    priority: "high"
+    needs_retesting: true
     status_history:
-      - working: true
-        agent: "testing"
-        comment: "🎉 MESSAGE DELIVERY VERIFICATION COMPLETE: Comprehensive testing confirms message delivery is FULLY OPERATIONAL with 96.1% success rate (49/51 tests passed). CRITICAL VERIFICATION CONFIRMED: ✅ Message Sending API - POST /api/messages/conversations/{conversation_id}/messages working correctly with proper data structure, authentication and authorization enforced, ✅ Message Retrieval API - GET /api/messages/conversations/{conversation_id}/messages working correctly, messages properly stored and retrievable from database, ✅ Conversation Management - creation/retrieval working correctly, proper linking between jobs/conversations/messages verified, ✅ Message Persistence & Database - Messages properly saved to MongoDB and retrievable, database consistency verified, MongoDB connection stable, ✅ Bi-directional Messaging - Both homeowner→tradesperson and tradesperson→homeowner flows working correctly, ✅ Authentication & Authorization - Proper authentication required for all operations, access control working (only participants can send/view), ✅ Payment System Integration - Messaging correctly blocked until paid_access status, business rules properly enforced. MINOR ISSUES: Only 2 failed tests related to wallet funding limitations in test environment (expected 422 errors). PRODUCTION READY: Core messaging functionality fully operational, recent ChatModal contact details fix has NOT broken any messaging functionality, message delivery working correctly for both tradespeople and homeowners as requested by user."
+      - working: "NA"
+        agent: "main"
+        comment: "🚀 ADMIN DASHBOARD CRUD ENHANCEMENT REQUESTED: User requested comprehensive update, edit, and delete functionality for admin dashboard frontend. Need to enhance existing AdminDashboard.jsx with: 1) Inline editing for all entities (states, LGAs, towns, trades, policies, contacts, users), 2) Delete confirmation modals with proper warnings, 3) Bulk operations for multiple items, 4) Enhanced error handling and validation, 5) Improved UI/UX for CRUD operations with proper form validation, 6) Real-time updates after operations. Backend APIs already exist - need to enhance frontend implementation."
 
   - task: "Authentication Redirect Flow - Tradespeople to Browse Jobs"
     implemented: true
