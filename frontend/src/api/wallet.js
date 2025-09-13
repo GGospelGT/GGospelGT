@@ -375,6 +375,25 @@ export const adminAPI = {
   },
 
   // ==========================================
+  // JOB ACCESS FEES MANAGEMENT
+  // ==========================================
+  
+  // Get all jobs with access fees
+  getJobsWithAccessFees: async (skip = 0, limit = 20) => {
+    const response = await apiClient.get(`/admin/jobs/access-fees?skip=${skip}&limit=${limit}`);
+    return response.data;
+  },
+
+  // Update job access fee
+  updateJobAccessFee: async (jobId, accessFeeNaira) => {
+    const formData = new FormData();
+    formData.append('access_fee_naira', accessFeeNaira.toString());
+    
+    const response = await apiClient.put(`/admin/jobs/${jobId}/access-fee`, formData);
+    return response.data;
+  },
+
+  // ==========================================
   // NOTIFICATION MANAGEMENT
   // ==========================================
   
