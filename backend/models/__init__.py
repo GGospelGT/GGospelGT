@@ -19,6 +19,13 @@ from .auth import (
     PasswordResetRequest, PasswordReset
 )
 
+from .notifications import (
+    NotificationType, NotificationChannel, NotificationStatus,
+    NotificationPreferences, NotificationTemplate, Notification,
+    NotificationRequest, NotificationResponse, NotificationHistory,
+    UpdatePreferencesRequest, NotificationStatsResponse
+)
+
 # Re-export all models for easy importing
 __all__ = [
     # Base models
