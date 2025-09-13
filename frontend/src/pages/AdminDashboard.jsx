@@ -1605,6 +1605,12 @@ const AdminDashboard = () => {
                                         Review
                                       </button>
                                       <button
+                                        onClick={() => handleOpenJobEditor(job)}
+                                        className="text-purple-600 hover:text-purple-900 text-sm font-medium"
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
                                         onClick={() => handleApproveJob(job.id, 'approve')}
                                         disabled={processingApproval}
                                         className="text-green-600 hover:text-green-900 text-sm font-medium disabled:opacity-50"
