@@ -349,8 +349,91 @@ serviceHub Team
                 type=NotificationType.NEW_MESSAGE,
                 channel=NotificationChannel.SMS,
                 subject_template="New Message - serviceHub",
-                content_template="💬 {sender_name}: {message_preview} Reply: {conversation_url}",
-                variables=["sender_name", "message_preview", "conversation_url"]
+                content_template="💬 New message from {sender_name} about {job_title}: {message_preview} Reply at: {conversation_url}",
+                variables=["sender_name", "job_title", "message_preview", "conversation_url"]
+            )
+        }
+        
+        # Job Approval templates
+        templates[NotificationType.JOB_APPROVED] = {
+            NotificationChannel.EMAIL: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_APPROVED,
+                channel=NotificationChannel.EMAIL,
+                subject_template="Job Approved: {job_title}",
+                content_template="""
+Hello {homeowner_name},
+
+Great news! Your job posting has been approved and is now live on serviceHub.
+
+📋 Job Title: {job_title}
+✅ Status: Approved and Active
+📅 Approved: {approved_at}
+👨‍💼 Reviewed by: Admin Team
+
+{admin_notes}
+
+Your job is now visible to all qualified tradespeople in your area. You should start receiving interest notifications soon.
+
+To view your job and manage applications, visit: https://app.emergent.sh/my-jobs
+
+Best regards,
+serviceHub Admin Team
+                """,
+                variables=["homeowner_name", "job_title", "approved_at", "admin_notes"]
+            ),
+            NotificationChannel.SMS: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_APPROVED,
+                channel=NotificationChannel.SMS,
+                subject_template="Job Approved - serviceHub",
+                content_template="✅ Your job '{job_title}' has been approved and is now live! Tradespeople can now see and apply. Check: https://app.emergent.sh/my-jobs",
+                variables=["job_title"]
+            )
+        }
+        
+        # Job Rejection templates
+        templates[NotificationType.JOB_REJECTED] = {
+            NotificationChannel.EMAIL: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_REJECTED,
+                channel=NotificationChannel.EMAIL,
+                subject_template="Job Submission Update: {job_title}",
+                content_template="""
+Hello {homeowner_name},
+
+Thank you for submitting your job posting to serviceHub. After review, we need some updates before we can approve your job.
+
+📋 Job Title: {job_title}
+❌ Status: Requires Updates
+📅 Reviewed: {reviewed_at}
+👨‍💼 Reviewed by: Admin Team
+
+📝 Required Updates:
+{rejection_reason}
+
+How to Fix:
+1. Log into your serviceHub account
+2. Go to "My Jobs" section
+3. Edit your job posting with the required updates
+4. Resubmit for review
+
+We're here to help! If you have questions about these requirements, please contact our support team.
+
+Visit your jobs: https://app.emergent.sh/my-jobs
+
+Best regards,
+serviceHub Admin Team
+                """,
+                variables=["homeowner_name", "job_title", "reviewed_at", "rejection_reason"]
+            ),
+            NotificationChannel.SMS: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_REJECTED,
+                channel=NotificationChannel.SMS,
+                subject_template="Job Update Required - serviceHub",
+                content_template="⚠️ Your job '{job_title}' needs updates before approval. Check your email for details or visit: https://app.emergent.sh/my-jobs",
+                variables=["job_title"]
             )
         }
         
