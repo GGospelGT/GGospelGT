@@ -300,9 +300,27 @@ const AdminDashboard = () => {
     setShowJobDetailsModal(true);
   };
 
-  const handleEditJob = (job) => {
-    setEditingJobData(job);
-    setShowEditJobModal(true);
+  const handleEditJob = async (job) => {
+    try {
+      setLoading(true);
+      
+      // Get detailed job information including access fees
+      const response = await adminAPI.getJobDetailsAdmin(job.id);
+      const jobDetails = response.job;
+      
+      setEditingJobData(jobDetails);
+      setShowEditJobModal(true);
+      
+    } catch (error) {
+      console.error('Failed to load job details:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load job details for editing",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteJob = async (jobId) => {
