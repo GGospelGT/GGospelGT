@@ -39,6 +39,7 @@ class NotificationPreferences(BaseModel):
     new_message: NotificationChannel = NotificationChannel.BOTH
     job_approved: NotificationChannel = NotificationChannel.BOTH
     job_rejected: NotificationChannel = NotificationChannel.BOTH
+    job_updated: NotificationChannel = NotificationChannel.EMAIL
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
