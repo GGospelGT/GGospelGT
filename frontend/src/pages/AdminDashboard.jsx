@@ -65,6 +65,22 @@ const AdminDashboard = () => {
   const [editingInline, setEditingInline] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   
+  // Notification Management state
+  const [notifications, setNotifications] = useState([]);
+  const [notificationTemplates, setNotificationTemplates] = useState([]);
+  const [userPreferences, setUserPreferences] = useState([]);
+  const [notificationStats, setNotificationStats] = useState({});
+  const [notificationFilters, setNotificationFilters] = useState({
+    type: '',
+    status: '',
+    channel: '',
+    date_from: '',
+    date_to: ''
+  });
+  const [activeNotificationTab, setActiveNotificationTab] = useState('notifications');
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  
   // Jobs Management state
   const [jobsFilter, setJobsFilter] = useState('');
   const [editingJobStatus, setEditingJobStatus] = useState(null);
