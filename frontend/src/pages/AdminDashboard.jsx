@@ -4265,13 +4265,22 @@ const AdminDashboard = () => {
                     placeholder="Optional notes about this edit that will be sent to the homeowner..."
                   />
                 </div>
-                      <option value="active">Active</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="expired">Expired</option>
-                      <option value="on_hold">On Hold</option>
-                    </select>
-                  </div>
+
+                {/* Status (if needed) */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Status</label>
+                  <select
+                    name="status"
+                    defaultValue={editingJobData.status}
+                    className="w-full px-3 py-2 border rounded-md"
+                  >
+                    <option value="pending_approval">Pending Approval</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="expired">Expired</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
                 </div>
               </div>
               
