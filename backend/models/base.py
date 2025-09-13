@@ -6,10 +6,12 @@ from enum import Enum
 
 # Enums
 class JobStatus(str, Enum):
+    PENDING_APPROVAL = "pending_approval"
     ACTIVE = "active"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
     EXPIRED = "expired"
+    REJECTED = "rejected"
 
 class QuoteStatus(str, Enum):
     PENDING = "pending"
