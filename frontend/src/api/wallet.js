@@ -362,6 +362,18 @@ export const adminAPI = {
     return response.data;
   },
 
+  // Edit job details and access fees
+  editJobAdmin: async (jobId, updateData) => {
+    const response = await apiClient.put(`/admin/jobs/${jobId}/edit`, updateData);
+    return response.data;
+  },
+
+  // Get detailed job information for editing
+  getJobDetailsAdmin: async (jobId) => {
+    const response = await apiClient.get(`/admin/jobs/${jobId}/details`);
+    return response.data;
+  },
+
   // ==========================================
   // NOTIFICATION MANAGEMENT
   // ==========================================
