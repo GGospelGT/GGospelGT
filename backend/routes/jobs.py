@@ -92,7 +92,7 @@ async def create_job(
         
         # Add default values
         job_dict['id'] = str(uuid.uuid4())
-        job_dict['status'] = 'active'
+        job_dict['status'] = 'pending_approval'  # Jobs need admin approval
         job_dict['quotes_count'] = 0
         job_dict['interests_count'] = 0  # Add interests count
         job_dict['access_fee_naira'] = 1000  # Default access fee ₦1000 (flexible)
