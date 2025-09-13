@@ -417,6 +417,117 @@ async def get_job_statistics_admin():
         "statistics": stats
     }
 
+@router.put("/jobs/{job_id}/edit")
+async def edit_job_admin(
+    job_id: str,
+    update_data: dict,
+    current_user = None  # Will be populated by admin auth
+):
+    """Edit job details including access fees (admin only)"""
+    
+    # Get current job
+    job = await database.get_job_by_id(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Validate update data
+    allowed_fields = [
+        'title', 'description', 'category', 'state', 'lga', 'town', 
+        'zip_code', 'home_address', 'budget_min', 'budget_max', 
+        'timeline', 'access_fee_naira', 'access_fee_coins'
+    ]
+    
+    # Filter out non-allowed fields
+    filtered_updates = {k: v for k, v in update_data.items() if k in allowed_fields and v is not None}
+    
+    if not filtered_updates:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
+    
+    # Validate specific fields
+    if 'access_fee_naira' in filtered_updates:
+        fee_naira = filtered_updates['access_fee_naira']
+        if not (500 <= fee_naira <= 10000):
+            raise HTTPException(status_code=400, detail="Access fee in Naira must be between 500 and 10,000")
+    
+    if 'access_fee_coins' in filtered_updates:
+        fee_coins = filtered_updates['access_fee_coins']
+        if not (5 <= fee_coins <= 100):
+            raise HTTPException(status_code=400, detail="Access fee in coins must be between 5 and 100")
+    
+    if 'budget_min' in filtered_updates and 'budget_max' in filtered_updates:
+        if filtered_updates['budget_min'] > filtered_updates['budget_max']:
+            raise HTTPException(status_code=400, detail="Minimum budget cannot be greater than maximum budget")
+    
+    # Add metadata
+    filtered_updates['updated_at'] = datetime.utcnow()
+    filtered_updates['last_edited_by'] = "admin"  # Use actual admin ID when auth is implemented
+    filtered_updates['admin_notes'] = update_data.get('admin_notes', '')
+    
+    # Update job
+    success = await database.update_job_admin(job_id, filtered_updates)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update job")
+    
+    # Send notification to homeowner about job update
+    try:
+        from services.notifications import notification_service
+        from models.notifications import NotificationType
+        
+        homeowner = await database.get_user_by_email(job["homeowner"]["email"])
+        if homeowner:
+            updated_fields = list(filtered_updates.keys())
+            await notification_service.send_notification(
+                user_id=homeowner["id"],
+                notification_type=NotificationType.JOB_UPDATED,
+                data={
+                    "job_title": job["title"],
+                    "job_id": job_id,
+                    "updated_fields": updated_fields,
+                    "admin_notes": update_data.get('admin_notes', '')
+                }
+            )
+    except Exception as e:
+        logger.warning(f"Failed to send job update notification: {str(e)}")
+    
+    return {
+        "message": "Job updated successfully",
+        "job_id": job_id,
+        "updated_fields": list(filtered_updates.keys()),
+        "updated_by": "admin",
+        "updated_at": datetime.utcnow().isoformat()
+    }
+
+@router.get("/jobs/{job_id}/details")
+async def get_job_details_admin(job_id: str):
+    """Get detailed job information for admin editing"""
+    
+    job = await database.get_job_by_id(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Get additional details
+    homeowner = await database.get_user_by_email(job["homeowner"]["email"])
+    interests_count = await database.get_job_interests_count(job_id)
+    
+    job_details = {
+        **job,
+        "homeowner_details": {
+            "name": homeowner.get("name") if homeowner else "Unknown",
+            "email": homeowner.get("email") if homeowner else "Unknown",
+            "phone": homeowner.get("phone") if homeowner else "Unknown",
+            "verification_status": homeowner.get("verification_status") if homeowner else "unknown",
+            "total_jobs": await database.count_homeowner_jobs(homeowner["id"]) if homeowner else 0
+        },
+        "interests_count": interests_count,
+        "access_fees": {
+            "naira": job.get("access_fee_naira", 1000),
+            "coins": job.get("access_fee_coins", 10)
+        }
+    }
+    
+    return {"job": job_details}
+
 # ==========================================
 # ADMIN DASHBOARD STATS
 # ==========================================
