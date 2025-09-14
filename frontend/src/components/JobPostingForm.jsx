@@ -123,6 +123,31 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     }
   }, [currentUser, loading]);
 
+  // Fetch trade categories from API
+  useEffect(() => {
+    const fetchTradeCategories = async () => {
+      try {
+        setLoadingTrades(true);
+        const response = await adminAPI.getAllTrades();
+        
+        if (response && response.trades && Array.isArray(response.trades)) {
+          setTradeCategories(response.trades);
+          console.log('✅ Job Posting Form: Loaded trade categories from API:', response.trades.length, 'categories');
+        } else {
+          console.log('⚠️ Job Posting Form: Invalid API response, using fallback');
+          setTradeCategories(FALLBACK_TRADE_CATEGORIES);
+        }
+      } catch (error) {
+        console.error('❌ Job Posting Form: Error fetching trade categories:', error);
+        setTradeCategories(FALLBACK_TRADE_CATEGORIES);
+      } finally {
+        setLoadingTrades(false);
+      }
+    };
+
+    fetchTradeCategories();
+  }, []);
+
   // Dynamic total steps based on authentication status - using defensive approach
   const totalSteps = (isAuthenticated() && !loading) ? 4 : 5;
 
