@@ -43,12 +43,15 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a 
-              onClick={() => navigate('/about')}
-              className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
-            >
-              About us
-            </a>
+            {/* Hide About us from tradespeople */}
+            {!isTradesperson() && (
+              <a 
+                onClick={() => navigate('/about')}
+                className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
+              >
+                About us
+              </a>
+            )}
             {/* Hide these navigation items when homeowner or tradesperson is logged in */}
             {!isHomeowner() && !isTradesperson() && (
               <>
