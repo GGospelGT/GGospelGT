@@ -278,6 +278,24 @@ const JobsMap = ({
         </div>
       )}
 
+      {error && (
+        <div className="absolute inset-0 bg-red-50 flex items-center justify-center rounded-lg border border-red-200">
+          <div className="text-center p-4">
+            <div className="text-red-500 mb-2">
+              <MapPin size={32} className="mx-auto" />
+            </div>
+            <p className="text-red-700 font-medium">Google Maps Error</p>
+            <p className="text-red-600 text-sm mt-1">{error}</p>
+            <button 
+              onClick={() => { setError(null); setLoading(true); initializeMap(); }}
+              className="mt-3 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md text-sm"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Controls */}
       {!loading && (
         <div className="absolute top-4 right-4 space-y-2">
