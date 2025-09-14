@@ -160,7 +160,7 @@ const ChatModal = ({
     }
   };
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (!newMessage.trim() || !conversationId || sending) return;
 
     // Store the message content before clearing
@@ -265,7 +265,7 @@ const ChatModal = ({
     } finally {
       setSending(false);
     }
-  };
+  }, [newMessage, conversationId, sending, messages.length, toast, scrollToBottom]);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
