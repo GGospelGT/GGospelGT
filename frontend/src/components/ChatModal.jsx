@@ -32,9 +32,9 @@ const ChatModal = ({
   const [initialLoad, setInitialLoad] = useState(true);
 
   // Auto-scroll to bottom when new messages arrive
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   useEffect(() => {
     if (isOpen && jobId && otherParty) {
