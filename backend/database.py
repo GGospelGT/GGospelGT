@@ -1993,12 +1993,12 @@ class Database:
         async for job in cursor:
             job["_id"] = str(job["_id"])
             
-            # Get homeowner details using the same logic as get_pending_jobs_admin
+            # Get homeowner details using multiple approaches
             homeowner_id = None
             homeowner_info = None
             
             # First, check if homeowner_id exists at root level
-            if "homeowner_id" in job:
+            if "homeowner_id" in job and job["homeowner_id"]:
                 homeowner_id = job["homeowner_id"]
                 homeowner = await self.database.users.find_one({"id": homeowner_id})
                 if homeowner:
@@ -2060,16 +2060,65 @@ class Database:
                             ]
                         })
                 else:
-                    # Use the embedded homeowner data as fallback
-                    homeowner_info = {
-                        "id": homeowner_obj.get("id", "unknown"),
-                        "name": homeowner_obj.get("name", "Unknown"),
-                        "email": homeowner_obj.get("email", ""),
-                        "phone": homeowner_obj.get("phone", ""),
-                        "verification_status": "pending",
-                        "join_date": job.get("created_at"),
-                        "total_jobs": 1  # At least this job
-                    }
+                    # NEW: Handle case where homeowner object exists but has no ID
+                    # Use the embedded homeowner data directly (name and email available)
+                    homeowner_name = homeowner_obj.get("name", "Unknown")
+                    homeowner_email = homeowner_obj.get("email", "")
+                    
+                    if homeowner_name != "Unknown" or homeowner_email:
+                        # Try to find user by email if available
+                        if homeowner_email:
+                            homeowner = await self.database.users.find_one({"email": homeowner_email})
+                            if homeowner:
+                                homeowner_info = {
+                                    "id": homeowner["id"],
+                                    "name": homeowner.get("name", homeowner_name),
+                                    "email": homeowner.get("email", homeowner_email),
+                                    "phone": homeowner.get("phone", homeowner_obj.get("phone", ""))
+                                }
+                                homeowner_info["verification_status"] = homeowner.get("verification_status", "pending")
+                                homeowner_info["join_date"] = homeowner.get("created_at")
+                                # Count total jobs for this homeowner using email
+                                homeowner_info["total_jobs"] = await self.database.jobs.count_documents({
+                                    "homeowner.email": homeowner_email
+                                })
+                            else:
+                                # Use embedded data even without user ID
+                                homeowner_info = {
+                                    "id": "legacy",
+                                    "name": homeowner_name,
+                                    "email": homeowner_email,
+                                    "phone": homeowner_obj.get("phone", ""),
+                                    "verification_status": "legacy",
+                                    "join_date": job.get("created_at"),
+                                    "total_jobs": await self.database.jobs.count_documents({
+                                        "homeowner.email": homeowner_email
+                                    }) if homeowner_email else 1
+                                }
+                        else:
+                            # Only name available, no email for lookup
+                            homeowner_info = {
+                                "id": "legacy",
+                                "name": homeowner_name,
+                                "email": "",
+                                "phone": homeowner_obj.get("phone", ""),
+                                "verification_status": "legacy",
+                                "join_date": job.get("created_at"),
+                                "total_jobs": await self.database.jobs.count_documents({
+                                    "homeowner.name": homeowner_name
+                                }) if homeowner_name != "Unknown" else 1
+                            }
+                    else:
+                        # Fallback for completely empty homeowner object
+                        homeowner_info = {
+                            "id": "unknown",
+                            "name": "Unknown",
+                            "email": "",
+                            "phone": "",
+                            "verification_status": "pending",
+                            "join_date": job.get("created_at"),
+                            "total_jobs": 1
+                        }
             
             # If still no homeowner info found, use legacy fields or defaults
             if not homeowner_info:
