@@ -59,13 +59,13 @@ const HeroSection = () => {
         setLoadingTrades(true);
         const response = await adminAPI.getAllTrades();
         
-        if (response && response.trades) {
-          // Extract trade names from API response
-          const tradeNames = response.trades.map(trade => trade.name || trade.trade_name).filter(Boolean);
-          setTradeCategories(tradeNames);
-          console.log('✅ Loaded trade categories from API:', tradeNames.length);
+        if (response && response.trades && Array.isArray(response.trades)) {
+          // API returns an array of trade name strings
+          setTradeCategories(response.trades);
+          console.log('✅ Loaded trade categories from API:', response.trades.length, 'categories');
+          console.log('📋 Categories:', response.trades.slice(0, 5), '...');
         } else {
-          console.log('⚠️ No trade data in API response, using fallback');
+          console.log('⚠️ Invalid API response format:', response);
           setTradeCategories(FALLBACK_TRADE_CATEGORIES);
         }
       } catch (error) {
