@@ -339,8 +339,11 @@ const TradeCategoryQuestionsManager = () => {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md"
+                disabled={loadingCategories}
               >
-                <option value="">All Categories</option>
+                <option value="">
+                  {loadingCategories ? 'Loading categories...' : 'All Categories'}
+                </option>
                 {tradeCategories.map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
