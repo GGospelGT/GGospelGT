@@ -205,6 +205,60 @@ const AdminDashboard = () => {
     }
   };
 
+  // User Management Handlers
+  const handleViewUserDetails = async (user) => {
+    try {
+      setSelectedUser(user);
+      
+      // Fetch detailed user information from API
+      const detailedUser = await adminAPI.getUserDetails(user.id);
+      if (detailedUser) {
+        setSelectedUser({...user, ...detailedUser});
+      }
+      
+      setShowUserDetailsModal(true);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      // Still show basic user info if detailed fetch fails
+      setSelectedUser(user);
+      setShowUserDetailsModal(true);
+    }
+  };
+
+  const handleDeleteUser = (user) => {
+    setUserToDelete(user);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    
+    try {
+      setDeletingUser(true);
+      
+      await adminAPI.deleteUser(userToDelete.id);
+      
+      toast({
+        title: "Success",
+        description: `User ${userToDelete.name || userToDelete.email} has been deleted successfully.`,
+      });
+      
+      setShowDeleteConfirmModal(false);
+      setUserToDelete(null);
+      fetchData(); // Refresh the user list
+      
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete user. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingUser(false);
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
