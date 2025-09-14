@@ -17,7 +17,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
-import { tradeCategoryQuestionsAPI } from '../../api/wallet';
+import { tradeCategoryQuestionsAPI, adminAPI } from '../../api/wallet';
 import { useToast } from '../../hooks/use-toast';
 
 const TradeCategoryQuestionsManager = () => {
