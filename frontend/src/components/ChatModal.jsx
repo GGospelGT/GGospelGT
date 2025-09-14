@@ -208,7 +208,8 @@ const ChatModal = ({
           console.log('New messages:', newMessages.length);
           console.log('Added message:', response);
           
-          // Force re-render by triggering scroll after state update
+          // Force component re-render and scroll
+          setForceUpdate(prev => prev + 1);
           setTimeout(() => {
             scrollToBottom();
           }, 100);
