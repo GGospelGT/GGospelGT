@@ -49,8 +49,8 @@ const Header = () => {
             >
               About us
             </a>
-            {/* Hide these navigation items when homeowner is logged in */}
-            {!isHomeowner() && (
+            {/* Hide these navigation items when homeowner or tradesperson is logged in */}
+            {!isHomeowner() && !isTradesperson() && (
               <>
                 <a 
                   onClick={() => navigate('/how-it-works')}
