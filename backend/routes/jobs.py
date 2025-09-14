@@ -720,6 +720,76 @@ async def _notify_job_posted_successfully(homeowner: dict, job: dict):
     except Exception as e:
         logger.error(f"❌ Failed to send job posted notification for job {job.get('id')}: {str(e)}")
 
+# ==========================================
+# TRADE CATEGORY QUESTIONS FOR JOB POSTING
+# ==========================================
+
+@router.get("/trade-questions/{trade_category}")
+async def get_trade_category_questions(trade_category: str):
+    """Get questions for a specific trade category (for job posting)"""
+    try:
+        questions = await database.get_questions_by_trade_category(trade_category)
+        
+        return {
+            "trade_category": trade_category,
+            "questions": questions,
+            "total_questions": len(questions)
+        }
+    except Exception as e:
+        logger.error(f"Error getting questions for trade category {trade_category}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve trade category questions")
+
+@router.post("/trade-questions/answers")
+async def save_job_question_answers(
+    answers_data: dict,
+    current_user: User = Depends(get_current_homeowner)
+):
+    """Save answers to trade category questions for a job"""
+    try:
+        # Validate required fields
+        required_fields = ["job_id", "trade_category", "answers"]
+        for field in required_fields:
+            if field not in answers_data:
+                raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+        
+        # Verify job belongs to current user
+        job = await database.get_job_by_id(answers_data["job_id"])
+        if not job or job.get("homeowner", {}).get("id") != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to save answers for this job")
+        
+        saved_answers = await database.save_job_question_answers(answers_data)
+        
+        if not saved_answers:
+            raise HTTPException(status_code=500, detail="Failed to save answers")
+        
+        return {
+            "message": "Job question answers saved successfully",
+            "answers": saved_answers
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error saving job question answers: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to save job question answers")
+
+@router.get("/trade-questions/answers/{job_id}")
+async def get_job_question_answers(job_id: str):
+    """Get answers to trade category questions for a job (accessible to job owner and interested tradespeople)"""
+    try:
+        answers = await database.get_job_question_answers(job_id)
+        
+        if not answers:
+            return {
+                "job_id": job_id,
+                "answers": [],
+                "message": "No answers found for this job"
+            }
+        
+        return answers
+    except Exception as e:
+        logger.error(f"Error getting job question answers for {job_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve job question answers")
+
 # Public Skills Questions Endpoint (no authentication required)
 @router.get("/skills-questions/{trade_category}")
 async def get_public_skills_questions(trade_category: str):
