@@ -225,6 +225,10 @@ class MessagingSystemTester:
         self.test_data['messaging_job_id'] = test_job_id
         self.log_result("Messaging setup - Job creation", True, f"Created job: {test_job_id}")
         
+        # Note: Job is created with 'pending_approval' status, which prevents interest creation
+        # This is expected behavior - jobs need admin approval before becoming active
+        print(f"📝 Note: Job created with status '{job_response.get('status', 'unknown')}' - requires admin approval to become active")
+        
         # Create interest for the tradesperson
         interest_data = {"job_id": test_job_id}
         response = self.make_request("POST", "/interests/show-interest", json=interest_data, auth_token=tradesperson_token)
