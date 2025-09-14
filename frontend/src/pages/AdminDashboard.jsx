@@ -4931,6 +4931,247 @@ const AdminDashboard = () => {
         isDeleting={isProcessing}
         dangerLevel="high"
       />
+
+      {/* User Details Modal */}
+      {showUserDetailsModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h3 className="text-2xl font-semibold">User Details - {selectedUser.name || 'Unknown User'}</h3>
+              <button
+                onClick={() => {
+                  setShowUserDetailsModal(false);
+                  setSelectedUser(null);
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* User Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-medium mb-3 text-gray-800">Basic Information</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0 h-16 w-16">
+                        <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                          <span className="text-xl font-bold text-white">
+                            {selectedUser.name ? selectedUser.name.charAt(0).toUpperCase() : 'U'}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-semibold text-gray-900">
+                          {selectedUser.name || 'No Name Provided'}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          User ID: {selectedUser.id}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div><strong>Email:</strong> <span className="text-blue-600">{selectedUser.email}</span></div>
+                    <div><strong>Phone:</strong> {selectedUser.phone || 'Not provided'}</div>
+                    <div><strong>Role:</strong> 
+                      <span className={`inline-flex px-2 py-1 ml-2 text-xs font-semibold rounded-full ${
+                        selectedUser.role === 'tradesperson' 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {selectedUser.role}
+                      </span>
+                    </div>
+                    <div><strong>Status:</strong> 
+                      <span className={`inline-flex px-2 py-1 ml-2 text-xs font-semibold rounded-full ${
+                        selectedUser.status === 'active' 
+                          ? 'bg-green-100 text-green-800' 
+                          : selectedUser.status === 'suspended'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {selectedUser.status || 'active'}
+                      </span>
+                      {selectedUser.is_verified && (
+                        <span className="inline-flex px-2 py-1 ml-2 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                          ✓ Verified
+                        </span>
+                      )}
+                    </div>
+                    <div><strong>Joined:</strong> {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : 'Unknown'}</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-medium mb-3 text-gray-800">Account Activity</h4>
+                  <div className="space-y-3">
+                    {selectedUser.role === 'tradesperson' ? (
+                      <>
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Interests Shown</div>
+                          <div className="text-lg font-semibold text-blue-600">
+                            {selectedUser.interests_shown || 0}
+                          </div>
+                        </div>
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Wallet Balance</div>
+                          <div className="text-lg font-semibold text-green-600">
+                            {selectedUser.wallet_balance || 0} coins
+                          </div>
+                        </div>
+                        {selectedUser.specializations && (
+                          <div>
+                            <strong>Specializations:</strong>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {selectedUser.specializations.map((spec, index) => (
+                                <span key={index} className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                  {spec}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div className="bg-orange-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Jobs Posted</div>
+                          <div className="text-lg font-semibold text-orange-600">
+                            {selectedUser.jobs_posted || 0}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    <div><strong>Last Login:</strong> {selectedUser.last_login ? new Date(selectedUser.last_login).toLocaleDateString() : 'Never'}</div>
+                    {selectedUser.login_count && (
+                      <div><strong>Login Count:</strong> {selectedUser.login_count}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Location Information */}
+              {(selectedUser.state || selectedUser.lga || selectedUser.location) && (
+                <div>
+                  <h4 className="text-lg font-medium mb-3 text-gray-800">Location Details</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {selectedUser.state && <div><strong>State:</strong> {selectedUser.state}</div>}
+                    {selectedUser.lga && <div><strong>LGA:</strong> {selectedUser.lga}</div>}
+                    {selectedUser.location && <div><strong>Location:</strong> {selectedUser.location}</div>}
+                  </div>
+                </div>
+              )}
+
+              {/* Additional Information */}
+              {selectedUser.bio && (
+                <div>
+                  <h4 className="text-lg font-medium mb-3 text-gray-800">Bio</h4>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-gray-700">{selectedUser.bio}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <button
+                  onClick={() => {
+                    setShowUserDetailsModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="px-6 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowUserDetailsModal(false);
+                    handleDeleteUser(selectedUser);
+                  }}
+                  className="px-6 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 font-medium"
+                >
+                  Delete User
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete User Confirmation Modal */}
+      {showDeleteConfirmModal && userToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Delete User Account</h3>
+                  <p className="text-sm text-gray-500">This action cannot be undone</p>
+                </div>
+              </div>
+              
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-red-800">
+                  <strong>Warning:</strong> You are about to permanently delete the user account for:
+                </p>
+                <div className="mt-2 p-2 bg-white rounded border">
+                  <div className="font-medium">{userToDelete.name || 'Unknown User'}</div>
+                  <div className="text-sm text-gray-600">{userToDelete.email}</div>
+                  <div className="text-xs text-gray-500">
+                    Role: {userToDelete.role} • Status: {userToDelete.status || 'active'}
+                  </div>
+                </div>
+                <p className="text-sm text-red-800 mt-2">
+                  This will permanently delete all user data, including:
+                </p>
+                <ul className="text-xs text-red-700 mt-1 ml-4 list-disc">
+                  <li>Profile information and settings</li>
+                  <li>Job history and interests</li>
+                  <li>Messages and communications</li>
+                  <li>Wallet balance and transactions</li>
+                  <li>All associated data</li>
+                </ul>
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirmModal(false);
+                    setUserToDelete(null);
+                  }}
+                  disabled={deletingUser}
+                  className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteUser}
+                  disabled={deletingUser}
+                  className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {deletingUser ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Deleting...</span>
+                    </div>
+                  ) : (
+                    'Delete User Permanently'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       <Footer />
     </div>
