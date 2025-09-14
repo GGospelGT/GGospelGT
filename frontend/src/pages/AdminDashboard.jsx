@@ -97,7 +97,11 @@ const AdminDashboard = () => {
   
   // Job Access Fees Management state
   const [jobsWithFees, setJobsWithFees] = useState([]);
-  const [feesLoading, setFeesLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
   const [editingJobFee, setEditingJobFee] = useState(null);
   const [feeUpdateInProgress, setFeeUpdateInProgress] = useState(false);
   
