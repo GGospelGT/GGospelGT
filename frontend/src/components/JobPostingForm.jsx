@@ -209,32 +209,41 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         if (!formData.title.trim()) newErrors.title = 'Job title is required';
         else if (formData.title.length < 10) newErrors.title = 'Job title must be at least 10 characters';
         
-        if (!formData.description.trim()) newErrors.description = 'Job description is required';
-        else if (formData.description.length < 50) newErrors.description = 'Description must be at least 50 characters';
-        
         if (!formData.category) newErrors.category = 'Please select a category';
 
-        // Validate trade category questions
-        tradeQuestions.forEach(question => {
-          if (question.is_required) {
-            const answer = questionAnswers[question.id];
-            
-            if (question.question_type === 'multiple_choice_multiple') {
-              if (!answer || answer.length === 0) {
-                newErrors[`question_${question.id}`] = 'This question is required';
+        // If category is selected, validate admin questions instead of description
+        if (formData.category) {
+          if (tradeQuestions.length > 0) {
+            // Validate trade category questions
+            tradeQuestions.forEach(question => {
+              if (question.is_required) {
+                const answer = questionAnswers[question.id];
+                
+                if (question.question_type === 'multiple_choice_multiple') {
+                  if (!answer || answer.length === 0) {
+                    newErrors[`question_${question.id}`] = 'This question is required';
+                  }
+                } else if (question.question_type === 'yes_no') {
+                  // For yes/no questions, any boolean value is valid (including false)
+                  if (answer === undefined || answer === null) {
+                    newErrors[`question_${question.id}`] = 'This question is required';
+                  }
+                } else {
+                  if (!answer || (typeof answer === 'string' && !answer.trim())) {
+                    newErrors[`question_${question.id}`] = 'This question is required';
+                  }
+                }
               }
-            } else if (question.question_type === 'yes_no') {
-              // For yes/no questions, any boolean value is valid (including false)
-              if (answer === undefined || answer === null) {
-                newErrors[`question_${question.id}`] = 'This question is required';
-              }
-            } else {
-              if (!answer || (typeof answer === 'string' && !answer.trim())) {
-                newErrors[`question_${question.id}`] = 'This question is required';
-              }
-            }
+            });
+          } else {
+            // No questions available for this category - prevent proceeding
+            newErrors.category = 'Questions need to be configured for this category. Please contact support or choose a different category.';
           }
-        });
+        } else {
+          // No category selected, validate generic description
+          if (!formData.description.trim()) newErrors.description = 'Job description is required';
+          else if (formData.description.length < 50) newErrors.description = 'Description must be at least 50 characters';
+        }
         break;
 
       case 2: // Location & Timeline
