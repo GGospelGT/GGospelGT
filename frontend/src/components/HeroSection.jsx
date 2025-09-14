@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Search, MapPin, Plus, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { jobsAPI } from '../api/services';
+import { adminAPI } from '../api/wallet';
 import { useToast } from '../hooks/use-toast';
 import useStates from '../hooks/useStates';
 
