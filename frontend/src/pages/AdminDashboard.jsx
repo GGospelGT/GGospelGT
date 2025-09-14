@@ -4374,7 +4374,7 @@ const AdminDashboard = () => {
                     <input
                       name="state"
                       type="text"
-                      defaultValue={editingJobData.state}
+                      defaultValue={editJobModal.state}
                       className="w-full px-3 py-2 border rounded-md"
                     />
                   </div>
@@ -4383,7 +4383,7 @@ const AdminDashboard = () => {
                     <input
                       name="lga"
                       type="text"
-                      defaultValue={editingJobData.lga}
+                      defaultValue={editJobModal.lga}
                       className="w-full px-3 py-2 border rounded-md"
                     />
                   </div>
@@ -4392,7 +4392,7 @@ const AdminDashboard = () => {
                     <input
                       name="town"
                       type="text"
-                      defaultValue={editingJobData.town}
+                      defaultValue={editJobModal.town}
                       className="w-full px-3 py-2 border rounded-md"
                     />
                   </div>
@@ -4404,7 +4404,7 @@ const AdminDashboard = () => {
                     <input
                       name="zip_code"
                       type="text"
-                      defaultValue={editingJobData.zip_code}
+                      defaultValue={editJobModal.zip_code}
                       className="w-full px-3 py-2 border rounded-md"
                       pattern="[0-9]{6}"
                       placeholder="6-digit postal code"
@@ -4415,7 +4415,7 @@ const AdminDashboard = () => {
                     <input
                       name="home_address"
                       type="text"
-                      defaultValue={editingJobData.home_address}
+                      defaultValue={editJobModal.home_address}
                       className="w-full px-3 py-2 border rounded-md"
                     />
                   </div>
@@ -4427,7 +4427,7 @@ const AdminDashboard = () => {
                     <input
                       name="budget_min"
                       type="number"
-                      defaultValue={editingJobData.budget_min}
+                      defaultValue={editJobModal.budget_min}
                       className="w-full px-3 py-2 border rounded-md"
                     />
                   </div>
@@ -4436,7 +4436,7 @@ const AdminDashboard = () => {
                     <input
                       name="budget_max"
                       type="number"
-                      defaultValue={editingJobData.budget_max}
+                      defaultValue={editJobModal.budget_max}
                       className="w-full px-3 py-2 border rounded-md"
                     />
                   </div>
@@ -4453,7 +4453,7 @@ const AdminDashboard = () => {
                         type="number"
                         min="500"
                         max="10000"
-                        defaultValue={editingJobData.access_fees?.naira || editingJobData.access_fee_naira || 1000}
+                        defaultValue={editJobModal.access_fees?.naira || editJobModal.access_fee_naira || 1000}
                         className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500"
                       />
                       <p className="text-xs text-blue-600 mt-1">Range: ₦500 - ₦10,000</p>
@@ -4465,7 +4465,7 @@ const AdminDashboard = () => {
                         type="number"
                         min="5"
                         max="100"
-                        defaultValue={editingJobData.access_fees?.coins || editingJobData.access_fee_coins || 10}
+                        defaultValue={editJobModal.access_fees?.coins || editJobModal.access_fee_coins || 10}
                         className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500"
                       />
                       <p className="text-xs text-blue-600 mt-1">Range: 5 - 100 coins</p>
@@ -4489,7 +4489,7 @@ const AdminDashboard = () => {
                   <label className="block text-sm font-medium mb-1">Status</label>
                   <select
                     name="status"
-                    defaultValue={editingJobData.status}
+                    defaultValue={editJobModal.status}
                     className="w-full px-3 py-2 border rounded-md"
                   >
                     <option value="pending_approval">Pending Approval</option>
