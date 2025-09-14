@@ -130,12 +130,30 @@ async def get_jobs_with_access_fees(skip: int = 0, limit: int = 20):
 @router.put("/jobs/{job_id}/access-fee")
 async def update_job_access_fee(
     job_id: str,
-    access_fee_naira: int = Form(...),
+    request: Request,
     current_user = None  # Will be populated by admin auth
 ):
     """Update access fee for a specific job"""
     
     try:
+        logger.info(f"Raw request received for job {job_id}")
+        
+        # Try to get form data
+        form_data = await request.form()
+        logger.info(f"Form data received: {dict(form_data)}")
+        
+        # Extract access_fee_naira from form data
+        access_fee_naira_str = form_data.get('access_fee_naira')
+        if not access_fee_naira_str:
+            logger.error("access_fee_naira not found in form data")
+            raise HTTPException(status_code=400, detail="access_fee_naira is required")
+        
+        try:
+            access_fee_naira = int(access_fee_naira_str)
+        except ValueError:
+            logger.error(f"Invalid access_fee_naira format: {access_fee_naira_str}")
+            raise HTTPException(status_code=400, detail="access_fee_naira must be a valid integer")
+        
         logger.info(f"Updating access fee for job {job_id} to ₦{access_fee_naira}")
         
         # Validate fee is positive and reasonable
