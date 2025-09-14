@@ -1420,6 +1420,157 @@ const AdminDashboard = () => {
                 </div>
               )}
 
+              {/* Job Access Fees Management Tab */}
+              {activeTab === 'fees' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold">Job Access Fees Management</h2>
+                    <button
+                      onClick={handleJobAccessFeesDataLoad}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+
+                  {/* Access Fees Table */}
+                  <div className="bg-white rounded-lg border">
+                    <div className="px-6 py-4 border-b">
+                      <h3 className="text-lg font-semibold">Jobs with Access Fees</h3>
+                      <p className="text-sm text-gray-600">Manage access fees for individual job postings</p>
+                    </div>
+                    
+                    {feesLoading ? (
+                      <div className="p-8 text-center">
+                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                        <p className="mt-2 text-gray-600">Loading job access fees...</p>
+                      </div>
+                    ) : jobsWithFees.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500">
+                        <div className="text-4xl mb-4">💳</div>
+                        <h4 className="text-lg font-medium mb-2">No jobs found</h4>
+                        <p>No job access fees to manage at this time.</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Job Details
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Homeowner
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Current Access Fee
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {jobsWithFees.map((job) => (
+                              <tr key={job.id} className="hover:bg-gray-50">
+                                <td className="px-6 py-4">
+                                  <div>
+                                    <div className="font-medium text-gray-900 mb-1">{job.title}</div>
+                                    <div className="text-sm text-gray-600 line-clamp-2">{job.description}</div>
+                                    <div className="mt-1">
+                                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        {job.category}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div>
+                                    <div className="font-medium text-gray-900">{job.homeowner?.name || 'Unknown'}</div>
+                                    <div className="text-sm text-gray-600">{job.homeowner?.email}</div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div>
+                                    <div className="text-lg font-bold text-green-600">
+                                      ₦{job.access_fee_naira?.toLocaleString() || '1,000'}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      {job.access_fee_coins || 10} coins
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getJobStatusColor(job.status)}`}>
+                                    {job.status?.toUpperCase()}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="flex space-x-2">
+                                    {editingJobFee === job.id ? (
+                                      <div className="flex items-center space-x-2">
+                                        <input
+                                          type="number"
+                                          min="500"
+                                          max="10000"
+                                          defaultValue={job.access_fee_naira || 1000}
+                                          className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
+                                          id={`fee-input-${job.id}`}
+                                          disabled={feeUpdateInProgress}
+                                        />
+                                        <button
+                                          onClick={() => {
+                                            const newFee = parseInt(document.getElementById(`fee-input-${job.id}`).value);
+                                            handleUpdateJobAccessFee(job.id, newFee);
+                                          }}
+                                          disabled={feeUpdateInProgress}
+                                          className="text-green-600 hover:text-green-900 text-sm font-medium disabled:opacity-50"
+                                        >
+                                          {feeUpdateInProgress ? 'Saving...' : 'Save'}
+                                        </button>
+                                        <button
+                                          onClick={() => setEditingJobFee(null)}
+                                          disabled={feeUpdateInProgress}
+                                          className="text-gray-600 hover:text-gray-900 text-sm font-medium disabled:opacity-50"
+                                        >
+                                          Cancel
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        onClick={() => setEditingJobFee(job.id)}
+                                        className="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                                      >
+                                        Edit Fee
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Access Fee Guidelines */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-blue-900 mb-2">Access Fee Guidelines</h4>
+                    <div className="text-sm text-blue-800 space-y-1">
+                      <p>• <strong>Minimum Fee:</strong> ₦500 (5 coins)</p>
+                      <p>• <strong>Maximum Fee:</strong> ₦10,000 (100 coins)</p>
+                      <p>• <strong>Standard Fee:</strong> ₦1,000 (10 coins) for most jobs</p>
+                      <p>• <strong>Premium Jobs:</strong> Higher fees for jobs with budgets >₦500,000</p>
+                      <p>• <strong>Conversion Rate:</strong> 1 Naira = 0.1 Coins</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Job Approval Management Tab */}
               {activeTab === 'approvals' && (
                 <div className="space-y-6">
