@@ -95,14 +95,7 @@ const Header = () => {
                       <Search size={16} />
                       <span>Find Tradespeople</span>
                     </Button>
-                    <Button 
-                      variant="ghost"
-                      onClick={() => navigate('/my-jobs')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
-                    >
-                      <Briefcase size={16} />
-                      <span>My Jobs</span>
-                    </Button>
+                    
                     <Button 
                       onClick={() => navigate('/post-job')}
                       className="font-lato text-white hover:opacity-90" 
@@ -111,23 +104,57 @@ const Header = () => {
                       Post a job
                     </Button>
                     
-                    {/* Help and Contact for homeowners */}
-                    <Button 
-                      variant="ghost"
-                      onClick={() => navigate('/help')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
-                    >
-                      <HelpCircle size={16} />
-                      <span>Help</span>
-                    </Button>
-                    <Button 
-                      variant="ghost"
-                      onClick={() => navigate('/contact')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
-                    >
-                      <MessageSquare size={16} />
-                      <span>Contact</span>
-                    </Button>
+                    {/* Homeowner User Menu Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost"
+                          className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                        >
+                          <User size={16} />
+                          <span>Menu</span>
+                          <ChevronDown size={14} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56" align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem onClick={() => navigate('/my-jobs')}>
+                          <Briefcase size={16} />
+                          <span>My Jobs</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem onClick={() => navigate('/reviews')}>
+                          <Star size={16} />
+                          <span>My Reviews</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem onClick={() => navigate('/help')}>
+                          <HelpCircle size={16} />
+                          <span>Help</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem onClick={() => navigate('/contact')}>
+                          <MessageSquare size={16} />
+                          <span>Contact</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem onClick={() => navigate('/profile')}>
+                          <User size={16} />
+                          <span>Profile</span>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem onClick={handleLogout} className="text-red-600 hover:text-red-700">
+                          <LogOut size={16} />
+                          <span>Logout</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </>
                 )}
                 
