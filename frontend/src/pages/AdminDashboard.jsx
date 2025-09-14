@@ -1238,6 +1238,7 @@ const AdminDashboard = () => {
                   { id: 'users', label: 'User Management', icon: '👥' },
                   { id: 'locations', label: 'Locations & Trades', icon: '🗺️' },
                   { id: 'skills', label: 'Skills Questions', icon: '❓' },
+                  { id: 'trade-questions', label: 'Job Questions', icon: '📝' },
                   { id: 'policies', label: 'Policy Management', icon: '📋' },
                   { id: 'contacts', label: 'Contact Management', icon: '📞' },
                   { id: 'notifications', label: 'Notifications', icon: '🔔' },
