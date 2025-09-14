@@ -50,6 +50,8 @@ const FALLBACK_TRADE_CATEGORIES = [
 const TradespersonRegistration = ({ onClose, onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [tradeCategories, setTradeCategories] = useState(FALLBACK_TRADE_CATEGORIES);
+  const [loadingTrades, setLoadingTrades] = useState(true);
   const [formData, setFormData] = useState({
     // Step 1: Account Creation
     name: '',
