@@ -679,16 +679,15 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
               </p>
             </div>
 
-            {/* Job Title */}
             <div>
               <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
                 Job Title *
               </label>
               <input
                 type="text"
-                placeholder="e.g., Fix leaky bathroom faucet"
                 value={formData.title}
-                onChange={(e) => updateFormData('title', e.target.value)}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                placeholder="e.g., Fix leaky bathroom tap, Install kitchen cabinets"
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
                   errors.title ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -696,21 +695,20 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
               {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
             </div>
 
-            {/* Category */}
             <div>
               <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
                 Category *
               </label>
               <select
                 value={formData.category}
-                onChange={(e) => updateFormData('category', e.target.value)}
+                onChange={(e) => setFormData({...formData, category: e.target.value})}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
                   errors.category ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
                 <option value="">Select a category</option>
-                {tradeCategories.map((category) => (
-                  <option key={category} value={category}>
+                {tradeCategories.map((category, index) => (
+                  <option key={index} value={category}>
                     {category}
                   </option>
                 ))}
@@ -718,39 +716,15 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
               {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
             </div>
 
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-                Job Description *
-              </label>
-              <textarea
-                rows={6}
-                placeholder="Describe the work you need done, including any specific requirements, materials needed, or preferences you have..."
-                value={formData.description}
-                onChange={(e) => updateFormData('description', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato resize-none ${
-                  errors.description ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              <div className="flex justify-between items-center mt-1">
-                {errors.description ? (
-                  <p className="text-red-500 text-sm">{errors.description}</p>
-                ) : (
-                  <p className="text-gray-500 text-sm">Minimum 50 characters</p>
-                )}
-                <p className="text-gray-500 text-sm">{formData.description.length}/2000</p>
-              </div>
-            </div>
-
-            {/* Dynamic Trade Category Questions */}
+            {/* Admin-Set Questions Section */}
             {formData.category && (
               <div className="border-t pt-6">
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold font-montserrat mb-2" style={{color: '#121E3C'}}>
-                    Additional Details for {formData.category}
+                    Job Details for {formData.category}
                   </h3>
                   <p className="text-gray-600 font-lato text-sm">
-                    Please answer these specific questions to help tradespeople better understand your requirements.
+                    Please provide the specific details about your {formData.category.toLowerCase()} requirements.
                   </p>
                 </div>
 
@@ -889,12 +863,49 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                       </div>
                     ))}
                   </div>
-                ) : formData.category && !loadingQuestions ? (
-                  <div className="text-center py-4 text-gray-500 font-lato">
-                    <p>No specific questions available for {formData.category}.</p>
-                    <p className="text-sm">You can provide additional details in the job description above.</p>
+                ) : (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-yellow-800 font-lato">
+                          No questions configured for {formData.category}
+                        </h3>
+                        <p className="mt-1 text-sm text-yellow-700 font-lato">
+                          An admin needs to set up specific questions for this trade category before jobs can be posted. 
+                          Please contact support or try a different category.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                ) : null}
+                )}
+              </div>
+            )}
+
+            {/* Fallback Description Field - Only show if no category selected or no questions available */}
+            {!formData.category && (
+              <div>
+                <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                  Job Description *
+                </label>
+                <textarea
+                  rows={4}
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  placeholder="Describe the work you need done in detail..."
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato resize-none ${
+                    errors.description ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-gray-500 text-xs">Minimum 50 characters</span>
+                  <p className="text-gray-500 text-sm">{formData.description.length}/2000</p>
+                </div>
+                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
               </div>
             )}
           </div>
