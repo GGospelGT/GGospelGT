@@ -499,6 +499,33 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     });
   };
 
+  // Format answer text for human readability
+  const formatAnswerText = (question, answer) => {
+    if (!answer) return '';
+    
+    switch (question.question_type) {
+      case 'multiple_choice_single':
+        const singleOption = question.options?.find(opt => opt.value === answer);
+        return singleOption ? singleOption.text : answer;
+      
+      case 'multiple_choice_multiple':
+        if (Array.isArray(answer)) {
+          const selectedOptions = question.options?.filter(opt => answer.includes(opt.value));
+          return selectedOptions?.map(opt => opt.text).join(', ') || answer.join(', ');
+        }
+        return answer;
+      
+      case 'yes_no':
+        return answer === true ? 'Yes' : 'No';
+      
+      case 'text_input':
+      case 'text_area':
+      case 'number_input':
+      default:
+        return answer.toString();
+    }
+  };
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     
