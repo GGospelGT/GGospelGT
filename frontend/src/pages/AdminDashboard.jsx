@@ -4339,7 +4339,7 @@ const AdminDashboard = () => {
                   <textarea
                     name="description"
                     rows={4}
-                    defaultValue={editingJobData.description}
+                    defaultValue={editJobModal.description}
                     className="w-full px-3 py-2 border rounded-md"
                     required
                   />
