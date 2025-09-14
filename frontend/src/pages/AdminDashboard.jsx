@@ -3805,10 +3805,10 @@ const AdminDashboard = () => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                   <div className="flex space-x-2">
                                     <button
-                                      onClick={() => window.alert(`User ID: ${user.id}\nEmail: ${user.email}\nRole: ${user.role}\nStatus: ${user.status || 'active'}`)}
-                                      className="text-blue-600 hover:text-blue-900"
+                                      onClick={() => handleViewUserDetails(user)}
+                                      className="text-blue-600 hover:text-blue-900 font-medium"
                                     >
-                                      View
+                                      View Details
                                     </button>
                                     {user.status !== 'suspended' && (
                                       <button
@@ -3824,7 +3824,7 @@ const AdminDashboard = () => {
                                               });
                                           }
                                         }}
-                                        className="text-yellow-600 hover:text-yellow-900"
+                                        className="text-yellow-600 hover:text-yellow-900 font-medium"
                                       >
                                         Suspend
                                       </button>
@@ -3843,11 +3843,17 @@ const AdminDashboard = () => {
                                               });
                                           }
                                         }}
-                                        className="text-green-600 hover:text-green-900"
+                                        className="text-green-600 hover:text-green-900 font-medium"
                                       >
                                         Activate
                                       </button>
                                     )}
+                                    <button
+                                      onClick={() => handleDeleteUser(user)}
+                                      className="text-red-600 hover:text-red-900 font-medium"
+                                    >
+                                      Delete
+                                    </button>
                                   </div>
                                 </td>
                               </tr>
