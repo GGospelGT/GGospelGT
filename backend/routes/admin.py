@@ -2010,3 +2010,146 @@ async def view_verification_document(filename: str):
         raise HTTPException(status_code=404, detail="Verification document not found")
     
     return FileResponse(file_path, media_type="image/jpeg")
+
+# ==========================================
+# TRADE CATEGORY QUESTIONS MANAGEMENT
+# ==========================================
+
+@router.get("/trade-questions")
+async def get_all_trade_questions(trade_category: Optional[str] = None):
+    """Get all trade category questions, optionally filtered by trade category"""
+    try:
+        questions = await database.get_all_trade_category_questions(trade_category)
+        categories_with_questions = await database.get_trade_categories_with_questions()
+        
+        return {
+            "questions": questions,
+            "categories_with_questions": categories_with_questions,
+            "total_questions": len(questions)
+        }
+    except Exception as e:
+        logger.error(f"Error getting trade questions: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve trade questions")
+
+@router.get("/trade-questions/category/{trade_category}")
+async def get_questions_by_category(trade_category: str):
+    """Get questions for a specific trade category"""
+    try:
+        questions = await database.get_questions_by_trade_category(trade_category)
+        return {
+            "trade_category": trade_category,
+            "questions": questions,
+            "total_questions": len(questions)
+        }
+    except Exception as e:
+        logger.error(f"Error getting questions for category {trade_category}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve questions for category")
+
+@router.post("/trade-questions")
+async def create_trade_question(question_data: dict):
+    """Create a new trade category question"""
+    try:
+        # Validate required fields
+        required_fields = ["trade_category", "question_text", "question_type"]
+        for field in required_fields:
+            if field not in question_data:
+                raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+        
+        # Generate ID
+        import uuid
+        question_data["id"] = str(uuid.uuid4())
+        
+        created_question = await database.create_trade_category_question(question_data)
+        
+        if not created_question:
+            raise HTTPException(status_code=500, detail="Failed to create question")
+        
+        return {
+            "message": "Trade category question created successfully",
+            "question": created_question
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating trade question: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create trade question")
+
+@router.get("/trade-questions/{question_id}")
+async def get_trade_question(question_id: str):
+    """Get a specific trade category question"""
+    try:
+        question = await database.get_trade_category_question_by_id(question_id)
+        
+        if not question:
+            raise HTTPException(status_code=404, detail="Question not found")
+        
+        return question
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting trade question {question_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve trade question")
+
+@router.put("/trade-questions/{question_id}")
+async def update_trade_question(question_id: str, update_data: dict):
+    """Update a trade category question"""
+    try:
+        updated_question = await database.update_trade_category_question(question_id, update_data)
+        
+        if not updated_question:
+            raise HTTPException(status_code=404, detail="Question not found or update failed")
+        
+        return {
+            "message": "Trade category question updated successfully",
+            "question": updated_question
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating trade question {question_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update trade question")
+
+@router.delete("/trade-questions/{question_id}")
+async def delete_trade_question(question_id: str):
+    """Delete a trade category question"""
+    try:
+        success = await database.delete_trade_category_question(question_id)
+        
+        if not success:
+            raise HTTPException(status_code=404, detail="Question not found")
+        
+        return {"message": "Trade category question deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting trade question {question_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete trade question")
+
+@router.put("/trade-questions/reorder/{trade_category}")
+async def reorder_trade_questions(trade_category: str, question_orders: List[dict]):
+    """Reorder questions for a trade category"""
+    try:
+        success = await database.reorder_trade_category_questions(trade_category, question_orders)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to reorder questions")
+        
+        return {"message": f"Questions reordered successfully for {trade_category}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error reordering questions for {trade_category}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to reorder questions")
+
+@router.get("/trade-categories-with-questions")
+async def get_trade_categories_with_questions():
+    """Get all trade categories that have questions defined"""
+    try:
+        categories = await database.get_trade_categories_with_questions()
+        return {
+            "categories": categories,
+            "total_categories": len(categories)
+        }
+    except Exception as e:
+        logger.error(f"Error getting trade categories with questions: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve trade categories with questions")
