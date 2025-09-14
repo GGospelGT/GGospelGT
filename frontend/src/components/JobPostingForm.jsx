@@ -397,6 +397,56 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     }
   };
 
+  // Load questions when trade category changes
+  const loadTradeQuestions = async (category) => {
+    if (!category) {
+      setTradeQuestions([]);
+      setQuestionAnswers({});
+      return;
+    }
+
+    try {
+      setLoadingQuestions(true);
+      const response = await tradeCategoryQuestionsAPI.getJobPostingQuestions(category);
+      setTradeQuestions(response.questions || []);
+      
+      // Initialize answers for required questions
+      const initialAnswers = {};
+      (response.questions || []).forEach(question => {
+        if (question.question_type === 'yes_no') {
+          initialAnswers[question.id] = false;
+        } else if (question.question_type === 'multiple_choice_multiple') {
+          initialAnswers[question.id] = [];
+        } else {
+          initialAnswers[question.id] = '';
+        }
+      });
+      setQuestionAnswers(initialAnswers);
+      
+    } catch (error) {
+      console.error('Failed to load trade questions:', error);
+      setTradeQuestions([]);
+      setQuestionAnswers({});
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
+  // Handle question answer changes
+  const handleQuestionAnswer = (questionId, value, questionType) => {
+    setQuestionAnswers(prev => {
+      if (questionType === 'multiple_choice_multiple') {
+        const currentAnswers = prev[questionId] || [];
+        const newAnswers = currentAnswers.includes(value)
+          ? currentAnswers.filter(v => v !== value)
+          : [...currentAnswers, value];
+        return { ...prev, [questionId]: newAnswers };
+      } else {
+        return { ...prev, [questionId]: value };
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     
