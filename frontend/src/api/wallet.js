@@ -655,18 +655,8 @@ export const policiesAPI = {
     return response.data;
   },
 
-  // ==========================================
-  // USER MANAGEMENT METHODS
-  // ==========================================
-
-  // Get detailed user information
-  getUserDetails: async (userId) => {
-    const response = await apiClient.get(`/admin/users/${userId}/details`);
-    return response.data;
-  },
-
-  // Delete user account
-  deleteUser: async (userId) => {
+  // User Management Methods (moved to adminAPI)
+  async deleteUser(userId) {
     const response = await apiClient.delete(`/admin/users/${userId}`);
     return response.data;
   }
