@@ -676,6 +676,61 @@ async def view_payment_proof(filename: str):
     return FileResponse(file_path, media_type="image/jpeg")
 
 # ==========================================
+# USER MANAGEMENT
+# ==========================================
+
+@router.get("/users/{user_id}/details")
+async def get_user_details(user_id: str):
+    """Get detailed user information for admin management"""
+    
+    try:
+        # Get comprehensive user details
+        user = await database.get_user_details_admin(user_id)
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return user
+        
+    except Exception as e:
+        logger.error(f"Error getting user details: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get user details")
+
+@router.delete("/users/{user_id}")
+async def delete_user_account(user_id: str):
+    """Delete user account permanently (admin only)"""
+    
+    try:
+        # Get user details first for logging
+        user = await database.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Perform complete user deletion
+        success = await database.delete_user_completely(user_id)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to delete user account")
+        
+        logger.info(f"Admin deleted user account: {user.get('email', 'Unknown')} (ID: {user_id})")
+        
+        return {
+            "message": "User account deleted successfully",
+            "user_id": user_id,
+            "deleted_user": {
+                "name": user.get("name", "Unknown"),
+                "email": user.get("email", "Unknown"),
+                "role": user.get("role", "Unknown")
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting user: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete user account")
+
+# ==========================================
 # CONTACT MANAGEMENT
 # ==========================================
 
