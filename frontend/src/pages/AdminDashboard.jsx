@@ -3,6 +3,7 @@ import { adminAPI } from '../api/wallet';
 import { adminReferralsAPI } from '../api/referrals';
 import { useToast } from '../hooks/use-toast';
 import ContactManagementTab from './ContactManagementTab';
+import TradeCategoryQuestionsManager from '../components/admin/TradeCategoryQuestionsManager';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AdminDataTable from '../components/admin/AdminDataTable';
