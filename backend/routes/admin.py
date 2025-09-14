@@ -816,13 +816,28 @@ async def get_all_policies():
     # Get history count for each policy
     policies_with_stats = []
     for policy in policies:
-        history = await database.get_policy_history(policy["policy_type"])
-        policy_stats = {
-            **policy,
-            "has_history": len(history) > 0,
-            "total_versions": len(history) + 1  # +1 for current version
-        }
-        policies_with_stats.append(policy_stats)
+        try:
+            # Handle missing or null policy_type gracefully
+            policy_type = policy.get("policy_type")
+            if not policy_type:
+                logger.warning(f"Policy {policy.get('id', 'unknown')} has no policy_type, skipping")
+                continue
+                
+            history = await database.get_policy_history(policy_type)
+            policy_stats = {
+                **policy,
+                "has_history": len(history) > 0,
+                "total_versions": len(history) + 1  # +1 for current version
+            }
+            policies_with_stats.append(policy_stats)
+        except Exception as e:
+            logger.error(f"Error processing policy {policy.get('id', 'unknown')}: {str(e)}")
+            # Add policy without stats if there's an error
+            policies_with_stats.append({
+                **policy,
+                "has_history": False,
+                "total_versions": 1
+            })
     
     return {
         "policies": policies_with_stats,
