@@ -3594,6 +3594,11 @@ const AdminDashboard = () => {
                 />
               )}
 
+              {/* Trade Category Questions Tab */}
+              {activeTab === 'trade-questions' && (
+                <TradeCategoryQuestionsManager />
+              )}
+
               {/* Stats Tab */}
               {activeTab === 'stats' && (
                 <div className="space-y-6">
