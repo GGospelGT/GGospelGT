@@ -1,42 +1,51 @@
 #!/usr/bin/env python3
 """
-USER MANAGEMENT API TESTING
+TRADESPEOPLE API DUPLICATION INVESTIGATION
 
 **CRITICAL TESTING REQUIREMENTS:**
 
-1. **GET /api/admin/users/{user_id}/details - User Details API Testing:**
-   - Test getting detailed user information for homeowners
-   - Test getting detailed user information for tradespeople
-   - Test getting user details for non-existent user (should return 404)
-   - Verify response includes all expected fields (activity stats, wallet info, recent transactions, etc.)
-   - Test authentication and authorization requirements
+1. **GET /api/tradespeople/ - Tradespeople API Endpoint Testing:**
+   - Test the actual API response data to identify duplicate entries
+   - Verify if duplicates are coming from the backend query
+   - Check if the query is properly filtering users with role="tradesperson"
+   - Examine the database query logic and results
+   - Test pagination and limit parameters
 
-2. **DELETE /api/admin/users/{user_id} - User Deletion API Testing:**
-   - Test deleting regular user accounts (homeowner/tradesperson)
-   - Test attempting to delete admin user (should be prevented)
-   - Test deleting non-existent user (should return 404)
-   - Verify that all related data is cleaned up when user is deleted
-   - Test proper error handling and response messages
+2. **Database Investigation:**
+   - Check how many users have role="tradesperson" in the database
+   - Verify if there are duplicate records in the users collection
+   - Check if the database query is properly deduplicating results
+   - Examine the filters and sorting logic
+   - Investigate data quality issues
 
-3. **Data Integrity Verification:**
-   - Verify user details include comprehensive information (profile, activity stats, wallet, recent activity)
-   - Verify user deletion removes all related data from jobs, interests, wallets, portfolio, reviews, etc.
-   - Verify admin users are NOT deletable
-   - Test proper error handling for invalid user IDs
+3. **API Response Analysis:**
+   - Verify the data transformation logic in the API
+   - Check if the same user ID is appearing multiple times
+   - Examine the pagination and limit logic
+   - Verify the total count vs actual returned records
+   - Analyze response structure and field mapping
 
-4. **API Response Format Verification:**
-   - Verify user details response structure and required fields
-   - Test response consistency and proper JSON serialization
-   - Verify proper HTTP status codes (200, 404, 403, etc.)
-   - Test error response formats and messages
+4. **Data Quality Checks:**
+   - Check if users have proper unique IDs
+   - Verify if there are any data inconsistencies
+   - Check if the profession/trade fields are properly populated
+   - Examine user creation patterns
+   - Look for duplicate names like "Emeka Okafor"
 
-5. **Authentication & Authorization Testing:**
-   - Verify proper admin access control for user management endpoints
-   - Test unauthorized access scenarios and error responses
-   - Verify role-based permissions for admin operations
+**EXPECTED BEHAVIOR:**
+- API should return diverse tradespeople, not the same person repeated
+- Each user should appear only once in the results
+- Total count should match the actual number of unique tradespeople
+- Results should be properly paginated and sorted
+
+**KEY QUESTIONS TO ANSWER:**
+- Why is "Emeka Okafor" appearing multiple times?
+- Are there actually 276+ users with role="tradesperson"?
+- Is the database query returning duplicates?
+- Is the API transformation creating duplicates?
 
 **PRIORITY FOCUS:**
-Test the new user management API endpoints to ensure they work correctly and provide comprehensive user information while maintaining proper security controls.
+Investigate the root cause of tradespeople duplication issue where "Emeka Okafor" appears multiple times instead of showing diverse tradespeople from the 276+ registered users.
 """
 
 import requests
