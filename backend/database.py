@@ -3498,8 +3498,9 @@ class Database:
     async def get_all_policies(self):
         """Get all current active policies"""
         try:
+            # Use $or instead of $in as there seems to be an issue with $in operator
             policies = await self.database.policies.find(
-                {"status": {"$in": ["active", "scheduled"]}}
+                {"$or": [{"status": "active"}, {"status": "scheduled"}]}
             ).sort("policy_type", 1).to_list(length=None)
             
             # Convert ObjectIds to strings for JSON serialization
