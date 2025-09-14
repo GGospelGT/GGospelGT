@@ -51,12 +51,7 @@ const BrowseTradespeopleePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalTradespeople, setTotalTradespeople] = useState(0);
-
-  const tradeCategories = [
-    'Plumbing', 'Electrical', 'Carpentry', 'Painting', 'Roofing', 
-    'HVAC', 'Landscaping', 'Cleaning', 'Handyman', 'Masonry',
-    'Welding', 'Tiling', 'Security', 'Interior Design', 'Moving'
-  ];
+  const [tradeCategories, setTradeCategories] = useState([]);
 
   const locations = [
     'Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 
