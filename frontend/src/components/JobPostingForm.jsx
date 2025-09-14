@@ -213,6 +213,28 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         else if (formData.description.length < 50) newErrors.description = 'Description must be at least 50 characters';
         
         if (!formData.category) newErrors.category = 'Please select a category';
+
+        // Validate trade category questions
+        tradeQuestions.forEach(question => {
+          if (question.is_required) {
+            const answer = questionAnswers[question.id];
+            
+            if (question.question_type === 'multiple_choice_multiple') {
+              if (!answer || answer.length === 0) {
+                newErrors[`question_${question.id}`] = 'This question is required';
+              }
+            } else if (question.question_type === 'yes_no') {
+              // For yes/no questions, any boolean value is valid (including false)
+              if (answer === undefined || answer === null) {
+                newErrors[`question_${question.id}`] = 'This question is required';
+              }
+            } else {
+              if (!answer || (typeof answer === 'string' && !answer.trim())) {
+                newErrors[`question_${question.id}`] = 'This question is required';
+              }
+            }
+          }
+        });
         break;
 
       case 2: // Location & Timeline
