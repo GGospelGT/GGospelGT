@@ -1,7 +1,6 @@
 import React from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import "./test-google-maps"; // Import our Google Maps test
 import HomePage from "./components/HomePage";
 import PostJobPage from "./pages/PostJobPage";
 import MyJobsPage from "./pages/MyJobsPage";
