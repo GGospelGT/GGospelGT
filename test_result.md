@@ -55,6 +55,18 @@ test_plan:
   test_priority: "high_first"
 ##
 backend:
+  - task: "Google Maps Integration Backend Testing"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/routes/jobs.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "🔧 GOOGLE MAPS INTEGRATION FIX TESTING REQUEST: Test the Google Maps integration fix by verifying that the Google Maps components (JobsMap and LocationPicker) can now properly load and initialize. The issue was with environment variable access where process.env.REACT_APP_GOOGLE_MAPS_API_KEY was not available in the browser environment, so fallback logic was added to use a hardcoded API key. Key testing points: 1) Verify that Google Maps API key access works (either from environment variables or fallback), 2) Test that the Google Maps Loader can successfully initialize, 3) Confirm that both JobsMap and LocationPicker components can create maps without errors, 4) Ensure no 'Google Maps API key not found' or similar errors occur, 5) Test that the API key AIzaSyDf53OPDNVCQVti3M6enDzNiNIssWl3EUU is working properly. Note: The API key is valid and working as confirmed by direct testing. The fix ensures components fall back to the hardcoded key when environment variables aren't accessible in the production build."
+
   - task: "Trade Category Questions API Testing - Dynamic Questions System"
     implemented: true
     working: true
