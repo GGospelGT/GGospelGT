@@ -4307,12 +4307,12 @@ const AdminDashboard = () => {
               
               try {
                 // Use the new editJobAdmin API
-                await adminAPI.editJobAdmin(editingJobData.id, jobData);
+                await adminAPI.editJobAdmin(editJobModal.id, jobData);
                 toast({
                   title: "Success",
                   description: "Job updated successfully. Homeowner has been notified.",
                 });
-                setShowEditJobModal(false);
+                setEditJobModal(null);
                 fetchData();
               } catch (error) {
                 toast({
