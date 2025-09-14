@@ -101,16 +101,30 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
   const { toast } = useToast();
   const { states: nigerianStates, loading: statesLoading } = useStates();
 
-  const tradeCategories = [
-    "Building", "Concrete Works", "Tiling", "CCTV & Security Systems",
-    "Door & Window Installation", "Air Conditioning & Refrigeration", 
-    "Renovations", "Relocation/Moving", "Painting", "Carpentry",
-    "General Handyman Work", "Bathroom Fitting", "Generator Services",
-    "Home Extensions", "Scaffolding", "Waste Disposal", "Flooring",
-    "Plastering/POP", "Cleaning", "Electrical Repairs", 
-    "Solar & Inverter Installation", "Plumbing", "Welding",
-    "Furniture Making", "Interior Design", "Roofing", "Locksmithing", "Recycling"
-  ];
+  // Fetch trade categories from API
+  useEffect(() => {
+    const fetchTradeCategories = async () => {
+      try {
+        setLoadingTrades(true);
+        const response = await adminAPI.getAllTrades();
+        
+        if (response && response.trades && Array.isArray(response.trades)) {
+          setTradeCategories(response.trades);
+          console.log('✅ Tradesperson Registration: Loaded trade categories from API:', response.trades.length, 'categories');
+        } else {
+          console.log('⚠️ Tradesperson Registration: Invalid API response, using fallback');
+          setTradeCategories(FALLBACK_TRADE_CATEGORIES);
+        }
+      } catch (error) {
+        console.error('❌ Tradesperson Registration: Error fetching trade categories:', error);
+        setTradeCategories(FALLBACK_TRADE_CATEGORIES);
+      } finally {
+        setLoadingTrades(false);
+      }
+    };
+
+    fetchTradeCategories();
+  }, []);
 
   const businessTypes = [
     'Self employed / sole trader',
