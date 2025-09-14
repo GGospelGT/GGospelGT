@@ -1,71 +1,60 @@
 #!/usr/bin/env python3
 """
-BI-DIRECTIONAL MESSAGE NOTIFICATIONS VERIFICATION
+MESSAGING SYSTEM FUNCTIONALITY TESTING
 
 **CRITICAL TESTING REQUIREMENTS:**
 
-1. **NEW_MESSAGE Notification Template Verification:**
-   - Verify NEW_MESSAGE templates exist in NotificationTemplateService
-   - Test both EMAIL and SMS template rendering with proper variables
-   - Verify template variables: recipient_name, sender_name, job_title, message_preview, conversation_url
-   - Test template rendering with sample data
+1. **Message Sending API Testing:**
+   - Test POST /api/messages/conversations/{conversation_id}/messages endpoint
+   - Verify API response format with id, content, sender_id, created_at fields
+   - Test message persistence to MongoDB database
+   - Verify authentication and authorization requirements
 
-2. **Message Sending Notification Flow:**
-   - Test POST `/api/messages/conversations/{conversation_id}/messages` endpoint
-   - Verify background task `_notify_new_message` is triggered after message sending
-   - Test notification sending for both directions:
-     - Tradesperson sends message → Homeowner receives notification
-     - Homeowner sends message → Tradesperson receives notification
+2. **Message Retrieval API Testing:**
+   - Test GET /api/messages/conversations/{conversation_id}/messages endpoint
+   - Verify proper message list structure and pagination
+   - Test message ordering and filtering
+   - Verify access control for conversation participants only
 
-3. **Notification Service Integration:**
-   - Verify NotificationService.send_notification is called with correct parameters
-   - Test user preference fetching (email, SMS, both)
-   - Verify notification record creation in database
-   - Test SendGrid email service integration (mock or real)
-   - Test Termii SMS service integration (mock or real)
+3. **Conversation Creation Testing:**
+   - Test GET /api/messages/conversations/job/{job_id} endpoint with tradesperson_id parameter
+   - Verify conversation creation workflow and access control
+   - Test payment workflow integration (paid_access requirement)
+   - Verify proper error handling for unauthorized access
 
-4. **Database Integration:**
-   - Test notification record saving to notifications collection
-   - Verify notification preferences creation/retrieval
-   - Test notification status tracking (pending, sent, failed)
-   - Verify user lookup for recipient details
+4. **API Response Format Verification:**
+   - Verify Message object structure: id, content, sender_id, created_at, conversation_id
+   - Test response consistency across different endpoints
+   - Verify proper JSON serialization of datetime fields
+   - Test error response formats and status codes
 
-5. **Error Handling & Edge Cases:**
-   - Test notification when recipient user not found
-   - Test notification when email/phone missing
-   - Test notification service failures (SendGrid/Termii unavailable)
-   - Test background task error handling
+5. **Database Integration Testing:**
+   - Verify messages are properly stored in MongoDB conversations collection
+   - Test message retrieval from database with proper filtering
+   - Verify conversation metadata updates (last_message, timestamps)
+   - Test database consistency and transaction handling
 
-6. **Notification Content Verification:**
-   - Verify email subject and content formatting
-   - Test SMS message character limits and formatting
-   - Verify message preview truncation (100 characters)
-   - Test conversation URL generation
+6. **Authentication & Authorization Testing:**
+   - Verify proper user access control for messaging endpoints
+   - Test role-based permissions (homeowner vs tradesperson)
+   - Verify conversation participant validation
+   - Test unauthorized access scenarios and error responses
 
-7. **Performance Testing:**
-   - Test background task execution (should not block message sending)
-   - Verify notification delivery doesn't affect message API response time
-   - Test concurrent message notifications
+7. **Error Handling Testing:**
+   - Test invalid conversation IDs (404 responses)
+   - Test unauthorized access attempts (403 responses)
+   - Test malformed request data (400 responses)
+   - Verify proper error message formatting
 
-**EXPECTED RESULTS:**
-- ✅ NEW_MESSAGE templates properly defined and functional
-- ✅ Background notifications triggered for both directions
-- ✅ Email notifications sent to recipients (mock or real)
-- ✅ SMS notifications sent to recipients (mock or real)
-- ✅ Notification records saved to database
-- ✅ User preferences respected (email/SMS/both)
-- ✅ Proper error handling for failed notifications
-- ✅ Message sending remains fast (background processing)
+**PRIORITY FOCUS:**
+Test the sendMessage API response format since the frontend relies on the response.id field to update the UI properly.
 
 **TEST SCENARIOS:**
-1. Tradesperson sends message → Verify homeowner notification
-2. Homeowner replies → Verify tradesperson notification  
-3. Multiple messages in conversation → Verify all notifications
-4. Missing recipient data → Verify graceful error handling
-5. Service failures → Verify fallback behavior
-
-**FOCUS AREAS:**
-Verify the complete bi-directional notification flow as requested by user: "When tradesperson send message to homeowner, I want notifications to be sent to them via email and sms and when they reply I want notifications to be sent to homeowners."
+1. Create conversation with proper payment workflow
+2. Send messages from both homeowner and tradesperson
+3. Retrieve message history and verify structure
+4. Test access control and error scenarios
+5. Verify database persistence and consistency
 """
 
 import requests
