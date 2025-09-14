@@ -10,6 +10,10 @@ import sys
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
 import re
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Add backend directory to path
 backend_dir = os.path.dirname(__file__)
