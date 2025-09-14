@@ -320,20 +320,16 @@ const Header = () => {
                       <>
                         <Button 
                           variant="ghost"
-                          onClick={() => navigate('/browse-tradespeople')}
+                          onClick={() => {
+                            navigate('/browse-tradespeople');
+                            setIsMenuOpen(false);
+                          }}
                           className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
                         >
                           <Search size={16} />
                           <span>Find Tradespeople</span>
                         </Button>
-                        <Button 
-                          variant="ghost"
-                          onClick={() => navigate('/my-jobs')}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
-                        >
-                          <Briefcase size={16} />
-                          <span>My Jobs</span>
-                        </Button>
+                        
                         <Button 
                           onClick={() => {
                             navigate('/post-job');
@@ -345,7 +341,38 @@ const Header = () => {
                           Post a job
                         </Button>
                         
-                        {/* Help and Contact for homeowners in mobile */}
+                        <div className="px-3 py-1">
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">My Account</div>
+                        </div>
+                        
+                        <Button 
+                          variant="ghost"
+                          onClick={() => {
+                            navigate('/my-jobs');
+                            setIsMenuOpen(false);
+                          }}
+                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                        >
+                          <Briefcase size={16} />
+                          <span>My Jobs</span>
+                        </Button>
+                        
+                        <Button 
+                          variant="ghost"
+                          onClick={() => {
+                            navigate('/reviews');
+                            setIsMenuOpen(false);
+                          }}
+                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                        >
+                          <Star size={16} />
+                          <span>My Reviews</span>
+                        </Button>
+                        
+                        <div className="px-3 py-1">
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Support</div>
+                        </div>
+                        
                         <Button 
                           variant="ghost"
                           onClick={() => {
@@ -357,6 +384,7 @@ const Header = () => {
                           <HelpCircle size={16} />
                           <span>Help</span>
                         </Button>
+                        
                         <Button 
                           variant="ghost"
                           onClick={() => {
@@ -367,6 +395,34 @@ const Header = () => {
                         >
                           <MessageSquare size={16} />
                           <span>Contact</span>
+                        </Button>
+                        
+                        <div className="px-3 py-1">
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Account</div>
+                        </div>
+                        
+                        <Button 
+                          variant="ghost"
+                          onClick={() => {
+                            navigate('/profile');
+                            setIsMenuOpen(false);
+                          }}
+                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                        >
+                          <User size={16} />
+                          <span>Profile</span>
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          onClick={() => {
+                            handleLogout();
+                            setIsMenuOpen(false);
+                          }}
+                          className="text-gray-700 font-lato hover:text-red-600 justify-start flex items-center space-x-1"
+                        >
+                          <LogOut size={16} />
+                          <span>Logout</span>
                         </Button>
                       </>
                     )}
