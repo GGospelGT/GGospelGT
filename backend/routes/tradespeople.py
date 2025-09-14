@@ -180,20 +180,107 @@ async def get_tradespeople(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching tradespeople: {str(e)}")
 
-@router.get("/{tradesperson_id}", response_model=models.Tradesperson)
+@router.get("/{tradesperson_id}", response_model=dict)
 async def get_tradesperson(tradesperson_id: str):
     """Get a specific tradesperson by ID"""
     try:
-        tradesperson = await database.get_tradesperson_by_id(tradesperson_id)
-        if not tradesperson:
+        # Get user from users collection where role is tradesperson
+        user = await database.get_user_by_id(tradesperson_id)
+        if not user or user.get("role") != "tradesperson":
             raise HTTPException(status_code=404, detail="Tradesperson not found")
         
-        return models.Tradesperson(**tradesperson)
+        # Calculate additional stats
+        portfolio_count = await database.database.portfolio.count_documents({"tradesperson_id": tradesperson_id})
+        reviews_count = await database.database.reviews.count_documents({"reviewee_id": tradesperson_id})
+        completed_jobs = await database.database.jobs.count_documents({
+            "assigned_tradesperson_id": tradesperson_id,
+            "status": "completed"
+        })
+        
+        # Get average rating from reviews if not stored in user document
+        avg_rating = user.get("average_rating", 0)
+        if avg_rating == 0 and reviews_count > 0:
+            # Calculate average rating from reviews
+            reviews_pipeline = [
+                {"$match": {"reviewee_id": tradesperson_id}},
+                {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}}}
+            ]
+            rating_result = await database.database.reviews.aggregate(reviews_pipeline).to_list(length=1)
+            if rating_result:
+                avg_rating = round(rating_result[0]["avg_rating"], 1)
+        
+        # Get recent portfolio items (limit 6 for preview)
+        portfolio_items = await database.database.portfolio.find(
+            {"tradesperson_id": tradesperson_id, "is_public": True}
+        ).sort("created_at", -1).limit(6).to_list(length=6)
+        
+        # Transform portfolio items
+        portfolio_preview = []
+        for item in portfolio_items:
+            portfolio_preview.append({
+                "id": str(item.get("_id", "")),
+                "title": item.get("title", ""),
+                "image_url": item.get("image_url", ""),
+                "description": item.get("description", ""),
+                "created_at": item.get("created_at")
+            })
+        
+        # Get recent reviews (limit 5 for preview)
+        recent_reviews = await database.database.reviews.find(
+            {"reviewee_id": tradesperson_id}
+        ).sort("created_at", -1).limit(5).to_list(length=5)
+        
+        # Transform reviews
+        reviews_preview = []
+        for review in recent_reviews:
+            reviewer = await database.get_user_by_id(review.get("reviewer_id", ""))
+            reviews_preview.append({
+                "id": str(review.get("_id", "")),
+                "rating": review.get("rating", 0),
+                "comment": review.get("comment", ""),
+                "reviewer_name": reviewer.get("name", "Anonymous") if reviewer else "Anonymous",
+                "created_at": review.get("created_at")
+            })
+        
+        # Transform to expected format
+        tradesperson_data = {
+            "id": user.get("id", ""),
+            "name": user.get("name", ""),
+            "email": user.get("email", ""),
+            "phone": user.get("phone", ""),
+            "main_trade": user.get("profession", ""),
+            "trade_categories": [user.get("profession", "")] if user.get("profession") else [],
+            "bio": user.get("bio", ""),
+            "location": user.get("location", ""),
+            "city": user.get("city", ""),
+            "state": user.get("state", ""),
+            "postcode": user.get("postcode", ""),
+            "years_experience": user.get("years_experience", 0),
+            "business_name": user.get("business_name", ""),
+            "profile_image": user.get("profile_image", ""),
+            "average_rating": avg_rating,
+            "total_reviews": reviews_count,
+            "completed_jobs": completed_jobs,
+            "portfolio_items": portfolio_count,
+            "is_verified": user.get("is_verified", False),
+            "created_at": user.get("created_at"),
+            "response_time": 2,
+            "status": user.get("status", "active"),
+            "verification_status": "verified" if user.get("is_verified") else "unverified",
+            # Additional detailed information
+            "portfolio_preview": portfolio_preview,
+            "reviews_preview": reviews_preview,
+            "certifications": user.get("certifications", []),
+            "skills": user.get("skills", []),
+            "availability": user.get("availability", "available")
+        }
+        
+        return tradesperson_data
         
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error fetching tradesperson: {str(e)}")
 
 @router.get("/{tradesperson_id}/reviews")
 async def get_tradesperson_reviews(
