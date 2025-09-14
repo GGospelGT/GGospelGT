@@ -77,9 +77,9 @@ const BrowseTradespeopleePage = () => {
 
   const loadTradeCategories = async () => {
     try {
-      const response = await adminAPI.getAllTrades();
-      if (response && response.trades) {
-        setTradeCategories(response.trades.map(trade => trade.name));
+      const response = await adminAPI.getAllTradeCategories();
+      if (response && response.length > 0) {
+        setTradeCategories(response.map(trade => trade.name || trade));
       }
     } catch (error) {
       console.error('Failed to load trade categories:', error);
