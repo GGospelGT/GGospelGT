@@ -85,6 +85,9 @@ async def create_job(
             'phone': current_user.phone
         }
         
+        # Also set homeowner_id at root level for admin queries
+        job_dict['homeowner_id'] = current_user.id
+        
         # Remove homeowner fields from job_data if they exist
         for field in ['homeowner_name', 'homeowner_email', 'homeowner_phone']:
             if field in job_dict:
