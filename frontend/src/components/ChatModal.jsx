@@ -163,19 +163,25 @@ const ChatModal = ({
   const sendMessage = async () => {
     if (!newMessage.trim() || !conversationId || sending) return;
 
+    // Store the message content before clearing
+    const messageContent = newMessage.trim();
+    
     try {
       setSending(true);
       
       const messageData = {
         conversation_id: conversationId,
         message_type: 'text',
-        content: newMessage.trim()
+        content: messageContent
       };
 
       console.log('=== SENDING MESSAGE ===');
       console.log('Conversation ID:', conversationId);
       console.log('Message data:', messageData);
       console.log('Current messages count:', messages.length);
+
+      // Clear input immediately for better UX
+      setNewMessage('');
 
       const response = await messagesAPI.sendMessage(conversationId, messageData);
       
@@ -186,18 +192,42 @@ const ChatModal = ({
       
       // Add message to local state immediately with better error handling
       if (response && response.id) {
-        setMessages(prev => {
-          const newMessages = [...prev, response];
+        // Force React to re-render by using functional state update with dependency check
+        setMessages(prevMessages => {
+          // Check if message already exists to prevent duplicates
+          const messageExists = prevMessages.some(msg => msg.id === response.id);
+          if (messageExists) {
+            console.log('⚠️ Message already exists, skipping duplicate');
+            return prevMessages;
+          }
+          
+          const newMessages = [...prevMessages, response];
           console.log('=== UPDATING MESSAGE STATE ===');
-          console.log('Previous messages:', prev.length);
+          console.log('Previous messages:', prevMessages.length);
           console.log('New messages:', newMessages.length);
           console.log('Added message:', response);
+          
+          // Force re-render by triggering scroll after state update
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+          
           return newMessages;
         });
-        setNewMessage('');
+        
         console.log('✅ Message added to state and input cleared');
+        
+        // Show success toast for user feedback
+        toast({
+          title: "Message Sent",
+          description: "Your message has been sent successfully.",
+          variant: "default",
+        });
+        
       } else {
         console.error('❌ Invalid message response format:', response);
+        // Restore message content on error
+        setNewMessage(messageContent);
         throw new Error('Invalid message response format');
       }
       
@@ -208,6 +238,9 @@ const ChatModal = ({
         response: error.response?.data,
         status: error.response?.status
       });
+      
+      // Restore message content on error
+      setNewMessage(messageContent);
       
       // Handle specific error cases
       if (error.response?.status === 403) {
