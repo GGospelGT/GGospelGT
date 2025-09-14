@@ -275,32 +275,37 @@ const Header = () => {
               >
                 About us
               </a>
-              <a 
-                onClick={() => {
-                  navigate('/how-it-works');
-                  setIsMenuOpen(false);
-                }}
-                className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
-              >
-                How it works
-              </a>
-              <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]">
-                Find tradespeople
-              </a>
-              {/* Only show "Join as tradesperson" if user is not already a tradesperson */}
-              {!isAuthenticated() || !isTradesperson() ? (
-                <a 
-                  href="#" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleAuthClick('signup');
-                    setIsMenuOpen(false);
-                  }}
-                  className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]"
-                >
-                  Join as tradesperson
-                </a>
-              ) : null}
+              {/* Hide these navigation items when homeowner is logged in */}
+              {!isHomeowner() && (
+                <>
+                  <a 
+                    onClick={() => {
+                      navigate('/how-it-works');
+                      setIsMenuOpen(false);
+                    }}
+                    className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
+                  >
+                    How it works
+                  </a>
+                  <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]">
+                    Find tradespeople
+                  </a>
+                  {/* Only show "Join as tradesperson" if user is not already a tradesperson */}
+                  {!isAuthenticated() || !isTradesperson() ? (
+                    <a 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleAuthClick('signup');
+                        setIsMenuOpen(false);
+                      }}
+                      className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]"
+                    >
+                      Join as tradesperson
+                    </a>
+                  ) : null}
+                </>
+              )}
               <div className="flex flex-col space-y-2 pt-4">
                 {isAuthenticated() ? (
                   <>
