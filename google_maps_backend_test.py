@@ -111,7 +111,7 @@ class GoogleMapsBackendTester:
         """Test getting available states"""
         print("\n=== 1. Testing Locations States Endpoint ===")
         
-        response = self.make_request("GET", "/locations/states")
+        response = self.make_request("GET", "/jobs/locations/states")
         
         if response.status_code == 200:
             try:
