@@ -1992,10 +1992,105 @@ class Database:
         jobs = []
         async for job in cursor:
             job["_id"] = str(job["_id"])
-            # Set default access fee if not present (flexible default)
+            
+            # Get homeowner details using the same logic as get_pending_jobs_admin
+            homeowner_id = None
+            homeowner_info = None
+            
+            # First, check if homeowner_id exists at root level
+            if "homeowner_id" in job:
+                homeowner_id = job["homeowner_id"]
+                homeowner = await self.database.users.find_one({"id": homeowner_id})
+                if homeowner:
+                    homeowner_info = {
+                        "id": homeowner["id"],
+                        "name": homeowner.get("name", "Unknown"),
+                        "email": homeowner.get("email", ""),
+                        "phone": homeowner.get("phone", "")
+                    }
+                    homeowner_info["verification_status"] = homeowner.get("verification_status", "pending")
+                    homeowner_info["join_date"] = homeowner.get("created_at")
+                    # Count total jobs for this homeowner
+                    homeowner_info["total_jobs"] = await self.database.jobs.count_documents({
+                        "$or": [
+                            {"homeowner_id": homeowner_id},
+                            {"homeowner.id": homeowner_id}
+                        ]
+                    })
+            
+            # If no homeowner_id at root, check if homeowner object exists
+            elif "homeowner" in job and isinstance(job["homeowner"], dict):
+                homeowner_obj = job["homeowner"]
+                homeowner_id = homeowner_obj.get("id")
+                
+                if homeowner_id and homeowner_id != "unknown":
+                    # Try to get updated user info from users collection
+                    homeowner = await self.database.users.find_one({"id": homeowner_id})
+                    if homeowner:
+                        homeowner_info = {
+                            "id": homeowner["id"],
+                            "name": homeowner.get("name", homeowner_obj.get("name", "Unknown")),
+                            "email": homeowner.get("email", homeowner_obj.get("email", "")),
+                            "phone": homeowner.get("phone", homeowner_obj.get("phone", ""))
+                        }
+                        homeowner_info["verification_status"] = homeowner.get("verification_status", "pending")
+                        homeowner_info["join_date"] = homeowner.get("created_at")
+                        # Count total jobs for this homeowner
+                        homeowner_info["total_jobs"] = await self.database.jobs.count_documents({
+                            "$or": [
+                                {"homeowner_id": homeowner_id},
+                                {"homeowner.id": homeowner_id}
+                            ]
+                        })
+                    else:
+                        # Use the embedded homeowner data
+                        homeowner_info = {
+                            "id": homeowner_obj.get("id", "unknown"),
+                            "name": homeowner_obj.get("name", "Unknown"),
+                            "email": homeowner_obj.get("email", ""),
+                            "phone": homeowner_obj.get("phone", "")
+                        }
+                        homeowner_info["verification_status"] = "pending"
+                        homeowner_info["join_date"] = job.get("created_at")
+                        # Count total jobs for this homeowner
+                        homeowner_info["total_jobs"] = await self.database.jobs.count_documents({
+                            "$or": [
+                                {"homeowner_id": homeowner_id},
+                                {"homeowner.id": homeowner_id}
+                            ]
+                        })
+                else:
+                    # Use the embedded homeowner data as fallback
+                    homeowner_info = {
+                        "id": homeowner_obj.get("id", "unknown"),
+                        "name": homeowner_obj.get("name", "Unknown"),
+                        "email": homeowner_obj.get("email", ""),
+                        "phone": homeowner_obj.get("phone", ""),
+                        "verification_status": "pending",
+                        "join_date": job.get("created_at"),
+                        "total_jobs": 1  # At least this job
+                    }
+            
+            # If still no homeowner info found, use legacy fields or defaults
+            if not homeowner_info:
+                homeowner_info = {
+                    "id": "unknown",
+                    "name": job.get("homeowner_name", "Unknown"),
+                    "email": job.get("homeowner_email", ""),
+                    "phone": job.get("homeowner_phone", ""),
+                    "verification_status": "pending",
+                    "join_date": job.get("created_at"),
+                    "total_jobs": 0
+                }
+            
+            # Set the homeowner info in the job
+            job["homeowner"] = homeowner_info
+            
+            # Set default access fee if not present
             if "access_fee_naira" not in job:
-                job["access_fee_naira"] = 1000  # Default ₦1000 (10 coins) - more flexible
-                job["access_fee_coins"] = 10
+                job["access_fee_naira"] = 1000  # Default ₦1000
+                job["access_fee_coins"] = 10    # Default 10 coins
+            
             jobs.append(job)
         
         return jobs
