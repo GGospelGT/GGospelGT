@@ -217,10 +217,10 @@ class GoogleMapsBackendTester:
         params = {
             'latitude': lagos_coords['latitude'],
             'longitude': lagos_coords['longitude'],
-            'radius': 10  # 10km radius
+            'max_distance_km': 10  # 10km radius
         }
         
-        response = self.make_request("GET", "/jobs/near-location", params=params)
+        response = self.make_request("GET", "/jobs/nearby", params=params)
         
         if response.status_code == 200:
             try:
