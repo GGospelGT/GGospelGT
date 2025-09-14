@@ -144,31 +144,9 @@ class GoogleMapsBackendTester:
         
         for state in test_states:
             print(f"\n--- Test 2.x: Get LGAs for {state} ---")
-            response = self.make_request("GET", f"/locations/lgas/{state}")
-            
-            if response.status_code == 200:
-                try:
-                    data = response.json()
-                    if 'lgas' in data and isinstance(data['lgas'], list):
-                        lgas = data['lgas']
-                        self.log_result(f"Get {state} LGAs", True, f"Retrieved {len(lgas)} LGAs")
-                        
-                        # Store for later tests
-                        if 'lgas_by_state' not in self.test_data:
-                            self.test_data['lgas_by_state'] = {}
-                        self.test_data['lgas_by_state'][state] = lgas
-                        
-                        # Verify LGA structure
-                        if lgas and isinstance(lgas[0], str):
-                            self.log_result(f"Verify {state} LGA structure", True, "LGAs are properly formatted")
-                        else:
-                            self.log_result(f"Verify {state} LGA structure", False, "Invalid LGA format")
-                    else:
-                        self.log_result(f"Get {state} LGAs", False, "Invalid response structure")
-                except json.JSONDecodeError:
-                    self.log_result(f"Get {state} LGAs", False, "Invalid JSON response")
-            else:
-                self.log_result(f"Get {state} LGAs", False, f"Status: {response.status_code}")
+            # Note: This endpoint doesn't exist in the current backend
+            # The LGA validation is done internally during job creation
+            self.log_result(f"Get {state} LGAs", False, "LGA endpoint not implemented in backend")
     
     def test_job_location_update(self):
         """Test updating job location coordinates"""
