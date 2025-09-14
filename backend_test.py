@@ -248,7 +248,18 @@ class MessagingSystemTester:
             else:
                 self.log_result("Messaging setup - Contact sharing", False, f"Failed to share contact: {share_response.status_code}")
         else:
-            self.log_result("Messaging setup - Interest creation", False, f"Failed to create interest: {response.status_code}")
+            # Log the specific error for debugging
+            error_detail = ""
+            try:
+                error_response = response.json()
+                error_detail = error_response.get('detail', 'Unknown error')
+            except:
+                error_detail = response.text
+            
+            self.log_result("Messaging setup - Interest creation", False, f"Failed to create interest: {response.status_code} - {error_detail}")
+            
+            # For testing purposes, let's still test the messaging system access control
+            print("⚠️  Interest creation failed - will test messaging system access control without full workflow")
     
     def attempt_payment_workflow(self, tradesperson_token: str, interest_id: str):
         """Attempt to complete payment workflow for testing"""
