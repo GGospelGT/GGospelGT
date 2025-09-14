@@ -674,3 +674,67 @@ export const contactsAPI = {
     return response.data;
   }
 };
+
+// ==========================================
+// TRADE CATEGORY QUESTIONS API
+// ==========================================
+
+export const tradeCategoryQuestionsAPI = {
+  // Admin methods for managing questions
+  async getAllTradeQuestions(tradeCategory = null) {
+    const params = tradeCategory ? `?trade_category=${encodeURIComponent(tradeCategory)}` : '';
+    const response = await apiClient.get(`/admin/trade-questions${params}`);
+    return response.data;
+  },
+
+  async getQuestionsByCategory(tradeCategory) {
+    const response = await apiClient.get(`/admin/trade-questions/category/${encodeURIComponent(tradeCategory)}`);
+    return response.data;
+  },
+
+  async createTradeQuestion(questionData) {
+    const response = await apiClient.post('/admin/trade-questions', questionData);
+    return response.data;
+  },
+
+  async getTradeQuestion(questionId) {
+    const response = await apiClient.get(`/admin/trade-questions/${questionId}`);
+    return response.data;
+  },
+
+  async updateTradeQuestion(questionId, updateData) {
+    const response = await apiClient.put(`/admin/trade-questions/${questionId}`, updateData);
+    return response.data;
+  },
+
+  async deleteTradeQuestion(questionId) {
+    const response = await apiClient.delete(`/admin/trade-questions/${questionId}`);
+    return response.data;
+  },
+
+  async reorderTradeQuestions(tradeCategory, questionOrders) {
+    const response = await apiClient.put(`/admin/trade-questions/reorder/${encodeURIComponent(tradeCategory)}`, questionOrders);
+    return response.data;
+  },
+
+  async getTradeCategoriesWithQuestions() {
+    const response = await apiClient.get('/admin/trade-categories-with-questions');
+    return response.data;
+  },
+
+  // Public methods for job posting
+  async getJobPostingQuestions(tradeCategory) {
+    const response = await apiClient.get(`/jobs/trade-questions/${encodeURIComponent(tradeCategory)}`);
+    return response.data;
+  },
+
+  async saveJobQuestionAnswers(answersData) {
+    const response = await apiClient.post('/jobs/trade-questions/answers', answersData);
+    return response.data;
+  },
+
+  async getJobQuestionAnswers(jobId) {
+    const response = await apiClient.get(`/jobs/trade-questions/answers/${jobId}`);
+    return response.data;
+  }
+};
