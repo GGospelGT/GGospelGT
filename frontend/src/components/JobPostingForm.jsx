@@ -686,7 +686,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                onChange={(e) => updateFormData('title', e.target.value)}
                 placeholder="e.g., Fix leaky bathroom tap, Install kitchen cabinets"
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
                   errors.title ? 'border-red-500' : 'border-gray-300'
