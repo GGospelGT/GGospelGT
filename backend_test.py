@@ -1,51 +1,49 @@
 #!/usr/bin/env python3
 """
-TRADESPEOPLE API DUPLICATION INVESTIGATION
+TRADESPEOPLE COUNT INVESTIGATION - CRITICAL DATA LOSS ANALYSIS
 
-**CRITICAL TESTING REQUIREMENTS:**
+**URGENT INVESTIGATION REQUIREMENTS:**
 
-1. **GET /api/tradespeople/ - Tradespeople API Endpoint Testing:**
-   - Test the actual API response data to identify duplicate entries
-   - Verify if duplicates are coming from the backend query
-   - Check if the query is properly filtering users with role="tradesperson"
-   - Examine the database query logic and results
-   - Test pagination and limit parameters
+🚨 CRITICAL ISSUE: Only 11 tradespeople showing when there should be 99 total tradespeople in the database.
 
-2. **Database Investigation:**
-   - Check how many users have role="tradesperson" in the database
-   - Verify if there are duplicate records in the users collection
-   - Check if the database query is properly deduplicating results
-   - Examine the filters and sorting logic
-   - Investigate data quality issues
+1. **Database Count Verification:**
+   - Check the actual total count of users with role="tradesperson" in the database
+   - Verify if the cleanup script was too aggressive and removed legitimate users
+   - Check if there are tradespeople with different status values (active/inactive/pending)
+   - Examine the database query filters in the API
 
-3. **API Response Analysis:**
-   - Verify the data transformation logic in the API
-   - Check if the same user ID is appearing multiple times
-   - Examine the pagination and limit logic
-   - Verify the total count vs actual returned records
-   - Analyze response structure and field mapping
+2. **API Response Analysis:**
+   - Test GET /api/tradespeople/ with different limit parameters
+   - Check if pagination is limiting the results incorrectly  
+   - Verify the default limit (currently set to 12) vs total available
+   - Test with higher limit values like limit=100
+   - Check if sorting or filtering is excluding valid tradespeople
 
-4. **Data Quality Checks:**
-   - Check if users have proper unique IDs
-   - Verify if there are any data inconsistencies
-   - Check if the profession/trade fields are properly populated
-   - Examine user creation patterns
-   - Look for duplicate names like "Emeka Okafor"
+3. **Data Status Investigation:**
+   - Check if tradespeople have status="active" vs other status values
+   - Verify if the API is filtering by status incorrectly
+   - Check if some users have empty/null profession fields that exclude them
+   - Examine if location or other field filters are excluding users
 
-**EXPECTED BEHAVIOR:**
-- API should return diverse tradespeople, not the same person repeated
-- Each user should appear only once in the results
-- Total count should match the actual number of unique tradespeople
-- Results should be properly paginated and sorted
+4. **API Parameters Testing:**
+   - Test: GET /api/tradespeople/?limit=100
+   - Test: GET /api/tradespeople/?limit=100&page=1
+   - Test different sort_by parameters
+   - Test without any filters to get all tradespeople
 
-**KEY QUESTIONS TO ANSWER:**
-- Why is "Emeka Okafor" appearing multiple times?
-- Are there actually 276+ users with role="tradesperson"?
-- Is the database query returning duplicates?
-- Is the API transformation creating duplicates?
+**EXPECTED RESULTS:**
+- Should find close to 99 tradespeople in the database
+- API should return all available tradespeople when limit is set high enough
+- Identify what's causing the restriction to only 11 results
+
+**KEY QUESTIONS:**
+- Are there actually 99 tradespeople in the users collection?
+- What status/filters are preventing them from showing?
+- Is the pagination limiting results incorrectly?
+- Did the cleanup script remove too many legitimate users?
 
 **PRIORITY FOCUS:**
-Investigate the root cause of tradespeople duplication issue where "Emeka Okafor" appears multiple times instead of showing diverse tradespeople from the 276+ registered users.
+Investigate why only 11 tradespeople are showing when there should be 99 total tradespeople in the database.
 """
 
 import requests
