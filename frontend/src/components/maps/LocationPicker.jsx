@@ -28,8 +28,17 @@ const LocationPicker = ({
 
   const initializeMap = async () => {
     try {
+      const apiKey = import.meta.env.REACT_APP_GOOGLE_MAPS_API_KEY || process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+      
+      if (!apiKey) {
+        console.error('Google Maps API key not found. Please set REACT_APP_GOOGLE_MAPS_API_KEY in your environment variables.');
+        setError('Google Maps API key not configured');
+        setLoading(false);
+        return;
+      }
+
       const loader = new Loader({
-        apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+        apiKey: apiKey,
         version: 'weekly',
         libraries: ['places', 'geometry']
       });
