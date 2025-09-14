@@ -30,6 +30,19 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
 import useStates from '../../hooks/useStates';
 import SkillsTestComponent from './SkillsTestComponent';
+import { adminAPI } from '../../api/wallet';
+
+// Fallback trade categories (used while loading or if API fails)
+const FALLBACK_TRADE_CATEGORIES = [
+  "Building", "Concrete Works", "Tiling", "CCTV & Security Systems",
+  "Door & Window Installation", "Air Conditioning & Refrigeration", 
+  "Renovations", "Relocation/Moving", "Painting", "Carpentry",
+  "General Handyman Work", "Bathroom Fitting", "Generator Services",
+  "Home Extensions", "Scaffolding", "Waste Disposal", "Flooring",
+  "Plastering/POP", "Cleaning", "Electrical Repairs", 
+  "Solar & Inverter Installation", "Plumbing", "Welding",
+  "Furniture Making", "Interior Design", "Roofing", "Locksmithing", "Recycling"
+];
 
 // If needed, we can also create a separate hook for trade categories
 // For now, keeping them as constants since they're less frequently changed
