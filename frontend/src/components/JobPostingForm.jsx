@@ -153,6 +153,13 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     fetchTradeCategories();
   }, []);
 
+  // Load trade questions when category changes
+  useEffect(() => {
+    if (formData.category) {
+      loadTradeQuestions(formData.category);
+    }
+  }, [formData.category]);
+
   // Dynamic total steps based on authentication status - using defensive approach
   const totalSteps = (isAuthenticated() && !loading) ? 4 : 5;
 
