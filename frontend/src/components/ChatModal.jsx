@@ -267,7 +267,7 @@ const ChatModal = ({
     } finally {
       setSending(false);
     }
-  }, [newMessage, conversationId, sending, messages.length, toast, scrollToBottom]);
+  }, [newMessage, conversationId, sending, messages.length, toast, scrollToBottom, setForceUpdate]);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
