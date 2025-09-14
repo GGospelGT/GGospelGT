@@ -130,43 +130,51 @@ async def get_jobs_with_access_fees(skip: int = 0, limit: int = 20):
 @router.put("/jobs/{job_id}/access-fee")
 async def update_job_access_fee(
     job_id: str,
-    access_fee_naira: int = Form(...)
+    access_fee_naira: int = Form(...),
+    current_user = None  # Will be populated by admin auth
 ):
     """Update access fee for a specific job"""
     
-    # Validate fee is positive and reasonable
-    if access_fee_naira <= 0:
-        raise HTTPException(
-            status_code=400, 
-            detail="Access fee must be greater than ₦0"
-        )
-    
-    if access_fee_naira > 10000:
-        raise HTTPException(
-            status_code=400, 
-            detail="Access fee cannot exceed ₦10,000"
-        )
-    
-    # Check if job exists
-    job = await database.get_job_by_id(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    # Update access fee
-    success = await database.update_job_access_fee(job_id, access_fee_naira)
-    
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to update access fee")
-    
-    access_fee_coins = access_fee_naira // 100
-    
-    return {
-        "message": "Access fee updated successfully",
-        "job_id": job_id,
-        "job_title": job["title"],
-        "new_access_fee_naira": access_fee_naira,
-        "new_access_fee_coins": access_fee_coins
-    }
+    try:
+        # Validate fee is positive and reasonable
+        if access_fee_naira <= 0:
+            raise HTTPException(
+                status_code=400, 
+                detail="Access fee must be greater than ₦0"
+            )
+        
+        if access_fee_naira > 10000:
+            raise HTTPException(
+                status_code=400, 
+                detail="Access fee cannot exceed ₦10,000"
+            )
+        
+        # Check if job exists
+        job = await database.get_job_by_id(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        # Update access fee
+        success = await database.update_job_access_fee(job_id, access_fee_naira)
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to update access fee")
+        
+        access_fee_coins = access_fee_naira // 100
+        
+        return {
+            "message": "Access fee updated successfully",
+            "job_id": job_id,
+            "job_title": job["title"],
+            "new_access_fee_naira": access_fee_naira,
+            "new_access_fee_coins": access_fee_coins
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating job access fee: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 # ==========================================
 # COMPREHENSIVE JOB MANAGEMENT
