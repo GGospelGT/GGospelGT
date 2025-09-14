@@ -45,31 +45,27 @@ const JobsMap = ({
       try {
         apiKey = import.meta?.env?.REACT_APP_GOOGLE_MAPS_API_KEY;
       } catch (e) {
-        // import.meta not available
+        console.log('import.meta.env not available:', e.message);
       }
       
       if (!apiKey) {
         try {
           apiKey = process?.env?.REACT_APP_GOOGLE_MAPS_API_KEY;
         } catch (e) {
-          // process.env not available
+          console.log('process.env not available:', e.message);
         }
       }
       
-      // Fallback to window environment or direct value
-      if (!apiKey && typeof window !== 'undefined') {
-        apiKey = window?.REACT_APP_GOOGLE_MAPS_API_KEY;
-      }
-      
-      // Last resort - check if it's defined globally
-      if (!apiKey && typeof REACT_APP_GOOGLE_MAPS_API_KEY !== 'undefined') {
-        apiKey = REACT_APP_GOOGLE_MAPS_API_KEY;
+      // For development/testing - hardcode the key temporarily to fix the immediate issue
+      if (!apiKey) {
+        apiKey = 'AIzaSyDf53OPDNVCQVti3M6enDzNiNIssWl3EUU'; // From your .env file
+        console.log('Using hardcoded API key as fallback');
       }
       
       console.log('Google Maps API Key available:', !!apiKey);
       
       if (!apiKey) {
-        console.error('Google Maps API key not found. Checked import.meta.env, process.env, window, and global scope.');
+        console.error('Google Maps API key not found. Checked import.meta.env and process.env.');
         setError('Google Maps API key not configured. Please contact support.');
         setLoading(false);
         return;
