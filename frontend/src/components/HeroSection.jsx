@@ -193,7 +193,33 @@ const HeroSection = () => {
                   {/* Job Categories Dropdown */}
                   {showJobDropdown && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
-                      {tradeCategories.map((category, index) => (
+                      {/* Search input inside dropdown */}
+                      <div className="p-2 border-b border-gray-200">
+                        <input
+                          type="text"
+                          value={job}
+                          onChange={handleJobInputChange}
+                          placeholder="Search job categories..."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                          autoFocus
+                        />
+                      </div>
+                      
+                      {/* Loading state */}
+                      {loadingTrades && (
+                        <div className="px-4 py-3 text-gray-500 text-center">
+                          Loading trade categories...
+                        </div>
+                      )}
+                      
+                      {/* Filtered categories */}
+                      {!loadingTrades && filteredTradeCategories.length === 0 && (
+                        <div className="px-4 py-3 text-gray-500 text-center">
+                          No categories found matching "{job}"
+                        </div>
+                      )}
+                      
+                      {!loadingTrades && filteredTradeCategories.map((category, index) => (
                         <button
                           key={index}
                           type="button"
