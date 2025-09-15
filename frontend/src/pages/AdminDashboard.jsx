@@ -1267,6 +1267,7 @@ const AdminDashboard = () => {
                   { id: 'verifications', label: 'ID Verifications', icon: '🆔' },
                   { id: 'users', label: 'User Management', icon: '👥' },
                   { id: 'admin-management', label: 'Admin Management', icon: '👨‍💼' },
+                  { id: 'content-management', label: 'Content Management', icon: '📝' },
                   { id: 'locations', label: 'Locations & Trades', icon: '🗺️' },
                   { id: 'skills', label: 'Skills Questions', icon: '❓' },
                   { id: 'trade-questions', label: 'Job Questions', icon: '📝' },
