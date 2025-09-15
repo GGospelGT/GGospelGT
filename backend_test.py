@@ -1,52 +1,49 @@
 #!/usr/bin/env python3
 """
-COMPREHENSIVE HIRING STATUS AND FEEDBACK SYSTEM BACKEND TESTING
+COMPREHENSIVE REVIEW SUBMISSION FIX TESTING
 
 **TESTING REQUIREMENTS FROM REVIEW REQUEST:**
 
-**1. HIRING STATUS API ENDPOINTS:**
-- POST /api/messages/hiring-status - Test updating hiring status with different job statuses
-- POST /api/messages/feedback - Test submitting feedback when not hiring
-- Verify both endpoints require homeowner authentication
-- Test error handling for missing/invalid parameters
+**ISSUES FIXED:**
+1. **Database validation bug**: Fixed `can_user_review` method to check hiring status records
+2. **Tradesperson identification**: Added endpoint to get hired tradespeople for jobs  
+3. **Review workflow**: Enhanced to automatically determine which tradesperson to review
 
-**2. HIRING STATUS WORKFLOW TESTING:**
-- Test creating hiring status with hired=true and various job_status values:
-  - "not_started" - Should schedule future review reminders
-  - "in_progress" - Should schedule review reminders
-  - "completed" - Should send immediate review invitation
-- Verify hiring status is saved to database correctly
-- Test updating existing hiring status records
+**CRITICAL TESTING NEEDED:**
 
-**3. FEEDBACK WORKFLOW TESTING:**
-- Test submitting feedback with hired=false and various feedback types:
-  - "too_expensive", "not_available", "poor_communication", "lack_experience"
-  - "found_someone_else", "changed_mind", "other"
-- Test with and without additional comments
-- Verify feedback is saved to database correctly
+**1. Review Validation Fix:**
+- Test the updated `can_user_review` database method
+- Create a hiring status record with hired=true for a job/tradesperson pair
+- Test that homeowner can now review that tradesperson for that job
+- Verify completed job status requirement still works
 
-**4. DATABASE INTEGRATION:**
-- Test create_hiring_status database method
-- Test create_hiring_feedback database method  
-- Test get_hiring_status_by_job_and_tradesperson method
-- Test get_hiring_feedback_by_job_and_tradesperson method
-- Test get_hiring_statistics method for analytics
+**2. Hired Tradespeople Endpoint:**
+- Test GET /api/messages/hired-tradespeople/{job_id}
+- Create hiring status records for a job with multiple tradespeople
+- Verify endpoint returns correct tradesperson details
+- Test authentication and job ownership validation
 
-**5. NOTIFICATION INTEGRATION:**
-- Test that review invitations are triggered for completed jobs
-- Test that review reminder scheduling works for ongoing jobs
-- Verify notification templates are properly used
+**3. End-to-End Review Workflow:**
+- Create a job and mark it completed
+- Create hiring status indicating homeowner hired a tradesperson
+- Test that review submission now works without "cannot review" error
+- Verify proper tradesperson identification and review creation
 
-**6. ERROR HANDLING & VALIDATION:**
-- Test with missing jobId/tradespersonId parameters
-- Test with invalid job IDs (non-existent jobs)
-- Test with unauthorized users (non-homeowners trying to update status)
-- Test with jobs that don't belong to the current user
+**4. Database Integration:**
+- Test hiring_status collection queries work correctly
+- Verify hiring status records are properly created and queried
+- Test both single and multiple hired tradespeople scenarios
 
-**7. AUTHENTICATION & PERMISSIONS:**
-- Verify only homeowners can update hiring status
-- Verify only homeowners can submit feedback
-- Test that users can only update status for their own jobs
+**5. Backward Compatibility:**
+- Test that old interest-based reviews still work
+- Verify new hiring status system doesn't break existing functionality
+- Test edge cases where no hiring status exists
+
+**EXPECTED RESULTS:**
+- ✅ Review submission should work for completed jobs with hiring status
+- ✅ Proper tradesperson identification from hiring records
+- ✅ No more "You cannot review this user for this job" errors
+- ✅ Database validation correctly checks hiring relationships
 """
 
 import requests
