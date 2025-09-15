@@ -386,6 +386,55 @@ async def get_hiring_status(
         logger.error(f"Error getting hiring status: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to get hiring status")
 
+@router.get("/hired-tradespeople/{job_id}")
+async def get_hired_tradespeople_for_job(
+    job_id: str,
+    current_user: User = Depends(get_current_homeowner)
+):
+    """Get all hired tradespeople for a specific job"""
+    try:
+        # Verify job exists and belongs to current user
+        job = await database.get_job_by_id(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        if job.get("homeowner", {}).get("id") != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only view hired tradespeople for your own jobs")
+        
+        # Get all hiring status records where hired = true for this job
+        cursor = database.hiring_status_collection.find({
+            "job_id": job_id, 
+            "homeowner_id": current_user.id,
+            "hired": True
+        })
+        
+        hiring_statuses = await cursor.to_list(length=None)
+        
+        if not hiring_statuses:
+            return {"tradespeople": []}
+        
+        # Get tradesperson details for each hired tradesperson
+        tradespeople = []
+        for status in hiring_statuses:
+            tradesperson = await database.get_user_by_id(status["tradesperson_id"])
+            if tradesperson:
+                tradespeople.append({
+                    "id": tradesperson["id"],
+                    "name": tradesperson.get("name", "Unknown"),
+                    "business_name": tradesperson.get("business_name"),
+                    "avatar": tradesperson.get("avatar"),
+                    "job_status": status.get("job_status"),
+                    "hired_at": status.get("created_at")
+                })
+        
+        return {"tradespeople": tradespeople}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting hired tradespeople: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get hired tradespeople")
+
 @router.post("/hiring-status")
 async def update_hiring_status(
     hiring_data: dict,
