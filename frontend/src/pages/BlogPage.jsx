@@ -108,17 +108,23 @@ const BlogPage = () => {
   const loadBlogData = async () => {
     setLoading(true);
     try {
-      const allPosts = await blogAPI.getPosts(filters);
-      
-      // Separate featured and regular posts
-      const featured = allPosts.filter(post => post.is_featured).slice(0, 3);
-      const regular = allPosts.filter(post => !post.is_featured);
-      
+      if (slug) {
+        // If we're viewing a single post, don't load the list
+        return;
+      }
+
+      // Get featured posts
+      const featured = await blogAPI.getFeaturedPosts();
       setFeaturedPosts(featured);
+
+      // Get regular posts
+      const allPosts = await blogAPI.getPosts(filters);
+      const regular = allPosts.filter(post => !post.is_featured);
       setPosts(regular);
       
-      // Extract categories
-      const uniqueCategories = [...new Set(allPosts.map(post => post.category))];
+      // Get categories
+      const categoryData = await blogAPI.getCategories();
+      const uniqueCategories = categoryData.map(cat => cat.category);
       setCategories(uniqueCategories);
       
     } catch (error) {
