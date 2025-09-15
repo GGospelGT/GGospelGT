@@ -35,6 +35,13 @@ const ContentManagement = () => {
   const [selectedContent, setSelectedContent] = useState(null);
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  
+  // Job-specific modal states
+  const [showCreateJobModal, setShowCreateJobModal] = useState(false);
+  const [showEditJobModal, setShowEditJobModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [showApplicationsModal, setShowApplicationsModal] = useState(false);
+  const [jobsSubTab, setJobsSubTab] = useState('postings'); // postings, applications, statistics
 
   // Content Management API
   const contentAPI = {
