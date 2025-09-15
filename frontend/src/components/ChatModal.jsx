@@ -5,11 +5,12 @@ import { Badge } from './ui/badge';
 import { Textarea } from './ui/textarea';
 import { 
   X, Send, MessageCircle, User, Clock, CheckCircle2, 
-  Phone, Mail, MapPin, Briefcase, Loader2
+  Phone, Mail, MapPin, Briefcase, Loader2, HelpCircle
 } from 'lucide-react';
 import { messagesAPI } from '../api/messages';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import HiringStatusModal from './HiringStatusModal';
 
 const ChatModal = ({ 
   isOpen, 
