@@ -40,6 +40,7 @@ const MyJobsPage = () => {
   const [tradespersonToReview, setTradespersonToReview] = useState(null);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [jobReviews, setJobReviews] = useState({});
+  const [jobHiringStatuses, setJobHiringStatuses] = useState({});
 
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
