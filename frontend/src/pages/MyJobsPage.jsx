@@ -31,6 +31,7 @@ const MyJobsPage = () => {
   const [jobToEdit, setJobToEdit] = useState(null);
   const [jobToClose, setJobToClose] = useState(null);
   const [reopeningJobId, setReopeningJobId] = useState(null);
+  const [completingJobId, setCompletingJobId] = useState(null);
   
   // Review state
   const [showReviewModal, setShowReviewModal] = useState(false);
