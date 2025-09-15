@@ -49,7 +49,7 @@
 ##
 test_plan:
   current_focus:
-    - "Google Maps Integration Backend Testing"
+    - "Admin Management Login API Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
