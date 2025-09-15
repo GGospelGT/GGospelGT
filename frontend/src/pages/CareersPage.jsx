@@ -535,7 +535,7 @@ const CareersPage = () => {
                   >
                     <option value="">Select a position</option>
                     <option value="General Application">General Application</option>
-                    {jobPositions.map((job) => (
+                    {openPositions.map((job) => (
                       <option key={job.id} value={job.title}>{job.title}</option>
                     ))}
                   </select>
