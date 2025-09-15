@@ -32,6 +32,16 @@ const MyReviewsPage = () => {
   // Helper function to check if user is homeowner
   const isHomeowner = () => user?.role === 'homeowner';
 
+  // Debug logging
+  console.log('🔍 MyReviewsPage Debug:', {
+    isAuthenticated,
+    user,
+    userRole: user?.role,
+    isHomeownerCheck: isHomeowner(),
+    hasToken: !!localStorage.getItem('token'),
+    hasUser: !!localStorage.getItem('user')
+  });
+
   useEffect(() => {
     if (isAuthenticated && isHomeowner()) {
       loadMyReviews();
