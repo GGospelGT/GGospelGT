@@ -126,6 +126,49 @@ class ReviewSubmissionFixTester:
         else:
             self.log_result("Service health check", False, f"Status: {response.status_code}")
     
+    def setup_admin_access(self):
+        """Setup admin access for job approval"""
+        print("\n=== Setting Up Admin Access ===")
+        
+        # Login as admin using legacy credentials
+        admin_data = {
+            "username": "admin",
+            "password": "servicehub2024"
+        }
+        
+        response = self.make_request("POST", "/admin-management/login", json=admin_data)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                self.admin_token = data.get('access_token')
+                self.log_result("Admin login", True, "Admin access obtained")
+            except json.JSONDecodeError:
+                self.log_result("Admin login", False, "Invalid JSON response")
+        else:
+            self.log_result("Admin login", False, f"Status: {response.status_code}, Response: {response.text}")
+    
+    def approve_job(self, job_id: str):
+        """Approve a job using admin credentials"""
+        if not self.admin_token:
+            self.log_result("Job approval", False, "No admin token available")
+            return False
+        
+        approval_data = {
+            "action": "approve",
+            "notes": "Approved for review submission fix testing"
+        }
+        
+        response = self.make_request("PUT", f"/admin/jobs/{job_id}/approve", 
+                                   json=approval_data, auth_token=self.admin_token)
+        
+        if response.status_code == 200:
+            self.log_result("Job approval", True, "Job approved successfully")
+            return True
+        else:
+            self.log_result("Job approval", False, f"Status: {response.status_code}, Response: {response.text}")
+            return False
+
     def setup_test_users(self):
         """Create test homeowner and tradesperson users"""
         print("\n=== Setting Up Test Users ===")
