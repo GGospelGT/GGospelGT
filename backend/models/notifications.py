@@ -16,6 +16,8 @@ class NotificationType(str, Enum):
     JOB_UPDATED = "job_updated"
     NEW_JOB_POSTED = "new_job_posted"  # For career page job postings
     NEW_APPLICATION = "new_application"  # For job applications
+    REVIEW_INVITATION = "review_invitation"  # Invite homeowners to leave reviews
+    REVIEW_REMINDER = "review_reminder"  # Remind homeowners to leave reviews
 
 class NotificationChannel(str, Enum):
     EMAIL = "email"
