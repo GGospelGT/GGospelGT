@@ -133,9 +133,9 @@ const Header = () => {
                           <span>My Jobs</span>
                         </DropdownMenuItem>
                         
-                        <DropdownMenuItem onClick={() => navigate('/my-received-reviews')}>
+                        <DropdownMenuItem onClick={() => navigate('/my-reviews')}>
                           <Star size={16} />
-                          <span>My Received Reviews</span>
+                          <span>My Reviews</span>
                         </DropdownMenuItem>
                         
                         <DropdownMenuSeparator />
