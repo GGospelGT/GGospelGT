@@ -845,7 +845,7 @@ class JobsCareersAPITester:
                         
                         # Log some key statistics
                         total_jobs = statistics.get('total_jobs', 0)
-                        published_jobs = statistics.get('published_jobs', 0)
+                        active_jobs = statistics.get('active_jobs', 0)
                         total_applications = statistics.get('total_applications', 0)
                         
                         self.log_result("Admin job statistics details", True, 
