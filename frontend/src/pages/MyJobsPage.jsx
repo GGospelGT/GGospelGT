@@ -15,6 +15,7 @@ import ReviewForm from '../components/reviews/ReviewForm';
 import { jobsAPI } from '../api/jobs';
 import { interestsAPI } from '../api/interests';
 import { reviewsAPI } from '../api/reviews';
+import { messagesAPI } from '../api/messages';
 import { useToast } from '../hooks/use-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
