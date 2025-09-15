@@ -5,6 +5,7 @@ import { useToast } from '../hooks/use-toast';
 import ContactManagementTab from './ContactManagementTab';
 import TradeCategoryQuestionsManager from '../components/admin/TradeCategoryQuestionsManager';
 import AdminManagement from '../components/admin/AdminManagement';
+import ContentManagement from '../components/admin/ContentManagement';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AdminDataTable from '../components/admin/AdminDataTable';
