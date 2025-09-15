@@ -233,11 +233,15 @@ class CompletedJobsBackendTester:
                     jobs = data['jobs']
                     self.log_result("My jobs endpoint structure", True, f"Found {len(jobs)} jobs")
                     
-                    # Check if response includes pagination info
-                    if 'total' in data and 'page' in data:
-                        self.log_result("My jobs pagination info", True, f"Total: {data['total']}, Page: {data['page']}")
+                    # Check if response includes pagination info (from JobsResponse model)
+                    if 'pagination' in data:
+                        pagination = data['pagination']
+                        if 'total' in pagination and 'page' in pagination:
+                            self.log_result("My jobs pagination info", True, f"Total: {pagination['total']}, Page: {pagination['page']}")
+                        else:
+                            self.log_result("My jobs pagination info", False, "Missing pagination fields")
                     else:
-                        self.log_result("My jobs pagination info", False, "Missing pagination information")
+                        self.log_result("My jobs pagination info", False, "Missing pagination object")
                 else:
                     self.log_result("My jobs endpoint structure", False, "Missing 'jobs' field in response")
             except json.JSONDecodeError:
