@@ -30,7 +30,7 @@ async def get_job_postings(
     department: Optional[JobDepartment] = None,
     status: Optional[ContentStatus] = None,
     search: Optional[str] = None,
-    admin: dict = Depends(require_permission(AdminPermission.MANAGE_POLICIES))
+    admin: dict = Depends(require_permission(AdminPermission.MANAGE_JOBS))
 ):
     """Get job postings with filtering (Admin only)"""
     
