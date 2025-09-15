@@ -28,6 +28,7 @@ import HelpFAQsPage from "./pages/HelpFAQsPage";
 import ContactUsPage from "./pages/ContactUsPage";
 import JoinForFreePage from "./pages/JoinForFreePage";
 import HelpCentrePage from "./pages/HelpCentrePage";
+import BlogPage from "./pages/BlogPage";
 import TradespersonRegistrationDemo from "./pages/TradespersonRegistrationDemo";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
