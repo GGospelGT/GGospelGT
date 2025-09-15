@@ -372,6 +372,7 @@ async def publish_job_posting(
         # Update status to published
         success = await database.update_content_item(job_id, {
             "status": "published",
+            "publish_date": datetime.utcnow(),
             "published_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
             "updated_by": admin["id"]
