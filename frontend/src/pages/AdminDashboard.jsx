@@ -13,7 +13,7 @@ import ConfirmDeleteModal from '../components/admin/ConfirmDeleteModal';
 import InlineEditForm from '../components/admin/InlineEditForm';
 
 const AdminDashboard = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(adminAPI.isLoggedIn());
   const [activeTab, setActiveTab] = useState('funding');
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [fundingRequests, setFundingRequests] = useState([]);
