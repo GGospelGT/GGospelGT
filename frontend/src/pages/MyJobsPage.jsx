@@ -246,10 +246,54 @@ const MyJobsPage = () => {
   };
 
   // Review handling functions
-  const handleLeaveReview = (job, tradesperson = null) => {
+  const handleLeaveReview = async (job, tradesperson = null) => {
     setJobToReview(job);
-    setTradespersonToReview(tradesperson);
-    setShowReviewModal(true);
+    
+    if (tradesperson) {
+      // If tradesperson is explicitly provided, use it
+      setTradespersonToReview(tradesperson);
+      setShowReviewModal(true);
+    } else {
+      // If no tradesperson provided, try to get hired tradespeople from hiring status
+      try {
+        const hiredTradespeople = await getHiredTradespeopleForJob(job.id);
+        
+        if (hiredTradespeople.length === 1) {
+          // If only one hired tradesperson, review them directly
+          setTradespersonToReview(hiredTradespeople[0]);
+          setShowReviewModal(true);
+        } else if (hiredTradespeople.length > 1) {
+          // If multiple hired tradespeople, show selection modal
+          setAvailableTradespeoplePorReview(hiredTradespeople);
+          setShowTradespersonSelectionModal(true);
+        } else {
+          // If no hired tradespeople found, show error
+          toast({
+            title: "Cannot Leave Review",
+            description: "No hired tradespeople found for this job. Please use the chat to indicate who you hired first.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error getting hired tradespeople:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load tradesperson information. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  // Get hired tradespeople for a job
+  const getHiredTradespeopleForJob = async (jobId) => {
+    try {
+      const response = await messagesAPI.getHiredTradespeopleForJob(jobId);
+      return response.tradespeople || [];
+    } catch (error) {
+      console.error('Error getting hired tradespeople:', error);
+      return [];
+    }
   };
 
   const handleSubmitReview = async (reviewData) => {
