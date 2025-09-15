@@ -69,6 +69,15 @@ export const reviewsAPI = {
       params: { page, limit }
     });
     return response.data;
+  },
+
+  // Get reviews received by current tradesperson
+  getReceivedReviews: async (params = {}) => {
+    const { page = 1, limit = 10 } = params;
+    const response = await apiClient.get('/reviews/received', {
+      params: { page, limit }
+    });
+    return response.data;
   }
 };
 
