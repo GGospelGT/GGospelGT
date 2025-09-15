@@ -231,6 +231,9 @@ class JobsCareersAPITester:
         response = self.make_request("POST", "/admin/jobs/postings", 
                                    json=job_data, auth_token=self.access_token)
         
+        print(f"DEBUG: Job creation response status: {response.status_code}")
+        print(f"DEBUG: Job creation response text: {response.text}")
+        
         if response.status_code == 200:
             try:
                 data = response.json()
