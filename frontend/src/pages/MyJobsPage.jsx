@@ -830,7 +830,12 @@ const MyJobsPage = () => {
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full">
             <div className="p-6">
               <div className="text-center">
-                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <div className="relative">
+                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4 animate-pulse" />
+                  <div className="absolute inset-0 w-16 h-16 mx-auto animate-ping">
+                    <CheckCircle className="w-16 h-16 text-green-300 opacity-75" />
+                  </div>
+                </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-2">Job Completed! 🎉</h2>
                 <p className="text-gray-600 mb-6">
                   Great! Your job "<strong>{completedJob.title}</strong>" has been marked as completed.
