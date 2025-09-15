@@ -441,6 +441,18 @@ const CareersPage = () => {
                   </div>
                 ))}
               </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <AlertCircle className="w-16 h-16 text-red-300 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-900 mb-2">Error Loading Positions</h3>
+                <p className="text-gray-500 mb-6">{error}</p>
+                <button 
+                  onClick={loadJobPositions}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
             ) : filteredPositions.length > 0 ? (
               <div className="grid md:grid-cols-2 gap-6">
                 {filteredPositions.map((job) => (
