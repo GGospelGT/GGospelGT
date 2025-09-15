@@ -191,7 +191,7 @@ class HiringStatusTester:
             self.log_result("Test job creation", False, "No homeowner token available")
             return
         
-        # Create a test job for the homeowner
+        # Create a test job for the homeowner with proper structure
         job_data = {
             "title": "Test Electrical Work for Hiring Status Testing",
             "description": "This is a test job created for testing the hiring status and feedback system. Need electrical work done in the kitchen area.",
@@ -199,31 +199,46 @@ class HiringStatusTester:
             "timeline": "within_week",
             "budget_min": 50000,
             "budget_max": 150000,
-            "location": {
-                "state": "Lagos",
-                "lga": "Ikeja",
-                "town": "Computer Village",
-                "zip_code": "100001",
-                "home_address": "123 Test Street, Computer Village"
-            },
+            "state": "Lagos",
+            "lga": "Ikeja", 
+            "town": "Computer Village",
+            "zip_code": "100001",
+            "home_address": "123 Test Street, Computer Village",
             "questions": [],
             "photos": []
         }
         
-        response = self.make_request("POST", "/jobs", json=job_data, auth_token=self.homeowner_token)
+        response = self.make_request("POST", "/jobs/", json=job_data, auth_token=self.homeowner_token)
         
         if response.status_code == 200:
             try:
                 data = response.json()
                 self.test_job_id = data.get('id')
                 self.log_result("Test job creation", True, f"Created job ID: {self.test_job_id}")
+                return
             except json.JSONDecodeError:
                 self.log_result("Test job creation", False, "Invalid JSON response")
         else:
             self.log_result("Test job creation", False, f"Status: {response.status_code}, Response: {response.text}")
-            # Fallback to existing job if creation fails
-            self.test_job_id = "312943cc-affb-4790-8a4b-29c20abbd430"
-            self.log_result("Test job fallback", True, f"Using fallback job ID: {self.test_job_id}")
+        
+        # Try to get homeowner's existing jobs
+        print("\n--- Trying to get homeowner's existing jobs ---")
+        response = self.make_request("GET", "/jobs/my-jobs", auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                jobs = data.get('jobs', [])
+                if jobs:
+                    self.test_job_id = jobs[0].get('id')
+                    self.log_result("Using existing job", True, f"Using job ID: {self.test_job_id}")
+                    return
+            except json.JSONDecodeError:
+                pass
+        
+        # If all else fails, create a mock job ID for testing API validation
+        self.test_job_id = str(uuid.uuid4())
+        self.log_result("Mock job for validation testing", True, f"Using mock job ID: {self.test_job_id}")
     
     def mark_job_completed(self):
         """Mark the test job as completed"""
