@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime
 
 # Get backend URL from environment
-BACKEND_URL = "https://content-job-manager.preview.emergentagent.com/api"
+BACKEND_URL = "https://tradepro-connect.preview.emergentagent.com/api"
 
 class ContactNotificationTester:
     def __init__(self):
