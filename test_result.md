@@ -49,7 +49,7 @@
 ##
 test_plan:
   current_focus:
-    []
+    - "Review Prompt Modal After Job Completion Testing"
   stuck_tasks: 
     []
   completed_tasks:
