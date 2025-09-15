@@ -264,19 +264,39 @@ const AdminDashboard = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('🔑 Attempting admin login...', { username: loginForm.username });
+    console.log('🔑 Attempting admin login...', { 
+      username: loginForm.username,
+      formData: loginForm 
+    });
+    
+    // Add a simple alert to verify function is being called
+    alert('Login function called! Check console for details.');
     
     try {
       const result = await adminAPI.login(loginForm.username, loginForm.password);
       console.log('✅ Login successful:', result);
       
+      // Test localStorage directly
+      console.log('🔧 Checking localStorage after login:', {
+        token: localStorage.getItem('admin_token'),
+        admin: localStorage.getItem('admin_info')
+      });
+      
       setIsLoggedIn(true);
+      
+      // Simple alert instead of toast for debugging
+      alert('Login successful! Redirecting to dashboard...');
+      
       toast({
         title: "Login Successful",
         description: "Welcome to Admin Dashboard"
       });
     } catch (error) {
       console.error('❌ Login failed:', error);
+      
+      // Simple alert for debugging
+      alert(`Login failed: ${error.message || 'Unknown error'}`);
+      
       toast({
         title: "Login Failed",
         description: error.message || "Invalid credentials. Please try again.",
