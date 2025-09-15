@@ -140,7 +140,7 @@ const MyReviewsPage = () => {
     return <Badge className={config.className}>{config.label}</Badge>;
   };
 
-  if (!isAuthenticated()) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
