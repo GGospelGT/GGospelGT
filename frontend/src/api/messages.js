@@ -33,6 +33,17 @@ export const messagesAPI = {
     const response = await apiClient.put(`/messages/conversations/${conversationId}/read`);
     return response.data;
   },
+
+  // Hiring Status and Feedback
+  updateHiringStatus: async (statusData) => {
+    const response = await apiClient.post('/messages/hiring-status', statusData);
+    return response.data;
+  },
+
+  submitHiringFeedback: async (feedbackData) => {
+    const response = await apiClient.post('/messages/feedback', feedbackData);
+    return response.data;
+  },
 };
 
 export default messagesAPI;
