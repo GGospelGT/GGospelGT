@@ -6,6 +6,8 @@ import uuid
 
 from database import database
 from models.content import ContentType, ContentStatus
+from models.notifications import NotificationType
+from services.notifications import notification_service
 
 logger = logging.getLogger(__name__)
 
