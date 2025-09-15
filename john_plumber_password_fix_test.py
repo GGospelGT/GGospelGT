@@ -100,7 +100,7 @@ class JohnPlumberPasswordFixTester:
         """Find john.plumber@gmail.com user in database"""
         print("\n=== Finding john.plumber@gmail.com User ===")
         
-        if not self.database:
+        if self.database is None:
             self.log_result("Find john.plumber user", False, "No database connection")
             return None
         
