@@ -347,3 +347,184 @@ async def _notify_new_message(sender: User, recipient_id: str, conversation: dic
         
     except Exception as e:
         logger.error(f"❌ Failed to send new message notification: {str(e)}")
+
+# Hiring Status and Feedback Endpoints
+
+@router.post("/hiring-status")
+async def update_hiring_status(
+    hiring_data: dict,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_homeowner)
+):
+    """Update hiring status and job progress for a tradesperson"""
+    try:
+        job_id = hiring_data.get("jobId")
+        tradesperson_id = hiring_data.get("tradespersonId")
+        hired = hiring_data.get("hired", False)
+        job_status = hiring_data.get("jobStatus")
+        
+        if not job_id or not tradesperson_id:
+            raise HTTPException(status_code=400, detail="Job ID and Tradesperson ID are required")
+        
+        # Verify job exists and belongs to current user
+        job = await database.get_job_by_id(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        if job.get("homeowner", {}).get("id") != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only update status for your own jobs")
+        
+        # Verify tradesperson exists
+        tradesperson = await database.get_user_by_id(tradesperson_id)
+        if not tradesperson:
+            raise HTTPException(status_code=404, detail="Tradesperson not found")
+        
+        # Create hiring status record
+        hiring_status_data = {
+            "id": str(uuid.uuid4()),
+            "job_id": job_id,
+            "homeowner_id": current_user.id,
+            "tradesperson_id": tradesperson_id,
+            "hired": hired,
+            "job_status": job_status,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        
+        # Save to database
+        await database.create_hiring_status(hiring_status_data)
+        
+        # If hired and job is completed, schedule review reminder
+        if hired and job_status == "completed":
+            background_tasks.add_task(
+                _send_review_invitation,
+                current_user,
+                tradesperson,
+                job,
+                immediate=True
+            )
+        elif hired and job_status in ["not_started", "in_progress"]:
+            # Schedule future review reminders
+            background_tasks.add_task(
+                _schedule_review_reminders,
+                current_user,
+                tradesperson,
+                job,
+                job_status
+            )
+        
+        return {
+            "message": "Hiring status updated successfully",
+            "id": hiring_status_data["id"],
+            "hired": hired,
+            "job_status": job_status
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating hiring status: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update hiring status")
+
+@router.post("/feedback")
+async def submit_hiring_feedback(
+    feedback_data: dict,
+    current_user: User = Depends(get_current_homeowner)
+):
+    """Submit feedback when homeowner doesn't hire a tradesperson"""
+    try:
+        job_id = feedback_data.get("jobId")
+        tradesperson_id = feedback_data.get("tradespersonId")
+        feedback_type = feedback_data.get("feedbackType")
+        comment = feedback_data.get("comment", "")
+        
+        if not job_id or not tradesperson_id or not feedback_type:
+            raise HTTPException(status_code=400, detail="Job ID, Tradesperson ID, and feedback type are required")
+        
+        # Verify job exists and belongs to current user
+        job = await database.get_job_by_id(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        if job.get("homeowner", {}).get("id") != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only submit feedback for your own jobs")
+        
+        # Verify tradesperson exists
+        tradesperson = await database.get_user_by_id(tradesperson_id)
+        if not tradesperson:
+            raise HTTPException(status_code=404, detail="Tradesperson not found")
+        
+        # Create feedback record
+        feedback_record = {
+            "id": str(uuid.uuid4()),
+            "job_id": job_id,
+            "homeowner_id": current_user.id,
+            "tradesperson_id": tradesperson_id,
+            "feedback_type": feedback_type,
+            "comment": comment,
+            "created_at": datetime.utcnow()
+        }
+        
+        # Save to database
+        await database.create_hiring_feedback(feedback_record)
+        
+        return {
+            "message": "Feedback submitted successfully",
+            "id": feedback_record["id"]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error submitting hiring feedback: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to submit feedback")
+
+# Background task functions for review reminders
+
+async def _send_review_invitation(homeowner: User, tradesperson: dict, job: dict, immediate: bool = False):
+    """Send review invitation to homeowner"""
+    try:
+        # Get homeowner preferences
+        preferences = await database.get_user_notification_preferences(homeowner.id)
+        
+        # Prepare template data
+        template_data = {
+            "homeowner_name": homeowner.name or "Homeowner",
+            "tradesperson_name": tradesperson.get("business_name") or tradesperson.get("name", "Tradesperson"),
+            "job_title": job.get("title", "Job"),
+            "completion_date": datetime.utcnow().strftime("%B %d, %Y"),
+            "review_url": f"https://servicehub.ng/my-jobs?review={job['id']}"
+        }
+        
+        # Send notification
+        notification = await notification_service.send_notification(
+            user_id=homeowner.id,
+            notification_type=NotificationType.REVIEW_INVITATION,
+            template_data=template_data,
+            user_preferences=preferences,
+            recipient_email=homeowner.email,
+            recipient_phone=homeowner.phone
+        )
+        
+        # Save notification to database
+        await database.create_notification(notification)
+        
+        logger.info(f"✅ Review invitation sent to homeowner {homeowner.id}")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to send review invitation: {str(e)}")
+
+async def _schedule_review_reminders(homeowner: User, tradesperson: dict, job: dict, job_status: str):
+    """Schedule future review reminders based on job status"""
+    try:
+        # For now, just log that we would schedule reminders
+        # In a real implementation, you'd use a task queue like Celery
+        logger.info(f"📅 Review reminders scheduled for job {job['id']} (status: {job_status})")
+        
+        # You could implement this with:
+        # - Database scheduled tasks
+        # - Celery with Redis/RabbitMQ
+        # - Background job processing
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to schedule review reminders: {str(e)}")
