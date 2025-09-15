@@ -1324,6 +1324,11 @@ class Database:
         """Access to interests collection"""
         return self.database.interests
 
+    @property
+    def hiring_status_collection(self):
+        """Access to hiring_status collection"""
+        return self.database.hiring_status
+
     # Review Management Methods (Trust & Quality System)
     async def create_review(self, review: Review) -> Review:
         """Create a new review"""
