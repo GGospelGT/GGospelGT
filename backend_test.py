@@ -1,40 +1,41 @@
 #!/usr/bin/env python3
 """
-COMPREHENSIVE REVIEW SYSTEM BACKEND TESTING
+COMPREHENSIVE REVIEW SYSTEM BACKEND TESTING - FOCUSED ON MY-REVIEWS ENDPOINT
 
-**TESTING REQUIREMENTS:**
+**TESTING REQUIREMENTS FROM REVIEW REQUEST:**
 
-**1. Review API Endpoints Testing:**
-- POST /api/reviews/create - Create a new review
-- GET /api/reviews/user/{userId} - Get reviews for a user  
-- GET /api/reviews/job/{jobId} - Get reviews for a job
-- GET /api/reviews/summary/{userId} - Get review summary
-- POST /api/reviews/respond/{reviewId} - Respond to review
-- GET /api/reviews/my-reviews - Get current user's reviews
+**1. Test Authentication & My Reviews Endpoint:**
+- Create or login as a homeowner user 
+- Test the new /api/reviews/my-reviews endpoint
+- Verify the endpoint returns proper JSON structure with reviews array, pagination, etc.
+- Test with both empty state (no reviews) and with sample reviews
 
-**2. Review Creation Workflow Testing:**
-- Test creating a review for a completed job
-- Verify all required fields (job_id, reviewee_id, rating, title, content)
-- Test category ratings (quality, timeliness, communication, etc.)
-- Test photo upload functionality
-- Test recommendation toggle
+**2. Test Complete Review Workflow:**
+- Create a test job and mark it as completed
+- Create a sample review for the job
+- Test that the review appears in /api/reviews/my-reviews results
+- Verify review data structure matches frontend expectations
 
-**3. Review Data Structure Testing:**
-- Verify review models work correctly
-- Test homeowner_to_tradesperson review type
-- Check review status handling (pending, published, etc.)
-- Test review metadata (dates, job info, etc.)
+**3. Test Review CRUD Operations:**
+- Test creating reviews via POST /api/reviews/
+- Test getting user reviews via GET /api/reviews/my-reviews
+- Test updating reviews (if endpoint exists)
+- Test review permissions (only reviewer can see their reviews)
 
-**4. Review Retrieval Testing:**
-- Test getting reviews for specific tradespeople
-- Test getting reviews for specific jobs
-- Test review summary calculations
-- Test pagination for review lists
+**4. Verify API Response Format:**
+- Ensure /api/reviews/my-reviews returns the exact format expected by the frontend:
+  {
+    "reviews": [...],
+    "total": number,
+    "page": number,
+    "limit": number,
+    "total_pages": number
+  }
 
-**5. Review Permissions Testing:**
-- Verify only homeowners who hired a tradesperson can review them
-- Test that users can't review the same job/tradesperson twice
-- Check review editing permissions
+**5. Test Error Handling:**
+- Test /api/reviews/my-reviews without authentication (should return 401)
+- Test with invalid pagination parameters
+- Test with non-existent user
 """
 
 import requests
