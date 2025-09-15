@@ -67,7 +67,7 @@ async def get_job_postings(
 @router.post("/postings")
 async def create_job_posting(
     job_data: dict,
-    admin: dict = Depends(require_permission(AdminPermission.MANAGE_POLICIES))
+    admin: dict = Depends(require_permission(AdminPermission.MANAGE_JOBS))
 ):
     """Create a new job posting (Admin only)"""
     
