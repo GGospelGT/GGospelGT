@@ -633,6 +633,18 @@ const MyJobsPage = () => {
                                   </Button>
                                 )}
 
+                                {/* Leave Review Button - Only for completed jobs */}
+                                {job.status === 'completed' && canLeaveReview(job) && (
+                                  <Button
+                                    onClick={() => handleLeaveReview(job)}
+                                    className="font-lato text-white"
+                                    style={{backgroundColor: '#2F8140'}}
+                                  >
+                                    <Star size={16} className="mr-2" />
+                                    Leave Review
+                                  </Button>
+                                )}
+
                                 {/* Close/Reopen Button */}
                                 {job.status === 'active' ? (
                                   <Button
