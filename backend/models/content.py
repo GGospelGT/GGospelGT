@@ -266,3 +266,141 @@ class ContentStatistics(BaseModel):
     content_by_category: Dict[str, int] = {}
     top_performing: List[Dict[str, Any]] = []
     recent_activity: List[Dict[str, Any]] = []
+
+# Job-specific models for enhanced job management
+class JobDepartment(str, Enum):
+    ENGINEERING = "engineering"
+    MARKETING = "marketing"
+    DESIGN = "design"
+    SALES = "sales"
+    CUSTOMER_SUCCESS = "customer_success"
+    OPERATIONS = "operations"
+    FINANCE = "finance"
+    HR = "hr"
+    LEGAL = "legal"
+
+class JobType(str, Enum):
+    FULL_TIME = "full_time"
+    PART_TIME = "part_time"
+    CONTRACT = "contract"
+    REMOTE = "remote"
+    HYBRID = "hybrid"
+
+class JobExperienceLevel(str, Enum):
+    ENTRY = "0-1 years"
+    JUNIOR = "1-3 years"
+    MID = "3-5 years"
+    SENIOR = "5-10 years"
+    LEAD = "10+ years"
+
+class JobPosting(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str = Field(..., min_length=1, max_length=200)
+    slug: str = Field(..., min_length=1, max_length=200)
+    department: JobDepartment
+    location: str = Field(..., min_length=1, max_length=100)
+    job_type: JobType
+    experience_level: JobExperienceLevel
+    
+    # Job content
+    description: str = Field(..., min_length=1)  # Main job description
+    requirements: List[str] = []  # Job requirements list
+    benefits: List[str] = []  # Job benefits list
+    responsibilities: List[str] = []  # Job responsibilities
+    
+    # Compensation & Details
+    salary_min: Optional[int] = None
+    salary_max: Optional[int] = None
+    salary_currency: str = "NGN"
+    is_salary_public: bool = False
+    
+    # Status & Publishing
+    status: ContentStatus = ContentStatus.DRAFT
+    is_featured: bool = False
+    is_urgent: bool = False
+    applications_count: int = 0
+    
+    # SEO & Marketing
+    meta_title: Optional[str] = Field(None, max_length=60)
+    meta_description: Optional[str] = Field(None, max_length=160)
+    keywords: List[str] = []
+    
+    # Dates
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    published_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    
+    # Admin info
+    created_by: str  # Admin ID
+    updated_by: Optional[str] = None
+    
+    def dict(self, **kwargs):
+        d = super().dict(**kwargs)
+        # Convert datetime objects to ISO strings
+        for key, value in d.items():
+            if isinstance(value, datetime):
+                d[key] = value.isoformat()
+        return d
+
+class JobApplication(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    job_id: str
+    job_title: str
+    
+    # Applicant information
+    name: str = Field(..., min_length=1, max_length=100)
+    email: EmailStr
+    phone: Optional[str] = None
+    
+    # Application details
+    experience_level: Optional[str] = None
+    message: str = Field(..., min_length=10)  # Cover letter/motivation
+    resume_url: Optional[str] = None  # URL to uploaded resume
+    resume_filename: Optional[str] = None
+    
+    # Application status
+    status: str = "new"  # new, reviewed, shortlisted, interviewed, hired, rejected
+    admin_notes: Optional[str] = None
+    reviewed_by: Optional[str] = None  # Admin ID
+    reviewed_at: Optional[datetime] = None
+    
+    # Metadata
+    applied_at: datetime = Field(default_factory=datetime.utcnow)
+    source: str = "website"  # website, referral, linkedin, etc.
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    
+    def dict(self, **kwargs):
+        d = super().dict(**kwargs)
+        # Convert datetime objects to ISO strings
+        for key, value in d.items():
+            if isinstance(value, datetime):
+                d[key] = value.isoformat()
+        return d
+
+class JobApplicationCreate(BaseModel):
+    job_id: str
+    name: str = Field(..., min_length=1, max_length=100)
+    email: EmailStr
+    phone: Optional[str] = None
+    experience_level: Optional[str] = None
+    message: str = Field(..., min_length=10)
+    resume_filename: Optional[str] = None
+
+class JobApplicationUpdate(BaseModel):
+    status: Optional[str] = None
+    admin_notes: Optional[str] = None
+
+# Job statistics model
+class JobStatistics(BaseModel):
+    total_jobs: int = 0
+    active_jobs: int = 0
+    draft_jobs: int = 0
+    expired_jobs: int = 0
+    total_applications: int = 0
+    jobs_by_department: Dict[str, int] = {}
+    jobs_by_type: Dict[str, int] = {}
+    applications_by_status: Dict[str, int] = {}
+    top_jobs: List[Dict[str, Any]] = []
+    recent_applications: List[Dict[str, Any]] = []
