@@ -11,6 +11,7 @@ from database import database
 from routes import jobs, tradespeople, quotes, reviews, stats, auth
 from routes.admin_management import router as admin_management_router
 from routes.content import router as content_router
+from routes.public_content import router as public_content_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
