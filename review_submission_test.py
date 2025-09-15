@@ -620,7 +620,10 @@ class ReviewSubmissionFixTester:
                 compat_job_id = job_result.get('id')
                 self.log_result("Backward compatibility job creation", True, f"Job ID: {compat_job_id}")
                 
-                # Mark job as completed using the specific complete endpoint
+                # Approve job first if needed, then mark as completed
+                if self.approve_job(compat_job_id):
+                    print("Compatibility job approved, now completing...")
+                
                 update_response = self.make_request("PUT", f"/jobs/{compat_job_id}/complete", 
                                                   auth_token=self.homeowner_token)
                 
