@@ -291,24 +291,24 @@ class CompletedJobsBackendTester:
         # Test 3: Job filtering by status
         print("\n--- Test 3: Job Filtering by Status ---")
         if self.test_job_id:
-            # Test filtering for active jobs
-            response = self.make_request("GET", "/jobs/my-jobs?status=active", auth_token=self.homeowner_token)
+            # Test filtering for pending_approval jobs (new jobs start as pending_approval)
+            response = self.make_request("GET", "/jobs/my-jobs?status=pending_approval", auth_token=self.homeowner_token)
             
             if response.status_code == 200:
                 try:
                     data = response.json()
-                    active_jobs = data.get('jobs', [])
+                    pending_jobs = data.get('jobs', [])
                     
-                    # Check if our test job is in active jobs
-                    job_ids = [job.get('id') for job in active_jobs]
+                    # Check if our test job is in pending jobs
+                    job_ids = [job.get('id') for job in pending_jobs]
                     if self.test_job_id in job_ids:
-                        self.log_result("Active jobs filtering", True, f"Found test job in {len(active_jobs)} active jobs")
+                        self.log_result("Pending jobs filtering", True, f"Found test job in {len(pending_jobs)} pending jobs")
                     else:
-                        self.log_result("Active jobs filtering", False, "Test job not found in active jobs")
+                        self.log_result("Pending jobs filtering", False, "Test job not found in pending jobs")
                 except json.JSONDecodeError:
-                    self.log_result("Active jobs filtering", False, "Invalid JSON response")
+                    self.log_result("Pending jobs filtering", False, "Invalid JSON response")
             else:
-                self.log_result("Active jobs filtering", False, f"Status: {response.status_code}")
+                self.log_result("Pending jobs filtering", False, f"Status: {response.status_code}")
             
             # Test filtering for completed jobs (should be empty initially)
             response = self.make_request("GET", "/jobs/my-jobs?status=completed", auth_token=self.homeowner_token)
