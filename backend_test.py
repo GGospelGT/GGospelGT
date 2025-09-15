@@ -1220,8 +1220,31 @@ class HiringStatusTester:
         print("\n=== Testing Authentication & Permissions ===")
         
         if not all([self.homeowner_token, self.tradesperson_token, self.test_job_id, self.tradesperson_id]):
-            self.log_result("Authentication permissions", False, "Missing required test data")
-            return
+            # Create the missing data for this test
+            if not self.tradesperson_token:
+                print("Creating additional tradesperson for permission testing...")
+                tradesperson_data = {
+                    "name": "Permission Test Tradesperson",
+                    "email": f"permission.test.{uuid.uuid4().hex[:8]}@test.com",
+                    "password": "TestPassword123!",
+                    "phone": "+2348087654321",
+                    "location": "Lagos",
+                    "postcode": "100001",
+                    "trade_categories": ["Electrical Repairs"],
+                    "experience_years": 3,
+                    "description": "Permission testing tradesperson"
+                }
+                
+                response = self.make_request("POST", "/auth/register/tradesperson", json=tradesperson_data)
+                if response.status_code == 200:
+                    data = response.json()
+                    self.tradesperson_token = data.get('access_token')
+                    if not self.tradesperson_id:
+                        self.tradesperson_id = data.get('id')
+                
+            if not all([self.homeowner_token, self.tradesperson_token, self.test_job_id, self.tradesperson_id]):
+                self.log_result("Authentication permissions setup", False, "Could not create required test data")
+                return
         
         # Test 1: Tradesperson trying to update hiring status (should fail)
         print(f"\n--- Test 1: Tradesperson Updating Hiring Status ---")
