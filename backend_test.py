@@ -61,7 +61,7 @@ from collections import Counter
 # Get backend URL from environment
 BACKEND_URL = "https://content-job-manager.preview.emergentagent.com/api"
 
-class ReviewSystemTester:
+class HiringStatusTester:
     def __init__(self):
         self.base_url = BACKEND_URL
         self.session = requests.Session()
