@@ -163,9 +163,12 @@ const BlogPage = () => {
     return Math.ceil(wordCount / wordsPerMinute);
   };
 
-  const handleShare = (post, platform) => {
+  const handleShare = async (post, platform) => {
     const url = `${window.location.origin}/blog/${post.slug}`;
     const title = post.title;
+    
+    // Increment share count
+    await blogAPI.sharePost(post.id);
     
     let shareUrl = '';
     switch (platform) {
@@ -186,6 +189,17 @@ const BlogPage = () => {
     
     if (shareUrl) {
       window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+  };
+
+  const handleLike = async (post) => {
+    await blogAPI.likePost(post.id);
+    // Update local state to reflect the like
+    if (selectedPost && selectedPost.id === post.id) {
+      setSelectedPost({
+        ...selectedPost,
+        like_count: (selectedPost.like_count || 0) + 1
+      });
     }
   };
 
