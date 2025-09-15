@@ -473,6 +473,92 @@ serviceHub System
             )
         }
 
+        # Review Invitation templates (for homeowners to review tradespeople)
+        templates[NotificationType.REVIEW_INVITATION] = {
+            NotificationChannel.EMAIL: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.REVIEW_INVITATION,
+                channel=NotificationChannel.EMAIL,
+                subject_template="Share Your Experience - Review {tradesperson_name}",
+                content_template="""
+Hello {homeowner_name},
+
+Your job has been completed! We hope you're satisfied with the work done by {tradesperson_name}.
+
+📋 Job: {job_title}
+👷 Tradesperson: {tradesperson_name}
+📅 Completed: {completion_date}
+⭐ Your review matters!
+
+Help other homeowners by sharing your experience:
+• Rate the quality of work (1-5 stars)
+• Comment on professionalism and timeliness  
+• Upload photos of the completed work
+• Recommend (or not) to other homeowners
+
+Your honest feedback helps build a trusted community and helps {tradesperson_name} grow their business.
+
+📝 Leave Your Review: {review_url}
+
+This invitation expires in 30 days. If you have any issues with the completed work, please contact us immediately.
+
+Best regards,
+serviceHub Team
+                """,
+                variables=["homeowner_name", "tradesperson_name", "job_title", "completion_date", "review_url"]
+            ),
+            NotificationChannel.SMS: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.REVIEW_INVITATION,
+                channel=NotificationChannel.SMS,
+                subject_template="Review Request - serviceHub",
+                content_template="🏠 Job completed by {tradesperson_name}! Share your experience and help other homeowners. Leave review: {review_url}",
+                variables=["tradesperson_name", "review_url"]
+            )
+        }
+
+        # Review Reminder templates (follow-up after initial invitation)
+        templates[NotificationType.REVIEW_REMINDER] = {
+            NotificationChannel.EMAIL: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.REVIEW_REMINDER,
+                channel=NotificationChannel.EMAIL,
+                subject_template="Don't Forget - Review {tradesperson_name}",
+                content_template="""
+Hello {homeowner_name},
+
+We noticed you haven't left a review for your recently completed job yet. Your feedback is valuable!
+
+📋 Job: {job_title}
+👷 Tradesperson: {tradesperson_name}
+📅 Completed: {completion_date}
+
+Your review helps:
+✅ Other homeowners make informed decisions
+✅ Tradespeople improve their services
+✅ Build a trusted community on serviceHub
+
+It only takes 2 minutes to leave a review!
+
+📝 Leave Your Review Now: {review_url}
+
+This invitation expires in {days_remaining} days.
+
+Best regards,
+serviceHub Team
+                """,
+                variables=["homeowner_name", "tradesperson_name", "job_title", "completion_date", "review_url", "days_remaining"]
+            ),
+            NotificationChannel.SMS: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.REVIEW_REMINDER,
+                channel=NotificationChannel.SMS,
+                subject_template="Review Reminder - serviceHub",
+                content_template="⏰ Reminder: Please review {tradesperson_name} for your completed job. Expires in {days_remaining} days: {review_url}",
+                variables=["tradesperson_name", "days_remaining", "review_url"]
+            )
+        }
+
         # Job Rejection templates
         templates[NotificationType.JOB_REJECTED] = {
             NotificationChannel.EMAIL: NotificationTemplate(
