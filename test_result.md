@@ -61,6 +61,7 @@ test_plan:
     - "Review Prompt Modal After Job Completion Testing"
     - "Review Submission Fix Testing - Cannot Review Error Resolution"
     - "Completed Jobs Display Backend Testing"
+    - "Completed Jobs Display Frontend Testing"
   test_all: false
   test_priority: "high_first"
 ##
