@@ -249,19 +249,14 @@ class ReviewSubmissionFixTester:
             self.log_result("Job completion", False, "Missing job ID or homeowner token")
             return
         
-        # Update job status to completed
-        update_data = {
-            "status": "completed",
-            "completion_notes": "Job completed successfully for review submission fix testing"
-        }
-        
-        response = self.make_request("PUT", f"/jobs/{self.test_job_id}", 
-                                   json=update_data, auth_token=self.homeowner_token)
+        # Use the specific complete job endpoint
+        response = self.make_request("PUT", f"/jobs/{self.test_job_id}/complete", 
+                                   auth_token=self.homeowner_token)
         
         if response.status_code == 200:
             self.log_result("Job completion", True, "Job marked as completed")
         else:
-            self.log_result("Job completion", False, f"Status: {response.status_code}")
+            self.log_result("Job completion", False, f"Status: {response.status_code}, Response: {response.text}")
     
     def test_hiring_status_creation(self):
         """Test creating hiring status records"""
