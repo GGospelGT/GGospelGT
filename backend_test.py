@@ -1,41 +1,52 @@
 #!/usr/bin/env python3
 """
-COMPREHENSIVE REVIEW SYSTEM BACKEND TESTING - FOCUSED ON MY-REVIEWS ENDPOINT
+COMPREHENSIVE HIRING STATUS AND FEEDBACK SYSTEM BACKEND TESTING
 
 **TESTING REQUIREMENTS FROM REVIEW REQUEST:**
 
-**1. Test Authentication & My Reviews Endpoint:**
-- Create or login as a homeowner user 
-- Test the new /api/reviews/my-reviews endpoint
-- Verify the endpoint returns proper JSON structure with reviews array, pagination, etc.
-- Test with both empty state (no reviews) and with sample reviews
+**1. HIRING STATUS API ENDPOINTS:**
+- POST /api/messages/hiring-status - Test updating hiring status with different job statuses
+- POST /api/messages/feedback - Test submitting feedback when not hiring
+- Verify both endpoints require homeowner authentication
+- Test error handling for missing/invalid parameters
 
-**2. Test Complete Review Workflow:**
-- Create a test job and mark it as completed
-- Create a sample review for the job
-- Test that the review appears in /api/reviews/my-reviews results
-- Verify review data structure matches frontend expectations
+**2. HIRING STATUS WORKFLOW TESTING:**
+- Test creating hiring status with hired=true and various job_status values:
+  - "not_started" - Should schedule future review reminders
+  - "in_progress" - Should schedule review reminders
+  - "completed" - Should send immediate review invitation
+- Verify hiring status is saved to database correctly
+- Test updating existing hiring status records
 
-**3. Test Review CRUD Operations:**
-- Test creating reviews via POST /api/reviews/
-- Test getting user reviews via GET /api/reviews/my-reviews
-- Test updating reviews (if endpoint exists)
-- Test review permissions (only reviewer can see their reviews)
+**3. FEEDBACK WORKFLOW TESTING:**
+- Test submitting feedback with hired=false and various feedback types:
+  - "too_expensive", "not_available", "poor_communication", "lack_experience"
+  - "found_someone_else", "changed_mind", "other"
+- Test with and without additional comments
+- Verify feedback is saved to database correctly
 
-**4. Verify API Response Format:**
-- Ensure /api/reviews/my-reviews returns the exact format expected by the frontend:
-  {
-    "reviews": [...],
-    "total": number,
-    "page": number,
-    "limit": number,
-    "total_pages": number
-  }
+**4. DATABASE INTEGRATION:**
+- Test create_hiring_status database method
+- Test create_hiring_feedback database method  
+- Test get_hiring_status_by_job_and_tradesperson method
+- Test get_hiring_feedback_by_job_and_tradesperson method
+- Test get_hiring_statistics method for analytics
 
-**5. Test Error Handling:**
-- Test /api/reviews/my-reviews without authentication (should return 401)
-- Test with invalid pagination parameters
-- Test with non-existent user
+**5. NOTIFICATION INTEGRATION:**
+- Test that review invitations are triggered for completed jobs
+- Test that review reminder scheduling works for ongoing jobs
+- Verify notification templates are properly used
+
+**6. ERROR HANDLING & VALIDATION:**
+- Test with missing jobId/tradespersonId parameters
+- Test with invalid job IDs (non-existent jobs)
+- Test with unauthorized users (non-homeowners trying to update status)
+- Test with jobs that don't belong to the current user
+
+**7. AUTHENTICATION & PERMISSIONS:**
+- Verify only homeowners can update hiring status
+- Verify only homeowners can submit feedback
+- Test that users can only update status for their own jobs
 """
 
 import requests
