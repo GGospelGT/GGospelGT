@@ -416,6 +416,28 @@ const ChatModal = ({
                 </p>
               </div>
             )}
+
+            {/* Hiring Status Prompt - Only show to homeowners */}
+            {user?.role === 'homeowner' && messageCount >= 3 && (
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-semibold text-blue-800">Job Status Update</span>
+                  </div>
+                  <Button
+                    onClick={() => setShowHiringStatusModal(true)}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                  >
+                    Update Status
+                  </Button>
+                </div>
+                <p className="text-xs text-blue-700 mt-1">
+                  Help us track your job progress and get review reminders.
+                </p>
+              </div>
+            )}
           </div>
           
           <Button
