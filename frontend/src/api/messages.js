@@ -49,6 +49,11 @@ export const messagesAPI = {
     const response = await apiClient.post('/messages/feedback', feedbackData);
     return response.data;
   },
+
+  getHiredTradespeopleForJob: async (jobId) => {
+    const response = await apiClient.get(`/messages/hired-tradespeople/${jobId}`);
+    return response.data;
+  },
 };
 
 export default messagesAPI;
