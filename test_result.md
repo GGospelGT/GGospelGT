@@ -49,7 +49,7 @@
 ##
 test_plan:
   current_focus:
-    - "Job Completion Functionality Backend Testing"
+    []
   stuck_tasks: 
     []
   completed_tasks:
