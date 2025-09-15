@@ -836,7 +836,7 @@ class JobsCareersAPITester:
                     statistics = data['statistics']
                     
                     # Verify statistics structure
-                    expected_stats = ['total_jobs', 'published_jobs', 'draft_jobs', 'total_applications']
+                    expected_stats = ['total_jobs', 'active_jobs', 'draft_jobs', 'total_applications']
                     stats_present = [stat for stat in expected_stats if stat in statistics]
                     
                     if len(stats_present) >= 3:
