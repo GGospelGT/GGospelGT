@@ -567,3 +567,39 @@ async def apply_to_job(
     except Exception as e:
         logger.error(f"Error applying to job: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to submit job application")
+
+# Helper function for notifications
+
+async def _send_application_notification(application: dict, job_posting: dict):
+    """Send notification to admins about new job application"""
+    
+    try:
+        # Get admin users to notify
+        admin_users = await database.get_admin_users()
+        
+        for admin in admin_users:
+            if admin.get("email"):
+                template_data = {
+                    "job_title": job_posting["title"],
+                    "applicant_name": application["name"],
+                    "applicant_email": application["email"],
+                    "applicant_phone": application.get("phone", "Not provided"),
+                    "experience_level": application.get("experience_level", "Not specified"),
+                    "applied_date": datetime.utcnow().strftime("%B %d, %Y at %I:%M %p"),
+                    "cover_letter": application["message"],
+                    "admin_dashboard_url": "https://servicehub.co/admin/jobs/applications"
+                }
+                
+                # Send notification to admin
+                await notification_service.send_notification(
+                    user_id=admin["id"],
+                    notification_type=NotificationType.NEW_APPLICATION,
+                    template_data=template_data,
+                    recipient_email=admin["email"]
+                )
+        
+        logger.info(f"✅ Application notification sent for: {application['name']} -> {job_posting['title']}")
+        
+    except Exception as e:
+        logger.error(f"❌ Error sending application notification: {str(e)}")
+        # Don't raise exception to avoid failing the application submission
