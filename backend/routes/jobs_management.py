@@ -11,7 +11,9 @@ from models.content import (
     JobStatistics, generate_slug
 )
 from models.admin import AdminPermission
+from models.notifications import NotificationType
 from routes.admin_management import get_current_admin, require_permission
+from services.notifications import notification_service
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer()
