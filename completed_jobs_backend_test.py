@@ -399,8 +399,8 @@ class CompletedJobsBackendTester:
         
         # Test 3: Try to complete already completed job (should fail)
         print("\n--- Test 3: Prevent Double Completion ---")
-        response = self.make_request("POST", f"/jobs/{self.test_job_id}/complete", 
-                                   json=completion_data, auth_token=self.homeowner_token)
+        response = self.make_request("PUT", f"/jobs/{self.test_job_id}/complete", 
+                                   auth_token=self.homeowner_token)
         
         if response.status_code in [400, 409]:
             self.log_result("Prevent double completion", True, "Correctly prevented double completion")
