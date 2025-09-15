@@ -1,4 +1,4 @@
-import { apiCall } from './client';
+import apiClient from './client';
 
 const careersAPI = {
   // Public APIs for career page
@@ -12,29 +12,28 @@ const careersAPI = {
     if (params.featured_only) queryParams.append('featured_only', params.featured_only);
     
     const queryString = queryParams.toString();
-    return await apiCall(`/api/public/content/jobs${queryString ? '?' + queryString : ''}`);
+    const response = await apiClient.get(`/public/content/jobs${queryString ? '?' + queryString : ''}`);
+    return response.data;
   },
 
   getJobBySlug: async (slug) => {
-    return await apiCall(`/api/public/content/jobs/${slug}`);
+    const response = await apiClient.get(`/public/content/jobs/${slug}`);
+    return response.data;
   },
 
   getFeaturedJobs: async (limit = 3) => {
-    return await apiCall(`/api/public/content/jobs/featured?limit=${limit}`);
+    const response = await apiClient.get(`/public/content/jobs/featured?limit=${limit}`);
+    return response.data;
   },
 
   getJobDepartments: async () => {
-    return await apiCall('/api/public/content/jobs/departments');
+    const response = await apiClient.get('/public/content/jobs/departments');
+    return response.data;
   },
 
   applyToJob: async (jobId, applicationData) => {
-    return await apiCall(`/api/public/content/jobs/${jobId}/apply`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(applicationData),
-    });
+    const response = await apiClient.post(`/public/content/jobs/${jobId}/apply`, applicationData);
+    return response.data;
   },
 
   // Admin APIs for job management (requires admin authentication)
