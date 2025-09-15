@@ -102,6 +102,11 @@ class UpdatePreferencesRequest(BaseModel):
     job_expiring: Optional[NotificationChannel] = None
     new_matching_job: Optional[NotificationChannel] = None
     new_message: Optional[NotificationChannel] = None
+    job_approved: Optional[NotificationChannel] = None
+    job_rejected: Optional[NotificationChannel] = None
+    job_updated: Optional[NotificationChannel] = None
+    new_job_posted: Optional[NotificationChannel] = None
+    new_application: Optional[NotificationChannel] = None
 
 class NotificationStatsResponse(BaseModel):
     """Notification statistics for admin/monitoring"""
