@@ -603,6 +603,7 @@ async def close_job(
 @router.put("/{job_id}/complete")
 async def complete_job(
     job_id: str,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_homeowner)
 ):
     """Mark a job as completed (homeowner only)"""
