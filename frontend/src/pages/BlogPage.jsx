@@ -396,7 +396,10 @@ const BlogPage = () => {
                   </div>
                   
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <button className="flex items-center hover:text-red-500 transition-colors">
+                    <button 
+                      onClick={() => handleLike(selectedPost)}
+                      className="flex items-center hover:text-red-500 transition-colors"
+                    >
                       <Heart className="w-4 h-4 mr-1" />
                       {selectedPost.like_count || 0}
                     </button>
