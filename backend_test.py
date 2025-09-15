@@ -115,7 +115,7 @@ class ReviewSystemTester:
         else:
             self.log_result("Service health check", False, f"Status: {response.status_code}")
     
-    def test_admin_login_legacy_credentials(self):
+    def setup_test_users(self):
         """Test admin login with legacy credentials (admin/servicehub2024)"""
         print("\n=== 1. Testing Admin Login with Legacy Credentials ===")
         
