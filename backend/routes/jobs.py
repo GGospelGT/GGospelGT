@@ -650,6 +650,7 @@ async def complete_job(
 @router.put("/{job_id}/reopen")
 async def reopen_job(
     job_id: str,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_homeowner)
 ):
     """Reopen a cancelled job (homeowner only)"""
