@@ -726,6 +726,22 @@ async def get_job(job_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+async def notify_job_completion(job_id: str, job: dict, homeowner: User):
+    """Background task to notify about job completion"""
+    try:
+        logger.info(f"Job {job_id} marked as completed by homeowner {homeowner.id}")
+        # Add any specific notification logic here if needed
+    except Exception as e:
+        logger.error(f"Error in job completion notification: {str(e)}")
+
+async def notify_interested_tradespeople_job_reopened(job_id: str, job: dict):
+    """Background task to notify interested tradespeople about job reopening"""
+    try:
+        logger.info(f"Job {job_id} has been reopened")
+        # Add any specific notification logic here if needed
+    except Exception as e:
+        logger.error(f"Error in job reopened notification: {str(e)}")
+
 async def _notify_job_posted_successfully(homeowner: dict, job: dict):
     """Background task to notify homeowner that job was posted successfully"""
     try:
