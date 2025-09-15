@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
-PASSWORD UPDATE TEST FOR USER: francisdaniel4jb@gmail.com
+URGENT PASSWORD UPDATE TEST FOR USER: john.plumber@gmail.com
 
 URGENT REQUIREMENT:
-1. Find user with email 'francisdaniel4jb@gmail.com' in the database
-2. Update their password hash to use 'Servicehub..1' (the password they're trying to use)
-3. Verify the account status is 'active' and role is 'homeowner'
+1. Find user with email 'john.plumber@gmail.com' in the database
+2. Update their password hash to use 'Password123!' (the password they're trying to use)
+3. Verify the account status is 'active' 
 4. Test login with the new credentials to confirm it works
 
 CONTEXT: 
 - User is successfully accessing the app from mobile (host header issue fixed)
-- User is trying to login with email 'francisdaniel4jb@gmail.com' and password 'Servicehub..1'
+- User is now trying to login with email 'john.plumber@gmail.com' and password 'Password123!'
 - Getting "Invalid email or password" error
 - Need to update password hash to match what user is trying to use
 
-GOAL: Enable user to login with francisdaniel4jb@gmail.com / Servicehub..1 credentials from their mobile device.
+GOAL: Enable user to login with john.plumber@gmail.com / Password123! credentials from their mobile device.
 """
 
 import requests
