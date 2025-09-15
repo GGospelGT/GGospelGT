@@ -43,6 +43,7 @@ const MyJobsPage = () => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [jobReviews, setJobReviews] = useState({});
   const [jobHiringStatuses, setJobHiringStatuses] = useState({});
+  const [pendingReviewJobs, setPendingReviewJobs] = useState(new Set());
 
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
