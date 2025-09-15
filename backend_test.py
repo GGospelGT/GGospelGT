@@ -564,52 +564,183 @@ class ReviewSystemTester:
             self.log_result("Non-existent review response", False, f"Expected 404, got {response.status_code}")
     
     def test_my_reviews_endpoint(self):
-        """Test GET /api/reviews/my-reviews endpoint"""
-        print("\n=== Testing My Reviews Endpoint ===")
+        """Test GET /api/reviews/my-reviews endpoint - MAIN FOCUS"""
+        print("\n=== Testing My Reviews Endpoint (MAIN FOCUS) ===")
         
         if not self.homeowner_token:
             self.log_result("My reviews endpoint", False, "No homeowner token available")
             return
         
-        # Test 1: Get current user's reviews
-        print(f"\n--- Test 1: Get My Reviews ---")
+        # Test 1: Get current user's reviews (empty state)
+        print(f"\n--- Test 1: Get My Reviews (Empty State) ---")
         response = self.make_request("GET", "/reviews/my-reviews", auth_token=self.homeowner_token)
         
         if response.status_code == 200:
             try:
                 data = response.json()
                 
-                # Verify response structure
+                # Verify exact response structure expected by frontend
                 required_fields = ['reviews', 'total', 'page', 'limit', 'total_pages']
                 missing_fields = [field for field in required_fields if field not in data]
                 
                 if not missing_fields:
                     self.log_result("My reviews response structure", True, 
-                                  f"Found {data['total']} reviews by current user")
+                                  f"Correct structure: reviews={len(data['reviews'])}, total={data['total']}, page={data['page']}, limit={data['limit']}, total_pages={data['total_pages']}")
                     
-                    # Check if our test review is included
-                    if data['reviews'] and self.test_review_id:
-                        review_ids = [r.get('id') for r in data['reviews']]
-                        if self.test_review_id in review_ids:
-                            self.log_result("My review inclusion", True, "Test review found in my reviews")
-                        else:
-                            self.log_result("My review inclusion", False, "Test review not found in my reviews")
+                    # Verify data types
+                    if (isinstance(data['reviews'], list) and 
+                        isinstance(data['total'], int) and 
+                        isinstance(data['page'], int) and 
+                        isinstance(data['limit'], int) and 
+                        isinstance(data['total_pages'], int)):
+                        self.log_result("My reviews data types", True, "All fields have correct data types")
+                    else:
+                        self.log_result("My reviews data types", False, "Incorrect data types in response")
+                        
+                    # Test empty state
+                    if data['total'] == 0 and len(data['reviews']) == 0:
+                        self.log_result("My reviews empty state", True, "Empty state handled correctly")
+                    else:
+                        self.log_result("My reviews empty state", False, f"Expected empty state, got {data['total']} reviews")
+                        
                 else:
                     self.log_result("My reviews response structure", False, f"Missing fields: {missing_fields}")
                     
             except json.JSONDecodeError:
                 self.log_result("My reviews endpoint", False, "Invalid JSON response")
         else:
-            self.log_result("My reviews endpoint", False, f"Status: {response.status_code}")
+            self.log_result("My reviews endpoint", False, f"Status: {response.status_code}, Response: {response.text}")
         
-        # Test 2: Unauthorized access
-        print(f"\n--- Test 2: Unauthorized My Reviews Access ---")
+        # Test 2: Test with pagination parameters
+        print(f"\n--- Test 2: My Reviews with Pagination ---")
+        response = self.make_request("GET", "/reviews/my-reviews?page=1&limit=5", auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                if data.get('page') == 1 and data.get('limit') == 5:
+                    self.log_result("My reviews pagination", True, f"Pagination working: page={data['page']}, limit={data['limit']}")
+                else:
+                    self.log_result("My reviews pagination", False, f"Pagination not working: page={data.get('page')}, limit={data.get('limit')}")
+            except json.JSONDecodeError:
+                self.log_result("My reviews pagination", False, "Invalid JSON response")
+        else:
+            self.log_result("My reviews pagination", False, f"Status: {response.status_code}")
+        
+        # Test 3: Test with invalid pagination parameters
+        print(f"\n--- Test 3: My Reviews with Invalid Pagination ---")
+        response = self.make_request("GET", "/reviews/my-reviews?page=0&limit=0", auth_token=self.homeowner_token)
+        
+        if response.status_code in [400, 422]:
+            self.log_result("My reviews invalid pagination", True, "Correctly rejected invalid pagination")
+        elif response.status_code == 200:
+            # Some APIs might handle this gracefully by using defaults
+            self.log_result("My reviews invalid pagination", True, "Handled invalid pagination gracefully")
+        else:
+            self.log_result("My reviews invalid pagination", False, f"Unexpected status: {response.status_code}")
+        
+        # Test 4: Unauthorized access
+        print(f"\n--- Test 4: Unauthorized My Reviews Access ---")
         response = self.make_request("GET", "/reviews/my-reviews")
         
         if response.status_code in [401, 403]:
             self.log_result("Unauthorized my reviews access", True, "Correctly rejected unauthorized request")
         else:
             self.log_result("Unauthorized my reviews access", False, f"Expected 401/403, got {response.status_code}")
+            
+        # Test 5: Test with invalid token
+        print(f"\n--- Test 5: My Reviews with Invalid Token ---")
+        response = self.make_request("GET", "/reviews/my-reviews", auth_token="invalid_token")
+        
+        if response.status_code in [401, 403]:
+            self.log_result("My reviews invalid token", True, "Correctly rejected invalid token")
+        else:
+            self.log_result("My reviews invalid token", False, f"Expected 401/403, got {response.status_code}")
+    
+    def test_my_reviews_with_data(self):
+        """Test My Reviews endpoint after creating sample reviews"""
+        print("\n=== Testing My Reviews Endpoint with Sample Data ===")
+        
+        if not all([self.homeowner_token, self.tradesperson_id, self.test_job_id]):
+            self.log_result("My reviews with data", False, "Missing required test data")
+            return
+        
+        # First create a sample review
+        print(f"\n--- Creating Sample Review for My Reviews Test ---")
+        review_data = {
+            "job_id": self.test_job_id,
+            "reviewee_id": self.tradesperson_id,
+            "rating": 4,
+            "title": "Good Work on Electrical Project",
+            "content": "The electrician completed the work satisfactorily. Professional service and good communication throughout the project.",
+            "category_ratings": {
+                "quality": 4,
+                "timeliness": 4,
+                "communication": 5,
+                "professionalism": 4,
+                "value_for_money": 3
+            },
+            "photos": ["https://example.com/photo1.jpg"],
+            "would_recommend": True
+        }
+        
+        # Try both endpoints to see which one works
+        create_response = self.make_request("POST", "/reviews/create", 
+                                          json=review_data, auth_token=self.homeowner_token)
+        
+        if create_response.status_code != 200:
+            # Try the other endpoint
+            create_response = self.make_request("POST", "/reviews/", 
+                                              json=review_data, auth_token=self.homeowner_token)
+        
+        if create_response.status_code == 200:
+            try:
+                review_result = create_response.json()
+                self.test_review_id = review_result.get('id')
+                self.log_result("Sample review creation", True, f"Review ID: {self.test_review_id}")
+                
+                # Now test My Reviews endpoint with data
+                print(f"\n--- Test: My Reviews with Sample Data ---")
+                response = self.make_request("GET", "/reviews/my-reviews", auth_token=self.homeowner_token)
+                
+                if response.status_code == 200:
+                    try:
+                        data = response.json()
+                        
+                        # Verify we now have reviews
+                        if data['total'] > 0 and len(data['reviews']) > 0:
+                            self.log_result("My reviews with data", True, f"Found {data['total']} reviews")
+                            
+                            # Check if our test review is included
+                            if self.test_review_id:
+                                review_ids = [r.get('id') for r in data['reviews']]
+                                if self.test_review_id in review_ids:
+                                    self.log_result("Test review in my reviews", True, "Test review found in results")
+                                    
+                                    # Verify review data structure
+                                    test_review = next((r for r in data['reviews'] if r.get('id') == self.test_review_id), None)
+                                    if test_review:
+                                        required_review_fields = ['id', 'rating', 'title', 'content', 'created_at']
+                                        missing_review_fields = [field for field in required_review_fields if field not in test_review]
+                                        
+                                        if not missing_review_fields:
+                                            self.log_result("Review data structure", True, "All required fields present")
+                                        else:
+                                            self.log_result("Review data structure", False, f"Missing fields: {missing_review_fields}")
+                                else:
+                                    self.log_result("Test review in my reviews", False, "Test review not found in results")
+                        else:
+                            self.log_result("My reviews with data", False, "No reviews found after creation")
+                            
+                    except json.JSONDecodeError:
+                        self.log_result("My reviews with data", False, "Invalid JSON response")
+                else:
+                    self.log_result("My reviews with data", False, f"Status: {response.status_code}")
+                    
+            except json.JSONDecodeError:
+                self.log_result("Sample review creation", False, "Invalid JSON response from review creation")
+        else:
+            self.log_result("Sample review creation", False, f"Status: {create_response.status_code}, Response: {create_response.text}")
     
     def test_review_permissions(self):
         """Test review permission system"""
