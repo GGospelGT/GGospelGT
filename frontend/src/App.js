@@ -67,6 +67,8 @@ function App() {
             <Route path="/contact" element={<ContactUsPage />} />
             <Route path="/join-for-free" element={<JoinForFreePage />} />
             <Route path="/help-centre" element={<HelpCentrePage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogPage />} />
             <Route path="/tradesperson-registration-demo" element={<TradespersonRegistrationDemo />} />
           </Routes>
           <Toaster />
