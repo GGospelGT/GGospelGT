@@ -151,6 +151,74 @@ async def get_my_reviews(
         logger.error(f"Error getting user reviews: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to get reviews")
 
+@router.get("/received")
+async def get_received_reviews(
+    current_user: models.User = Depends(get_current_user),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=50)
+):
+    """Get reviews received by current tradesperson"""
+    try:
+        # Only allow tradespeople to access this endpoint
+        if current_user.role != 'tradesperson':
+            raise HTTPException(
+                status_code=403, 
+                detail="This endpoint is only available for tradespeople"
+            )
+        
+        # Get reviews where current user is the reviewee (tradesperson)
+        skip = (page - 1) * limit
+        
+        # Get reviews from database
+        reviews_cursor = database.reviews_collection.find(
+            {"reviewee_id": current_user.id}  # Reviews about this tradesperson
+        ).sort("created_at", -1).skip(skip).limit(limit)
+        
+        reviews = []
+        async for doc in reviews_cursor:
+            # Convert ObjectId to string and remove _id
+            doc["id"] = str(doc["_id"])
+            del doc["_id"]
+            
+            # Get reviewer (homeowner) name for display
+            if doc.get("reviewer_id"):
+                reviewer = await database.get_user_by_id(doc["reviewer_id"])
+                if reviewer:
+                    doc["reviewer_name"] = reviewer.get("name", "Anonymous")
+                else:
+                    doc["reviewer_name"] = "Anonymous"
+            
+            # Get job details for context
+            if doc.get("job_id"):
+                job = await database.get_job_by_id(doc["job_id"])
+                if job:
+                    doc["job_title"] = job.get("title", "")
+                    doc["job_location"] = job.get("location", "")
+            
+            reviews.append(doc)
+        
+        # Get total count
+        total = await database.reviews_collection.count_documents(
+            {"reviewee_id": current_user.id}
+        )
+        
+        # Calculate pagination info
+        total_pages = (total + limit - 1) // limit
+        
+        return {
+            "reviews": reviews,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "total_pages": total_pages
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting received reviews: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get received reviews")
+
 @router.get("/{review_id}", response_model=models.Review)
 async def get_review(review_id: str):
     """Get a specific review by ID"""
