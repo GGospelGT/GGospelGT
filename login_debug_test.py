@@ -112,7 +112,7 @@ class LoginDebugTester:
         """Check if the target user exists in the local database"""
         print(f"\n=== Checking User Existence in Database: {self.target_email} ===")
         
-        if not self.database:
+        if self.database is None:
             self.log_result("Database user check", False, "No database connection")
             return None
         
