@@ -3,7 +3,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
 
 const app = express();
-const PORT = 3001;
+const PORT = 3002;
 
 console.log('🚀 Starting Basic Proxy Server...');
 
