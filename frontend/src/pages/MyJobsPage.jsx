@@ -714,8 +714,9 @@ const MyJobsPage = () => {
                                   </Button>
                                 )}
 
-                                {/* Mark as Completed Button - For active/in-progress jobs */}
-                                {(job.status === 'active' || job.status === 'in_progress') && (
+                                {/* Mark as Completed Button - Only show after hiring status answered */}
+                                {(job.status === 'active' || job.status === 'in_progress') && 
+                                 jobHiringStatuses[job.id]?.hasAnswered && (
                                   <Button
                                     onClick={() => handleCompleteJob(job.id)}
                                     className="font-lato text-white"
