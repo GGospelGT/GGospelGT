@@ -1,33 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { 
+  Calendar, MapPin, Clock, Users, Heart, TrendingUp, 
+  Edit3, X, RotateCcw, AlertCircle, CheckCircle, Star 
+} from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import JobEditModal from '../components/JobEditModal';
 import JobCloseModal from '../components/JobCloseModal';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { 
-  MapPin, 
-  Calendar, 
-  DollarSign, 
-  Heart,
-  Eye,
-  Clock,
-  Briefcase,
-  TrendingUp,
-  Users,
-  MessageCircle,
-  MessageSquare,
-  Edit3,
-  X,
-  RotateCcw,
-  AlertCircle
-} from 'lucide-react';
-import { jobsAPI, interestsAPI } from '../api/services';
-import { useAuth } from '../contexts/AuthContext';
+import ReviewForm from '../components/reviews/ReviewForm';
+import { jobsAPI } from '../api/jobs';
+import { interestsAPI } from '../api/interests';
+import { reviewsAPI } from '../api/reviews';
 import { useToast } from '../hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { isAuthenticated, isHomeowner, getCurrentUser } from '../auth/authHelpers';
 
 const MyJobsPage = () => {
   const [jobs, setJobs] = useState([]);
