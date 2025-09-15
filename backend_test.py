@@ -59,8 +59,12 @@ class ReviewSystemTester:
             'failed': 0,
             'errors': []
         }
-        self.access_token = None
-        self.admin_info = None
+        self.homeowner_token = None
+        self.tradesperson_token = None
+        self.homeowner_id = None
+        self.tradesperson_id = None
+        self.test_job_id = None
+        self.test_review_id = None
         
     def log_result(self, test_name: str, success: bool, message: str = ""):
         """Log test result"""
