@@ -3909,6 +3909,11 @@ const AdminDashboard = () => {
               {activeTab === 'admin-management' && (
                 <AdminManagement />
               )}
+
+              {/* Content Management Tab */}
+              {activeTab === 'content-management' && (
+                <ContentManagement />
+              )}
             </div>
           </div>
         </div>
