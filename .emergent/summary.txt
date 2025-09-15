@@ -1,54 +1,78 @@
 <analysis>
-The AI engineer systematically tackled a series of bugs and feature enhancements across the  application. Initial efforts focused on verifying and fixing the Admin Dashboard's Job Access Fees, resolving React state update issues in , and rectifying Review/Edit button functionality in Job Approvals. Subsequent work addressed persistent Unknown Homeowner display bugs in both Job Approvals and Job Access Fees by correcting data structures and API mappings in both backend and frontend. The policy management module, initially failing to load data, was fixed by refining MongoDB queries and adding robust error handling. A critical bug involving hardcoded trade categories in the frontend was resolved by implementing dynamic API fetching for , , and  components. The current task involves developing comprehensive user management features in the Admin Dashboard, including detailed user views and account deletion, with initial frontend and API client modifications complete, pending backend route creation.
+The AI engineer's work evolved from debugging existing features to implementing significant new functionalities. Initially, efforts focused on resolving a persistent Google Maps loading error, involving environment variable checks and component initialization. Following this, the user requested a multi-admin system with role-based access control, which was successfully implemented, including backend models, routes, and frontend integration, after debugging a login failure related to endpoint configuration and async function usage. Subsequently, a comprehensive content management tab was created in the admin dashboard. This led to the development of a dynamic blog page and a careers page, both integrated into the footer navigation. The current task is to integrate the static careers page with the newly built content management system to allow for dynamic job posting management.
 </analysis>
 
 <product_requirements>
-The  platform aims to connect Nigerian homeowners with tradespeople, providing authentication, multi-step job posting, tradesperson portfolios, a lead generation marketplace, and a rating/review system, all supported by a coin-based wallet, referral system, and Google Maps integration. Key features implemented or fixed during this phase include a comprehensive Admin Dashboard for managing various entities (locations, trades, policies, contacts, users), 6-step tradesperson registration, 4-step homeowner job posting, and various communication and job lifecycle functionalities. Specific bug resolutions encompass hiding homeowner contact details in chat, fixing login failures, resolving Skill questions display and Job access fee section loading issues in the Admin Dashboard. Recent enhancements include improved Admin Dashboard CRUD, bi-directional email/SMS notifications, admin job approval, job editing (including access fees), and dynamic trade category loading across the application. The current user request is to enhance user management in the admin dashboard to view full user details and enable user account deletion.
+The  platform aims to connect Nigerian homeowners with tradespeople, featuring authentication, multi-step job posting, portfolios, a lead marketplace, and a rating system. Key features include an Admin Dashboard for managing entities (locations, trades, policies, contacts, users), tradesperson registration, and homeowner job posting. Recent updates include Admin Dashboard CRUD, bi-directional notifications, job approval, editing, and dynamic trade category loading.
+
+User requests during this trajectory included:
+1.  **Robust User Management**: Implement user details viewing and account deletion in the Admin Dashboard, with safety measures.
+2.  **Dynamic Job Posting Questions**: Allow admins to define category-specific questions for homeowners, replacing generic job descriptions.
+3.  **Google Maps Error Resolution**: Debug and fix a persistent Google Maps loading error affecting map components.
+4.  **Multi-Admin System**: Implement a system for multiple administrators with distinct roles and permissions for managing the platform.
+5.  **Professional Content Management Tab**: Create an admin dashboard tab for managing various types of platform content (banners, announcements, blog posts, FAQs, media).
+6.  **Blog Page Integration**: Develop a public blog page, integrated into the footer, leveraging the new content management system.
+7.  **Careers Page Integration**: Create a careers page, integrated into the footer, with the explicit follow-up request to connect it dynamically to the content management system for job postings.
 </product_requirements>
 
 <key_technical_concepts>
 -   **Full-stack Development**: React.js (Frontend), FastAPI (Backend), MongoDB (Database).
 -   **API Integration**: Axios (frontend), Pydantic (backend models), JWT (authentication).
--   **State Management**: React Context API, , , , .
+-   **State Management**: React Context API, , .
 -   **Deployment**: Kubernetes, Supervisor.
--   **UI/UX**: Tailwind CSS, ShadCN UI.
--   **Python Package Management**: .
+-   **UI/UX**: Tailwind CSS, ShadCN UI, Lucide Icons.
+-   **Environment Variables**: , .
+-   **Authentication**: Role-Based Access Control (RBAC), bcrypt for password hashing.
 </key_technical_concepts>
 
 <code_architecture>
 
--   : Defines core Pydantic models. Updated  enum for , added approval fields to  model, and introduced  and  models.
--   : Defines the  Pydantic model.
--   : Contains admin API endpoints. Modified to handle job approval/rejection, job editing. Updated  to process homeowner data and handle  from various content types. Enhanced  route with error handling. **Currently being extended to include new user management endpoints.**
--   : Handles job-related API endpoints. Modified job creation to set default status as  and ensure  is stored at the root level of job documents.
--   : Manages MongoDB interactions. Modified job queries for ,  and  were updated to retrieve homeowner data correctly.  was updated from  to  query for policy status and enhanced with error handling.
--   : Frontend API client for admin operations. Extended with methods for job approvals, editing, access fees, and skills questions. **Currently being extended with  and  methods.**
--   : Messaging interface. Modified contact details to hide for homeowners. Updated for React state management issues, using , , , and a  mechanism.
--   : Homepage hero section. **Modified to fetch trade categories dynamically via  and includes search/filter functionality.**
--   : Job posting form. **Modified to fetch trade categories dynamically via  for consistency.**
--   : Tradesperson registration form. **Modified to fetch trade categories dynamically via  for profession selection.**
--   : Admin interface. Integrated new UI components for CRUD. Enhanced state/handlers. Added Notification Management, Job Approval, and Job Access Fees tabs/sections. Fixed Review and Edit buttons in Job Approvals by adding a  and correcting the 's display logic and form references. Updated homeowner display for Job Approvals and Job Access Fees tabs. Corrected policy data loading. **Currently undergoing significant changes to add View User Details and Delete User Account functionality, including new state variables, handler functions, and modals.**
+-   : Defines core Pydantic models. Updated with job approval fields, and new , ,  models for job questions.
+-   : **NEW**: Defines Pydantic models for , , , , and  to support the multi-admin system with roles and permissions.
+-   : **NEW/UPDATED**: Initially defined generic  models. Later updated to include specific  models (, , ) for dynamic careers page content.
+-   : Contains admin API endpoints. Modified for user management (details, deletion) and added routes for managing trade category questions.
+-   : **NEW**: Implements API endpoints for admin login, creation, retrieval, updating, and deletion of admin accounts with role-based access control.
+-   : **NEW**: Implements API endpoints for admin to perform CRUD operations on various content types (banners, announcements, blog posts, etc.).
+-   : **NEW**: Provides public-facing API endpoints to fetch published content like blog posts, without requiring admin authentication. Includes routes for incrementing views, likes, and shares.
+-   : Handles job-related API. Added endpoints to fetch trade-specific questions and save answers with job posts.
+-   : Modified to correctly fetch tradesperson profiles from the  collection and map fields to frontend requirements.
+-   : **NEW**: Currently being created to handle dedicated API endpoints for managing job postings (e.g., create, read, update, delete job positions).
+-   : Manages MongoDB interactions. Updated for user details, deletion, and new CRUD operations for trade category questions, admin management, and content management.
+-   : Main FastAPI application. Updated to include new routers (, , , ).
+-   : **NEW**: Created to encapsulate all admin-related API calls, including the new admin management login and CRUD operations.
+-   : Frontend API client. Extended with ,  for admin and  methods for trade category questions. The  function was updated to point to the new  endpoint.
+-   : Extensively modified for homeowner navigation dropdown, and conditional rendering of navigation items based on user roles (, ).
+-   : Significantly updated to display dynamic admin-defined questions based on selected trade category, replacing the generic job description field.
+-   : Modified to correctly access Google Maps API key using  and  with null checks and improved error handling.
+-   : Modified similarly to  for Google Maps API key access and error handling.
+-   : **NEW**: Frontend component for the Admin Dashboard tab, allowing super admins to manage other admin accounts, roles, and permissions.
+-   : **NEW**: Frontend component for the Admin Dashboard tab, allowing content admins to create, edit, and delete various types of content.
+-   : Modified to include navigation links for the new Blog and Careers pages.
+-   : Enhanced for user management features, integrated , , and  as new tabs, and updated login logic to use the new admin API.
+-   : Updated to display tradesperson profiles fetched dynamically from the backend and use dynamic trade categories.
+-   : **NEW**: Frontend page for displaying blog posts, fetching content from the public content API.
+-   : **NEW**: Frontend page for displaying career opportunities. Currently, it uses static data but is being updated to fetch dynamic job postings from the CMS.
+-   : Main routing file. Updated to include new routes for  and .
 </code_architecture>
 
 <pending_tasks>
+-   **Google Maps Error Resolution**: The persistent Google Maps loading error (script not loading) is still an unresolved issue.
+-   **Careers Page CMS Integration**: Complete the integration of the careers page with the admin dashboard content management system for dynamic job postings.
 -   **Advanced Features (Analytics, Search)**: Develop an analytics dashboard, advanced job search and filtering.
 -   **Production Deployment**: Configure Docker files and deployment scripts for , and perform the actual deployment.
--   **Tradesperson Role-Based Content Filtering**: Implement proper role-based content filtering so tradespeople only see information relevant to their role.
+-   **Tradesperson Role-Based Content Filtering**: Implement proper role-based content filtering.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was actively working on implementing comprehensive user management features within the Admin Dashboard. The user explicitly requested the ability to view users full details and to be able to delete users account. The engineer started by investigating the existing user management section in , which showed a list of users with basic details and View and Suspend buttons. The plan is to enhance the View functionality to open a detailed modal, add a Delete button with confirmation, and create corresponding backend API endpoints.
+Immediately before this summary request, the AI engineer was actively working on integrating the newly created Careers page with the Admin Dashboard's Content Management System. This was initiated after the user explicitly requested this connection. The careers page was initially static, displaying hardcoded job positions.
 
-Current progress includes:
-1.  **Frontend Modifications**:
-    *   Added new state variables (, , , ) in  to manage modal visibility and data.
-    *   Implemented handler functions (, , ) in .
-    *   Updated the user management table's action buttons in  to trigger these new handlers.
-    *   Added two new React modals ( and ) to .
-    *   Added new API client methods (, ) to .
-2.  **Backend Task**: The engineer confirmed that the corresponding backend API endpoints for getting user details () and deleting users () do not yet exist in .
+The process for this integration began with:
+1.  **Updating **: The file was updated to include specific Pydantic models for , , and , along with  models, to support dynamic job postings. This transforms the generic content model into one capable of handling structured job data.
+2.  **Creating **: Dedicated API routes are being developed in this new file to manage job postings (CRUD operations). This will provide the backend infrastructure for admins to create, edit, and publish job vacancies.
+
+The last action performed was creating the  file, indicating the next logical step is to define the API endpoints within this file and then to create public API routes for the careers page to fetch these job postings dynamically.
 </current_work>
 
 <optional_next_step>
-Create the backend API endpoints in  for getting detailed user information and deleting user accounts.
+Create public API routes for the careers page to fetch job postings dynamically.
 </optional_next_step>

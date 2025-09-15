@@ -38,7 +38,7 @@ import uuid
 from collections import Counter
 
 # Get backend URL from environment
-BACKEND_URL = "https://servicehub-connect-2.preview.emergentagent.com/api"
+BACKEND_URL = "https://content-job-manager.preview.emergentagent.com/api"
 
 class GoogleMapsBackendTester:
     def __init__(self):
