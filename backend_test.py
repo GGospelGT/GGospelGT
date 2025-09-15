@@ -892,9 +892,372 @@ class HiringStatusTester:
             else:
                 self.log_result("Review endpoints basic functionality", False, f"Status: {response.status_code}")
     
+    def test_hiring_status_endpoints(self):
+        """Test hiring status API endpoints"""
+        print("\n=== Testing Hiring Status API Endpoints ===")
+        
+        if not all([self.homeowner_token, self.tradesperson_id, self.test_job_id]):
+            self.log_result("Hiring status endpoints", False, "Missing required test data")
+            return
+        
+        # Test 1: Update hiring status with hired=true, job_status="completed"
+        print(f"\n--- Test 1: Hiring Status - Completed Job ---")
+        hiring_data = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "hired": True,
+            "jobStatus": "completed"
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=hiring_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                if data.get("hired") == True and data.get("job_status") == "completed":
+                    self.log_result("Hiring status - completed job", True, f"Status ID: {data.get('id')}")
+                else:
+                    self.log_result("Hiring status - completed job", False, "Response data mismatch")
+            except json.JSONDecodeError:
+                self.log_result("Hiring status - completed job", False, "Invalid JSON response")
+        else:
+            self.log_result("Hiring status - completed job", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Test 2: Update hiring status with hired=true, job_status="in_progress"
+        print(f"\n--- Test 2: Hiring Status - In Progress Job ---")
+        hiring_data_progress = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "hired": True,
+            "jobStatus": "in_progress"
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=hiring_data_progress, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                if data.get("hired") == True and data.get("job_status") == "in_progress":
+                    self.log_result("Hiring status - in progress job", True, f"Status ID: {data.get('id')}")
+                else:
+                    self.log_result("Hiring status - in progress job", False, "Response data mismatch")
+            except json.JSONDecodeError:
+                self.log_result("Hiring status - in progress job", False, "Invalid JSON response")
+        else:
+            self.log_result("Hiring status - in progress job", False, f"Status: {response.status_code}")
+        
+        # Test 3: Update hiring status with hired=true, job_status="not_started"
+        print(f"\n--- Test 3: Hiring Status - Not Started Job ---")
+        hiring_data_not_started = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "hired": True,
+            "jobStatus": "not_started"
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=hiring_data_not_started, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                if data.get("hired") == True and data.get("job_status") == "not_started":
+                    self.log_result("Hiring status - not started job", True, f"Status ID: {data.get('id')}")
+                else:
+                    self.log_result("Hiring status - not started job", False, "Response data mismatch")
+            except json.JSONDecodeError:
+                self.log_result("Hiring status - not started job", False, "Invalid JSON response")
+        else:
+            self.log_result("Hiring status - not started job", False, f"Status: {response.status_code}")
+        
+        # Test 4: Test with missing parameters
+        print(f"\n--- Test 4: Missing Parameters ---")
+        invalid_data = {
+            "jobId": self.test_job_id
+            # Missing tradespersonId
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=invalid_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 400:
+            self.log_result("Hiring status missing parameters", True, "Correctly rejected missing parameters")
+        else:
+            self.log_result("Hiring status missing parameters", False, f"Expected 400, got {response.status_code}")
+        
+        # Test 5: Test with non-existent job
+        print(f"\n--- Test 5: Non-existent Job ---")
+        fake_job_data = {
+            "jobId": str(uuid.uuid4()),
+            "tradespersonId": self.tradesperson_id,
+            "hired": True,
+            "jobStatus": "completed"
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=fake_job_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 404:
+            self.log_result("Hiring status non-existent job", True, "Correctly rejected non-existent job")
+        else:
+            self.log_result("Hiring status non-existent job", False, f"Expected 404, got {response.status_code}")
+        
+        # Test 6: Test unauthorized access (no token)
+        print(f"\n--- Test 6: Unauthorized Access ---")
+        response = self.make_request("POST", "/messages/hiring-status", json=hiring_data)
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Hiring status unauthorized", True, "Correctly rejected unauthorized request")
+        else:
+            self.log_result("Hiring status unauthorized", False, f"Expected 401/403, got {response.status_code}")
+    
+    def test_feedback_endpoints(self):
+        """Test feedback submission API endpoints"""
+        print("\n=== Testing Feedback Submission API Endpoints ===")
+        
+        if not all([self.homeowner_token, self.tradesperson_id, self.test_job_id]):
+            self.log_result("Feedback endpoints", False, "Missing required test data")
+            return
+        
+        # Test different feedback types
+        feedback_types = [
+            "too_expensive",
+            "not_available", 
+            "poor_communication",
+            "lack_experience",
+            "found_someone_else",
+            "changed_mind",
+            "other"
+        ]
+        
+        for i, feedback_type in enumerate(feedback_types, 1):
+            print(f"\n--- Test {i}: Feedback Type - {feedback_type} ---")
+            
+            feedback_data = {
+                "jobId": self.test_job_id,
+                "tradespersonId": self.tradesperson_id,
+                "feedbackType": feedback_type,
+                "comment": f"Test comment for {feedback_type} feedback type"
+            }
+            
+            response = self.make_request("POST", "/messages/feedback", 
+                                       json=feedback_data, auth_token=self.homeowner_token)
+            
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if data.get("id"):
+                        self.log_result(f"Feedback - {feedback_type}", True, f"Feedback ID: {data.get('id')}")
+                    else:
+                        self.log_result(f"Feedback - {feedback_type}", False, "Missing feedback ID")
+                except json.JSONDecodeError:
+                    self.log_result(f"Feedback - {feedback_type}", False, "Invalid JSON response")
+            else:
+                self.log_result(f"Feedback - {feedback_type}", False, f"Status: {response.status_code}")
+        
+        # Test feedback without comment
+        print(f"\n--- Test: Feedback Without Comment ---")
+        feedback_no_comment = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "feedbackType": "other"
+            # No comment field
+        }
+        
+        response = self.make_request("POST", "/messages/feedback", 
+                                   json=feedback_no_comment, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            self.log_result("Feedback without comment", True, "Successfully submitted feedback without comment")
+        else:
+            self.log_result("Feedback without comment", False, f"Status: {response.status_code}")
+        
+        # Test missing required parameters
+        print(f"\n--- Test: Missing Required Parameters ---")
+        invalid_feedback = {
+            "jobId": self.test_job_id
+            # Missing tradespersonId and feedbackType
+        }
+        
+        response = self.make_request("POST", "/messages/feedback", 
+                                   json=invalid_feedback, auth_token=self.homeowner_token)
+        
+        if response.status_code == 400:
+            self.log_result("Feedback missing parameters", True, "Correctly rejected missing parameters")
+        else:
+            self.log_result("Feedback missing parameters", False, f"Expected 400, got {response.status_code}")
+        
+        # Test unauthorized access
+        print(f"\n--- Test: Unauthorized Feedback Submission ---")
+        response = self.make_request("POST", "/messages/feedback", json=feedback_data)
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Feedback unauthorized", True, "Correctly rejected unauthorized request")
+        else:
+            self.log_result("Feedback unauthorized", False, f"Expected 401/403, got {response.status_code}")
+    
+    def test_authentication_permissions(self):
+        """Test authentication and permission requirements"""
+        print("\n=== Testing Authentication & Permissions ===")
+        
+        if not all([self.homeowner_token, self.tradesperson_token, self.test_job_id, self.tradesperson_id]):
+            self.log_result("Authentication permissions", False, "Missing required test data")
+            return
+        
+        # Test 1: Tradesperson trying to update hiring status (should fail)
+        print(f"\n--- Test 1: Tradesperson Updating Hiring Status ---")
+        hiring_data = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "hired": True,
+            "jobStatus": "completed"
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=hiring_data, auth_token=self.tradesperson_token)
+        
+        if response.status_code == 403:
+            self.log_result("Tradesperson hiring status", True, "Correctly rejected tradesperson access")
+        else:
+            self.log_result("Tradesperson hiring status", False, f"Expected 403, got {response.status_code}")
+        
+        # Test 2: Tradesperson trying to submit feedback (should fail)
+        print(f"\n--- Test 2: Tradesperson Submitting Feedback ---")
+        feedback_data = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "feedbackType": "other",
+            "comment": "Test feedback"
+        }
+        
+        response = self.make_request("POST", "/messages/feedback", 
+                                   json=feedback_data, auth_token=self.tradesperson_token)
+        
+        if response.status_code == 403:
+            self.log_result("Tradesperson feedback", True, "Correctly rejected tradesperson access")
+        else:
+            self.log_result("Tradesperson feedback", False, f"Expected 403, got {response.status_code}")
+        
+        # Test 3: Invalid tokens
+        print(f"\n--- Test 3: Invalid Token Access ---")
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=hiring_data, auth_token="invalid_token")
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Invalid token access", True, "Correctly rejected invalid token")
+        else:
+            self.log_result("Invalid token access", False, f"Expected 401/403, got {response.status_code}")
+    
+    def test_database_integration(self):
+        """Test database integration by verifying data persistence"""
+        print("\n=== Testing Database Integration ===")
+        
+        # Note: This would require direct database access or additional API endpoints
+        # For now, we'll test that the API responses indicate successful database operations
+        
+        if not all([self.homeowner_token, self.tradesperson_id, self.test_job_id]):
+            self.log_result("Database integration", False, "Missing required test data")
+            return
+        
+        # Test hiring status creation and retrieval
+        print(f"\n--- Test: Hiring Status Database Persistence ---")
+        hiring_data = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "hired": True,
+            "jobStatus": "completed"
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=hiring_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                if data.get("id") and data.get("message"):
+                    self.log_result("Hiring status database persistence", True, 
+                                  f"Successfully created hiring status with ID: {data.get('id')}")
+                else:
+                    self.log_result("Hiring status database persistence", False, "Missing response data")
+            except json.JSONDecodeError:
+                self.log_result("Hiring status database persistence", False, "Invalid JSON response")
+        else:
+            self.log_result("Hiring status database persistence", False, f"Status: {response.status_code}")
+        
+        # Test feedback creation and retrieval
+        print(f"\n--- Test: Feedback Database Persistence ---")
+        feedback_data = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "feedbackType": "other",
+            "comment": "Database persistence test feedback"
+        }
+        
+        response = self.make_request("POST", "/messages/feedback", 
+                                   json=feedback_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                if data.get("id") and data.get("message"):
+                    self.log_result("Feedback database persistence", True, 
+                                  f"Successfully created feedback with ID: {data.get('id')}")
+                else:
+                    self.log_result("Feedback database persistence", False, "Missing response data")
+            except json.JSONDecodeError:
+                self.log_result("Feedback database persistence", False, "Invalid JSON response")
+        else:
+            self.log_result("Feedback database persistence", False, f"Status: {response.status_code}")
+    
+    def test_notification_integration(self):
+        """Test notification system integration"""
+        print("\n=== Testing Notification Integration ===")
+        
+        if not all([self.homeowner_token, self.tradesperson_id, self.test_job_id]):
+            self.log_result("Notification integration", False, "Missing required test data")
+            return
+        
+        # Test review invitation for completed job
+        print(f"\n--- Test: Review Invitation for Completed Job ---")
+        hiring_data = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "hired": True,
+            "jobStatus": "completed"
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=hiring_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            # The notification is sent as a background task, so we can't directly verify it
+            # But we can verify the API call succeeded, which should trigger the notification
+            self.log_result("Review invitation trigger", True, "Completed job status should trigger review invitation")
+        else:
+            self.log_result("Review invitation trigger", False, f"Status: {response.status_code}")
+        
+        # Test review reminder scheduling for in-progress job
+        print(f"\n--- Test: Review Reminder Scheduling ---")
+        hiring_data_progress = {
+            "jobId": self.test_job_id,
+            "tradespersonId": self.tradesperson_id,
+            "hired": True,
+            "jobStatus": "in_progress"
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=hiring_data_progress, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            self.log_result("Review reminder scheduling", True, "In-progress job status should schedule review reminders")
+        else:
+            self.log_result("Review reminder scheduling", False, f"Status: {response.status_code}")
+    
     def run_all_tests(self):
-        """Run focused review system tests - MY-REVIEWS ENDPOINT FOCUS"""
-        print("🚀 Starting Review System Backend Testing - MY-REVIEWS ENDPOINT FOCUS")
+        """Run comprehensive hiring status and feedback system tests"""
+        print("🚀 Starting Hiring Status and Feedback System Backend Testing")
         print("=" * 80)
         
         try:
@@ -905,17 +1268,12 @@ class HiringStatusTester:
             self.setup_test_users()
             self.create_test_job()
             
-            # MAIN FOCUS: Test My Reviews endpoint
-            self.test_my_reviews_endpoint()
-            
-            # Test My Reviews with sample data
-            self.test_my_reviews_with_data()
-            
-            # Test other key review endpoints for completeness
-            self.test_review_endpoints_without_job()
-            self.test_review_creation_endpoint()
-            self.test_get_user_reviews_endpoint()
-            self.test_get_review_summary_endpoint()
+            # Main testing focus
+            self.test_hiring_status_endpoints()
+            self.test_feedback_endpoints()
+            self.test_authentication_permissions()
+            self.test_database_integration()
+            self.test_notification_integration()
             
             # Cleanup
             self.cleanup_test_data()
