@@ -264,7 +264,7 @@ const MyJobsPage = () => {
     }
   };
 
-  if (!isAuthenticated()) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
