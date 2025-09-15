@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional
 import sys
 import os
+import logging
 backend_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, backend_dir)
 import models
@@ -9,6 +10,9 @@ from models.reviews import Review as AdvancedReview
 from database import database
 from datetime import datetime
 import uuid
+import auth
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/reviews", tags=["reviews"])
 
