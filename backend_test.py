@@ -756,6 +756,29 @@ class ReviewSystemTester:
         else:
             self.log_result("Test data cleanup", True, "No test data to cleanup")
     
+    def test_review_endpoints_without_job(self):
+        """Test review endpoints that don't require job creation"""
+        print("\n=== Testing Review Endpoints (No Job Required) ===")
+        
+        # Test review endpoints that work without job creation
+        if self.tradesperson_id:
+            # Test getting reviews for tradesperson (should work even with 0 reviews)
+            print(f"\n--- Test: Get Reviews for Tradesperson (No Job) ---")
+            response = self.make_request("GET", f"/reviews/user/{self.tradesperson_id}")
+            
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if 'reviews' in data and 'total' in data:
+                        self.log_result("Review endpoints basic functionality", True, 
+                                      f"API working, found {data['total']} reviews")
+                    else:
+                        self.log_result("Review endpoints basic functionality", False, "Invalid response structure")
+                except json.JSONDecodeError:
+                    self.log_result("Review endpoints basic functionality", False, "Invalid JSON response")
+            else:
+                self.log_result("Review endpoints basic functionality", False, f"Status: {response.status_code}")
+    
     def run_all_tests(self):
         """Run all review system tests"""
         print("🚀 Starting Comprehensive Review System Backend Testing")
@@ -768,6 +791,9 @@ class ReviewSystemTester:
             # Setup test users and job
             self.setup_test_users()
             self.create_test_job()
+            
+            # Test review endpoints that don't require job creation
+            self.test_review_endpoints_without_job()
             
             # Test review API endpoints
             self.test_review_creation_endpoint()
