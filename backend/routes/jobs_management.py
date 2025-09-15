@@ -385,6 +385,13 @@ async def publish_job_posting(
             target_id=job_id, target_type="job"
         )
         
+        # Send email notifications for new job posting (in background)
+        try:
+            await _send_new_job_notifications(existing_job, job_id)
+        except Exception as e:
+            logger.error(f"Failed to send job posting notifications: {str(e)}")
+            # Don't fail the publish operation due to notification errors
+        
         return {"message": "Job posting published successfully"}
         
     except HTTPException:
