@@ -70,6 +70,7 @@ app.include_router(notifications.router, prefix="/api/notifications", tags=["not
 app.include_router(reviews_advanced.router, prefix="/api/reviews", tags=["reviews"])
 app.include_router(wallet.router)
 app.include_router(admin.router)
+app.include_router(admin_management_router)
 app.include_router(referrals.router)
 app.include_router(messages.router)
 
