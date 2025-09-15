@@ -407,35 +407,191 @@ class AdminPermissionsInvestigator:
                 self.log_result(f"Invalid credentials test {i}", False, 
                               f"Expected 401, got {response.status_code}")
     
-    def test_malformed_login_requests(self):
-        """Test login with malformed requests"""
-        print("\n=== 9. Testing Malformed Login Requests ===")
+    def investigate_admin_permissions(self):
+        """Investigate current admin user permissions for job management"""
+        print("\n=== 4. Investigating Admin User Permissions ===")
         
-        malformed_requests = [
-            {},  # Empty request
-            {"username": "admin"},  # Missing password
-            {"password": "servicehub2024"},  # Missing username
-            {"user": "admin", "pass": "servicehub2024"},  # Wrong field names
-            "invalid_json"  # Invalid JSON
-        ]
+        if not self.admin_info:
+            self.log_result("Admin permissions investigation", False, "No admin info available")
+            return
         
-        for i, request_data in enumerate(malformed_requests, 1):
-            print(f"\n--- Test 9.{i}: Malformed request test {i} ---")
+        print(f"\n--- Test 4.1: Check admin user role and permissions ---")
+        
+        # Check admin role
+        admin_role = self.admin_info.get('role')
+        print(f"Current admin role: {admin_role}")
+        
+        if admin_role in ['super_admin', 'content_admin']:
+            self.log_result("Admin role check", True, 
+                          f"Admin has appropriate role: {admin_role}")
+        else:
+            self.log_result("Admin role check", False, 
+                          f"Admin role '{admin_role}' may not have job management permissions")
+        
+        # Get current admin permissions via /me endpoint
+        if self.access_token:
+            response = self.make_request("GET", "/admin-management/me", auth_token=self.access_token)
             
-            if request_data == "invalid_json":
-                # Send invalid JSON
-                response = self.make_request("POST", "/admin-management/login", 
-                                           data="invalid_json", 
-                                           headers={'Content-Type': 'application/json'})
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    permissions = data.get('permissions', [])
+                    
+                    # Check for MANAGE_JOBS permission
+                    has_manage_jobs = 'manage_jobs' in permissions
+                    
+                    if has_manage_jobs:
+                        self.log_result("MANAGE_JOBS permission check", True, 
+                                      "Admin has MANAGE_JOBS permission")
+                    else:
+                        self.log_result("MANAGE_JOBS permission check", False, 
+                                      "Admin does NOT have MANAGE_JOBS permission")
+                    
+                    # Log all permissions for debugging
+                    print(f"    All admin permissions ({len(permissions)}): {permissions[:10]}...")
+                    
+                    # Check for other relevant permissions
+                    relevant_permissions = ['approve_jobs', 'delete_jobs', 'edit_job_fees']
+                    for perm in relevant_permissions:
+                        if perm in permissions:
+                            self.log_result(f"{perm} permission", True, f"Admin has {perm} permission")
+                        else:
+                            self.log_result(f"{perm} permission", False, f"Admin missing {perm} permission")
+                            
+                except json.JSONDecodeError:
+                    self.log_result("Admin permissions investigation", False, "Invalid JSON response")
             else:
-                response = self.make_request("POST", "/admin-management/login", json=request_data)
+                self.log_result("Admin permissions investigation", False, 
+                              f"Could not retrieve admin permissions: {response.status_code}")
+    
+    def test_job_management_endpoints(self):
+        """Test access to job management endpoints"""
+        print("\n=== 5. Testing Job Management Endpoints Access ===")
+        
+        if not self.access_token:
+            self.log_result("Job management endpoints test", False, "No access token available")
+            return
+        
+        # Test GET /api/admin/jobs/postings
+        print(f"\n--- Test 5.1: GET /api/admin/jobs/postings ---")
+        response = self.make_request("GET", "/admin/jobs/postings", auth_token=self.access_token)
+        
+        if response.status_code == 200:
+            self.log_result("GET job postings endpoint", True, 
+                          "Successfully accessed job postings endpoint")
+            try:
+                data = response.json()
+                job_postings = data.get('job_postings', [])
+                print(f"    Found {len(job_postings)} job postings")
+            except json.JSONDecodeError:
+                self.log_result("Job postings response parsing", False, "Invalid JSON response")
+        elif response.status_code == 403:
+            self.log_result("GET job postings endpoint", False, 
+                          "403 Forbidden - Admin lacks MANAGE_JOBS permission")
+        else:
+            self.log_result("GET job postings endpoint", False, 
+                          f"Unexpected status: {response.status_code}, Response: {response.text}")
+        
+        # Test GET /api/admin-management/profile (alternative endpoint)
+        print(f"\n--- Test 5.2: GET /api/admin-management/profile ---")
+        response = self.make_request("GET", "/admin-management/profile", auth_token=self.access_token)
+        
+        if response.status_code == 200:
+            self.log_result("GET admin profile endpoint", True, "Admin profile endpoint accessible")
+        elif response.status_code == 404:
+            self.log_result("GET admin profile endpoint", False, "Admin profile endpoint not found")
+        else:
+            self.log_result("GET admin profile endpoint", False, 
+                          f"Status: {response.status_code}")
+    
+    def test_job_creation(self):
+        """Test job creation with current admin permissions"""
+        print("\n=== 6. Testing Job Creation ===")
+        
+        if not self.access_token:
+            self.log_result("Job creation test", False, "No access token available")
+            return
+        
+        # Create a simple test job posting
+        test_job = {
+            "title": "Test Job Posting - Admin Permissions Investigation",
+            "description": "This is a test job posting created during admin permissions investigation.",
+            "department": "engineering",
+            "location": "Lagos, Nigeria",
+            "job_type": "full_time",
+            "experience_level": "mid_level",
+            "requirements": ["Test requirement 1", "Test requirement 2"],
+            "benefits": ["Test benefit 1", "Test benefit 2"],
+            "responsibilities": ["Test responsibility 1", "Test responsibility 2"],
+            "salary_min": 150000,
+            "salary_max": 300000,
+            "salary_currency": "NGN",
+            "is_salary_public": True,
+            "status": "draft"
+        }
+        
+        print(f"\n--- Test 6.1: POST /api/admin/jobs/postings ---")
+        response = self.make_request("POST", "/admin/jobs/postings", 
+                                   json=test_job, auth_token=self.access_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                job_id = data.get('job_id')
+                self.log_result("Job creation test", True, 
+                              f"Successfully created test job with ID: {job_id}")
+                
+                # Store job ID for potential cleanup
+                self.test_data['created_job_id'] = job_id
+                
+            except json.JSONDecodeError:
+                self.log_result("Job creation test", False, "Invalid JSON response")
+        elif response.status_code == 403:
+            self.log_result("Job creation test", False, 
+                          "403 Forbidden - Admin lacks MANAGE_JOBS permission for job creation")
+        elif response.status_code == 401:
+            self.log_result("Job creation test", False, 
+                          "401 Unauthorized - Token may be invalid or expired")
+        else:
+            self.log_result("Job creation test", False, 
+                          f"Status: {response.status_code}, Response: {response.text}")
+    
+    def provide_recommendations(self):
+        """Provide recommendations based on investigation results"""
+        print("\n=== 7. Recommendations ===")
+        
+        if not self.admin_info:
+            print("❌ Could not investigate admin permissions - login failed")
+            return
+        
+        admin_role = self.admin_info.get('role')
+        
+        print(f"\n--- Current Admin Status ---")
+        print(f"Username: {self.admin_info.get('username', 'Unknown')}")
+        print(f"Role: {admin_role}")
+        print(f"Status: {self.admin_info.get('status', 'Unknown')}")
+        print(f"Email: {self.admin_info.get('email', 'Unknown')}")
+        
+        # Analyze results and provide recommendations
+        failed_tests = [error for error in self.results['errors'] if 'MANAGE_JOBS' in error or '403 Forbidden' in error]
+        
+        if failed_tests:
+            print(f"\n--- ISSUE IDENTIFIED ---")
+            print(f"❌ Admin user lacks proper permissions for job management")
+            print(f"❌ Failed tests: {len(failed_tests)}")
             
-            if response.status_code in [400, 422]:
-                self.log_result(f"Malformed request test {i}", True, 
-                              f"Correctly rejected malformed request (Status: {response.status_code})")
-            else:
-                self.log_result(f"Malformed request test {i}", False, 
-                              f"Expected 400/422, got {response.status_code}")
+            print(f"\n--- RECOMMENDED SOLUTIONS ---")
+            if admin_role not in ['super_admin', 'content_admin']:
+                print(f"1. UPDATE ADMIN ROLE: Change admin role from '{admin_role}' to 'content_admin' or 'super_admin'")
+            
+            print(f"2. VERIFY PERMISSION MAPPING: Ensure CONTENT_ADMIN role includes MANAGE_JOBS permission")
+            print(f"3. CREATE NEW ADMIN: Create a new admin user with CONTENT_ADMIN role specifically for job management")
+            print(f"4. CHECK DATABASE: Verify admin permissions are properly stored in database")
+            
+        else:
+            print(f"\n--- STATUS: PERMISSIONS OK ---")
+            print(f"✅ Admin user appears to have proper permissions for job management")
+            print(f"✅ If 403 errors persist, check application logs for detailed error messages")
     
     def run_all_tests(self):
         """Run all admin permissions investigation tests"""
