@@ -941,6 +941,74 @@ class HiringStatusTester:
             else:
                 self.log_result("Review endpoints basic functionality", False, f"Status: {response.status_code}")
     
+    def test_api_structure_and_validation(self):
+        """Test API structure and validation without requiring job ownership"""
+        print("\n=== Testing API Structure and Validation ===")
+        
+        if not self.homeowner_token:
+            self.log_result("API structure validation", False, "No homeowner token available")
+            return
+        
+        # Test 1: Hiring status endpoint structure
+        print(f"\n--- Test 1: Hiring Status Endpoint Structure ---")
+        
+        # Test with completely invalid data to check validation
+        invalid_data = {
+            "invalid_field": "test"
+        }
+        
+        response = self.make_request("POST", "/messages/hiring-status", 
+                                   json=invalid_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 400:
+            self.log_result("Hiring status validation", True, "Correctly validates required fields")
+        else:
+            self.log_result("Hiring status validation", False, f"Expected 400, got {response.status_code}")
+        
+        # Test 2: Feedback endpoint structure
+        print(f"\n--- Test 2: Feedback Endpoint Structure ---")
+        
+        response = self.make_request("POST", "/messages/feedback", 
+                                   json=invalid_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 400:
+            self.log_result("Feedback validation", True, "Correctly validates required fields")
+        else:
+            self.log_result("Feedback validation", False, f"Expected 400, got {response.status_code}")
+        
+        # Test 3: Authentication requirements
+        print(f"\n--- Test 3: Authentication Requirements ---")
+        
+        valid_hiring_data = {
+            "jobId": str(uuid.uuid4()),
+            "tradespersonId": str(uuid.uuid4()),
+            "hired": True,
+            "jobStatus": "completed"
+        }
+        
+        # Test without authentication
+        response = self.make_request("POST", "/messages/hiring-status", json=valid_hiring_data)
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Hiring status authentication", True, "Correctly requires authentication")
+        else:
+            self.log_result("Hiring status authentication", False, f"Expected 401/403, got {response.status_code}")
+        
+        # Test feedback without authentication
+        valid_feedback_data = {
+            "jobId": str(uuid.uuid4()),
+            "tradespersonId": str(uuid.uuid4()),
+            "feedbackType": "other",
+            "comment": "Test feedback"
+        }
+        
+        response = self.make_request("POST", "/messages/feedback", json=valid_feedback_data)
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Feedback authentication", True, "Correctly requires authentication")
+        else:
+            self.log_result("Feedback authentication", False, f"Expected 401/403, got {response.status_code}")
+    
     def test_hiring_status_endpoints(self):
         """Test hiring status API endpoints"""
         print("\n=== Testing Hiring Status API Endpoints ===")
