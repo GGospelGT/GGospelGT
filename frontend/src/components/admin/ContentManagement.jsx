@@ -3,8 +3,10 @@ import {
   FileText, Plus, Search, Filter, Eye, Edit, Trash2, Upload, 
   Calendar, BarChart3, Tag, Globe, Users, Image, Video, 
   Megaphone, BookOpen, HelpCircle, Mail, Zap, Star, Archive,
-  Clock, CheckCircle, XCircle, TrendingUp, Activity
+  Clock, CheckCircle, XCircle, TrendingUp, Activity, Briefcase,
+  MapPin, Building, User, Send
 } from 'lucide-react';
+import careersAPI from '../../api/careers';
 
 const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState('content');
