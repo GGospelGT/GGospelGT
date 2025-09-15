@@ -49,8 +49,10 @@
 ##
 test_plan:
   current_focus:
-    - "Admin User Permissions Investigation - Job Posting Management"
-  stuck_tasks: []
+    - "Review System Backend Testing"
+  stuck_tasks: 
+    - "Job Creation API Endpoint - 404 Not Found Error"
+    - "My Reviews Endpoint - 404 Not Found Error"
   test_all: false
   test_priority: "high_first"
 ##
