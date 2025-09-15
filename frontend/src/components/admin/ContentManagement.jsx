@@ -1228,6 +1228,25 @@ const ContentManagement = () => {
           }}
         />
       )}
+
+      {/* Job Creation/Edit Modal */}
+      {(showCreateJobModal || showEditJobModal) && (
+        <JobModal
+          isEdit={showEditJobModal}
+          job={selectedJob}
+          onClose={() => {
+            setShowCreateJobModal(false);
+            setShowEditJobModal(false);
+            setSelectedJob(null);
+          }}
+          onSave={() => {
+            setShowCreateJobModal(false);
+            setShowEditJobModal(false);
+            setSelectedJob(null);
+            loadJobsData();
+          }}
+        />
+      )}
     </div>
   );
 };
