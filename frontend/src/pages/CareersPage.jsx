@@ -12,7 +12,10 @@ import careersAPI from '../api/careers';
 const CareersPage = () => {
   const [openPositions, setOpenPositions] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [departments, setDepartments] = useState(['all']);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const [applicationForm, setApplicationForm] = useState({
     name: '',
     email: '',
@@ -22,9 +25,6 @@ const CareersPage = () => {
     message: '',
     resume: null
   });
-
-  // Mock job positions (in a real implementation, this would come from an API or CMS)
-  const jobPositions = [
     {
       id: 1,
       title: 'Senior Frontend Developer',
