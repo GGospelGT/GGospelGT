@@ -144,6 +144,31 @@ const MyJobsPage = () => {
     await loadMyJobs();
   };
 
+  const handleCompleteJob = async (jobId) => {
+    try {
+      setCompletingJobId(jobId);
+      await jobsAPI.completeJob(jobId);
+      
+      toast({
+        title: "Job Completed",
+        description: "Your job has been marked as completed. You can now leave a review for the tradesperson.",
+      });
+      
+      // Refresh jobs list
+      await loadMyJobs();
+      
+    } catch (error) {
+      console.error('Failed to complete job:', error);
+      toast({
+        title: "Failed to Complete Job",
+        description: error.response?.data?.detail || "There was an error marking the job as completed.",
+        variant: "destructive",
+      });
+    } finally {
+      setCompletingJobId(null);
+    }
+  };
+
   const handleReopenJob = async (jobId) => {
     try {
       setReopeningJobId(jobId);
