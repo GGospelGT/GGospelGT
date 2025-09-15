@@ -116,11 +116,7 @@ const CareersPage = () => {
   ];
 
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => {
-      setOpenPositions(jobPositions);
-      setLoading(false);
-    }, 1000);
+    loadJobPositions();
   }, []);
 
   const filteredPositions = selectedDepartment === 'all' 
