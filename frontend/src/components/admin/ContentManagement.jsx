@@ -489,7 +489,8 @@ const ContentManagement = () => {
               { id: 'content', label: 'Content Items', icon: FileText },
               { id: 'media', label: 'Media Library', icon: Image },
               { id: 'templates', label: 'Templates', icon: BookOpen },
-              { id: 'analytics', label: 'Analytics', icon: BarChart3 }
+              { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+              { id: 'jobs', label: 'Jobs & Careers', icon: Briefcase }
             ].map((tab) => (
               <button
                 key={tab.id}
