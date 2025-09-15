@@ -100,7 +100,7 @@
                 // Step 1: Get a fresh token from the backend
                 updateStatus('Step 1: Getting authentication token...', 'info');
                 
-                const loginResponse = await fetch('http://localhost:8001/api/auth/login', {
+                const loginResponse = await fetch('http://10.219.64.152:8001/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
