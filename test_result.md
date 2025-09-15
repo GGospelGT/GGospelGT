@@ -49,7 +49,7 @@
 ##
 test_plan:
   current_focus:
-    - "Admin Management Login API Testing"
+    - "Admin User Permissions Investigation - Job Posting Management"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
