@@ -183,22 +183,19 @@ class ReviewSystemTester:
         
         job_data = {
             "title": "Electrical Wiring Review Test Job",
-            "description": "Test job for review system testing - electrical wiring work needed",
+            "description": "Test job for review system testing - electrical wiring work needed. This is a comprehensive electrical project requiring professional expertise.",
             "category": "Electrical Repairs",
-            "location": {
-                "state": "Lagos",
-                "lga": "Ikeja", 
-                "town": "Computer Village",
-                "address": "123 Test Street"
-            },
-            "budget": {
-                "min": 50000,
-                "max": 100000,
-                "currency": "NGN"
-            },
+            "state": "Lagos",
+            "lga": "Ikeja", 
+            "town": "Computer Village",
+            "zip_code": "100001",
+            "home_address": "123 Test Street, Computer Village, Ikeja",
+            "budget_min": 50000,
+            "budget_max": 100000,
             "timeline": "1-2 weeks",
-            "requirements": ["Licensed electrician", "Experience with home wiring"],
-            "urgency": "medium"
+            "homeowner_name": "Test Homeowner Review",
+            "homeowner_email": f"homeowner.review.{uuid.uuid4().hex[:8]}@test.com",
+            "homeowner_phone": "+2348012345678"
         }
         
         response = self.make_request("POST", "/api/jobs", json=job_data, auth_token=self.homeowner_token)
