@@ -1386,6 +1386,7 @@ class HiringStatusTester:
             self.create_test_job()
             
             # Main testing focus
+            self.test_api_structure_and_validation()
             self.test_hiring_status_endpoints()
             self.test_feedback_endpoints()
             self.test_authentication_permissions()
