@@ -46,6 +46,8 @@ class NotificationPreferences(BaseModel):
     job_updated: NotificationChannel = NotificationChannel.EMAIL
     new_job_posted: NotificationChannel = NotificationChannel.EMAIL  # Career job notifications
     new_application: NotificationChannel = NotificationChannel.EMAIL  # Application notifications
+    review_invitation: NotificationChannel = NotificationChannel.EMAIL  # Review invitations
+    review_reminder: NotificationChannel = NotificationChannel.EMAIL  # Review reminders
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
