@@ -376,13 +376,13 @@ const Header = () => {
                         <Button 
                           variant="ghost"
                           onClick={() => {
-                            navigate('/my-reviews');
+                            navigate('/my-received-reviews');
                             setIsMenuOpen(false);
                           }}
                           className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
                         >
                           <Star size={16} />
-                          <span>My Reviews</span>
+                          <span>My Received Reviews</span>
                         </Button>
                         
                         <div className="px-3 py-1">
