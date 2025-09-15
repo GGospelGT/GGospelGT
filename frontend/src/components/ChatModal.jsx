@@ -525,6 +525,18 @@ const ChatModal = ({
           </p>
         </div>
       </div>
+
+      {/* Hiring Status Modal */}
+      <HiringStatusModal
+        isOpen={showHiringStatusModal}
+        onClose={() => setShowHiringStatusModal(false)}
+        jobId={jobId}
+        jobTitle={jobTitle}
+        tradespersonName={otherParty?.name}
+        tradespersonId={otherParty?.id}
+        onStatusUpdate={handleStatusUpdate}
+        onFeedbackSubmit={handleFeedbackSubmit}
+      />
     </div>
   );
 };
