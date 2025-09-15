@@ -46,17 +46,23 @@ export const walletAPI = {
 };
 
 export const adminAPI = {
-  // Admin login
+  // Admin login (updated to use new admin management system)
   async login(username, password) {
-    const formData = new FormData();
-    formData.append('username', username);
-    formData.append('password', password);
-    
-    const response = await apiClient.post('/admin/login', formData, {
+    const response = await apiClient.post('/admin-management/login', {
+      username,
+      password
+    }, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/json',
       },
     });
+    
+    // Store the admin token for subsequent requests
+    if (response.data.access_token) {
+      localStorage.setItem('admin_token', response.data.access_token);
+      localStorage.setItem('admin_info', JSON.stringify(response.data.admin));
+    }
+    
     return response.data;
   },
 
