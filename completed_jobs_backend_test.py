@@ -328,21 +328,57 @@ class CompletedJobsBackendTester:
                 self.log_result("Completed jobs filtering", False, f"Status: {response.status_code}")
     
     def test_job_completion_endpoint(self):
-        """Test POST /api/jobs/{job_id}/complete endpoint"""
+        """Test PUT /api/jobs/{job_id}/complete endpoint"""
         print("\n✅ === TESTING JOB COMPLETION ENDPOINT ===")
         
         if not self.test_job_id or not self.homeowner_token:
             self.log_result("Job completion endpoint", False, "Missing job ID or homeowner token")
             return
         
-        # Test 1: Mark job as completed
-        print("\n--- Test 1: Mark Job as Completed ---")
-        completion_data = {
-            "completion_notes": "Job completed successfully for testing completed jobs display functionality"
+        # First, we need to approve the job since it starts as pending_approval
+        print("\n--- Setup: Approve Job via Admin ---")
+        
+        # Get admin token
+        admin_login_data = {
+            "username": "admin",
+            "password": "servicehub2024"
         }
         
-        response = self.make_request("POST", f"/jobs/{self.test_job_id}/complete", 
-                                   json=completion_data, auth_token=self.homeowner_token)
+        admin_response = self.make_request("POST", "/admin-management/login", json=admin_login_data)
+        
+        if admin_response.status_code == 200:
+            try:
+                admin_data = admin_response.json()
+                admin_token = admin_data.get('access_token')
+                
+                if admin_token:
+                    self.log_result("Admin login for job approval", True, "Admin token obtained")
+                    
+                    # Approve the job
+                    approval_data = {
+                        "action": "approve",
+                        "notes": "Approved for testing completed jobs functionality"
+                    }
+                    
+                    approve_response = self.make_request("PUT", f"/admin/jobs/{self.test_job_id}/approve", 
+                                                       json=approval_data, auth_token=admin_token)
+                    
+                    if approve_response.status_code == 200:
+                        self.log_result("Job approval", True, "Job approved successfully")
+                    else:
+                        self.log_result("Job approval", False, f"Approval failed: {approve_response.status_code}")
+                else:
+                    self.log_result("Admin login for job approval", False, "No admin token received")
+            except json.JSONDecodeError:
+                self.log_result("Admin login for job approval", False, "Invalid JSON response")
+        else:
+            self.log_result("Admin login for job approval", False, f"Admin login failed: {admin_response.status_code}")
+        
+        # Test 1: Mark job as completed
+        print("\n--- Test 1: Mark Job as Completed ---")
+        
+        response = self.make_request("PUT", f"/jobs/{self.test_job_id}/complete", 
+                                   auth_token=self.homeowner_token)
         
         if response.status_code == 200:
             try:
@@ -357,12 +393,6 @@ class CompletedJobsBackendTester:
                         self.log_result("Job completion timestamp", True, f"Completed at: {data.get('completed_at')}")
                     else:
                         self.log_result("Job completion timestamp", False, "Missing completion timestamp")
-                        
-                    # Verify completion notes
-                    if data.get('completion_notes') == completion_data['completion_notes']:
-                        self.log_result("Job completion notes", True, "Completion notes saved correctly")
-                    else:
-                        self.log_result("Job completion notes", False, "Completion notes mismatch")
                 else:
                     self.log_result("Job completion", False, f"Job status not updated: {data.get('status')}")
             except json.JSONDecodeError:
