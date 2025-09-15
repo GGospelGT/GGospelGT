@@ -111,6 +111,8 @@ class UpdatePreferencesRequest(BaseModel):
     job_updated: Optional[NotificationChannel] = None
     new_job_posted: Optional[NotificationChannel] = None
     new_application: Optional[NotificationChannel] = None
+    review_invitation: Optional[NotificationChannel] = None
+    review_reminder: Optional[NotificationChannel] = None
 
 class NotificationStatsResponse(BaseModel):
     """Notification statistics for admin/monitoring"""
