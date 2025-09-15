@@ -399,3 +399,83 @@ async def publish_job_posting(
     except Exception as e:
         logger.error(f"Error publishing job posting: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to publish job posting")
+
+# Notification helper functions
+
+async def _send_new_job_notifications(job_posting: dict, job_id: str):
+    """Send notifications to relevant users about new job posting"""
+    
+    try:
+        settings = job_posting.get("settings", {})
+        
+        # Get list of users who might be interested (optional - can be job seekers, subscribers)
+        # For now, we'll just log that the notification would be sent
+        # In a real implementation, you'd fetch users interested in job alerts
+        
+        logger.info(f"📢 New job notification would be sent for: {job_posting['title']}")
+        
+        # For demonstration, let's send to admin users as a test
+        # In production, this would be sent to job seekers who subscribed to job alerts
+        admin_users = await database.get_admin_users()
+        
+        for admin in admin_users:
+            if admin.get("email"):
+                template_data = {
+                    "recipient_name": admin.get("full_name", "Job Seeker"),
+                    "job_title": job_posting["title"],
+                    "department": settings.get("department", "General"),
+                    "location": settings.get("location", "Nigeria"),
+                    "job_type": settings.get("job_type", "Full Time"),
+                    "experience_level": settings.get("experience_level", "Entry Level"),
+                    "posted_date": datetime.utcnow().strftime("%B %d, %Y"),
+                    "job_description": job_posting["content"][:200] + "..." if len(job_posting["content"]) > 200 else job_posting["content"],
+                    "application_url": f"https://servicehub.co/careers/{job_posting['slug']}"
+                }
+                
+                # Send notification (this will be logged as mock email in development)
+                await notification_service.send_notification(
+                    user_id=admin["id"],
+                    notification_type=NotificationType.NEW_JOB_POSTED,
+                    template_data=template_data,
+                    recipient_email=admin["email"]
+                )
+        
+        logger.info(f"✅ Job posting notifications sent for: {job_posting['title']}")
+        
+    except Exception as e:
+        logger.error(f"❌ Error sending job posting notifications: {str(e)}")
+        raise
+
+async def _send_application_notification(application: dict, job_posting: dict):
+    """Send notification to admins about new job application"""
+    
+    try:
+        # Get admin users to notify
+        admin_users = await database.get_admin_users()
+        
+        for admin in admin_users:
+            if admin.get("email"):
+                template_data = {
+                    "job_title": job_posting["title"],
+                    "applicant_name": application["name"],
+                    "applicant_email": application["email"],
+                    "applicant_phone": application.get("phone", "Not provided"),
+                    "experience_level": application.get("experience_level", "Not specified"),
+                    "applied_date": datetime.utcnow().strftime("%B %d, %Y at %I:%M %p"),
+                    "cover_letter": application["message"],
+                    "admin_dashboard_url": "https://servicehub.co/admin/jobs/applications"
+                }
+                
+                # Send notification to admin
+                await notification_service.send_notification(
+                    user_id=admin["id"],
+                    notification_type=NotificationType.NEW_APPLICATION,
+                    template_data=template_data,
+                    recipient_email=admin["email"]
+                )
+        
+        logger.info(f"✅ Application notification sent for: {application['name']} -> {job_posting['title']}")
+        
+    except Exception as e:
+        logger.error(f"❌ Error sending application notification: {str(e)}")
+        # Don't raise exception to avoid failing the application submission
