@@ -42,7 +42,7 @@ import json
 import os
 import time
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 import uuid
 from collections import Counter
 
@@ -116,524 +116,684 @@ class ReviewSystemTester:
             self.log_result("Service health check", False, f"Status: {response.status_code}")
     
     def setup_test_users(self):
-        """Test admin login with legacy credentials (admin/servicehub2024)"""
-        print("\n=== 1. Testing Admin Login with Legacy Credentials ===")
+        """Create test homeowner and tradesperson users"""
+        print("\n=== Setting Up Test Users ===")
         
-        login_data = {
-            "username": "admin",
-            "password": "servicehub2024"
+        # Create test homeowner
+        homeowner_data = {
+            "name": "Test Homeowner Review",
+            "email": f"homeowner.review.{uuid.uuid4().hex[:8]}@test.com",
+            "password": "TestPassword123!",
+            "phone": "+2348012345678",
+            "location": {
+                "state": "Lagos",
+                "lga": "Ikeja",
+                "town": "Computer Village"
+            }
         }
         
-        print(f"\n--- Test 1.1: Login with legacy credentials ---")
-        response = self.make_request("POST", "/admin-management/login", json=login_data)
+        print(f"\n--- Creating Test Homeowner ---")
+        response = self.make_request("POST", "/auth/register/homeowner", json=homeowner_data)
         
         if response.status_code == 200:
             try:
                 data = response.json()
+                self.homeowner_token = data.get('access_token')
+                self.homeowner_id = data.get('user', {}).get('id')
+                self.log_result("Homeowner creation", True, f"ID: {self.homeowner_id}")
+            except json.JSONDecodeError:
+                self.log_result("Homeowner creation", False, "Invalid JSON response")
+        else:
+            self.log_result("Homeowner creation", False, f"Status: {response.status_code}, Response: {response.text}")
+        
+        # Create test tradesperson
+        tradesperson_data = {
+            "name": "Test Tradesperson Review",
+            "email": f"tradesperson.review.{uuid.uuid4().hex[:8]}@test.com",
+            "password": "TestPassword123!",
+            "phone": "+2348087654321",
+            "trade_category": "Electrical Repairs",
+            "experience_years": 5,
+            "location": {
+                "state": "Lagos",
+                "lga": "Ikeja",
+                "town": "Computer Village"
+            },
+            "bio": "Experienced electrician for review testing"
+        }
+        
+        print(f"\n--- Creating Test Tradesperson ---")
+        response = self.make_request("POST", "/auth/register/tradesperson", json=tradesperson_data)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                self.tradesperson_token = data.get('access_token')
+                self.tradesperson_id = data.get('user', {}).get('id')
+                self.log_result("Tradesperson creation", True, f"ID: {self.tradesperson_id}")
+            except json.JSONDecodeError:
+                self.log_result("Tradesperson creation", False, "Invalid JSON response")
+        else:
+            self.log_result("Tradesperson creation", False, f"Status: {response.status_code}, Response: {response.text}")
+    
+    def create_test_job(self):
+        """Create a test job for review testing"""
+        print("\n=== Creating Test Job ===")
+        
+        if not self.homeowner_token:
+            self.log_result("Test job creation", False, "No homeowner token available")
+            return
+        
+        job_data = {
+            "title": "Electrical Wiring Review Test Job",
+            "description": "Test job for review system testing - electrical wiring work needed",
+            "category": "Electrical Repairs",
+            "location": {
+                "state": "Lagos",
+                "lga": "Ikeja", 
+                "town": "Computer Village",
+                "address": "123 Test Street"
+            },
+            "budget": {
+                "min": 50000,
+                "max": 100000,
+                "currency": "NGN"
+            },
+            "timeline": "1-2 weeks",
+            "requirements": ["Licensed electrician", "Experience with home wiring"],
+            "urgency": "medium"
+        }
+        
+        response = self.make_request("POST", "/jobs", json=job_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                self.test_job_id = data.get('id')
+                self.log_result("Test job creation", True, f"Job ID: {self.test_job_id}")
+                
+                # Mark job as completed for review testing
+                self.mark_job_completed()
+                
+            except json.JSONDecodeError:
+                self.log_result("Test job creation", False, "Invalid JSON response")
+        else:
+            self.log_result("Test job creation", False, f"Status: {response.status_code}, Response: {response.text}")
+    
+    def mark_job_completed(self):
+        """Mark the test job as completed"""
+        print("\n--- Marking Job as Completed ---")
+        
+        if not self.test_job_id or not self.homeowner_token:
+            self.log_result("Job completion", False, "Missing job ID or homeowner token")
+            return
+        
+        # Update job status to completed
+        update_data = {
+            "status": "completed",
+            "completion_notes": "Job completed successfully for review testing"
+        }
+        
+        response = self.make_request("PUT", f"/jobs/{self.test_job_id}", 
+                                   json=update_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            self.log_result("Job completion", True, "Job marked as completed")
+        else:
+            self.log_result("Job completion", False, f"Status: {response.status_code}")
+    
+    def test_review_creation_endpoint(self):
+        """Test POST /api/reviews/create endpoint"""
+        print("\n=== Testing Review Creation Endpoint ===")
+        
+        if not all([self.homeowner_token, self.tradesperson_id, self.test_job_id]):
+            self.log_result("Review creation endpoint", False, "Missing required test data")
+            return
+        
+        # Test 1: Create a valid review
+        print(f"\n--- Test 1: Create Valid Review ---")
+        review_data = {
+            "job_id": self.test_job_id,
+            "reviewee_id": self.tradesperson_id,
+            "rating": 5,
+            "title": "Excellent Electrical Work",
+            "content": "The electrician did an outstanding job with the wiring. Very professional, punctual, and the work quality was excellent. Highly recommended!",
+            "category_ratings": {
+                "quality": 5,
+                "timeliness": 5,
+                "communication": 4,
+                "professionalism": 5,
+                "value_for_money": 4
+            },
+            "photos": ["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"],
+            "would_recommend": True
+        }
+        
+        response = self.make_request("POST", "/reviews/create", 
+                                   json=review_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                self.test_review_id = data.get('id')
                 
                 # Verify response structure
-                required_fields = ['access_token', 'expires_in', 'admin', 'permissions']
+                required_fields = ['id', 'job_id', 'reviewer_id', 'reviewee_id', 'rating', 'title', 'content']
                 missing_fields = [field for field in required_fields if field not in data]
                 
                 if not missing_fields:
-                    self.log_result("Admin login response structure", True, 
-                                  "All required fields present in response")
+                    self.log_result("Valid review creation", True, f"Review ID: {self.test_review_id}")
                     
-                    # Store access token for subsequent tests
-                    self.access_token = data['access_token']
-                    self.admin_info = data['admin']
-                    
-                    # Verify access token format (JWT should have 3 parts separated by dots)
-                    token_parts = self.access_token.split('.')
-                    if len(token_parts) == 3:
-                        self.log_result("JWT token format", True, "Valid JWT token format")
+                    # Verify review data
+                    if data.get('rating') == 5 and data.get('title') == review_data['title']:
+                        self.log_result("Review data verification", True, "All fields match")
                     else:
-                        self.log_result("JWT token format", False, f"Invalid JWT format: {len(token_parts)} parts")
-                    
-                    # Verify admin object structure
-                    admin_required_fields = ['id', 'username', 'email', 'full_name', 'role', 'status']
-                    admin_missing_fields = [field for field in admin_required_fields if field not in data['admin']]
-                    
-                    if not admin_missing_fields:
-                        self.log_result("Admin object structure", True, 
-                                      f"Admin: {data['admin']['username']} ({data['admin']['role']})")
+                        self.log_result("Review data verification", False, "Data mismatch")
+                        
+                    # Verify category ratings
+                    if data.get('category_ratings') and len(data['category_ratings']) == 5:
+                        self.log_result("Category ratings", True, f"Found {len(data['category_ratings'])} categories")
                     else:
-                        self.log_result("Admin object structure", False, 
-                                      f"Missing admin fields: {admin_missing_fields}")
-                    
-                    # Verify permissions array
-                    if isinstance(data['permissions'], list) and len(data['permissions']) > 0:
-                        self.log_result("Admin permissions", True, 
-                                      f"Found {len(data['permissions'])} permissions")
-                    else:
-                        self.log_result("Admin permissions", False, "No permissions found or invalid format")
-                    
-                    # Verify expires_in is reasonable (should be in seconds)
-                    if isinstance(data['expires_in'], int) and data['expires_in'] > 0:
-                        hours = data['expires_in'] / 3600
-                        self.log_result("Token expiration", True, f"Token expires in {hours} hours")
-                    else:
-                        self.log_result("Token expiration", False, "Invalid expiration time")
+                        self.log_result("Category ratings", False, "Category ratings missing or incomplete")
                         
                 else:
-                    self.log_result("Admin login response structure", False, 
-                                  f"Missing required fields: {missing_fields}")
+                    self.log_result("Valid review creation", False, f"Missing fields: {missing_fields}")
                     
             except json.JSONDecodeError:
-                self.log_result("Admin login with legacy credentials", False, "Invalid JSON response")
+                self.log_result("Valid review creation", False, "Invalid JSON response")
         else:
-            self.log_result("Admin login with legacy credentials", False, 
-                          f"Status: {response.status_code}, Response: {response.text}")
-    
-    def test_admin_me_endpoint(self):
-        """Test /api/admin-management/me endpoint with JWT token"""
-        print("\n=== 2. Testing Admin Me Endpoint ===")
+            self.log_result("Valid review creation", False, f"Status: {response.status_code}, Response: {response.text}")
         
-        if not self.access_token:
-            self.log_result("Admin me endpoint", False, "No access token available from login test")
+        # Test 2: Try to create duplicate review (should fail)
+        print(f"\n--- Test 2: Duplicate Review Prevention ---")
+        response = self.make_request("POST", "/reviews/create", 
+                                   json=review_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 400:
+            self.log_result("Duplicate review prevention", True, "Correctly rejected duplicate review")
+        else:
+            self.log_result("Duplicate review prevention", False, f"Expected 400, got {response.status_code}")
+        
+        # Test 3: Invalid review data
+        print(f"\n--- Test 3: Invalid Review Data Validation ---")
+        invalid_review_data = {
+            "job_id": self.test_job_id,
+            "reviewee_id": self.tradesperson_id,
+            "rating": 6,  # Invalid rating (> 5)
+            "title": "Bad",  # Too short
+            "content": "Bad work"  # Too short
+        }
+        
+        response = self.make_request("POST", "/reviews/create", 
+                                   json=invalid_review_data, auth_token=self.homeowner_token)
+        
+        if response.status_code in [400, 422]:
+            self.log_result("Invalid review data validation", True, "Correctly rejected invalid data")
+        else:
+            self.log_result("Invalid review data validation", False, f"Expected 400/422, got {response.status_code}")
+        
+        # Test 4: Unauthorized review creation
+        print(f"\n--- Test 4: Unauthorized Review Creation ---")
+        response = self.make_request("POST", "/reviews/create", json=review_data)
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Unauthorized review creation", True, "Correctly rejected unauthorized request")
+        else:
+            self.log_result("Unauthorized review creation", False, f"Expected 401/403, got {response.status_code}")
+    
+    def test_get_user_reviews_endpoint(self):
+        """Test GET /api/reviews/user/{userId} endpoint"""
+        print("\n=== Testing Get User Reviews Endpoint ===")
+        
+        if not self.tradesperson_id:
+            self.log_result("Get user reviews endpoint", False, "No tradesperson ID available")
             return
         
-        print(f"\n--- Test 2.1: Get current admin info with JWT token ---")
-        response = self.make_request("GET", "/admin-management/me", auth_token=self.access_token)
+        # Test 1: Get reviews for tradesperson
+        print(f"\n--- Test 1: Get Reviews for Tradesperson ---")
+        response = self.make_request("GET", f"/reviews/user/{self.tradesperson_id}")
         
         if response.status_code == 200:
             try:
                 data = response.json()
                 
                 # Verify response structure
-                if 'admin' in data and 'permissions' in data:
-                    admin_data = data['admin']
-                    permissions = data['permissions']
+                required_fields = ['reviews', 'total', 'page', 'limit', 'total_pages', 'average_rating']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    self.log_result("User reviews response structure", True, 
+                                  f"Found {data['total']} reviews, avg rating: {data['average_rating']}")
                     
-                    # Verify admin data consistency with login response
-                    if self.admin_info and admin_data.get('id') == self.admin_info.get('id'):
-                        self.log_result("Admin data consistency", True, 
-                                      f"Admin ID matches: {admin_data['id']}")
-                    else:
-                        self.log_result("Admin data consistency", False, "Admin ID mismatch")
-                    
-                    # Verify admin fields
-                    admin_fields = ['id', 'username', 'email', 'full_name', 'role', 'status']
-                    present_fields = [field for field in admin_fields if field in admin_data]
-                    
-                    if len(present_fields) == len(admin_fields):
-                        self.log_result("Admin me response fields", True, 
-                                      f"All {len(admin_fields)} admin fields present")
-                    else:
-                        missing = set(admin_fields) - set(present_fields)
-                        self.log_result("Admin me response fields", False, 
-                                      f"Missing fields: {missing}")
-                    
-                    # Verify permissions
-                    if isinstance(permissions, list) and len(permissions) > 0:
-                        self.log_result("Admin me permissions", True, 
-                                      f"Retrieved {len(permissions)} permissions")
+                    # Verify reviews array
+                    if isinstance(data['reviews'], list):
+                        self.log_result("Reviews array format", True, f"Reviews list with {len(data['reviews'])} items")
                         
-                        # Log some sample permissions
-                        sample_permissions = permissions[:5]  # First 5 permissions
-                        print(f"    Sample permissions: {sample_permissions}")
+                        # Check if our test review is included
+                        if data['reviews'] and self.test_review_id:
+                            review_ids = [r.get('id') for r in data['reviews']]
+                            if self.test_review_id in review_ids:
+                                self.log_result("Test review inclusion", True, "Test review found in results")
+                            else:
+                                self.log_result("Test review inclusion", False, "Test review not found")
                     else:
-                        self.log_result("Admin me permissions", False, "No permissions or invalid format")
+                        self.log_result("Reviews array format", False, "Reviews is not a list")
                         
                 else:
-                    self.log_result("Admin me endpoint response structure", False, 
-                                  "Missing 'admin' or 'permissions' in response")
+                    self.log_result("User reviews response structure", False, f"Missing fields: {missing_fields}")
                     
             except json.JSONDecodeError:
-                self.log_result("Admin me endpoint", False, "Invalid JSON response")
+                self.log_result("Get user reviews endpoint", False, "Invalid JSON response")
         else:
-            self.log_result("Admin me endpoint", False, 
-                          f"Status: {response.status_code}, Response: {response.text}")
-    
-    def test_admin_me_without_token(self):
-        """Test /api/admin-management/me endpoint without JWT token (should fail)"""
-        print("\n=== 3. Testing Admin Me Endpoint Without Token ===")
+            self.log_result("Get user reviews endpoint", False, f"Status: {response.status_code}")
         
-        print(f"\n--- Test 3.1: Access admin me endpoint without authentication ---")
-        response = self.make_request("GET", "/admin-management/me")
-        
-        if response.status_code == 401:
-            self.log_result("Admin me without token", True, "Correctly rejected unauthenticated request")
-        elif response.status_code == 403:
-            self.log_result("Admin me without token", True, "Correctly rejected unauthorized request")
-        else:
-            self.log_result("Admin me without token", False, 
-                          f"Expected 401/403, got {response.status_code}")
-    
-    def test_admin_me_with_invalid_token(self):
-        """Test /api/admin-management/me endpoint with invalid JWT token"""
-        print("\n=== 4. Testing Admin Me Endpoint With Invalid Token ===")
-        
-        invalid_tokens = [
-            "invalid.jwt.token",
-            "Bearer invalid_token",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.signature",
-            ""
-        ]
-        
-        for i, invalid_token in enumerate(invalid_tokens, 1):
-            print(f"\n--- Test 4.{i}: Test with invalid token: {invalid_token[:20]}... ---")
-            response = self.make_request("GET", "/admin-management/me", auth_token=invalid_token)
-            
-            if response.status_code in [401, 403]:
-                self.log_result(f"Invalid token test {i}", True, 
-                              f"Correctly rejected invalid token (Status: {response.status_code})")
-            else:
-                self.log_result(f"Invalid token test {i}", False, 
-                              f"Expected 401/403, got {response.status_code}")
-    
-    def test_super_admin_account_creation(self):
-        """Test that super admin account is created when using legacy credentials"""
-        print("\n=== 5. Testing Super Admin Account Creation ===")
-        
-        if not self.admin_info:
-            self.log_result("Super admin account creation", False, "No admin info available")
-            return
-        
-        print(f"\n--- Test 5.1: Verify super admin account properties ---")
-        
-        # Check if admin has super admin role
-        if self.admin_info.get('role') == 'super_admin':
-            self.log_result("Super admin role", True, "Admin has super_admin role")
-        else:
-            self.log_result("Super admin role", False, 
-                          f"Expected super_admin role, got: {self.admin_info.get('role')}")
-        
-        # Check if admin status is active
-        if self.admin_info.get('status') == 'active':
-            self.log_result("Super admin status", True, "Admin status is active")
-        else:
-            self.log_result("Super admin status", False, 
-                          f"Expected active status, got: {self.admin_info.get('status')}")
-        
-        # Check if admin has proper username
-        if self.admin_info.get('username') == 'superadmin':
-            self.log_result("Super admin username", True, "Username is 'superadmin'")
-        else:
-            self.log_result("Super admin username", False, 
-                          f"Expected 'superadmin', got: {self.admin_info.get('username')}")
-        
-        # Check if admin has email
-        if self.admin_info.get('email'):
-            self.log_result("Super admin email", True, 
-                          f"Email: {self.admin_info.get('email')}")
-        else:
-            self.log_result("Super admin email", False, "No email found")
-    
-    def test_login_statistics_update(self):
-        """Test that login statistics are updated after login"""
-        print("\n=== 6. Testing Login Statistics Update ===")
-        
-        if not self.access_token:
-            self.log_result("Login statistics update", False, "No access token available")
-            return
-        
-        # Get current admin info to check login statistics
-        print(f"\n--- Test 6.1: Check login statistics in admin info ---")
-        response = self.make_request("GET", "/admin-management/me", auth_token=self.access_token)
+        # Test 2: Get reviews with pagination
+        print(f"\n--- Test 2: Reviews Pagination ---")
+        response = self.make_request("GET", f"/reviews/user/{self.tradesperson_id}?page=1&limit=5")
         
         if response.status_code == 200:
             try:
                 data = response.json()
-                admin_data = data.get('admin', {})
-                
-                # Check if last_login is present and recent
-                if 'last_login' in admin_data and admin_data['last_login']:
-                    self.log_result("Last login timestamp", True, 
-                                  f"Last login: {admin_data['last_login']}")
+                if data.get('page') == 1 and data.get('limit') == 5:
+                    self.log_result("Reviews pagination", True, f"Page {data['page']}, limit {data['limit']}")
                 else:
-                    self.log_result("Last login timestamp", False, "No last_login timestamp found")
-                
-                # Check if created_at is present
-                if 'created_at' in admin_data and admin_data['created_at']:
-                    self.log_result("Account creation timestamp", True, 
-                                  f"Created at: {admin_data['created_at']}")
-                else:
-                    self.log_result("Account creation timestamp", False, "No created_at timestamp found")
-                    
+                    self.log_result("Reviews pagination", False, "Pagination parameters not respected")
             except json.JSONDecodeError:
-                self.log_result("Login statistics update", False, "Invalid JSON response")
+                self.log_result("Reviews pagination", False, "Invalid JSON response")
         else:
-            self.log_result("Login statistics update", False, 
-                          f"Could not retrieve admin info: {response.status_code}")
-    
-    def test_multiple_login_attempts(self):
-        """Test multiple login attempts to verify consistency"""
-        print("\n=== 7. Testing Multiple Login Attempts ===")
+            self.log_result("Reviews pagination", False, f"Status: {response.status_code}")
         
-        login_data = {
-            "username": "admin",
-            "password": "servicehub2024"
-        }
+        # Test 3: Non-existent user
+        print(f"\n--- Test 3: Non-existent User Reviews ---")
+        fake_user_id = str(uuid.uuid4())
+        response = self.make_request("GET", f"/reviews/user/{fake_user_id}")
         
-        successful_logins = 0
-        
-        for i in range(3):
-            print(f"\n--- Test 7.{i+1}: Login attempt {i+1} ---")
-            response = self.make_request("POST", "/admin-management/login", json=login_data)
-            
-            if response.status_code == 200:
-                successful_logins += 1
-                try:
-                    data = response.json()
-                    if 'access_token' in data and 'admin' in data:
-                        self.log_result(f"Multiple login attempt {i+1}", True, 
-                                      f"Successful login, token length: {len(data['access_token'])}")
-                    else:
-                        self.log_result(f"Multiple login attempt {i+1}", False, 
-                                      "Missing required fields in response")
-                except json.JSONDecodeError:
-                    self.log_result(f"Multiple login attempt {i+1}", False, "Invalid JSON response")
-            else:
-                self.log_result(f"Multiple login attempt {i+1}", False, 
-                              f"Status: {response.status_code}")
-        
-        # Verify all attempts were successful
-        if successful_logins == 3:
-            self.log_result("Multiple login consistency", True, 
-                          "All 3 login attempts successful")
+        if response.status_code == 404:
+            self.log_result("Non-existent user reviews", True, "Correctly returned 404 for non-existent user")
         else:
-            self.log_result("Multiple login consistency", False, 
-                          f"Only {successful_logins}/3 login attempts successful")
+            self.log_result("Non-existent user reviews", False, f"Expected 404, got {response.status_code}")
     
-    def test_invalid_credentials(self):
-        """Test login with invalid credentials"""
-        print("\n=== 8. Testing Invalid Credentials ===")
+    def test_get_job_reviews_endpoint(self):
+        """Test GET /api/reviews/job/{jobId} endpoint"""
+        print("\n=== Testing Get Job Reviews Endpoint ===")
         
-        invalid_credentials = [
-            {"username": "admin", "password": "wrongpassword"},
-            {"username": "wronguser", "password": "servicehub2024"},
-            {"username": "admin", "password": ""},
-            {"username": "", "password": "servicehub2024"},
-            {"username": "", "password": ""}
-        ]
-        
-        for i, creds in enumerate(invalid_credentials, 1):
-            print(f"\n--- Test 8.{i}: Invalid credentials test {i} ---")
-            response = self.make_request("POST", "/admin-management/login", json=creds)
-            
-            if response.status_code == 401:
-                self.log_result(f"Invalid credentials test {i}", True, 
-                              "Correctly rejected invalid credentials")
-            else:
-                self.log_result(f"Invalid credentials test {i}", False, 
-                              f"Expected 401, got {response.status_code}")
-    
-    def investigate_admin_permissions(self):
-        """Investigate current admin user permissions for job management"""
-        print("\n=== 4. Investigating Admin User Permissions ===")
-        
-        if not self.admin_info:
-            self.log_result("Admin permissions investigation", False, "No admin info available")
+        if not self.test_job_id:
+            self.log_result("Get job reviews endpoint", False, "No test job ID available")
             return
         
-        print(f"\n--- Test 4.1: Check admin user role and permissions ---")
+        # Test 1: Get reviews for job
+        print(f"\n--- Test 1: Get Reviews for Job ---")
+        response = self.make_request("GET", f"/reviews/job/{self.test_job_id}")
         
-        # Check admin role
-        admin_role = self.admin_info.get('role')
-        print(f"Current admin role: {admin_role}")
-        
-        if admin_role in ['super_admin', 'content_admin']:
-            self.log_result("Admin role check", True, 
-                          f"Admin has appropriate role: {admin_role}")
-        else:
-            self.log_result("Admin role check", False, 
-                          f"Admin role '{admin_role}' may not have job management permissions")
-        
-        # Get current admin permissions via /me endpoint
-        if self.access_token:
-            response = self.make_request("GET", "/admin-management/me", auth_token=self.access_token)
-            
-            if response.status_code == 200:
-                try:
-                    data = response.json()
-                    permissions = data.get('permissions', [])
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                
+                if isinstance(data, list):
+                    self.log_result("Job reviews response format", True, f"Found {len(data)} reviews for job")
                     
-                    # Check for MANAGE_JOBS permission
-                    has_manage_jobs = 'manage_jobs' in permissions
-                    
-                    if has_manage_jobs:
-                        self.log_result("MANAGE_JOBS permission check", True, 
-                                      "Admin has MANAGE_JOBS permission")
-                    else:
-                        self.log_result("MANAGE_JOBS permission check", False, 
-                                      "Admin does NOT have MANAGE_JOBS permission")
-                    
-                    # Log all permissions for debugging
-                    print(f"    All admin permissions ({len(permissions)}): {permissions[:10]}...")
-                    
-                    # Check for other relevant permissions
-                    relevant_permissions = ['approve_jobs', 'delete_jobs', 'edit_job_fees']
-                    for perm in relevant_permissions:
-                        if perm in permissions:
-                            self.log_result(f"{perm} permission", True, f"Admin has {perm} permission")
+                    # Check if our test review is included
+                    if data and self.test_review_id:
+                        review_ids = [r.get('id') for r in data]
+                        if self.test_review_id in review_ids:
+                            self.log_result("Job review inclusion", True, "Test review found in job reviews")
                         else:
-                            self.log_result(f"{perm} permission", False, f"Admin missing {perm} permission")
-                            
-                except json.JSONDecodeError:
-                    self.log_result("Admin permissions investigation", False, "Invalid JSON response")
-            else:
-                self.log_result("Admin permissions investigation", False, 
-                              f"Could not retrieve admin permissions: {response.status_code}")
-    
-    def test_job_management_endpoints(self):
-        """Test access to job management endpoints"""
-        print("\n=== 5. Testing Job Management Endpoints Access ===")
+                            self.log_result("Job review inclusion", False, "Test review not found in job reviews")
+                else:
+                    self.log_result("Job reviews response format", False, "Response is not a list")
+                    
+            except json.JSONDecodeError:
+                self.log_result("Get job reviews endpoint", False, "Invalid JSON response")
+        else:
+            self.log_result("Get job reviews endpoint", False, f"Status: {response.status_code}")
         
-        if not self.access_token:
-            self.log_result("Job management endpoints test", False, "No access token available")
+        # Test 2: Non-existent job
+        print(f"\n--- Test 2: Non-existent Job Reviews ---")
+        fake_job_id = str(uuid.uuid4())
+        response = self.make_request("GET", f"/reviews/job/{fake_job_id}")
+        
+        if response.status_code == 404:
+            self.log_result("Non-existent job reviews", True, "Correctly returned 404 for non-existent job")
+        else:
+            self.log_result("Non-existent job reviews", False, f"Expected 404, got {response.status_code}")
+    
+    def test_get_review_summary_endpoint(self):
+        """Test GET /api/reviews/summary/{userId} endpoint"""
+        print("\n=== Testing Get Review Summary Endpoint ===")
+        
+        if not self.tradesperson_id:
+            self.log_result("Get review summary endpoint", False, "No tradesperson ID available")
             return
         
-        # Test GET /api/admin/jobs/postings
-        print(f"\n--- Test 5.1: GET /api/admin/jobs/postings ---")
-        response = self.make_request("GET", "/admin/jobs/postings", auth_token=self.access_token)
+        # Test 1: Get review summary for tradesperson
+        print(f"\n--- Test 1: Get Review Summary ---")
+        response = self.make_request("GET", f"/reviews/summary/{self.tradesperson_id}")
         
         if response.status_code == 200:
-            self.log_result("GET job postings endpoint", True, 
-                          "Successfully accessed job postings endpoint")
             try:
                 data = response.json()
-                job_postings = data.get('job_postings', [])
-                print(f"    Found {len(job_postings)} job postings")
+                
+                # Verify summary structure
+                required_fields = ['total_reviews', 'average_rating', 'rating_distribution', 'recommendation_percentage']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    self.log_result("Review summary structure", True, 
+                                  f"Total: {data['total_reviews']}, Avg: {data['average_rating']}")
+                    
+                    # Verify rating distribution
+                    if isinstance(data['rating_distribution'], dict):
+                        self.log_result("Rating distribution format", True, "Rating distribution is a dict")
+                    else:
+                        self.log_result("Rating distribution format", False, "Rating distribution is not a dict")
+                        
+                    # Verify recommendation percentage
+                    if 0 <= data['recommendation_percentage'] <= 100:
+                        self.log_result("Recommendation percentage", True, f"{data['recommendation_percentage']}%")
+                    else:
+                        self.log_result("Recommendation percentage", False, "Invalid percentage value")
+                        
+                else:
+                    self.log_result("Review summary structure", False, f"Missing fields: {missing_fields}")
+                    
             except json.JSONDecodeError:
-                self.log_result("Job postings response parsing", False, "Invalid JSON response")
-        elif response.status_code == 403:
-            self.log_result("GET job postings endpoint", False, 
-                          "403 Forbidden - Admin lacks MANAGE_JOBS permission")
+                self.log_result("Get review summary endpoint", False, "Invalid JSON response")
         else:
-            self.log_result("GET job postings endpoint", False, 
-                          f"Unexpected status: {response.status_code}, Response: {response.text}")
+            self.log_result("Get review summary endpoint", False, f"Status: {response.status_code}")
         
-        # Test GET /api/admin-management/profile (alternative endpoint)
-        print(f"\n--- Test 5.2: GET /api/admin-management/profile ---")
-        response = self.make_request("GET", "/admin-management/profile", auth_token=self.access_token)
+        # Test 2: Non-existent user summary
+        print(f"\n--- Test 2: Non-existent User Summary ---")
+        fake_user_id = str(uuid.uuid4())
+        response = self.make_request("GET", f"/reviews/summary/{fake_user_id}")
         
-        if response.status_code == 200:
-            self.log_result("GET admin profile endpoint", True, "Admin profile endpoint accessible")
-        elif response.status_code == 404:
-            self.log_result("GET admin profile endpoint", False, "Admin profile endpoint not found")
+        if response.status_code == 404:
+            self.log_result("Non-existent user summary", True, "Correctly returned 404 for non-existent user")
         else:
-            self.log_result("GET admin profile endpoint", False, 
-                          f"Status: {response.status_code}")
+            self.log_result("Non-existent user summary", False, f"Expected 404, got {response.status_code}")
     
-    def test_job_creation(self):
-        """Test job creation with current admin permissions"""
-        print("\n=== 6. Testing Job Creation ===")
+    def test_review_response_endpoint(self):
+        """Test POST /api/reviews/respond/{reviewId} endpoint"""
+        print("\n=== Testing Review Response Endpoint ===")
         
-        if not self.access_token:
-            self.log_result("Job creation test", False, "No access token available")
+        if not self.test_review_id or not self.tradesperson_token:
+            self.log_result("Review response endpoint", False, "Missing review ID or tradesperson token")
             return
         
-        # Create a simple test job posting
-        test_job = {
-            "title": "Test Job Posting - Admin Permissions Investigation",
-            "description": "This is a test job posting created during admin permissions investigation.",
-            "department": "engineering",
-            "location": "Lagos, Nigeria",
-            "job_type": "full_time",
-            "experience_level": "mid_level",
-            "requirements": ["Test requirement 1", "Test requirement 2"],
-            "benefits": ["Test benefit 1", "Test benefit 2"],
-            "responsibilities": ["Test responsibility 1", "Test responsibility 2"],
-            "salary_min": 150000,
-            "salary_max": 300000,
-            "salary_currency": "NGN",
-            "is_salary_public": True,
-            "status": "draft"
+        # Test 1: Valid review response
+        print(f"\n--- Test 1: Valid Review Response ---")
+        response_data = {
+            "response": "Thank you for the excellent review! It was a pleasure working on your electrical project. I'm glad you were satisfied with the quality of work and professionalism."
         }
         
-        print(f"\n--- Test 6.1: POST /api/admin/jobs/postings ---")
-        response = self.make_request("POST", "/admin/jobs/postings", 
-                                   json=test_job, auth_token=self.access_token)
+        response = self.make_request("POST", f"/reviews/respond/{self.test_review_id}", 
+                                   json=response_data, auth_token=self.tradesperson_token)
         
         if response.status_code == 200:
             try:
                 data = response.json()
-                job_id = data.get('job_id')
-                self.log_result("Job creation test", True, 
-                              f"Successfully created test job with ID: {job_id}")
                 
-                # Store job ID for potential cleanup
-                self.test_data['created_job_id'] = job_id
-                
+                # Verify response was added
+                if data.get('response') == response_data['response']:
+                    self.log_result("Valid review response", True, "Response added successfully")
+                    
+                    # Verify response date is set
+                    if data.get('response_date'):
+                        self.log_result("Response date", True, f"Response date: {data['response_date']}")
+                    else:
+                        self.log_result("Response date", False, "Response date not set")
+                else:
+                    self.log_result("Valid review response", False, "Response content mismatch")
+                    
             except json.JSONDecodeError:
-                self.log_result("Job creation test", False, "Invalid JSON response")
-        elif response.status_code == 403:
-            self.log_result("Job creation test", False, 
-                          "403 Forbidden - Admin lacks MANAGE_JOBS permission for job creation")
-        elif response.status_code == 401:
-            self.log_result("Job creation test", False, 
-                          "401 Unauthorized - Token may be invalid or expired")
+                self.log_result("Valid review response", False, "Invalid JSON response")
         else:
-            self.log_result("Job creation test", False, 
-                          f"Status: {response.status_code}, Response: {response.text}")
-    
-    def provide_recommendations(self):
-        """Provide recommendations based on investigation results"""
-        print("\n=== 7. Recommendations ===")
+            self.log_result("Valid review response", False, f"Status: {response.status_code}, Response: {response.text}")
         
-        if not self.admin_info:
-            print("❌ Could not investigate admin permissions - login failed")
+        # Test 2: Unauthorized response (homeowner trying to respond)
+        print(f"\n--- Test 2: Unauthorized Review Response ---")
+        response = self.make_request("POST", f"/reviews/respond/{self.test_review_id}", 
+                                   json=response_data, auth_token=self.homeowner_token)
+        
+        if response.status_code == 403:
+            self.log_result("Unauthorized review response", True, "Correctly rejected unauthorized response")
+        else:
+            self.log_result("Unauthorized review response", False, f"Expected 403, got {response.status_code}")
+        
+        # Test 3: Non-existent review response
+        print(f"\n--- Test 3: Non-existent Review Response ---")
+        fake_review_id = str(uuid.uuid4())
+        response = self.make_request("POST", f"/reviews/respond/{fake_review_id}", 
+                                   json=response_data, auth_token=self.tradesperson_token)
+        
+        if response.status_code == 404:
+            self.log_result("Non-existent review response", True, "Correctly returned 404 for non-existent review")
+        else:
+            self.log_result("Non-existent review response", False, f"Expected 404, got {response.status_code}")
+    
+    def test_my_reviews_endpoint(self):
+        """Test GET /api/reviews/my-reviews endpoint"""
+        print("\n=== Testing My Reviews Endpoint ===")
+        
+        if not self.homeowner_token:
+            self.log_result("My reviews endpoint", False, "No homeowner token available")
             return
         
-        admin_role = self.admin_info.get('role')
+        # Test 1: Get current user's reviews
+        print(f"\n--- Test 1: Get My Reviews ---")
+        response = self.make_request("GET", "/reviews/my-reviews", auth_token=self.homeowner_token)
         
-        print(f"\n--- Current Admin Status ---")
-        print(f"Username: {self.admin_info.get('username', 'Unknown')}")
-        print(f"Role: {admin_role}")
-        print(f"Status: {self.admin_info.get('status', 'Unknown')}")
-        print(f"Email: {self.admin_info.get('email', 'Unknown')}")
-        
-        # Analyze results and provide recommendations
-        failed_tests = [error for error in self.results['errors'] if 'MANAGE_JOBS' in error or '403 Forbidden' in error]
-        
-        if failed_tests:
-            print(f"\n--- ISSUE IDENTIFIED ---")
-            print(f"❌ Admin user lacks proper permissions for job management")
-            print(f"❌ Failed tests: {len(failed_tests)}")
-            
-            print(f"\n--- RECOMMENDED SOLUTIONS ---")
-            if admin_role not in ['super_admin', 'content_admin']:
-                print(f"1. UPDATE ADMIN ROLE: Change admin role from '{admin_role}' to 'content_admin' or 'super_admin'")
-            
-            print(f"2. VERIFY PERMISSION MAPPING: Ensure CONTENT_ADMIN role includes MANAGE_JOBS permission")
-            print(f"3. CREATE NEW ADMIN: Create a new admin user with CONTENT_ADMIN role specifically for job management")
-            print(f"4. CHECK DATABASE: Verify admin permissions are properly stored in database")
-            
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                
+                # Verify response structure
+                required_fields = ['reviews', 'total', 'page', 'limit', 'total_pages']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    self.log_result("My reviews response structure", True, 
+                                  f"Found {data['total']} reviews by current user")
+                    
+                    # Check if our test review is included
+                    if data['reviews'] and self.test_review_id:
+                        review_ids = [r.get('id') for r in data['reviews']]
+                        if self.test_review_id in review_ids:
+                            self.log_result("My review inclusion", True, "Test review found in my reviews")
+                        else:
+                            self.log_result("My review inclusion", False, "Test review not found in my reviews")
+                else:
+                    self.log_result("My reviews response structure", False, f"Missing fields: {missing_fields}")
+                    
+            except json.JSONDecodeError:
+                self.log_result("My reviews endpoint", False, "Invalid JSON response")
         else:
-            print(f"\n--- STATUS: PERMISSIONS OK ---")
-            print(f"✅ Admin user appears to have proper permissions for job management")
-            print(f"✅ If 403 errors persist, check application logs for detailed error messages")
+            self.log_result("My reviews endpoint", False, f"Status: {response.status_code}")
+        
+        # Test 2: Unauthorized access
+        print(f"\n--- Test 2: Unauthorized My Reviews Access ---")
+        response = self.make_request("GET", "/reviews/my-reviews")
+        
+        if response.status_code in [401, 403]:
+            self.log_result("Unauthorized my reviews access", True, "Correctly rejected unauthorized request")
+        else:
+            self.log_result("Unauthorized my reviews access", False, f"Expected 401/403, got {response.status_code}")
+    
+    def test_review_permissions(self):
+        """Test review permission system"""
+        print("\n=== Testing Review Permissions ===")
+        
+        # Test 1: Can review eligibility check
+        print(f"\n--- Test 1: Review Eligibility Check ---")
+        if self.homeowner_token and self.tradesperson_id and self.test_job_id:
+            response = self.make_request("GET", f"/reviews/can-review/{self.tradesperson_id}/{self.test_job_id}", 
+                                       auth_token=self.homeowner_token)
+            
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if 'can_review' in data:
+                        # Since we already created a review, this should be False
+                        if not data['can_review']:
+                            self.log_result("Review eligibility check", True, "Correctly identified duplicate review")
+                        else:
+                            self.log_result("Review eligibility check", False, "Should not allow duplicate review")
+                    else:
+                        self.log_result("Review eligibility check", False, "Missing can_review field")
+                except json.JSONDecodeError:
+                    self.log_result("Review eligibility check", False, "Invalid JSON response")
+            else:
+                self.log_result("Review eligibility check", False, f"Status: {response.status_code}")
+        
+        # Test 2: Tradesperson cannot review homeowner for same job (wrong direction)
+        print(f"\n--- Test 2: Wrong Direction Review Prevention ---")
+        if self.tradesperson_token and self.homeowner_id and self.test_job_id:
+            wrong_review_data = {
+                "job_id": self.test_job_id,
+                "reviewee_id": self.homeowner_id,
+                "rating": 4,
+                "title": "Good Client",
+                "content": "The homeowner was easy to work with and paid on time."
+            }
+            
+            response = self.make_request("POST", "/reviews/create", 
+                                       json=wrong_review_data, auth_token=self.tradesperson_token)
+            
+            # This should fail because tradesperson reviewing homeowner requires different workflow
+            if response.status_code in [400, 403]:
+                self.log_result("Wrong direction review prevention", True, "Correctly prevented inappropriate review")
+            else:
+                self.log_result("Wrong direction review prevention", False, f"Expected 400/403, got {response.status_code}")
+    
+    def test_review_data_structure(self):
+        """Test review data structure and validation"""
+        print("\n=== Testing Review Data Structure ===")
+        
+        if not self.test_review_id:
+            self.log_result("Review data structure", False, "No test review ID available")
+            return
+        
+        # Get the created review and verify its structure
+        print(f"\n--- Test 1: Review Data Structure Validation ---")
+        response = self.make_request("GET", f"/reviews/user/{self.tradesperson_id}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                reviews = data.get('reviews', [])
+                
+                if reviews:
+                    review = reviews[0]  # Get first review
+                    
+                    # Check required fields
+                    required_fields = [
+                        'id', 'job_id', 'reviewer_id', 'reviewee_id', 'rating', 
+                        'title', 'content', 'created_at', 'review_type'
+                    ]
+                    
+                    missing_fields = [field for field in required_fields if field not in review]
+                    
+                    if not missing_fields:
+                        self.log_result("Review required fields", True, "All required fields present")
+                        
+                        # Verify review type
+                        if review.get('review_type') == 'homeowner_to_tradesperson':
+                            self.log_result("Review type validation", True, "Correct review type")
+                        else:
+                            self.log_result("Review type validation", False, f"Wrong review type: {review.get('review_type')}")
+                        
+                        # Verify rating range
+                        rating = review.get('rating')
+                        if 1 <= rating <= 5:
+                            self.log_result("Rating range validation", True, f"Rating: {rating}")
+                        else:
+                            self.log_result("Rating range validation", False, f"Invalid rating: {rating}")
+                        
+                        # Verify category ratings
+                        category_ratings = review.get('category_ratings', {})
+                        if isinstance(category_ratings, dict) and len(category_ratings) > 0:
+                            self.log_result("Category ratings structure", True, f"Found {len(category_ratings)} categories")
+                        else:
+                            self.log_result("Category ratings structure", False, "Category ratings missing or invalid")
+                        
+                        # Verify photos array
+                        photos = review.get('photos', [])
+                        if isinstance(photos, list):
+                            self.log_result("Photos array structure", True, f"Photos array with {len(photos)} items")
+                        else:
+                            self.log_result("Photos array structure", False, "Photos is not an array")
+                        
+                        # Verify recommendation field
+                        would_recommend = review.get('would_recommend')
+                        if isinstance(would_recommend, bool):
+                            self.log_result("Recommendation field", True, f"Would recommend: {would_recommend}")
+                        else:
+                            self.log_result("Recommendation field", False, "Recommendation field is not boolean")
+                            
+                    else:
+                        self.log_result("Review required fields", False, f"Missing fields: {missing_fields}")
+                else:
+                    self.log_result("Review data structure", False, "No reviews found for validation")
+                    
+            except json.JSONDecodeError:
+                self.log_result("Review data structure", False, "Invalid JSON response")
+        else:
+            self.log_result("Review data structure", False, f"Status: {response.status_code}")
+    
+    def cleanup_test_data(self):
+        """Clean up test data created during testing"""
+        print("\n=== Cleaning Up Test Data ===")
+        
+        # Note: In a real implementation, you might want to delete test users and jobs
+        # For now, we'll just log what would be cleaned up
+        cleanup_items = []
+        
+        if self.homeowner_id:
+            cleanup_items.append(f"Homeowner: {self.homeowner_id}")
+        if self.tradesperson_id:
+            cleanup_items.append(f"Tradesperson: {self.tradesperson_id}")
+        if self.test_job_id:
+            cleanup_items.append(f"Job: {self.test_job_id}")
+        if self.test_review_id:
+            cleanup_items.append(f"Review: {self.test_review_id}")
+        
+        if cleanup_items:
+            print(f"Test data created (for manual cleanup if needed):")
+            for item in cleanup_items:
+                print(f"  - {item}")
+            self.log_result("Test data cleanup", True, f"Identified {len(cleanup_items)} items for cleanup")
+        else:
+            self.log_result("Test data cleanup", True, "No test data to cleanup")
     
     def run_all_tests(self):
-        """Run all admin permissions investigation tests"""
-        print("🚀 Starting Admin User Permissions Investigation for Job Posting Management")
+        """Run all review system tests"""
+        print("🚀 Starting Comprehensive Review System Backend Testing")
         print("=" * 80)
         
         try:
             # Test service health
             self.test_service_health()
             
-            # Test admin login with legacy credentials
-            self.test_admin_login_legacy_credentials()
+            # Setup test users and job
+            self.setup_test_users()
+            self.create_test_job()
             
-            # Test admin me endpoint with token
-            self.test_admin_me_endpoint()
+            # Test review API endpoints
+            self.test_review_creation_endpoint()
+            self.test_get_user_reviews_endpoint()
+            self.test_get_job_reviews_endpoint()
+            self.test_get_review_summary_endpoint()
+            self.test_review_response_endpoint()
+            self.test_my_reviews_endpoint()
             
-            # Investigate admin user permissions
-            self.investigate_admin_permissions()
+            # Test review permissions and data structure
+            self.test_review_permissions()
+            self.test_review_data_structure()
             
-            # Test job management endpoints access
-            self.test_job_management_endpoints()
-            
-            # Test job creation with proper permissions
-            self.test_job_creation()
-            
-            # Provide recommendations
-            self.provide_recommendations()
+            # Cleanup
+            self.cleanup_test_data()
             
         except Exception as e:
-            print(f"❌ Critical error during investigation: {str(e)}")
+            print(f"❌ Critical error during testing: {str(e)}")
             self.results['failed'] += 1
             self.results['errors'].append(f"Critical error: {str(e)}")
         
@@ -641,9 +801,9 @@ class ReviewSystemTester:
         self.print_final_results()
     
     def print_final_results(self):
-        """Print comprehensive investigation results"""
+        """Print comprehensive test results"""
         print("\n" + "=" * 80)
-        print("🏁 ADMIN USER PERMISSIONS INVESTIGATION RESULTS")
+        print("🏁 COMPREHENSIVE REVIEW SYSTEM TESTING RESULTS")
         print("=" * 80)
         
         total_tests = self.results['passed'] + self.results['failed']
@@ -654,47 +814,68 @@ class ReviewSystemTester:
         print(f"📊 SUCCESS RATE: {success_rate:.1f}% ({self.results['passed']}/{total_tests} tests passed)")
         
         # Print key findings
-        print(f"\n🎯 KEY INVESTIGATION FINDINGS:")
+        print(f"\n🎯 KEY TESTING FINDINGS:")
         
-        if self.admin_info:
-            admin_role = self.admin_info.get('role', 'Unknown')
-            print(f"✅ Admin login successful with role: {admin_role}")
-            print(f"✅ Admin account status: {self.admin_info.get('status', 'Unknown')}")
-            
-            # Check if permissions-related failures exist
-            permission_failures = [error for error in self.results['errors'] 
-                                 if 'MANAGE_JOBS' in error or '403 Forbidden' in error]
-            
-            if permission_failures:
-                print(f"❌ PERMISSION ISSUES IDENTIFIED:")
-                for error in permission_failures:
-                    print(f"   - {error}")
-                print(f"❌ Root cause: Admin user lacks MANAGE_JOBS permission")
-                print(f"❌ Impact: Cannot create job postings via admin dashboard")
-            else:
-                print(f"✅ Admin permissions appear to be correctly configured")
-                print(f"✅ Job management endpoints should be accessible")
+        if success_rate >= 90:
+            print(f"✅ EXCELLENT: Review system is working excellently")
+        elif success_rate >= 80:
+            print(f"✅ GOOD: Review system is working well with minor issues")
+        elif success_rate >= 70:
+            print(f"⚠️  FAIR: Review system has some issues that need attention")
+        else:
+            print(f"❌ POOR: Review system has significant issues requiring fixes")
         
+        # Categorize failures
         if self.results['failed'] > 0:
             print(f"\n🔍 DETAILED FAILURE ANALYSIS:")
-            for i, error in enumerate(self.results['errors'], 1):
-                print(f"{i}. {error}")
+            
+            endpoint_failures = [e for e in self.results['errors'] if 'endpoint' in e.lower()]
+            permission_failures = [e for e in self.results['errors'] if 'permission' in e.lower()]
+            validation_failures = [e for e in self.results['errors'] if 'validation' in e.lower()]
+            
+            if endpoint_failures:
+                print(f"\n📡 ENDPOINT ISSUES ({len(endpoint_failures)}):")
+                for error in endpoint_failures:
+                    print(f"   - {error}")
+            
+            if permission_failures:
+                print(f"\n🔒 PERMISSION ISSUES ({len(permission_failures)}):")
+                for error in permission_failures:
+                    print(f"   - {error}")
+            
+            if validation_failures:
+                print(f"\n✅ VALIDATION ISSUES ({len(validation_failures)}):")
+                for error in validation_failures:
+                    print(f"   - {error}")
+            
+            # Other failures
+            other_failures = [e for e in self.results['errors'] 
+                            if not any(keyword in e.lower() for keyword in ['endpoint', 'permission', 'validation'])]
+            if other_failures:
+                print(f"\n🔧 OTHER ISSUES ({len(other_failures)}):")
+                for error in other_failures:
+                    print(f"   - {error}")
         
         # Overall assessment
-        permission_issues = len([e for e in self.results['errors'] if 'permission' in e.lower() or '403' in e])
+        print(f"\n🎯 OVERALL ASSESSMENT:")
         
-        if permission_issues == 0 and success_rate >= 80:
-            print(f"\n✅ OVERALL RESULT: PERMISSIONS CONFIGURED CORRECTLY")
-            print(f"   Admin user should be able to manage job postings without 403 errors")
-        elif permission_issues > 0:
-            print(f"\n❌ OVERALL RESULT: PERMISSION CONFIGURATION ISSUE IDENTIFIED")
-            print(f"   Admin user needs role/permission updates to manage job postings")
+        if success_rate >= 85:
+            print(f"✅ PRODUCTION READY: Review system is fully functional and ready for production use")
+            print(f"   - All core review workflows are operational")
+            print(f"   - API endpoints are working correctly")
+            print(f"   - Permission system is properly enforced")
+            print(f"   - Data validation is working as expected")
+        elif success_rate >= 70:
+            print(f"⚠️  NEEDS MINOR FIXES: Review system is mostly functional but needs some improvements")
+            print(f"   - Core functionality is working")
+            print(f"   - Some edge cases or minor features need attention")
         else:
-            print(f"\n⚠️  OVERALL RESULT: INVESTIGATION INCOMPLETE")
-            print(f"   Some tests failed - manual verification may be required")
+            print(f"❌ NEEDS MAJOR FIXES: Review system has significant issues that must be resolved")
+            print(f"   - Core functionality may be broken")
+            print(f"   - Multiple critical issues identified")
         
         print("=" * 80)
 
 if __name__ == "__main__":
-    investigator = AdminPermissionsInvestigator()
-    investigator.run_all_tests()
+    tester = ReviewSystemTester()
+    tester.run_all_tests()
