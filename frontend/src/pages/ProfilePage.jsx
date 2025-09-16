@@ -79,6 +79,7 @@ const ProfilePage = () => {
       // Load portfolio if tradesperson
       if (isTradesperson()) {
         loadPortfolio();
+        loadReceivedReviews();
       }
     }
   }, [user, isAuthenticated, isTradesperson]);
