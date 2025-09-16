@@ -369,9 +369,10 @@ const ProfilePage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Tabs defaultValue="profile" className="space-y-6">
-              <TabsList className={`grid w-full ${isTradesperson() ? 'grid-cols-4' : 'grid-cols-3'}`}>
+              <TabsList className={`grid w-full ${isTradesperson() ? 'grid-cols-5' : 'grid-cols-3'}`}>
                 <TabsTrigger value="profile">Profile Information</TabsTrigger>
                 {isTradesperson() && <TabsTrigger value="portfolio">Portfolio</TabsTrigger>}
+                {isTradesperson() && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
                 <TabsTrigger value="account">Account Settings</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
               </TabsList>
