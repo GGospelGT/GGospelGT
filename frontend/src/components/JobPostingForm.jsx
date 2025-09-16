@@ -535,6 +535,34 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         newAnswers = { ...prev, [questionId]: value };
       }
       
+      // After updating answers, check if current question index is still valid
+      // This is important because conditional logic might hide/show questions
+      setTimeout(() => {
+        const visibleQuestions = getVisibleQuestions();
+        if (currentQuestionIndex >= visibleQuestions.length && visibleQuestions.length > 0) {
+          // Current index is out of bounds, reset to last visible question
+          setCurrentQuestionIndex(visibleQuestions.length - 1);
+        } else if (visibleQuestions.length === 0) {
+          // No visible questions, reset to 0
+          setCurrentQuestionIndex(0);
+        }
+        
+        // Clear any validation errors for questions that are no longer visible
+        const visibleQuestionIds = visibleQuestions.map(q => q.id);
+        setErrors(prevErrors => {
+          const newErrors = { ...prevErrors };
+          Object.keys(newErrors).forEach(errorKey => {
+            if (errorKey.startsWith('question_')) {
+              const questionId = errorKey.replace('question_', '');
+              if (!visibleQuestionIds.includes(questionId)) {
+                delete newErrors[errorKey];
+              }
+            }
+          });
+          return newErrors;
+        });
+      }, 10); // Small delay to ensure state has updated
+      
       return newAnswers;
     });
   };
