@@ -518,146 +518,152 @@ const MyInterestsPage = () => {
           </Card>
         </div>
 
-        {/* Interests Tabs */}
+        {/* Interests Filter */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-montserrat">Your Job Interests</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="font-montserrat">Your Job Interests</CardTitle>
+              <div className="flex items-center space-x-3">
+                <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
+                  Filter by status:
+                </label>
+                <Select value={activeTab} onValueChange={setActiveTab}>
+                  <SelectTrigger className="w-[200px]" id="status-filter">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">
+                      All ({interests.length})
+                    </SelectItem>
+                    <SelectItem value="pending">
+                      Pending ({getTabCount(interests, 'pending')})
+                    </SelectItem>
+                    <SelectItem value="contact_shared">
+                      Contact Shared ({getTabCount(interests, 'contact_shared')})
+                    </SelectItem>
+                    <SelectItem value="paid">
+                      Paid Access ({getTabCount(interests, 'paid')})
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="all">
-                  All ({interests.length})
-                </TabsTrigger>
-                <TabsTrigger value="pending">
-                  Pending ({getTabCount(interests, 'pending')})
-                </TabsTrigger>
-                <TabsTrigger value="contact_shared">
-                  Contact Shared ({getTabCount(interests, 'contact_shared')})
-                </TabsTrigger>
-                <TabsTrigger value="paid">
-                  Paid Access ({getTabCount(interests, 'paid')})
-                </TabsTrigger>
-              </TabsList>
-
-              {(['all', 'pending', 'contact_shared', 'paid']).map((tab) => (
-                <TabsContent key={tab} value={tab} className="mt-6">
-                  {filterInterests(interests, tab).length === 0 ? (
-                    <div className="text-center py-12">
-                      <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                        No interests found
-                      </h3>
-                      <p className="text-gray-500 mb-6">
-                        {tab === 'all' 
-                          ? "You haven't shown interest in any jobs yet."
-                          : `No interests with ${tab.replace('_', ' ')} status.`
-                        }
-                      </p>
-                      {tab === 'all' && (
-                        <Button 
-                          onClick={() => navigate('/browse-jobs')}
-                          className="text-white"
-                          style={{backgroundColor: '#2F8140'}}
-                        >
-                          Browse Available Jobs
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {filterInterests(interests, tab).map((interest) => (
-                        <Card key={interest.id} className="hover:shadow-lg transition-shadow">
-                          <CardContent className="p-6">
-                            <div className="flex justify-between items-start mb-4">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <h3 className="text-lg font-semibold font-montserrat">
-                                    {interest.job_title}
-                                  </h3>
-                                  {getStatusBadge(interest.status)}
-                                </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                                  <div className="flex items-center gap-2">
-                                    <MapPin size={16} />
-                                    <span>{interest.job_location}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <Calendar size={16} />
-                                    <span>Interested: {formatDate(interest.created_at)}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <DollarSign size={16} />
-                                    <span>
-                                      {interest.job_budget_min && interest.job_budget_max
-                                        ? `${formatCurrency(interest.job_budget_min)} - ${formatCurrency(interest.job_budget_max)}`
-                                        : 'Budget negotiable'
-                                      }
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <p className="text-gray-700 mt-3 line-clamp-2">
-                                  {interest.job_description}
-                                </p>
-                              </div>
+            {/* Content for each filter status */}
+            {filterInterests(interests, activeTab).length === 0 ? (
+              <div className="text-center py-12">
+                <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                  No interests found
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  {activeTab === 'all' 
+                    ? "You haven't shown interest in any jobs yet."
+                    : `No interests with ${activeTab.replace('_', ' ')} status.`
+                  }
+                </p>
+                {activeTab === 'all' && (
+                  <Button 
+                    onClick={() => navigate('/browse-jobs')}
+                    className="text-white"
+                    style={{backgroundColor: '#2F8140'}}
+                  >
+                    Browse Available Jobs
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filterInterests(interests, activeTab).map((interest) => (
+                  <Card key={interest.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold font-montserrat">
+                              {interest.job_title}
+                            </h3>
+                            {getStatusBadge(interest.status)}
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-2">
+                              <MapPin size={16} />
+                              <span>{interest.job_location}</span>
                             </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex justify-between items-center pt-4 border-t">
-                              <div className="text-sm text-gray-500">
-                                Access Fee: {interest.access_fee_coins || 0} coins ({formatCurrency(interest.access_fee_naira || 0)})
-                              </div>
-                              
-                              <div className="flex gap-2">
-                                {interest.status === 'pending' && (
-                                  <Badge variant="outline" className="text-yellow-600">
-                                    Waiting for homeowner response
-                                  </Badge>
-                                )}
-                                
-                                {interest.status === 'contact_shared' && (
-                                  <Button
-                                    onClick={() => handlePayForAccess(interest.id, interest.access_fee_coins || 0)}
-                                    disabled={paymentLoading[interest.id]}
-                                    className="text-white"
-                                    style={{backgroundColor: '#2F8140'}}
-                                  >
-                                    {paymentLoading[interest.id] ? (
-                                      <>
-                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                        Processing...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <CreditCard className="w-4 h-4 mr-2" />
-                                        Pay {interest.access_fee_coins || 0} coins
-                                      </>
-                                    )}
-                                  </Button>
-                                )}
-                                
-                                {interest.status === 'paid_access' && (
-                                  <Button
-                                    onClick={() => handleStartChatAfterPayment(interest)}
-                                    className="text-white"
-                                    style={{backgroundColor: '#2F8140'}}
-                                  >
-                                    <MessageCircle className="w-4 h-4 mr-2" />
-                                    Chat with Homeowner
-                                  </Button>
-                                )}
-                              </div>
+                            <div className="flex items-center gap-2">
+                              <Calendar size={16} />
+                              <span>Interested: {formatDate(interest.created_at)}</span>
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </TabsContent>
-              ))}
-            </Tabs>
+                            <div className="flex items-center gap-2">
+                              <DollarSign size={16} />
+                              <span>
+                                {interest.job_budget_min && interest.job_budget_max
+                                  ? `${formatCurrency(interest.job_budget_min)} - ${formatCurrency(interest.job_budget_max)}`
+                                  : 'Budget negotiable'
+                                }
+                              </span>
+                            </div>
+                          </div>
+
+                          <p className="text-gray-700 mt-3 line-clamp-2">
+                            {interest.job_description}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex justify-between items-center pt-4 border-t">
+                        <div className="text-sm text-gray-500">
+                          Access Fee: {interest.access_fee_coins || 0} coins ({formatCurrency(interest.access_fee_naira || 0)})
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          {interest.status === 'pending' && (
+                            <Badge variant="outline" className="text-yellow-600">
+                              Waiting for homeowner response
+                            </Badge>
+                          )}
+                          
+                          {interest.status === 'contact_shared' && (
+                            <Button
+                              onClick={() => handlePayForAccess(interest.id, interest.access_fee_coins || 0)}
+                              disabled={paymentLoading[interest.id]}
+                              className="text-white"
+                              style={{backgroundColor: '#2F8140'}}
+                            >
+                              {paymentLoading[interest.id] ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                  Processing...
+                                </>
+                              ) : (
+                                <>
+                                  <CreditCard className="w-4 h-4 mr-2" />
+                                  Pay {interest.access_fee_coins || 0} coins
+                                </>
+                              )}
+                            </Button>
+                          )}
+                          
+                          {interest.status === 'paid_access' && (
+                            <Button
+                              onClick={() => handleStartChatAfterPayment(interest)}
+                              className="text-white"
+                              style={{backgroundColor: '#2F8140'}}
+                            >
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              Chat with Homeowner
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
