@@ -826,11 +826,19 @@ const ProfilePage = () => {
                                 </div>
                               </div>
                               
-                              {review.comment && (
+                              {(review.content || review.comment) && (
                                 <div className="mb-3">
                                   <p className="text-gray-700 font-lato leading-relaxed bg-gray-50 p-3 rounded-lg">
-                                    "{review.comment}"
+                                    "{review.content || review.comment}"
                                   </p>
+                                </div>
+                              )}
+                              
+                              {review.title && (
+                                <div className="mb-2">
+                                  <h4 className="font-semibold text-gray-800 font-montserrat">
+                                    "{review.title}"
+                                  </h4>
                                 </div>
                               )}
                               
