@@ -1042,6 +1042,7 @@ const MyJobsPage = () => {
                   </TabsContent>
                 ))}
               </Tabs>
+              </>
             )}
           </div>
         </div>
