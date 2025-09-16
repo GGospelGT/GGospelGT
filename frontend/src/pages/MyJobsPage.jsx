@@ -5,7 +5,8 @@ import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { 
   Calendar, MapPin, Clock, Users, Heart, TrendingUp, 
-  Edit3, X, RotateCcw, AlertCircle, CheckCircle, Star, Briefcase 
+  Edit3, X, RotateCcw, AlertCircle, CheckCircle, Star, Briefcase,
+  User, DollarSign, MessageSquare 
 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
