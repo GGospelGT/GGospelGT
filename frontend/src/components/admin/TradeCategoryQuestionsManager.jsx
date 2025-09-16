@@ -889,12 +889,12 @@ const TradeCategoryQuestionsManager = () => {
                           <p className="text-sm font-medium text-purple-800 mb-1">Conditional Logic:</p>
                           <div className="text-sm text-purple-700">
                             <p>• Triggered by: {questions.find(q => q.id === question.conditional_logic.parent_question_id)?.question_text?.substring(0, 40) || 'Unknown question'}...</p>
-                            <p>• Condition: {question.conditional_logic.trigger_condition} "{question.conditional_logic.trigger_value}"</p>
-                            {question.conditional_logic.yes_follow_up_questions?.length > 0 && (
-                              <p>• Yes follow-ups: {question.conditional_logic.yes_follow_up_questions.length} questions</p>
-                            )}
-                            {question.conditional_logic.no_follow_up_questions?.length > 0 && (
-                              <p>• No follow-ups: {question.conditional_logic.no_follow_up_questions.length} questions</p>
+                            <p>• Condition: {question.conditional_logic.trigger_condition} 
+                              {question.conditional_logic.trigger_value ? ` "${question.conditional_logic.trigger_value}"` : ''}
+                              {question.conditional_logic.trigger_values?.length > 0 ? ` [${question.conditional_logic.trigger_values.join(', ')}]` : ''}
+                            </p>
+                            {question.conditional_logic.follow_up_questions?.length > 0 && (
+                              <p>• Shows {question.conditional_logic.follow_up_questions.length} follow-up questions when condition is met</p>
                             )}
                           </div>
                         </div>
