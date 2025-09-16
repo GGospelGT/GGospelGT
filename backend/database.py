@@ -2383,8 +2383,9 @@ class Database:
                 job_lng = job.get("longitude")
                 
                 if job_lat is not None and job_lng is not None:
-                    distance = self._calculate_distance(latitude, longitude, job_lat, job_lng)
+                    distance = self.calculate_distance(latitude, longitude, job_lat, job_lng)
                     if distance <= max_distance_km:
+                        job["_id"] = str(job["_id"])
                         job["distance_km"] = round(distance, 2)
                         jobs_within_distance.append(job)
             
@@ -2392,13 +2393,7 @@ class Database:
             jobs_within_distance.sort(key=lambda x: x.get("distance_km", float('inf')))
             limited_jobs = jobs_within_distance[:limit]
             
-            # Process and enrich jobs data
-            processed_jobs = []
-            for job in limited_jobs:
-                processed_job = await self._process_job_data(job)
-                processed_jobs.append(processed_job)
-            
-            return processed_jobs
+            return limited_jobs
             
         except Exception as e:
             print(f"Error getting jobs near location with skills: {str(e)}")
