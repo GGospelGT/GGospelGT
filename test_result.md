@@ -62,6 +62,7 @@ test_plan:
     - "Review Submission Fix Testing - Cannot Review Error Resolution"
     - "Completed Jobs Display Backend Testing"
     - "Completed Jobs Display Frontend Testing"
+    - "My Interests Access Fee Fix Testing - Clean Up and Backend Verification"
   test_all: false
   test_priority: "high_first"
 ##
