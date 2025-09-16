@@ -268,11 +268,19 @@ const MyReceivedReviewsPage = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      {review.comment && (
+                      {(review.content || review.comment) && (
                         <div className="mb-4">
-                          <p className="text-gray-700 font-lato leading-relaxed">
-                            "{review.comment}"
+                          <p className="text-gray-700 font-lato leading-relaxed bg-gray-50 p-3 rounded-lg">
+                            "{review.content || review.comment}"
                           </p>
+                        </div>
+                      )}
+                      
+                      {review.title && (
+                        <div className="mb-3">
+                          <h4 className="font-semibold text-gray-800 font-montserrat">
+                            "{review.title}"
+                          </h4>
                         </div>
                       )}
                       
