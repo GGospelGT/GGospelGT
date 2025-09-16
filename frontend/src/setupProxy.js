@@ -17,7 +17,7 @@ module.exports = function(app) {
         res.end('Proxy Error: ' + err.message);
       },
       onProxyReq: function (proxyReq, req, res) {
-        console.log('Proxying request:', req.method, req.url, '-> http://localhost:8001' + req.url);
+        console.log('Proxying request:', req.method, req.url, '-> http://10.219.63.217:8001' + req.url);
       },
       onProxyRes: function (proxyRes, req, res) {
         console.log('Proxy response:', proxyRes.statusCode, 'for', req.url);
