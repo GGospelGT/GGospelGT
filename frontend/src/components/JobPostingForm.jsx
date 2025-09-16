@@ -1003,16 +1003,57 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                                 <span>Previous</span>
                               </Button>
                               
-                              <Button
-                                type="button"
-                                onClick={goToNextQuestion}
-                                disabled={currentQuestionIndex === tradeQuestions.length - 1}
-                                className="flex items-center space-x-2 text-white"
-                                style={{backgroundColor: '#2F8140'}}
-                              >
-                                <span>Next</span>
-                                <ArrowRight size={16} />
-                              </Button>
+                              {currentQuestionIndex === tradeQuestions.length - 1 ? (
+                                <Button
+                                  type="button"
+                                  onClick={() => {
+                                    // Validate the last question before proceeding to next step
+                                    const currentQuestion = tradeQuestions[currentQuestionIndex];
+                                    const answer = questionAnswers[currentQuestion.id];
+                                    
+                                    let isAnswered = false;
+                                    if (currentQuestion.question_type === 'multiple_choice_multiple') {
+                                      isAnswered = Array.isArray(answer) && answer.length > 0;
+                                    } else if (currentQuestion.question_type === 'yes_no') {
+                                      isAnswered = answer === true || answer === false;
+                                    } else {
+                                      isAnswered = answer !== undefined && answer !== null && answer !== '';
+                                    }
+                                    
+                                    if (!isAnswered && currentQuestion.is_required) {
+                                      setErrors(prev => ({
+                                        ...prev,
+                                        [`question_${currentQuestion.id}`]: 'This question is required'
+                                      }));
+                                      return;
+                                    }
+                                    
+                                    // Clear errors and proceed to next step
+                                    setErrors(prev => {
+                                      const newErrors = { ...prev };
+                                      delete newErrors[`question_${currentQuestion.id}`];
+                                      return newErrors;
+                                    });
+                                    
+                                    nextStep();
+                                  }}
+                                  className="flex items-center space-x-2 text-white"
+                                  style={{backgroundColor: '#2F8140'}}
+                                >
+                                  <span>Continue to Next Step</span>
+                                  <ArrowRight size={16} />
+                                </Button>
+                              ) : (
+                                <Button
+                                  type="button"
+                                  onClick={goToNextQuestion}
+                                  className="flex items-center space-x-2 text-white"
+                                  style={{backgroundColor: '#2F8140'}}
+                                >
+                                  <span>Next Question</span>
+                                  <ArrowRight size={16} />
+                                </Button>
+                              )}
                             </div>
                           </div>
                         )}
