@@ -591,6 +591,100 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     setCurrentQuestionIndex(0);
   };
 
+  // Enhanced conditional logic evaluation for multiple rules
+  const evaluateConditionalLogicRule = (rule, answers) => {
+    const parentAnswer = answers[rule.parent_question_id];
+    const { trigger_condition, trigger_value, trigger_values } = rule;
+
+    // Handle empty answers
+    if (parentAnswer === undefined || parentAnswer === null || parentAnswer === '') {
+      return trigger_condition === 'is_empty';
+    }
+
+    // Evaluate based on trigger condition
+    switch (trigger_condition) {
+      case 'equals':
+        if (trigger_values && trigger_values.length > 0) {
+          // For multiple choice questions
+          if (Array.isArray(parentAnswer)) {
+            return parentAnswer.some(value => trigger_values.includes(value));
+          }
+          return trigger_values.includes(String(parentAnswer));
+        }
+        return String(parentAnswer) === String(trigger_value);
+
+      case 'not_equals':
+        if (trigger_values && trigger_values.length > 0) {
+          if (Array.isArray(parentAnswer)) {
+            return !parentAnswer.some(value => trigger_values.includes(value));
+          }
+          return !trigger_values.includes(String(parentAnswer));
+        }
+        return String(parentAnswer) !== String(trigger_value);
+
+      case 'contains':
+        return String(parentAnswer).toLowerCase().includes(String(trigger_value).toLowerCase());
+
+      case 'not_contains':
+        return !String(parentAnswer).toLowerCase().includes(String(trigger_value).toLowerCase());
+
+      case 'greater_than':
+        const numAnswer = parseFloat(parentAnswer);
+        const numTrigger = parseFloat(trigger_value);
+        return !isNaN(numAnswer) && !isNaN(numTrigger) && numAnswer > numTrigger;
+
+      case 'less_than':
+        const numAnswer2 = parseFloat(parentAnswer);
+        const numTrigger2 = parseFloat(trigger_value);
+        return !isNaN(numAnswer2) && !isNaN(numTrigger2) && numAnswer2 < numTrigger2;
+
+      case 'is_empty':
+        if (Array.isArray(parentAnswer)) {
+          return parentAnswer.length === 0;
+        }
+        return parentAnswer === '' || parentAnswer === null || parentAnswer === undefined;
+
+      case 'is_not_empty':
+        if (Array.isArray(parentAnswer)) {
+          return parentAnswer.length > 0;
+        }
+        return parentAnswer !== '' && parentAnswer !== null && parentAnswer !== undefined;
+
+      default:
+        return false;
+    }
+  };
+
+  const evaluateConditionalLogic = (question, answers) => {
+    const conditionalLogic = question.conditional_logic;
+    
+    // No conditional logic or not enabled
+    if (!conditionalLogic || !conditionalLogic.enabled || !conditionalLogic.rules || conditionalLogic.rules.length === 0) {
+      return true; // Show question by default
+    }
+
+    const { logic_operator = 'AND', rules } = conditionalLogic;
+    const ruleResults = rules.map(rule => evaluateConditionalLogicRule(rule, answers));
+
+    // Apply logic operator
+    if (logic_operator === 'OR') {
+      return ruleResults.some(result => result === true);
+    } else { // AND
+      return ruleResults.every(result => result === true);
+    }
+  };
+
+  // Filter questions based on conditional logic
+  const getVisibleQuestions = () => {
+    if (!tradeQuestions || tradeQuestions.length === 0) {
+      return [];
+    }
+
+    return tradeQuestions.filter(question => {
+      return evaluateConditionalLogic(question, questionAnswers);
+    });
+  };
+
   // Format answer text for human readability
   const formatAnswerText = (question, answer) => {
     if (!answer) return '';
