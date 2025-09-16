@@ -368,69 +368,6 @@ const MyJobsPage = () => {
     );
   };
 
-  // Create sample data for testing
-  const createSampleData = async () => {
-    try {
-      setCreatingData(true);
-      
-      const sampleJobs = [
-        {
-          title: "Kitchen Renovation",
-          description: "Complete kitchen renovation including cabinets, countertops, and appliances. Looking for experienced contractors.",
-          category: "Home Renovation",
-          location: "Lagos, Nigeria",
-          budget_min: 500000,
-          budget_max: 1000000,
-          timeline: "2-3 months",
-          urgency: "medium"
-        },
-        {
-          title: "Bathroom Plumbing Repair",
-          description: "Need urgent plumbing repair for bathroom. Leaking pipes and blocked drain.",
-          category: "Plumbing",
-          location: "Abuja, Nigeria", 
-          budget_min: 50000,
-          budget_max: 150000,
-          timeline: "1-2 weeks",
-          urgency: "high"
-        },
-        {
-          title: "Electrical Wiring Installation",
-          description: "New electrical wiring installation for 3-bedroom apartment. Need certified electrician.",
-          category: "Electrical",
-          location: "Port Harcourt, Nigeria",
-          budget_min: 200000,
-          budget_max: 400000,
-          timeline: "3-4 weeks",
-          urgency: "medium"
-        }
-      ];
-
-      // Create jobs one by one
-      for (const jobData of sampleJobs) {
-        await jobsAPI.createJob(jobData);
-      }
-
-      toast({
-        title: "Sample Jobs Created!",
-        description: `Successfully created ${sampleJobs.length} sample jobs for testing.`,
-      });
-
-      // Reload jobs to show the new ones
-      await loadMyJobs();
-
-    } catch (error) {
-      console.error('Failed to create sample jobs:', error);
-      toast({
-        title: "Failed to Create Sample Jobs",
-        description: error.response?.data?.detail || "There was an error creating sample jobs.",
-        variant: "destructive",
-      });
-    } finally {
-      setCreatingData(false);
-    }
-  };
-
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
