@@ -1060,142 +1060,168 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                   </div>
                 ) : tradeQuestions.length > 0 ? (
                   <div className="space-y-6">
-                    {showQuestionsOneByOne ? (
-                      // Show current question only
-                      <div className="space-y-4">
-                        {tradeQuestions.length > 0 && tradeQuestions[currentQuestionIndex] && (
-                          <div className="bg-white border-2 border-green-200 rounded-lg p-6 shadow-sm">
-                            <div className="space-y-4">
-                              <label className="block text-lg font-medium font-lato" style={{color: '#121E3C'}}>
-                                {tradeQuestions[currentQuestionIndex].question_text}
-                                {tradeQuestions[currentQuestionIndex].is_required && <span className="text-red-500 ml-1">*</span>}
+                    {(() => {
+                      const visibleQuestions = getVisibleQuestions();
+                      
+                      if (visibleQuestions.length === 0) {
+                        return (
+                          <div className="text-center py-8 text-gray-600">
+                            <p>No questions to display based on your previous answers.</p>
+                            <p className="text-sm mt-2">Please review your answers if this seems incorrect.</p>
+                          </div>
+                        );
+                      }
+
+                      return showQuestionsOneByOne ? (
+                        // Show current question only
+                        <div className="space-y-4">
+                          {visibleQuestions.length > 0 && visibleQuestions[currentQuestionIndex] && (
+                            <div className="bg-white border-2 border-green-200 rounded-lg p-6 shadow-sm">
+                              <div className="space-y-4">
+                                <label className="block text-lg font-medium font-lato" style={{color: '#121E3C'}}>
+                                  {visibleQuestions[currentQuestionIndex].question_text}
+                                  {visibleQuestions[currentQuestionIndex].is_required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                                
+                                {visibleQuestions[currentQuestionIndex].help_text && (
+                                  <p className="text-gray-500 text-sm font-lato">{visibleQuestions[currentQuestionIndex].help_text}</p>
+                                )}
+
+                                {/* Render the current question input */}
+                                {renderQuestionInput(visibleQuestions[currentQuestionIndex])}
+
+                                {/* Error message */}
+                                {errors[`question_${visibleQuestions[currentQuestionIndex].id}`] && (
+                                  <p className="text-red-500 text-sm font-lato mt-1">
+                                    {errors[`question_${visibleQuestions[currentQuestionIndex].id}`]}
+                                  </p>
+                                )}
+                              </div>
+                              
+                              {/* Navigation buttons */}
+                              <div className="flex justify-between items-center mt-6">
+                                <Button
+                                  type="button" 
+                                  variant="outline"
+                                  onClick={goToPreviousQuestion}
+                                  disabled={currentQuestionIndex === 0}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <ArrowLeft size={16} />
+                                  <span>Previous</span>
+                                </Button>
+                                
+                                {currentQuestionIndex === visibleQuestions.length - 1 ? (
+                                  <Button
+                                    type="button"
+                                    onClick={() => {
+                                      // Validate the last question before proceeding to next step
+                                      const currentQuestion = visibleQuestions[currentQuestionIndex];
+                                      const answer = questionAnswers[currentQuestion.id];
+                                      
+                                      let isAnswered = false;
+                                      if (currentQuestion.question_type === 'multiple_choice_multiple') {
+                                        isAnswered = Array.isArray(answer) && answer.length > 0;
+                                      } else if (currentQuestion.question_type === 'yes_no') {
+                                        isAnswered = answer === true || answer === false;
+                                      } else {
+                                        isAnswered = answer !== undefined && answer !== null && answer !== '';
+                                      }
+                                      
+                                      if (!isAnswered && currentQuestion.is_required) {
+                                        setErrors(prev => ({
+                                          ...prev,
+                                          [`question_${currentQuestion.id}`]: 'This question is required'
+                                        }));
+                                        return;
+                                      }
+                                      
+                                      // Clear errors and proceed to next step
+                                      setErrors(prev => {
+                                        const newErrors = { ...prev };
+                                        delete newErrors[`question_${currentQuestion.id}`];
+                                        return newErrors;
+                                      });
+                                      
+                                      nextStep();
+                                    }}
+                                    className="flex items-center space-x-2 text-white"
+                                    style={{backgroundColor: '#2F8140'}}
+                                  >
+                                    <span>Continue to Next Step</span>
+                                    <ArrowRight size={16} />
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    type="button"
+                                    onClick={goToNextQuestion}
+                                    className="flex items-center space-x-2 text-white"
+                                    style={{backgroundColor: '#2F8140'}}
+                                  >
+                                    <span>Next Question</span>
+                                    <ArrowRight size={16} />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Show answered questions summary */}
+                          {currentQuestionIndex > 0 && (
+                            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                              <h4 className="text-sm font-medium text-gray-700 mb-3">Previously Answered:</h4>
+                              <div className="space-y-2">
+                                {visibleQuestions.slice(0, currentQuestionIndex).map((question, index) => (
+                                  <div key={question.id} className="flex justify-between items-start text-sm">
+                                    <span className="text-gray-600 flex-1 pr-4">{question.question_text}</span>
+                                    <span className="text-gray-800 font-medium">
+                                      {formatAnswerText(question, questionAnswers[question.id])}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Conditional Logic Debug Info (remove in production) */}
+                          {process.env.NODE_ENV === 'development' && (
+                            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs">
+                              <p><strong>Debug Info:</strong></p>
+                              <p>Total Questions: {tradeQuestions.length}</p>
+                              <p>Visible Questions: {visibleQuestions.length}</p>
+                              <p>Current Index: {currentQuestionIndex + 1}</p>
+                              {visibleQuestions[currentQuestionIndex]?.conditional_logic?.enabled && (
+                                <p>Current Question has conditional logic: {visibleQuestions[currentQuestionIndex].conditional_logic.rules?.length || 0} rules</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        // Show all visible questions (original view)
+                        <div className="space-y-6">
+                          {visibleQuestions.map((question, index) => (
+                            <div key={question.id} className="space-y-2">
+                              <label className="block text-sm font-medium font-lato" style={{color: '#121E3C'}}>
+                                {question.question_text}
+                                {question.is_required && <span className="text-red-500 ml-1">*</span>}
                               </label>
                               
-                              {tradeQuestions[currentQuestionIndex].help_text && (
-                                <p className="text-gray-500 text-sm font-lato">{tradeQuestions[currentQuestionIndex].help_text}</p>
+                              {question.help_text && (
+                                <p className="text-gray-500 text-xs font-lato">{question.help_text}</p>
                               )}
 
-                              {/* Render the current question input */}
-                              {renderQuestionInput(tradeQuestions[currentQuestionIndex])}
+                              {renderQuestionInput(question)}
 
-                              {/* Error message */}
-                              {errors[`question_${tradeQuestions[currentQuestionIndex].id}`] && (
-                                <p className="text-red-500 text-sm font-lato mt-1">
-                                  {errors[`question_${tradeQuestions[currentQuestionIndex].id}`]}
+                              {errors[`question_${question.id}`] && (
+                                <p className="text-red-500 text-sm font-lato">
+                                  {errors[`question_${question.id}`]}
                                 </p>
                               )}
                             </div>
-                            
-                            {/* Navigation buttons */}
-                            <div className="flex justify-between items-center mt-6">
-                              <Button
-                                type="button" 
-                                variant="outline"
-                                onClick={goToPreviousQuestion}
-                                disabled={currentQuestionIndex === 0}
-                                className="flex items-center space-x-2"
-                              >
-                                <ArrowLeft size={16} />
-                                <span>Previous</span>
-                              </Button>
-                              
-                              {currentQuestionIndex === tradeQuestions.length - 1 ? (
-                                <Button
-                                  type="button"
-                                  onClick={() => {
-                                    // Validate the last question before proceeding to next step
-                                    const currentQuestion = tradeQuestions[currentQuestionIndex];
-                                    const answer = questionAnswers[currentQuestion.id];
-                                    
-                                    let isAnswered = false;
-                                    if (currentQuestion.question_type === 'multiple_choice_multiple') {
-                                      isAnswered = Array.isArray(answer) && answer.length > 0;
-                                    } else if (currentQuestion.question_type === 'yes_no') {
-                                      isAnswered = answer === true || answer === false;
-                                    } else {
-                                      isAnswered = answer !== undefined && answer !== null && answer !== '';
-                                    }
-                                    
-                                    if (!isAnswered && currentQuestion.is_required) {
-                                      setErrors(prev => ({
-                                        ...prev,
-                                        [`question_${currentQuestion.id}`]: 'This question is required'
-                                      }));
-                                      return;
-                                    }
-                                    
-                                    // Clear errors and proceed to next step
-                                    setErrors(prev => {
-                                      const newErrors = { ...prev };
-                                      delete newErrors[`question_${currentQuestion.id}`];
-                                      return newErrors;
-                                    });
-                                    
-                                    nextStep();
-                                  }}
-                                  className="flex items-center space-x-2 text-white"
-                                  style={{backgroundColor: '#2F8140'}}
-                                >
-                                  <span>Continue to Next Step</span>
-                                  <ArrowRight size={16} />
-                                </Button>
-                              ) : (
-                                <Button
-                                  type="button"
-                                  onClick={goToNextQuestion}
-                                  className="flex items-center space-x-2 text-white"
-                                  style={{backgroundColor: '#2F8140'}}
-                                >
-                                  <span>Next Question</span>
-                                  <ArrowRight size={16} />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Show answered questions summary */}
-                        {currentQuestionIndex > 0 && (
-                          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <h4 className="text-sm font-medium text-gray-700 mb-3">Previously Answered:</h4>
-                            <div className="space-y-2">
-                              {tradeQuestions.slice(0, currentQuestionIndex).map((question, index) => (
-                                <div key={question.id} className="flex justify-between items-start text-sm">
-                                  <span className="text-gray-600 flex-1 pr-4">{question.question_text}</span>
-                                  <span className="text-gray-800 font-medium">
-                                    {formatAnswerText(question, questionAnswers[question.id])}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      // Show all questions (original view)
-                      <div className="space-y-6">
-                        {tradeQuestions.map((question, index) => (
-                          <div key={question.id} className="space-y-2">
-                            <label className="block text-sm font-medium font-lato" style={{color: '#121E3C'}}>
-                              {question.question_text}
-                              {question.is_required && <span className="text-red-500 ml-1">*</span>}
-                            </label>
-                            
-                            {question.help_text && (
-                              <p className="text-gray-500 text-xs font-lato">{question.help_text}</p>
-                            )}
-
-                            {renderQuestionInput(question)}
-
-                            {errors[`question_${question.id}`] && (
-                              <p className="text-red-500 text-sm font-lato">
-                                {errors[`question_${question.id}`]}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 ) : (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
