@@ -43,11 +43,8 @@ const TradeCategoryQuestionsManager = () => {
     // New conditional logic fields
     conditional_logic: {
       enabled: false,
-      parent_question_id: '',
-      trigger_condition: 'equals',
-      trigger_value: '',
-      trigger_values: [],
-      follow_up_questions: []
+      logic_operator: 'AND',
+      rules: []
     }
   });
   
