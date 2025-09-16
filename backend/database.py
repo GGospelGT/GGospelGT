@@ -1245,7 +1245,8 @@ class Database:
                     "homeowner_name": "$job.homeowner.name",
                     "contact_shared": {"$eq": ["$status", "contact_shared"]},
                     "payment_made": {"$eq": ["$status", "paid_access"]},
-                    "access_fee": 1
+                    "access_fee_coins": "$job.access_fee_coins",
+                    "access_fee_naira": "$job.access_fee_naira"
                 }
             },
             {"$sort": {"created_at": -1}}
