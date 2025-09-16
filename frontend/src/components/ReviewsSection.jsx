@@ -61,7 +61,7 @@ const ReviewsSection = () => {
       ...review,
       homeowner_name: homeowner_name || 'Unknown',
       comment: review.content || review.comment, // Handle both content and comment fields
-      location: review.location || 'Unknown Location'
+      location: review.job_location || review.location || 'Unknown Location'
     };
   };
 
