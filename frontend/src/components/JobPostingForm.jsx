@@ -1863,42 +1863,44 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
             <form onSubmit={handleSubmit}>
               {renderStep()}
               
-              {/* Navigation Buttons */}
-              <div className="flex justify-between pt-8 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={prevStep}
-                  disabled={currentStep === 1}
-                  className="flex items-center font-lato"
-                >
-                  <ArrowLeft size={16} className="mr-2" />
-                  Previous
-                </Button>
-
-                {currentStep < totalSteps ? (
+              {/* Navigation Buttons - Hide when in one-by-one questions mode */}
+              {!(currentStep === 1 && tradeQuestions.length > 0 && showQuestionsOneByOne) && (
+                <div className="flex justify-between pt-8 border-t">
                   <Button
                     type="button"
-                    onClick={nextStep}
-                    disabled={submitting}
-                    className="flex items-center text-white font-lato"
-                    style={{backgroundColor: '#2F8140'}}
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={currentStep === 1}
+                    className="flex items-center font-lato"
                   >
-                    Next
-                    <ArrowRight size={16} className="ml-2" />
+                    <ArrowLeft size={16} className="mr-2" />
+                    Previous
                   </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    disabled={submitting}
-                    className="flex items-center text-white font-lato"
-                    style={{backgroundColor: '#2F8140'}}
-                  >
-                    {submitting ? 'Submitting...' : (isUserAuthenticated() ? 'Post Job' : 'Create Account & Post Job')}
-                    <CheckCircle size={16} className="ml-2" />
-                  </Button>
-                )}
-              </div>
+
+                  {currentStep < totalSteps ? (
+                    <Button
+                      type="button"
+                      onClick={nextStep}
+                      disabled={submitting}
+                      className="flex items-center text-white font-lato"
+                      style={{backgroundColor: '#2F8140'}}
+                    >
+                      Next
+                      <ArrowRight size={16} className="ml-2" />
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex items-center text-white font-lato"
+                      style={{backgroundColor: '#2F8140'}}
+                    >
+                      {submitting ? 'Submitting...' : (isUserAuthenticated() ? 'Post Job' : 'Create Account & Post Job')}
+                      <CheckCircle size={16} className="ml-2" />
+                    </Button>
+                  )}
+                </div>
+              )}
             </form>
           </CardContent>
         </Card>
