@@ -522,10 +522,10 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
       let newAnswers;
       if (questionType === 'multiple_choice_multiple') {
         const currentAnswers = prev[questionId] || [];
-        const newAnswers = currentAnswers.includes(value)
+        const multipleAnswers = currentAnswers.includes(value)
           ? currentAnswers.filter(v => v !== value)
           : [...currentAnswers, value];
-        newAnswers = { ...prev, [questionId]: newAnswers };
+        newAnswers = { ...prev, [questionId]: multipleAnswers };
       } else {
         newAnswers = { ...prev, [questionId]: value };
       }
