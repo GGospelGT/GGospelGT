@@ -369,6 +369,46 @@ const MyJobsPage = () => {
     );
   };
 
+  // Create sample data for testing
+  const createSampleData = async () => {
+    try {
+      setCreatingData(true);
+      
+      // Call the backend endpoint to create sample jobs
+      const response = await fetch('/api/jobs/create-sample-data', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create sample data');
+      }
+
+      const result = await response.json();
+
+      toast({
+        title: "Sample Jobs Created!",
+        description: `Successfully created ${result.jobs_created} jobs including ${result.completed_jobs} completed jobs.`,
+      });
+
+      // Reload jobs to show the new ones
+      await loadMyJobs();
+
+    } catch (error) {
+      console.error('Failed to create sample jobs:', error);
+      toast({
+        title: "Failed to Create Sample Jobs",
+        description: "There was an error creating sample jobs. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingData(false);
+    }
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
