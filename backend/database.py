@@ -1259,11 +1259,16 @@ class Database:
             if '_id' in interest:
                 interest['_id'] = str(interest['_id'])
             
+            # Debug: Print the interest data
+            print(f"🔍 Interest data: {interest}")
+            
             # Set default access fees if not present or null
             if not interest.get("access_fee_naira") or interest.get("access_fee_naira") is None:
                 interest["access_fee_naira"] = 1000
+                print(f"🔧 Set default naira fee: 1000")
             if not interest.get("access_fee_coins") or interest.get("access_fee_coins") is None:
                 interest["access_fee_coins"] = 10
+                print(f"🔧 Set default coins fee: 10")
         
         return interests
 
