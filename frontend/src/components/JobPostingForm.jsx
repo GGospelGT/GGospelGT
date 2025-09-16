@@ -535,13 +535,6 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         newAnswers = { ...prev, [questionId]: value };
       }
       
-      // Auto-advance to next question when this one is answered (except for multiple choice multiple)
-      if (showQuestionsOneByOne && questionType !== 'multiple_choice_multiple') {
-        setTimeout(() => {
-          goToNextQuestion();
-        }, 800); // Small delay to show the answer was registered
-      }
-      
       return newAnswers;
     });
   };
