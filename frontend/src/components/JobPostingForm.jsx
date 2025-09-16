@@ -592,6 +592,120 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     }
   };
 
+  // Render question input based on question type
+  const renderQuestionInput = (question) => {
+    switch (question.question_type) {
+      case 'multiple_choice_single':
+        return (
+          <div className="space-y-2">
+            {question.options?.map((option, optIndex) => (
+              <label key={optIndex} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name={`question_${question.id}`}
+                  value={option.value}
+                  checked={questionAnswers[question.id] === option.value}
+                  onChange={(e) => handleQuestionAnswer(question.id, e.target.value, question.question_type)}
+                  className="text-green-600 focus:ring-green-500"
+                />
+                <span className="text-sm font-lato">{option.text}</span>
+              </label>
+            ))}
+          </div>
+        );
+
+      case 'multiple_choice_multiple':
+        return (
+          <div className="space-y-2">
+            {question.options?.map((option, optIndex) => (
+              <label key={optIndex} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  value={option.value}
+                  checked={(questionAnswers[question.id] || []).includes(option.value)}
+                  onChange={(e) => handleQuestionAnswer(question.id, option.value, question.question_type)}
+                  className="text-green-600 focus:ring-green-500 rounded"
+                />
+                <span className="text-sm font-lato">{option.text}</span>
+              </label>
+            ))}
+          </div>
+        );
+
+      case 'text_input':
+        return (
+          <input
+            type="text"
+            value={questionAnswers[question.id] || ''}
+            onChange={(e) => handleQuestionAnswer(question.id, e.target.value, question.question_type)}
+            placeholder={question.placeholder_text || 'Enter your answer...'}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
+              errors[`question_${question.id}`] ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+        );
+
+      case 'text_area':
+        return (
+          <textarea
+            rows={4}
+            value={questionAnswers[question.id] || ''}
+            onChange={(e) => handleQuestionAnswer(question.id, e.target.value, question.question_type)}
+            placeholder={question.placeholder_text || 'Enter your detailed answer...'}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato resize-none ${
+              errors[`question_${question.id}`] ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+        );
+
+      case 'number_input':
+        return (
+          <input
+            type="number"
+            value={questionAnswers[question.id] || ''}
+            onChange={(e) => handleQuestionAnswer(question.id, e.target.value, question.question_type)}
+            placeholder={question.placeholder_text || 'Enter number...'}
+            min={question.min_value}
+            max={question.max_value}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
+              errors[`question_${question.id}`] ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+        );
+
+      case 'yes_no':
+        return (
+          <div className="flex space-x-6">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name={`question_${question.id}`}
+                value="true"
+                checked={questionAnswers[question.id] === true}
+                onChange={(e) => handleQuestionAnswer(question.id, true, question.question_type)}
+                className="text-green-600 focus:ring-green-500"
+              />
+              <span className="text-sm font-lato">Yes</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name={`question_${question.id}`}
+                value="false"
+                checked={questionAnswers[question.id] === false}
+                onChange={(e) => handleQuestionAnswer(question.id, false, question.question_type)}
+                className="text-green-600 focus:ring-green-500"
+              />
+              <span className="text-sm font-lato">No</span>
+            </label>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     
