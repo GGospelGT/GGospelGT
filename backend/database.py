@@ -2297,28 +2297,58 @@ class Database:
         return await self.get_jobs(skip=skip, limit=limit, filters={"status": "active"})
 
     async def get_jobs_for_tradesperson(self, tradesperson_id: str, skip: int = 0, limit: int = 50) -> List[dict]:
-        """Get jobs filtered by tradesperson's location and travel preferences"""
-        # Get tradesperson details
-        tradesperson = await self.get_user_by_id(tradesperson_id)
-        if not tradesperson:
-            # Fallback to all jobs if tradesperson not found
-            return await self.get_available_jobs(skip=skip, limit=limit)
-        
-        # If tradesperson has location set, filter by distance
-        if (tradesperson.get("latitude") is not None and 
-            tradesperson.get("longitude") is not None):
+        """Get jobs filtered by tradesperson's skills and location preferences"""
+        try:
+            # Get tradesperson details
+            tradesperson = await self.get_user_by_id(tradesperson_id)
+            if not tradesperson:
+                # Fallback to all jobs if tradesperson not found
+                return await self.get_available_jobs(skip=skip, limit=limit)
             
-            max_distance = tradesperson.get("travel_distance_km", 25)
+            # Build the job filter based on tradesperson profile
+            job_filter = {"status": "active"}
             
-            return await self.get_jobs_near_location(
-                latitude=tradesperson["latitude"],
-                longitude=tradesperson["longitude"],
-                max_distance_km=max_distance,
-                skip=skip,
-                limit=limit
-            )
-        else:
-            # No location set, return all jobs
+            # 1. SKILLS FILTERING - Only show jobs matching tradesperson's trade categories
+            tradesperson_categories = tradesperson.get("trade_categories", [])
+            if tradesperson_categories:
+                # Case-insensitive matching for trade categories
+                category_regex_patterns = [{"category": {"$regex": f"^{category}$", "$options": "i"}} for category in tradesperson_categories]
+                job_filter["$or"] = category_regex_patterns
+                print(f"Skills filter applied: {tradesperson_categories}")
+            
+            # 2. LOCATION FILTERING - Show jobs within tradesperson's travel distance
+            if (tradesperson.get("latitude") is not None and 
+                tradesperson.get("longitude") is not None):
+                
+                max_distance = tradesperson.get("travel_distance_km", 25)  # Default 25km
+                print(f"Location filter applied: {max_distance}km radius")
+                
+                # Use location-based filtering with skills filtering
+                return await self.get_jobs_near_location_with_skills(
+                    latitude=tradesperson["latitude"],
+                    longitude=tradesperson["longitude"],
+                    max_distance_km=max_distance,
+                    skill_categories=tradesperson_categories,
+                    skip=skip,
+                    limit=limit
+                )
+            else:
+                # No location data, use skills-only filtering
+                print("Using skills-only filtering (no location data)")
+                cursor = self.database.jobs.find(job_filter).sort("created_at", -1).skip(skip).limit(limit)
+                jobs = await cursor.to_list(length=None)
+                
+                # Process and enrich jobs data
+                processed_jobs = []
+                for job in jobs:
+                    processed_job = await self._process_job_data(job)
+                    processed_jobs.append(processed_job)
+                
+                return processed_jobs
+                
+        except Exception as e:
+            print(f"Error in get_jobs_for_tradesperson: {str(e)}")
+            # Fallback to general available jobs
             return await self.get_available_jobs(skip=skip, limit=limit)
 
     async def search_jobs_with_location(self, search_query: str = None, category: str = None, 
