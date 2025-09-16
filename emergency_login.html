@@ -142,6 +142,42 @@
             }
         }
 
+        function loginAsHomeowner() {
+            updateStatus('Authenticating...', 'info', 'Setting up homeowner authentication...');
+            
+            try {
+                // Francis's valid JWT token (homeowner)
+                const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNjYzMGNkOS0xYTAzLTQzNWQtOTNmYS04ZDczZTY0Nzc1ZjYiLCJlbWFpbCI6ImZyYW5jaXNkYW5pZWw0amJAZ21haWwuY29tIiwiZXhwIjoxNzU4MTE1NDY1fQ.omPOVm6Ap1AJVLFJiO2VaeyyfoVcuOZtLSM-DemqztU';
+                
+                const user = {
+                    id: 'a6630cd9-1a03-435d-93fa-8d73e64775f6',
+                    name: 'Francis ekpemi daniel',
+                    email: 'francisdaniel4jb@gmail.com',
+                    role: 'homeowner',
+                    phone: '+2348058030079',
+                    location: 'Lagos, Nigeria',
+                    postcode: '100001',
+                    status: 'active'
+                };
+
+                // Store authentication data
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                updateStatus('Login Successful!', 'success', 
+                    `Welcome ${user.name}! You are now authenticated as a ${user.role}. ` +
+                    `You can access your jobs, including the completed jobs tab.`);
+                
+                setTimeout(() => {
+                    updateStatus('Ready to Explore', 'success', 
+                        'Click "Go to My Jobs" to test the completed jobs functionality.');
+                }, 2000);
+                
+            } catch (error) {
+                updateStatus('Authentication Failed', 'error', `Error: ${error.message}`);
+            }
+        }
+
         function emergencyLogin() {
             updateStatus('Authenticating...', 'info', 'Setting up emergency authentication...');
             
