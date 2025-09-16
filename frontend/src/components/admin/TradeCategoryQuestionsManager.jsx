@@ -634,7 +634,7 @@ const TradeCategoryQuestionsManager = () => {
               {formData.conditional_logic.enabled && (
                 <div className="space-y-6">
                   {/* Logic Operator Selection */}
-                  {formData.conditional_logic.rules.length > 1 && (
+                  {formData.conditional_logic.rules && formData.conditional_logic.rules.length > 1 && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                       <label className="block text-sm font-medium text-blue-800 mb-2">
                         How should multiple rules be combined?
