@@ -114,8 +114,9 @@ class EnhancedJobsFilteringTester:
                 def __init__(self, error_msg):
                     self.status_code = 500
                     self.text = str(error_msg)
+                    self.error_msg = error_msg
                 def json(self):
-                    return {"error": str(error_msg)}
+                    return {"error": str(self.error_msg)}
             return MockResponse(request_error)
 
     def test_john_plumber_login(self):
