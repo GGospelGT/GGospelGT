@@ -695,7 +695,7 @@ const TradeCategoryQuestionsManager = () => {
                         <p className="text-sm">Click "Add Rule" to create your first conditional logic rule.</p>
                       </div>
                     ) : (
-                      formData.conditional_logic.rules.map((rule, ruleIndex) => (
+                      formData.conditional_logic.rules && formData.conditional_logic.rules.map((rule, ruleIndex) => (
                         <div key={rule.id} className="border border-gray-300 rounded-lg p-4 bg-white">
                           <div className="flex justify-between items-center mb-4">
                             <h6 className="text-sm font-medium text-gray-700">
