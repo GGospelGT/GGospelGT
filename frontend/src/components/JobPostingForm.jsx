@@ -519,16 +519,45 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
   // Handle question answer changes
   const handleQuestionAnswer = (questionId, value, questionType) => {
     setQuestionAnswers(prev => {
+      let newAnswers;
       if (questionType === 'multiple_choice_multiple') {
         const currentAnswers = prev[questionId] || [];
         const newAnswers = currentAnswers.includes(value)
           ? currentAnswers.filter(v => v !== value)
           : [...currentAnswers, value];
-        return { ...prev, [questionId]: newAnswers };
+        newAnswers = { ...prev, [questionId]: newAnswers };
       } else {
-        return { ...prev, [questionId]: value };
+        newAnswers = { ...prev, [questionId]: value };
       }
+      
+      // Auto-advance to next question when this one is answered (except for multiple choice multiple)
+      if (showQuestionsOneByOne && questionType !== 'multiple_choice_multiple') {
+        setTimeout(() => {
+          goToNextQuestion();
+        }, 800); // Small delay to show the answer was registered
+      }
+      
+      return newAnswers;
     });
+  };
+
+  // Navigate to next question
+  const goToNextQuestion = () => {
+    if (currentQuestionIndex < tradeQuestions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    }
+  };
+
+  // Navigate to previous question
+  const goToPreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
+
+  // Reset question navigation when category changes
+  const resetQuestionNavigation = () => {
+    setCurrentQuestionIndex(0);
   };
 
   // Format answer text for human readability
