@@ -11,7 +11,7 @@ import json
 import uuid
 from datetime import datetime
 
-BACKEND_URL = "https://tradepro-connect.preview.emergentagent.com/api"
+BACKEND_URL = "https://homepro-ng.preview.emergentagent.com/api"
 
 class FocusedJobCompletionTester:
     def __init__(self):

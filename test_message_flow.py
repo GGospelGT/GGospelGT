@@ -20,7 +20,7 @@ from datetime import datetime
 import asyncio
 
 # Get backend URL from environment
-BACKEND_URL = "https://tradepro-connect.preview.emergentagent.com/api"
+BACKEND_URL = "https://homepro-ng.preview.emergentagent.com/api"
 
 class MessageFlowTester:
     def __init__(self):

@@ -7,7 +7,7 @@ import requests
 import json
 import uuid
 
-BACKEND_URL = "https://tradepro-connect.preview.emergentagent.com/api"
+BACKEND_URL = "https://homepro-ng.preview.emergentagent.com/api"
 
 def make_request(method, endpoint, auth_token=None, **kwargs):
     """Make HTTP request with error handling"""
