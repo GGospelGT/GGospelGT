@@ -761,11 +761,24 @@ const BrowseJobsPage = () => {
                               </span>
                               <span className="flex items-center">
                                 📍 {job.location}
+                                {job.distance_km && (
+                                  <span className="ml-1 text-blue-600 font-medium">
+                                    ({job.distance_km}km away)
+                                  </span>
+                                )}
                               </span>
                               <span className="flex items-center">
                                 🕐 {formatDate(job.created_at)}
                               </span>
                             </div>
+                            {/* Skills match indicator */}
+                            {user?.trade_categories?.some(skill => 
+                              skill.toLowerCase() === job.category.toLowerCase()
+                            ) && (
+                              <Badge className="bg-green-100 text-green-800 text-xs">
+                                ✓ Skills Match
+                              </Badge>
+                            )}
                           </div>
 
                           {/* Job title */}
