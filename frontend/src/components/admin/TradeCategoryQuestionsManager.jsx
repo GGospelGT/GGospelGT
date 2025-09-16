@@ -689,7 +689,7 @@ const TradeCategoryQuestionsManager = () => {
                       </button>
                     </div>
 
-                    {formData.conditional_logic.rules.length === 0 ? (
+                    {!formData.conditional_logic.rules || formData.conditional_logic.rules.length === 0 ? (
                       <div className="text-center py-6 text-gray-500">
                         <p>No conditional rules added yet.</p>
                         <p className="text-sm">Click "Add Rule" to create your first conditional logic rule.</p>
