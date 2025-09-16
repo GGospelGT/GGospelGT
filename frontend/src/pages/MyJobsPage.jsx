@@ -691,24 +691,45 @@ const MyJobsPage = () => {
                 ))}
               </div>
             ) : jobs.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-16">
-                  <Briefcase size={64} className="mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold font-montserrat text-gray-900 mb-2">
-                    No jobs posted yet
-                  </h3>
-                  <p className="text-gray-600 font-lato mb-6">
-                    Start by posting your first job to connect with qualified tradespeople.
-                  </p>
+              <div className="text-center py-12">
+                <Briefcase className="h-16 w-16 text-gray-400 mx-auto mb-6" />
+                <h3 className="text-xl font-semibold font-montserrat mb-4" style={{color: '#121E3C'}}>
+                  No jobs posted yet
+                </h3>
+                <p className="text-gray-600 font-lato mb-6 max-w-md mx-auto">
+                  Once you post your first job, you'll be able to track its progress and see completed jobs here.
+                </p>
+                
+                {/* Development/Testing Button */}
+                <div className="space-y-4">
                   <Button 
                     onClick={() => window.location.href = '/post-job'}
-                    className="text-white font-lato"
-                    style={{backgroundColor: '#2F8140'}}
+                    className="bg-[#2F8140] hover:bg-[#245a32] text-white font-montserrat"
                   >
                     Post Your First Job
                   </Button>
-                </CardContent>
-              </Card>
+                  
+                  {/* Temporary testing button */}
+                  <div className="pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-500 mb-2">For Testing: Create Sample Data</p>
+                    <Button 
+                      onClick={createSampleData}
+                      variant="outline"
+                      className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                      disabled={creatingData}
+                    >
+                      {creatingData ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                          Creating Sample Jobs...
+                        </>
+                      ) : (
+                        'Create Sample Jobs for Testing'
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
             ) : (
               <>
                 {/* Jobs Summary Statistics */}
