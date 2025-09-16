@@ -281,7 +281,7 @@ const JoinForFreePage = () => {
             Ready to Transform Your Business?
           </h2>
           <p className="text-xl mb-8 text-green-100">
-            Join over 251,000 tradespeople already earning more with ServiceHub
+            Join over 5000+ tradespeople already earning more with ServiceHub
           </p>
           
           <Button

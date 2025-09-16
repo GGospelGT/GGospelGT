@@ -98,11 +98,7 @@ const CareersPage = () => {
       title: 'Work-Life Balance',
       items: ['Flexible working hours', 'Remote work options', 'Unlimited PTO', 'Sabbatical opportunities']
     },
-    {
-      icon: Laptop,
-      title: 'Tech & Tools',
-      items: ['Latest MacBook/PC', 'Home office setup', 'Software subscriptions', 'Tech allowance']
-    },
+    
     {
       icon: Users,
       title: 'Team Culture',
