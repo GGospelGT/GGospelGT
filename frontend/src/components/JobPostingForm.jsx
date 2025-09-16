@@ -106,6 +106,10 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
   const [tradeQuestions, setTradeQuestions] = useState([]);
   const [questionAnswers, setQuestionAnswers] = useState({});
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+  
+  // One-by-one question display state
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [showQuestionsOneByOne, setShowQuestionsOneByOne] = useState(true);
 
   const { loginWithToken, isAuthenticated, user: currentUser, loading } = useAuth();
   const { toast } = useToast();
