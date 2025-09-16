@@ -27,6 +27,7 @@ import {
   Plus
 } from 'lucide-react';
 import { authAPI, portfolioAPI } from '../api/services';
+import { reviewsAPI } from '../api/reviews';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import ImageUpload from '../components/portfolio/ImageUpload';
