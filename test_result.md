@@ -67,6 +67,7 @@ test_plan:
     - "Enhanced Jobs Filtering System Testing for Tradespeople"
     - "Enhanced Job Posting Form with Validation and Single Navigation Testing"
     - "Enhanced Multiple Conditional Logic Functionality Testing"
+    - "Enhanced Profile Page Dropdown Navigation Testing"
   test_all: false
   test_priority: "high_first"
 ##
