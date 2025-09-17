@@ -61,15 +61,12 @@ const JobEditModal = ({
         access_fee_coins: job.access_fee_coins || ''
       });
       
-      // Load LGAs and towns if state is already selected
+      // Load LGAs if state is already selected
       if (job.state) {
         loadLGAs(job.state);
-        if (job.lga) {
-          loadTowns(job.state, job.lga);
-        }
       }
     }
-  }, [job, isOpen, loadLGAs, loadTowns]);
+  }, [job, isOpen, loadLGAs]);
 
   // Load categories on mount
   useEffect(() => {
