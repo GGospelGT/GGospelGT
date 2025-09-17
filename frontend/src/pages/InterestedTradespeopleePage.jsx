@@ -467,6 +467,17 @@ const InterestedTradespeopleePage = () => {
                         console.log('Button click event for tradesperson:', tradesperson);
                         console.log('Job data for chat:', job);
                         
+                        // Safety check for job object
+                        if (!job || !job.id) {
+                          console.error('Job object is null or missing id:', job);
+                          toast({
+                            title: "Error",
+                            description: "Unable to start chat - job information is missing",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        
                         const chatData = {
                           type: 'start_chat',
                           participants: [
