@@ -12,7 +12,7 @@ import {
 import { 
   Calendar, MapPin, Clock, Users, Heart, TrendingUp, 
   Edit3, X, RotateCcw, AlertCircle, CheckCircle, Star, Briefcase,
-  User, DollarSign, MessageSquare, ChevronDown 
+  User, DollarSign, MessageSquare, ChevronDown, MessageCircle 
 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
