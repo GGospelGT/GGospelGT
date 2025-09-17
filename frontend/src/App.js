@@ -38,6 +38,72 @@ import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
+  // Remove "Made with Emergent" watermark
+  useEffect(() => {
+    const removeWatermark = () => {
+      // Method 1: Find by text content and remove
+      const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+      
+      let node;
+      while (node = walker.nextNode()) {
+        if (node.textContent && (
+          node.textContent.includes('Made with Emergent') ||
+          node.textContent.includes('Made with emergent') ||
+          node.textContent.trim() === 'Made with Emergent'
+        )) {
+          // Remove the parent element
+          let elementToRemove = node.parentElement;
+          if (elementToRemove) {
+            elementToRemove.style.display = 'none';
+            elementToRemove.remove();
+          }
+        }
+      }
+
+      // Method 2: Find common watermark patterns and remove
+      const potentialWatermarks = document.querySelectorAll([
+        'div[style*="position: fixed"][style*="bottom"][style*="right"]',
+        'div[style*="position: absolute"][style*="bottom"][style*="right"]',
+        '[style*="z-index: 999"]',
+        '[style*="z-index: 9999"]'
+      ].join(','));
+
+      potentialWatermarks.forEach(element => {
+        if (element.textContent && element.textContent.includes('Made with')) {
+          element.style.display = 'none';
+          element.remove();
+        }
+      });
+    };
+
+    // Run immediately
+    removeWatermark();
+
+    // Run again after a short delay (in case watermark loads after initial render)
+    const timeoutId = setTimeout(removeWatermark, 1000);
+
+    // Set up observer to catch dynamically added watermarks
+    const observer = new MutationObserver(() => {
+      removeWatermark();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // Cleanup
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <div className="App">
       <AuthProvider>
