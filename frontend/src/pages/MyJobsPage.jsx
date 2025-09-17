@@ -230,8 +230,17 @@ const MyJobsPage = () => {
   };
 
   const handleEditJob = (job) => {
-    setJobToEdit(job);
-    setShowEditModal(true);
+    console.log('🔧 handleEditJob called with job:', job);
+    console.log('🔧 Current showEditModal state:', showEditModal);
+    console.log('🔧 Current jobToEdit state:', jobToEdit);
+    
+    try {
+      setJobToEdit(job);
+      setShowEditModal(true);
+      console.log('✅ Edit job state updated successfully');
+    } catch (error) {
+      console.error('❌ Error in handleEditJob:', error);
+    }
   };
 
   const handleJobUpdated = (updatedJob) => {
