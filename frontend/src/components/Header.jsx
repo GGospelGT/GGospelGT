@@ -477,6 +477,19 @@ const Header = () => {
                           <Heart size={16} />
                           <span>My Interests</span>
                         </Button>
+                        
+                        <Button 
+                          variant="ghost"
+                          onClick={() => {
+                            navigate('/completed-jobs');
+                            setIsMenuOpen(false);
+                          }}
+                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                        >
+                          <CheckCircle size={16} />
+                          <span>Completed Jobs</span>
+                        </Button>
+                        
                         <Button 
                           variant="ghost"
                           onClick={() => {
