@@ -50,6 +50,10 @@ const MyJobsPage = () => {
   const [jobToReview, setJobToReview] = useState(null);
   const [tradespersonToReview, setTradespersonToReview] = useState(null);
   const [submittingReview, setSubmittingReview] = useState(false);
+  
+  // Chat modal state
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [chatData, setChatData] = useState(null);
   const [jobReviews, setJobReviews] = useState({});
   const [showTradespersonSelectionModal, setShowTradespersonSelectionModal] = useState(false);
   const [availableTradespeoplePorReview, setAvailableTradespeoplePorReview] = useState([]);
