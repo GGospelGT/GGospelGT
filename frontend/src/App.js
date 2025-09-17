@@ -47,6 +47,7 @@ function App() {
             <Route path="/post-job" element={<PostJobPage />} />
             <Route path="/my-jobs" element={<MyJobsPage />} />
             <Route path="/my-interests" element={<MyInterestsPage />} />
+            <Route path="/completed-jobs" element={<CompletedJobsPage />} />
             <Route path="/tradesperson/:id" element={<TradespersonProfilePage />} />
             <Route path="/browse-tradespeople" element={<BrowseTradespeopleePage />} />
             <Route path="/job/:jobId/interested-tradespeople" element={<InterestedTradespeopleePage />} />
