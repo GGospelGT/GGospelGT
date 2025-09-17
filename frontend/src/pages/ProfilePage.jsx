@@ -7,6 +7,12 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '../components/ui/dropdown-menu';
 import { 
   User, 
   Mail, 
@@ -24,7 +30,8 @@ import {
   Shield,
   Settings,
   Camera,
-  Plus
+  Plus,
+  ChevronDown
 } from 'lucide-react';
 import { authAPI, portfolioAPI } from '../api/services';
 import { reviewsAPI } from '../api/reviews';
