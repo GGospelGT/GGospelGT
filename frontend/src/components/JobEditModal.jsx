@@ -371,32 +371,6 @@ const JobEditModal = ({
                   className="border-green-300 focus:border-green-500 focus:ring-green-500"
                 />
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Access Fee (₦)
-                </label>
-                <Input
-                  type="number"
-                  value={formData.access_fee_naira}
-                  placeholder="e.g., 1000"
-                  readOnly
-                  className="bg-gray-50 cursor-not-allowed"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Access Fee (Coins)
-                </label>
-                <Input
-                  type="number"
-                  value={formData.access_fee_coins}
-                  placeholder="e.g., 10"
-                  readOnly
-                  className="bg-gray-50 cursor-not-allowed"
-                />
-              </div>
             </div>
           </div>
 
