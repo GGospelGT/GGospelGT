@@ -1111,10 +1111,9 @@ const MyJobsPage = () => {
                             </div>
                           </CardContent>
                         </Card>
-                      ))}
-                  </TabsContent>
-                ))}
-              </Tabs>
+                      ))
+                  )}
+                </div>
               </>
             )}
           </div>
