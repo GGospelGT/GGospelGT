@@ -45,6 +45,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [editData, setEditData] = useState({});
+  const [activeTab, setActiveTab] = useState("profile"); // Added state for active tab
   
   // Portfolio states
   const [portfolioItems, setPortfolioItems] = useState([]);
