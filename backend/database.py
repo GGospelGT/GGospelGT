@@ -5727,8 +5727,9 @@ class Database:
                 # Flatten the job array
                 {"$unwind": "$job"},
                 
-                # Project the fields we need
+                # Project the fields we need (excluding ObjectId fields)
                 {"$project": {
+                    "_id": 0,  # Exclude the MongoDB _id field
                     "id": "$id",
                     "job_id": "$job_id",
                     "job_title": "$job.title",
@@ -5759,7 +5760,9 @@ class Database:
             
             completed_jobs = []
             async for job in self.database.interests.aggregate(pipeline):
-                completed_jobs.append(job)
+                # Clean the job data to ensure all fields are serializable
+                cleaned_job = self._clean_job_data(job)
+                completed_jobs.append(cleaned_job)
             
             logger.info(f"Retrieved {len(completed_jobs)} completed jobs for tradesperson {tradesperson_id}")
             return completed_jobs
@@ -5767,6 +5770,26 @@ class Database:
         except Exception as e:
             logger.error(f"Error getting completed jobs for tradesperson {tradesperson_id}: {str(e)}")
             raise e
+
+    def _clean_job_data(self, job_data: dict) -> dict:
+        """Clean job data to ensure all fields are JSON serializable"""
+        from bson import ObjectId
+        from datetime import datetime
+        
+        cleaned = {}
+        for key, value in job_data.items():
+            if isinstance(value, ObjectId):
+                cleaned[key] = str(value)
+            elif isinstance(value, datetime):
+                cleaned[key] = value.isoformat()
+            elif isinstance(value, dict):
+                cleaned[key] = self._clean_job_data(value)
+            elif isinstance(value, list):
+                cleaned[key] = [self._clean_job_data(item) if isinstance(item, dict) else item for item in value]
+            else:
+                cleaned[key] = value
+        
+        return cleaned
 
 # Create global database instance
 database = Database()
