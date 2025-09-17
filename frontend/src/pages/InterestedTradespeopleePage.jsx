@@ -220,6 +220,20 @@ const InterestedTradespeopleePage = () => {
     setShowImageModal(true);
   };
 
+  // Helper function to check if chat should be disabled based on job status
+  const isChatDisabled = () => {
+    if (!job) return false; // If job is not loaded yet, don't disable
+    return job.status === 'cancelled' || job.status === 'completed';
+  };
+
+  // Get message for why chat is disabled
+  const getChatDisabledMessage = () => {
+    if (!job) return '';
+    if (job.status === 'cancelled') return 'Chat disabled - Job has been cancelled';
+    if (job.status === 'completed') return 'Chat disabled - Job has been completed';
+    return '';
+  };
+
   const handleStartChat = async (tradesperson) => {
     console.log('=== HOMEOWNER START CHAT DEBUG ===');
     console.log('handleStartChat called with tradesperson:', tradesperson);
