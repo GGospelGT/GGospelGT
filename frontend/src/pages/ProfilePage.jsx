@@ -68,6 +68,42 @@ const ProfilePage = () => {
   const { user, loading: authLoading, isAuthenticated, isHomeowner, isTradesperson, updateUser } = useAuth();
   const { toast } = useToast();
 
+  // Helper function to get tab display text
+  const getTabDisplayText = (tabValue) => {
+    switch (tabValue) {
+      case 'profile':
+        return 'Profile Information';
+      case 'portfolio':
+        return 'Portfolio';
+      case 'reviews':
+        return 'Reviews';
+      case 'account':
+        return 'Account Settings';
+      case 'activity':
+        return 'Activity';
+      default:
+        return 'Profile Information';
+    }
+  };
+
+  // Get available tabs based on user role
+  const getAvailableTabs = () => {
+    const baseTabs = [
+      { value: 'profile', label: 'Profile Information' },
+      { value: 'account', label: 'Account Settings' },
+      { value: 'activity', label: 'Activity' }
+    ];
+
+    if (isTradesperson()) {
+      baseTabs.splice(1, 0, 
+        { value: 'portfolio', label: 'Portfolio' },
+        { value: 'reviews', label: 'Reviews' }
+      );
+    }
+
+    return baseTabs;
+  };
+
   useEffect(() => {
     if (isAuthenticated() && user) {
       setProfileData(user);
