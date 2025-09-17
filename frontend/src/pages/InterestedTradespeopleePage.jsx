@@ -456,6 +456,41 @@ const InterestedTradespeopleePage = () => {
                   </div>
                 )}
 
+                {tradesperson.status === 'paid_access' && (
+                  <div className="space-y-2">
+                    <Badge className="bg-purple-50 text-purple-700 border-purple-200">
+                      Access granted - Tradesperson can contact you
+                    </Badge>
+                    <Button
+                      onClick={() => {
+                        console.log('🔥 HOMEOWNER START CHAT BUTTON CLICKED!');
+                        console.log('Button click event for tradesperson:', tradesperson);
+                        console.log('Job data for chat:', job);
+                        
+                        const chatData = {
+                          type: 'start_chat',
+                          participants: [
+                            { id: user.id, name: user.name, role: 'homeowner' },
+                            { id: tradesperson.tradesperson_id, name: tradesperson.name, role: 'tradesperson' }
+                          ],
+                          jobId: job.id,
+                          jobTitle: job.title,
+                          chatContext: 'paid_access'
+                        };
+                        
+                        console.log('Chat data being passed:', chatData);
+                        
+                        // Start chat
+                        handleStartChat(tradesperson);
+                      }}
+                      className="text-white font-lato bg-blue-600 hover:bg-blue-700 w-full"
+                    >
+                      <MessageCircle size={16} className="mr-2" />
+                      Start Chat
+                    </Button>
+                  </div>
+                )}
+
                 {tradesperson.status === 'interested' && (
                   <Button
                     onClick={() => handleStartChat(tradesperson)}
