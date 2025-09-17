@@ -445,45 +445,6 @@ const InterestedTradespeopleePage = () => {
                     Contact details shared, waiting for feedback
                   </Badge>
                 )}
-
-                {tradesperson.status === 'paid_access' && (
-                  <>
-                    <Badge className="bg-purple-50 text-purple-700 border-purple-200">
-                      Access granted - Tradesperson can contact you
-                    </Badge>
-                    {console.log('🔥 RENDERING START CHAT BUTTON for tradesperson:', tradesperson.tradesperson_id)}
-                    <Button
-                      onClick={(e) => {
-                        console.log('🔥 HOMEOWNER START CHAT BUTTON CLICKED!');
-                        console.log('Button click event:', e);
-                        console.log('Tradesperson data for chat:', tradesperson);
-                        
-                        // Add immediate visual feedback for mobile users
-                        e.target.style.backgroundColor = '#059669'; // Change color immediately
-                        e.target.innerHTML = '⏳ Opening Chat...';
-                        
-                        // Prevent default and stop propagation for mobile
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        // Small delay to show the visual feedback, then proceed
-                        setTimeout(() => {
-                          handleStartChat(tradesperson);
-                        }, 100);
-                      }}
-                      onTouchStart={(e) => {
-                        // Handle touch events for mobile
-                        console.log('🔥 TOUCH START EVENT on Start Chat button');
-                        e.target.style.backgroundColor = '#065f46'; // Darker green on touch
-                      }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 min-h-[44px] px-4"
-                      style={{ touchAction: 'manipulation' }}
-                    >
-                      <MessageCircle size={16} />
-                      Start Chat
-                    </Button>
-                  </>
-                )}
               </div>
             </div>
           </div>
