@@ -645,6 +645,86 @@ serviceHub Admin Team
             )
         }
         
+        # Job Completed templates
+        templates[NotificationType.JOB_COMPLETED] = {
+            NotificationChannel.EMAIL: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_COMPLETED,
+                channel=NotificationChannel.EMAIL,
+                subject_template="Job Completed: {job_title}",
+                content_template="""
+Hello {tradesperson_name},
+
+The job you showed interest in has been marked as completed by the homeowner.
+
+📋 Job: {job_title}
+📍 Location: {job_location}
+👤 Homeowner: {homeowner_name}
+✅ Status: Completed
+📅 Completed: {completion_date}
+
+The homeowner has indicated that the work for this project has been finished. If you were selected for this job and have completed the work, congratulations on a successful project!
+
+If you have any questions about this job completion status, please contact our support team.
+
+View your interests: {interests_url}
+
+Best regards,
+serviceHub Team
+                """,
+                variables=["tradesperson_name", "job_title", "job_location", "homeowner_name", "completion_date", "interests_url"]
+            ),
+            NotificationChannel.SMS: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_COMPLETED,
+                channel=NotificationChannel.SMS,
+                subject_template="Job Completed - serviceHub",
+                content_template="✅ Job '{job_title}' has been completed by homeowner {homeowner_name}. Check your interests: {interests_url}",
+                variables=["job_title", "homeowner_name", "interests_url"]
+            )
+        }
+        
+        # Job Cancelled templates
+        templates[NotificationType.JOB_CANCELLED] = {
+            NotificationChannel.EMAIL: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_CANCELLED,
+                channel=NotificationChannel.EMAIL,
+                subject_template="Job Cancelled: {job_title}",
+                content_template="""
+Hello {tradesperson_name},
+
+Unfortunately, the job you showed interest in has been cancelled by the homeowner.
+
+📋 Job: {job_title}
+📍 Location: {job_location}
+👤 Homeowner: {homeowner_name}
+❌ Status: Cancelled
+📅 Cancelled: {cancellation_date}
+📝 Reason: {cancellation_reason}
+
+We understand this is disappointing. The homeowner has decided to cancel this project at this time.
+
+Don't worry - there are many other opportunities available! Keep browsing for new jobs that match your skills.
+
+🔍 Browse Jobs: {browse_jobs_url}
+📋 View Your Interests: {interests_url}
+
+Best regards,
+serviceHub Team
+                """,
+                variables=["tradesperson_name", "job_title", "job_location", "homeowner_name", "cancellation_date", "cancellation_reason", "browse_jobs_url", "interests_url"]
+            ),
+            NotificationChannel.SMS: NotificationTemplate(
+                id=str(uuid.uuid4()),
+                type=NotificationType.JOB_CANCELLED,
+                channel=NotificationChannel.SMS,
+                subject_template="Job Cancelled - serviceHub",
+                content_template="❌ Job '{job_title}' cancelled by {homeowner_name}. Reason: {cancellation_reason}. Browse new jobs: {browse_jobs_url}",
+                variables=["job_title", "homeowner_name", "cancellation_reason", "browse_jobs_url"]
+            )
+        }
+        
         return templates
     
     def get_template(self, notification_type: NotificationType, channel: NotificationChannel) -> Optional[NotificationTemplate]:
