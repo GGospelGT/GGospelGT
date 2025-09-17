@@ -45,7 +45,7 @@ import {
   Info,
   ExternalLink
 } from 'lucide-react';
-import { interestsAPI, portfolioAPI, tradespeopleAPI } from '../api/services';
+import { interestsAPI, portfolioAPI, tradespeopleAPI, jobsAPI } from '../api/services';
 import { reviewsAPI } from '../api/reviews';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
