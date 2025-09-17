@@ -412,14 +412,37 @@ const ProfilePage = () => {
       <section className="py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Tabs defaultValue="profile" className="space-y-6">
-              <TabsList className={`grid w-full ${isTradesperson() ? 'grid-cols-5' : 'grid-cols-3'}`}>
-                <TabsTrigger value="profile">Profile Information</TabsTrigger>
-                {isTradesperson() && <TabsTrigger value="portfolio">Portfolio</TabsTrigger>}
-                {isTradesperson() && <TabsTrigger value="reviews">Reviews</TabsTrigger>}
-                <TabsTrigger value="account">Account Settings</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
-              </TabsList>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+              {/* Navigation Dropdown */}
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold font-montserrat text-gray-900">Profile Management</h1>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center space-x-2 px-4 py-2">
+                      <span>{getTabDisplayText(activeTab)}</span>
+                      <ChevronDown size={16} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    {getAvailableTabs().map((tab) => (
+                      <DropdownMenuItem 
+                        key={tab.value}
+                        onClick={() => setActiveTab(tab.value)}
+                        className={`cursor-pointer ${activeTab === tab.value ? 'bg-gray-100' : ''}`}
+                      >
+                        <div className="flex items-center space-x-2">
+                          {tab.value === 'profile' && <User size={16} />}
+                          {tab.value === 'portfolio' && <Briefcase size={16} />}
+                          {tab.value === 'reviews' && <Star size={16} />}
+                          {tab.value === 'account' && <Settings size={16} />}
+                          {tab.value === 'activity' && <Clock size={16} />}
+                          <span>{tab.label}</span>
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
               {/* Profile Information Tab */}
               <TabsContent value="profile" className="space-y-6">
