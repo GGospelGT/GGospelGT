@@ -21,7 +21,7 @@ import json
 import uuid
 import time
 
-BACKEND_URL = "https://homepro-ng.preview.emergentagent.com/api"
+BACKEND_URL = "https://tradepro-connect-1.preview.emergentagent.com/api"
 
 class FinalUserManagementTest:
     def __init__(self):
