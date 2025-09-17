@@ -256,84 +256,66 @@ const JobEditModal = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  State *
-                </label>
-                <Select 
-                  value={formData.state} 
-                  onValueChange={(value) => handleInputChange('state', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(states || []).map((state) => (
-                      <SelectItem key={state} value={state}>
-                        {state}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  LGA *
-                </label>
-                <Select 
-                  value={formData.lga} 
-                  onValueChange={(value) => handleInputChange('lga', value)}
-                  disabled={!formData.state}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select LGA" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(lgas || []).map((lga) => (
-                      <SelectItem key={lga} value={lga}>
-                        {lga}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Town *
+                  State
                 </label>
                 <Input
                   type="text"
-                  value={formData.town}
-                  onChange={(e) => handleInputChange('town', e.target.value)}
-                  placeholder="Enter town name"
-                  required
+                  value={formData.state}
+                  placeholder="Select state"
+                  readOnly
+                  className="bg-gray-50 cursor-not-allowed"
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Zip Code *
+                  LGA
+                </label>
+                <Input
+                  type="text"
+                  value={formData.lga}
+                  placeholder="Select LGA"
+                  readOnly
+                  className="bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Town
+                </label>
+                <Input
+                  type="text"
+                  value={formData.town}
+                  placeholder="Enter town name"
+                  readOnly
+                  className="bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Zip Code
                 </label>
                 <Input
                   type="text"
                   value={formData.zip_code}
-                  onChange={(e) => handleInputChange('zip_code', e.target.value)}
-                  placeholder="6-digit zip code"
-                  maxLength={6}
-                  required
+                  placeholder="Enter zip code"
+                  readOnly
+                  className="bg-gray-50 cursor-not-allowed"
                 />
               </div>
               
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Home Address *
+                  Home Address
                 </label>
                 <Input
                   type="text"
                   value={formData.home_address}
-                  onChange={(e) => handleInputChange('home_address', e.target.value)}
                   placeholder="Full home address"
-                  required
+                  readOnly
+                  className="bg-gray-50 cursor-not-allowed"
                 />
               </div>
             </div>
