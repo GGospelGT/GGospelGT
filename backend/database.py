@@ -5772,6 +5772,59 @@ class Database:
             logger.error(f"Error getting completed jobs for tradesperson {tradesperson_id}: {str(e)}")
             raise e
 
+    async def get_interested_tradespeople_for_job(self, job_id: str):
+        """Get all tradespeople who showed interest in a specific job"""
+        try:
+            # Get all interests for this job with tradesperson details
+            pipeline = [
+                # Match interests for this job
+                {"$match": {"job_id": job_id}},
+                
+                # Lookup the tradesperson details
+                {"$lookup": {
+                    "from": "users",
+                    "localField": "tradesperson_id",
+                    "foreignField": "id",
+                    "as": "tradesperson"
+                }},
+                
+                # Only include if tradesperson exists
+                {"$match": {"tradesperson": {"$ne": []}}},
+                
+                # Flatten the tradesperson array
+                {"$unwind": "$tradesperson"},
+                
+                # Project the fields we need
+                {"$project": {
+                    "_id": 0,  # Exclude MongoDB _id
+                    "id": "$id",
+                    "job_id": "$job_id",
+                    "tradesperson_id": "$tradesperson_id",
+                    "status": "$status",
+                    "created_at": "$created_at",
+                    "updated_at": "$updated_at",
+                    "tradesperson": {
+                        "id": "$tradesperson.id",
+                        "name": "$tradesperson.name",
+                        "email": "$tradesperson.email",
+                        "phone": "$tradesperson.phone"
+                    }
+                }}
+            ]
+            
+            interested_tradespeople = []
+            async for interest in self.database.interests.aggregate(pipeline):
+                # Clean the interest data to ensure serialization
+                cleaned_interest = self._clean_job_data(interest)
+                interested_tradespeople.append(cleaned_interest)
+            
+            logger.info(f"Retrieved {len(interested_tradespeople)} interested tradespeople for job {job_id}")
+            return interested_tradespeople
+            
+        except Exception as e:
+            logger.error(f"Error getting interested tradespeople for job {job_id}: {str(e)}")
+            raise e
+
     def _clean_job_data(self, job_data: dict) -> dict:
         """Clean job data to ensure all fields are JSON serializable"""
         from bson import ObjectId
