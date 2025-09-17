@@ -810,20 +810,51 @@ const MyJobsPage = () => {
                   </Card>
                 </div>
 
-                <Tabs defaultValue="all" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="all">All Jobs</TabsTrigger>
-                  <TabsTrigger value="active">Active</TabsTrigger>
-                  <TabsTrigger value="in_progress">In Progress</TabsTrigger>
-                  <TabsTrigger value="completed">Completed</TabsTrigger>
-                  <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-                </TabsList>
+                {/* Job Status Filter Dropdown */}
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold font-montserrat text-gray-900">My Posted Jobs</h2>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="flex items-center space-x-2 px-4 py-2">
+                        <span>{getJobStatusDisplayText(activeJobStatus)}</span>
+                        <ChevronDown size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {getJobStatusOptions().map((option) => (
+                        <DropdownMenuItem 
+                          key={option.value}
+                          onClick={() => setActiveJobStatus(option.value)}
+                          className={`cursor-pointer ${activeJobStatus === option.value ? 'bg-gray-100' : ''}`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <option.icon size={16} />
+                            <span>{option.label}</span>
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
 
-                {['all', 'active', 'in_progress', 'completed', 'cancelled'].map(status => (
-                  <TabsContent key={status} value={status} className="space-y-6">
-                    {jobs
-                      .filter(job => status === 'all' || job.status === status)
-                      .map((job) => (
+                {/* Jobs List */}
+                <div className="space-y-6">
+                  {getFilteredJobs().length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                          No {getJobStatusDisplayText(activeJobStatus).toLowerCase()} found
+                        </h3>
+                        <p className="text-gray-500">
+                          {activeJobStatus === 'all' 
+                            ? "You haven't posted any jobs yet." 
+                            : `You don't have any ${getJobStatusDisplayText(activeJobStatus).toLowerCase()} jobs.`}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    getFilteredJobs().map((job) => (
                         <Card key={job.id} className="hover:shadow-lg transition-shadow duration-300">
                           <CardHeader>
                             <div className="flex items-start justify-between">
