@@ -96,10 +96,9 @@ const JobEditModal = ({
       loadLGAs(value);
     }
 
-    // Handle LGA change to load towns
+    // Clear town when LGA changes (since town is now a text input, user can enter manually)
     if (field === 'lga' && value && formData.state) {
       setFormData(prev => ({ ...prev, town: '' }));
-      loadTowns(formData.state, value);
     }
   };
 
