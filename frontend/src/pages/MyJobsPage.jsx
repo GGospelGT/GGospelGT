@@ -94,10 +94,13 @@ const MyJobsPage = () => {
 
   // Filter jobs based on selected status
   const getFilteredJobs = () => {
+    // First filter out any null or undefined jobs
+    const validJobs = jobs.filter(job => job && job.id);
+    
     if (activeJobStatus === 'all') {
-      return jobs;
+      return validJobs;
     }
-    return jobs.filter(job => job.status === activeJobStatus);
+    return validJobs.filter(job => job.status === activeJobStatus);
   };
 
   useEffect(() => {
