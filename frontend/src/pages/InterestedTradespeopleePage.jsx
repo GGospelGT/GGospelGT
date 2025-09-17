@@ -108,12 +108,33 @@ const InterestedTradespeopleePage = () => {
   const loadInterestedTradespeople = async () => {
     try {
       setLoading(true);
+      console.log('Loading interested tradespeople for job:', jobId);
+      
       const response = await interestsAPI.getJobInterestedTradespeople(jobId);
+      console.log('API response:', response);
+      
       setInterestedTradespeople(response.interested_tradespeople || []);
       
-      // Assuming the job details come with the response, otherwise we'd need a separate API call
+      // Check if job details come with the response
       if (response.job) {
+        console.log('Job data found in response:', response.job);
         setJob(response.job);
+      } else {
+        console.log('No job data in response, attempting to fetch job details separately');
+        // If job details aren't included, we need to fetch them separately
+        try {
+          const jobResponse = await jobsAPI.getJobById(jobId);
+          console.log('Separate job API response:', jobResponse);
+          setJob(jobResponse);
+        } catch (jobError) {
+          console.error('Failed to fetch job details:', jobError);
+          // Create a minimal job object if we can't fetch full details
+          setJob({
+            id: jobId,
+            title: 'Job Details',
+            // We'll still allow chat functionality even with minimal job data
+          });
+        }
       }
     } catch (error) {
       console.error('Failed to load interested tradespeople:', error);
