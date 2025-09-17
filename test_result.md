@@ -69,6 +69,7 @@ test_plan:
     - "Enhanced Multiple Conditional Logic Functionality Testing"
     - "Enhanced Profile Page Dropdown Navigation Testing"
     - "Paid Access UI Element Hiding Implementation Testing"
+    - "Job Details Fix Testing - Blank Category and Location Fields on InterestedTradespeopleePage"
   test_all: false
   test_priority: "high_first"
 ##
