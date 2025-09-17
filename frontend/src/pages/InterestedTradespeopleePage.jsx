@@ -486,23 +486,36 @@ const InterestedTradespeopleePage = () => {
                     <Badge className="bg-green-50 text-green-700 border-green-200">
                       Contact details shared, waiting for feedback
                     </Badge>
-                    <Button
-                      onClick={() => {
-                        if (!job) {
-                          toast({
-                            title: "Loading...",
-                            description: "Please wait for job details to load before starting chat",
-                            variant: "default",
-                          });
-                          return;
-                        }
-                        handleStartChat(tradesperson);
-                      }}
-                      className="text-white font-lato bg-blue-600 hover:bg-blue-700 w-full"
-                    >
-                      <MessageCircle size={16} className="mr-2" />
-                      Start Chat
-                    </Button>
+                    {isChatDisabled() ? (
+                      <div className="space-y-1">
+                        <Button
+                          disabled
+                          className="text-gray-400 bg-gray-100 cursor-not-allowed w-full"
+                        >
+                          <MessageCircle size={16} className="mr-2" />
+                          Start Chat
+                        </Button>
+                        <p className="text-xs text-gray-500 text-center">{getChatDisabledMessage()}</p>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          if (!job) {
+                            toast({
+                              title: "Loading...",
+                              description: "Please wait for job details to load before starting chat",
+                              variant: "default",
+                            });
+                            return;
+                          }
+                          handleStartChat(tradesperson);
+                        }}
+                        className="text-white font-lato bg-blue-600 hover:bg-blue-700 w-full"
+                      >
+                        <MessageCircle size={16} className="mr-2" />
+                        Start Chat
+                      </Button>
+                    )}
                   </div>
                 )}
 
