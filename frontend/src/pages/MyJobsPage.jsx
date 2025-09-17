@@ -305,6 +305,30 @@ const MyJobsPage = () => {
     }
   };
 
+  // Handle starting a chat with tradespeople
+  const handleStartQuickChat = (job) => {
+    try {
+      console.log('🚀 Starting quick chat for job:', job.id);
+      
+      toast({
+        title: "Opening Chat...",
+        description: "Starting chat with interested tradespeople",
+        variant: "default",
+      });
+
+      // Navigate to the interested tradespeople page where full chat functionality is available
+      navigate(`/job/${job.id}/interested-tradespeople`);
+      
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start chat. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Review handling functions
   const handleLeaveReview = async (job, tradesperson = null) => {
     setJobToReview(job);
