@@ -489,12 +489,12 @@ const InterestedTradespeopleePage = () => {
                         console.log('Job data for chat:', job);
                         
                         // Safety check for job object
-                        if (!job || !job.id) {
-                          console.error('Job object is null or missing id:', job);
+                        if (!job) {
+                          console.error('Job object is null:', job);
                           toast({
-                            title: "Error",
-                            description: "Unable to start chat - job information is missing",
-                            variant: "destructive",
+                            title: "Loading...",
+                            description: "Please wait for job details to load before starting chat",
+                            variant: "default",
                           });
                           return;
                         }
@@ -505,8 +505,8 @@ const InterestedTradespeopleePage = () => {
                             { id: user.id, name: user.name, role: 'homeowner' },
                             { id: tradesperson.tradesperson_id, name: tradesperson.name, role: 'tradesperson' }
                           ],
-                          jobId: job.id,
-                          jobTitle: job.title,
+                          jobId: job.id || jobId, // Use jobId from URL as fallback
+                          jobTitle: job.title || 'Job Chat',
                           chatContext: 'paid_access'
                         };
                         
