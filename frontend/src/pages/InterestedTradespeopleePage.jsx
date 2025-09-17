@@ -103,7 +103,7 @@ const InterestedTradespeopleePage = () => {
     }
 
     loadInterestedTradespeople();
-  }, [jobId]);
+  }, [jobId, isAuthenticated, isHomeowner, toast, navigate]);
 
   const loadInterestedTradespeople = async () => {
     try {
