@@ -5702,5 +5702,71 @@ class Database:
                 "hiring_rate": 0
             }
 
+    async def get_completed_jobs_for_tradesperson(self, tradesperson_id: str):
+        """Get all completed jobs for a tradesperson where they showed interest"""
+        try:
+            # Get all interests for this tradesperson where the job is completed
+            pipeline = [
+                # Match interests for this tradesperson
+                {"$match": {"tradesperson_id": tradesperson_id}},
+                
+                # Lookup the job details
+                {"$lookup": {
+                    "from": "jobs",
+                    "localField": "job_id", 
+                    "foreignField": "id",
+                    "as": "job"
+                }},
+                
+                # Only include if job exists and is completed
+                {"$match": {
+                    "job.status": "completed",
+                    "job": {"$ne": []}
+                }},
+                
+                # Flatten the job array
+                {"$unwind": "$job"},
+                
+                # Project the fields we need
+                {"$project": {
+                    "id": "$id",
+                    "job_id": "$job_id",
+                    "job_title": "$job.title",
+                    "job_description": "$job.description",
+                    "job_category": "$job.category",
+                    "job_location": "$job.location",
+                    "job_budget_min": "$job.budget_min",
+                    "job_budget_max": "$job.budget_max",
+                    "job_timeline": "$job.timeline",
+                    "job_status": "$job.status",
+                    "homeowner_id": "$job.homeowner.id",
+                    "homeowner_name": "$job.homeowner.name",
+                    "homeowner_email": "$job.homeowner.email",
+                    "homeowner_phone": "$job.homeowner.phone",
+                    "status": "$status",
+                    "created_at": "$created_at",
+                    "updated_at": "$updated_at",
+                    "completed_at": "$job.completed_at",
+                    "access_fee_naira": "$job.access_fee_naira",
+                    "access_fee_coins": "$job.access_fee_coins",
+                    "payment_made_at": "$payment_made_at",
+                    "rating": {"$ifNull": ["$rating", None]}
+                }},
+                
+                # Sort by completion date (most recent first)
+                {"$sort": {"completed_at": -1, "updated_at": -1}}
+            ]
+            
+            completed_jobs = []
+            async for job in self.database.interests.aggregate(pipeline):
+                completed_jobs.append(job)
+            
+            logger.info(f"Retrieved {len(completed_jobs)} completed jobs for tradesperson {tradesperson_id}")
+            return completed_jobs
+            
+        except Exception as e:
+            logger.error(f"Error getting completed jobs for tradesperson {tradesperson_id}: {str(e)}")
+            raise e
+
 # Create global database instance
 database = Database()
