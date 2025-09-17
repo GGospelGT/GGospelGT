@@ -50,6 +50,8 @@ class NotificationPreferences(BaseModel):
     new_application: NotificationChannel = NotificationChannel.EMAIL  # Application notifications
     review_invitation: NotificationChannel = NotificationChannel.EMAIL  # Review invitations
     review_reminder: NotificationChannel = NotificationChannel.EMAIL  # Review reminders
+    job_completed: NotificationChannel = NotificationChannel.BOTH  # Job completion notifications
+    job_cancelled: NotificationChannel = NotificationChannel.BOTH  # Job cancellation notifications
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
