@@ -151,6 +151,21 @@ frontend:
         agent: "main"
         comment: "CTA BUTTONS STYLING FIX APPLIED SUCCESSFULLY: Applied same button readability fixes to TradeCategoriesPage CTA section buttons. CHANGES MADE: 1) 'Post a Job' Button: Changed to outline variant with !important prefixes (!bg-white !text-green-600 !border-white) to ensure white background with green text, added proper hover states (hover:!bg-gray-100 hover:!text-green-600), 2) 'Browse Jobs' Button: Applied outline variant with !important prefixes (!border-white !text-white !bg-transparent) for white border and text on transparent background, enhanced hover states (hover:!bg-white hover:!text-green-600) for proper contrast. TECHNICAL DETAILS: Same root cause as homepage - Button component default variant overriding explicit styles. Solution ensures proper contrast ratios: Post a Job button now has white background with green text, Browse Jobs button has transparent background with white text and white border, both maintain readability on gradient background. Both buttons now display clearly readable text resolving the white-on-white visibility issues identified in user screenshot."
 
+  - task: "Remove 'Made with Emergent' Branding Watermark"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js, /app/frontend/src/index.css"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "Remove the made with emergent from my website"
+      - working: true
+        agent: "main"
+        comment: "WATERMARK REMOVAL SUCCESSFULLY IMPLEMENTED: Completely removed 'Made with Emergent' branding watermark from the website using dual approach. CHANGES MADE: 1) JavaScript Solution (App.js): Added useEffect hook with comprehensive watermark detection and removal logic including text-based search using TreeWalker API, DOM element removal for matching content, MutationObserver for dynamically added watermarks, multiple detection patterns for various text formats ('Made with Emergent', 'Made with emergent'), immediate execution plus delayed execution (1000ms) to catch late-loading watermarks, 2) CSS Solution (index.css): Added comprehensive CSS rules targeting common watermark positioning patterns, fixed and absolute positioning with bottom/right alignment, high z-index elements, multiple selector combinations to catch various implementation approaches. TECHNICAL DETAILS: The Emergent platform was injecting a watermark element at the bottom-right corner of pages. Solution uses both proactive CSS hiding and reactive JavaScript removal to ensure complete elimination. JavaScript approach handles dynamic watermarks while CSS approach provides immediate hiding. Both methods target multiple positioning and styling patterns commonly used for watermarks. RESULT: Watermark completely removed from all pages including homepage and trade categories page, verified through screenshots showing clean bottom-right corner with no visible branding, solution works across page navigations and dynamic content loading."
+
 frontend:
   - task: "Job Status Synchronization Fix in MyInterestsPage"
     implemented: true
