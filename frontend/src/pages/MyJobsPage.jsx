@@ -3,10 +3,16 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '../components/ui/dropdown-menu';
 import { 
   Calendar, MapPin, Clock, Users, Heart, TrendingUp, 
   Edit3, X, RotateCcw, AlertCircle, CheckCircle, Star, Briefcase,
-  User, DollarSign, MessageSquare 
+  User, DollarSign, MessageSquare, ChevronDown 
 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
