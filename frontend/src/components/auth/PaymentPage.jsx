@@ -28,6 +28,7 @@ const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
   
   const { toast } = useToast();
   const { registerTradesperson } = useAuth();
+  const navigate = useNavigate();
 
   // Load bank details on component mount
   useEffect(() => {
