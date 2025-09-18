@@ -915,7 +915,7 @@ const ProfileSetup = ({ formData, updateFormData }) => (
 );
 
 // Wallet Setup Component (Step 6)
-const WalletSetup = ({ formData, updateFormData }) => (
+const WalletSetup = ({ formData, updateFormData, handleFinalSubmit, isLoading }) => (
   <div className="space-y-6">
     <div className="text-center mb-6">
       <Wallet className="mx-auto h-16 w-16 text-green-600 mb-4" />
