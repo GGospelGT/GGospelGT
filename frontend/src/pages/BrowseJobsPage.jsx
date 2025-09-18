@@ -126,6 +126,39 @@ const BrowseJobsPage = () => {
     }
   }, [filters, userLocation, isAuthenticated, isTradesperson]); // Add authentication dependencies
 
+  // Show welcome message for new registrations
+  useEffect(() => {
+    if (location.state?.welcomeMessage) {
+      toast({
+        title: "Registration Successful! 🎉",
+        description: location.state.welcomeMessage,
+        duration: 5000,
+      });
+
+      // Show additional wallet funding info if applicable
+      if (location.state?.walletFunded && location.state?.fundingAmount) {
+        setTimeout(() => {
+          toast({
+            title: "Wallet Funding Submitted",
+            description: `Your payment of ₦${location.state.fundingAmount} has been submitted for verification. You'll be notified once approved.`,
+            duration: 5000,
+          });
+        }, 1000);
+      } else if (location.state?.walletError) {
+        setTimeout(() => {
+          toast({
+            title: "Note",
+            description: "You can fund your wallet anytime from the Wallet page to start applying for jobs.",
+            variant: "info",
+          });
+        }, 1000);
+      }
+
+      // Clear the state to prevent showing message again on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, toast, navigate]);
+
   const loadWalletBalance = async () => {
     try {
       const data = await walletAPI.getBalance();
