@@ -166,6 +166,21 @@ frontend:
         agent: "main"
         comment: "WATERMARK REMOVAL SUCCESSFULLY IMPLEMENTED: Completely removed 'Made with Emergent' branding watermark from the website using dual approach. CHANGES MADE: 1) JavaScript Solution (App.js): Added useEffect hook with comprehensive watermark detection and removal logic including text-based search using TreeWalker API, DOM element removal for matching content, MutationObserver for dynamically added watermarks, multiple detection patterns for various text formats ('Made with Emergent', 'Made with emergent'), immediate execution plus delayed execution (1000ms) to catch late-loading watermarks, 2) CSS Solution (index.css): Added comprehensive CSS rules targeting common watermark positioning patterns, fixed and absolute positioning with bottom/right alignment, high z-index elements, multiple selector combinations to catch various implementation approaches. TECHNICAL DETAILS: The Emergent platform was injecting a watermark element at the bottom-right corner of pages. Solution uses both proactive CSS hiding and reactive JavaScript removal to ensure complete elimination. JavaScript approach handles dynamic watermarks while CSS approach provides immediate hiding. Both methods target multiple positioning and styling patterns commonly used for watermarks. RESULT: Watermark completely removed from all pages including homepage and trade categories page, verified through screenshots showing clean bottom-right corner with no visible branding, solution works across page navigations and dynamic content loading."
 
+  - task: "Fix Tradespeople Registration Form Skills Assessment API Connection"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/api/wallet.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "the tradespeople registration form is not displaying skill assessment from the admin dashboard"
+      - working: true
+        agent: "main"
+        comment: "SKILLS ASSESSMENT API CONNECTION FIXED SUCCESSFULLY: Identified and resolved incorrect API endpoint causing skills assessment questions to not load in registration form. ROOT CAUSE ANALYSIS: Frontend skillsAPI.getQuestionsForTrade() was calling incorrect endpoint '/skills-questions/{tradeCategory}' which returned 404 Not Found. Backend had questions stored properly in database (verified 7 total questions across Plumbing, Building, Concrete Works, and Bathroom Fitting trades) and public endpoint existed at correct path '/jobs/skills-questions/{tradeCategory}'. SOLUTION IMPLEMENTED: Updated skillsAPI endpoint in /app/frontend/src/api/wallet.js from '/skills-questions/{encodeURIComponent(tradeCategory)}' to '/jobs/skills-questions/{encodeURIComponent(tradeCategory)}' to match backend router configuration. VERIFICATION RESULTS: 1) Backend API endpoint working correctly - returns proper question format with options, correct answers, categories, and explanations, 2) Frontend registration form now loads skills assessment properly - 'Start Skills Test' button enabled, questions display available for selected trades, 3) Skills test component shows correct information (20-question test, 80% pass rate requirement, 30-minute time limit). TECHNICAL DETAILS: Backend router has prefix '/api/jobs' so public skills questions endpoint is '/api/jobs/skills-questions/{trade_category}'. Admin dashboard successfully stores questions which are now accessible via correct public endpoint. Registration form validates selected trade has available questions before enabling skills test step. IMPACT: Registration form now fully functional with skills assessment capability, enabling quality verification of tradespeople expertise during onboarding process."
+
 frontend:
   - task: "Job Status Synchronization Fix in MyInterestsPage"
     implemented: true
