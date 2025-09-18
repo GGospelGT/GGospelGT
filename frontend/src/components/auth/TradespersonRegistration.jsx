@@ -246,8 +246,14 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
   };
 
   const handleFinalSubmit = async () => {
-    if (!validateCurrentStep()) return;
+    console.log('🚀 handleFinalSubmit called, current step:', currentStep);
     
+    if (!validateCurrentStep()) {
+      console.log('❌ Validation failed, errors:', errors);
+      return;
+    }
+    
+    console.log('✅ Validation passed, proceeding with registration');
     setIsLoading(true);
     
     try {
