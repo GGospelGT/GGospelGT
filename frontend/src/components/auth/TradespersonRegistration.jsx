@@ -306,7 +306,9 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         });
 
         // Redirect to Browse Jobs page after a brief delay
+        console.log('🚀 Attempting redirect to /browse-jobs');
         setTimeout(() => {
+          console.log('🚀 Executing navigate to /browse-jobs');
           navigate('/browse-jobs', { 
             state: { 
               welcomeMessage: `Welcome to ServiceHub, ${fullName}! Your account has been created successfully.`,
