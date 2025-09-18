@@ -359,6 +359,9 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
           newErrors.profileDescription = 'Profile description is required';
         }
         break;
+      case 6:
+        // No validation needed for wallet setup step - it's optional
+        break;
     }
 
     setErrors(newErrors);
