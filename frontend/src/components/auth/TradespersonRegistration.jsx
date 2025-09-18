@@ -269,9 +269,9 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
 
       const result = await registerTradesperson({
         name: fullName,
-        email: formData.email || `${formData.phone}@servicehub.temp`, // Generate email if not provided
+        email: formData.email, // Use the actual email from the form
         password: formData.password,
-        phone: formData.phoneNumber, // Use phoneNumber instead of phone
+        phone: formData.phone, // Use the correct field name
         location: formData.state,
         postcode: '000000', // Placeholder postcode
         trade_categories: formData.selectedTrades,
