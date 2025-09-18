@@ -1056,13 +1056,17 @@ const WalletSetup = ({ formData, updateFormData, handleFinalSubmit, isLoading, s
       </div>
 
       <div className="space-y-3">
-        <Button
-          onClick={() => setShowPaymentPage(true)}
+        <button
+          onClick={() => {
+            console.log('🔵 FUND NOW BUTTON CLICKED');
+            setShowPaymentPage(true);
+          }}
           disabled={isLoading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium disabled:opacity-50"
+          type="button"
         >
           Fund Now
-        </Button>
+        </button>
         
         <button
           onClick={() => {
