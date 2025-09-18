@@ -29,6 +29,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
 import useStates from '../../hooks/useStates';
+import { useNavigate } from 'react-router-dom';
 import SkillsTestComponent from './SkillsTestComponent';
 import { adminAPI } from '../../api/wallet';
 import PaymentPage from './PaymentPage';
