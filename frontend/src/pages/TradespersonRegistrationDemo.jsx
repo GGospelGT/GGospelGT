@@ -42,13 +42,17 @@ const TradespersonRegistrationDemo = () => {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Button
-                      onClick={() => {
-                        console.log('🚀 Multi-Step Registration button clicked');
+                      onClick={(e) => {
+                        console.log('🚀 Multi-Step Registration button clicked - event:', e);
+                        console.log('🚀 Current state before:', { showRegistration, registrationType });
+                        e.preventDefault();
+                        e.stopPropagation();
                         setRegistrationType('multi-step');
                         setShowRegistration(true);
-                        console.log('📊 State after click:', { registrationType: 'multi-step', showRegistration: true });
+                        console.log('📊 State changes triggered');
                       }}
                       className="h-24 flex flex-col space-y-2 bg-green-600 hover:bg-green-700 text-white"
+                      type="button"
                     >
                       <span className="text-lg font-semibold">Multi-Step Registration</span>
                       <span className="text-sm opacity-90">Complete 6-step process with skills test</span>
