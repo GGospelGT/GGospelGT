@@ -15,6 +15,7 @@ import {
 import { useToast } from '../../hooks/use-toast';
 import { walletAPI } from '../../api/wallet';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
   const [bankDetails, setBankDetails] = useState(null);
