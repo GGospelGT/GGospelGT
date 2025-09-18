@@ -985,54 +985,64 @@ const ProfileSetup = ({ formData, updateFormData }) => (
 );
 
 // Wallet Setup Component (Step 6)
-const WalletSetup = ({ formData, updateFormData, handleFinalSubmit, isLoading }) => (
-  <div className="space-y-6">
-    <div className="text-center mb-6">
-      <Wallet className="mx-auto h-16 w-16 text-green-600 mb-4" />
-      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-        Fund your wallet
-      </h3>
-      <p className="text-gray-600">
-        Set up your wallet to access job leads. You'll need coins to show interest in jobs and get homeowner contact details.
-      </p>
-    </div>
-
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <h4 className="font-medium text-blue-800 mb-2">How it works:</h4>
-      <ul className="text-sm text-blue-700 space-y-1">
-        <li>• Each job has an access fee (typically 5-20 coins)</li>
-        <li>• You pay the fee to get homeowner contact details</li>
-        <li>• 1 coin = ₦100</li>
-        <li>• Minimum funding: ₦100 (1 coin)</li>
-      </ul>
-    </div>
-
-    <div className="space-y-3">
-      <Button
-        onClick={() => {
-          // Fund Now - redirect to wallet funding after completing registration
+const WalletSetup = ({ formData, updateFormData, handleFinalSubmit, isLoading, showPaymentPage, setShowPaymentPage }) => {
+  if (showPaymentPage) {
+    return (
+      <PaymentPage
+        onBack={() => setShowPaymentPage(false)}
+        onPaymentComplete={() => {
           updateFormData('walletSetup', 'fund_now');
           handleFinalSubmit();
         }}
-        disabled={isLoading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
-      >
-        {isLoading ? 'Completing Registration...' : 'Fund Now & Complete Registration'}
-      </Button>
-      
-      <Button
-        onClick={() => {
-          updateFormData('walletSetup', 'later');
-          handleFinalSubmit();
-        }}
-        disabled={isLoading}
-        variant="outline"
-        className="w-full border-green-600 text-green-600 hover:bg-green-50 py-3"
-      >
-        {isLoading ? 'Completing Registration...' : 'Set Up Wallet Later & Complete Registration'}
-      </Button>
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <Wallet className="mx-auto h-16 w-16 text-green-600 mb-4" />
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+          Fund your wallet
+        </h3>
+        <p className="text-gray-600">
+          Set up your wallet to access job leads. You'll need coins to show interest in jobs and get homeowner contact details.
+        </p>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h4 className="font-medium text-blue-800 mb-2">How it works:</h4>
+        <ul className="text-sm text-blue-700 space-y-1">
+          <li>• Each job has an access fee (typically 5-20 coins)</li>
+          <li>• You pay the fee to get homeowner contact details</li>
+          <li>• 1 coin = ₦100</li>
+          <li>• Minimum funding: ₦100 (1 coin)</li>
+        </ul>
+      </div>
+
+      <div className="space-y-3">
+        <Button
+          onClick={() => setShowPaymentPage(true)}
+          disabled={isLoading}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+        >
+          Fund Now
+        </Button>
+        
+        <Button
+          onClick={() => {
+            updateFormData('walletSetup', 'later');
+            handleFinalSubmit();
+          }}
+          disabled={isLoading}
+          variant="outline"
+          className="w-full border-green-600 text-green-600 hover:bg-green-50 py-3"
+        >
+          {isLoading ? 'Completing Registration...' : 'Set Up Wallet Later & Complete Registration'}
+        </Button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default TradespersonRegistration;
