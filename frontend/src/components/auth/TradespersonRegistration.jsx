@@ -279,7 +279,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         '10+': 15
       };
 
-      const result = await registerTradesperson({
+      const registrationData = {
         name: fullName,
         email: formData.email, // Use the actual email from the form
         password: formData.password,
@@ -291,7 +291,10 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         company_name: formData.tradingName,
         description: description,
         certifications: formData.certifications || []
-      });
+      };
+
+      console.log('📤 Sending registration data:', registrationData);
+      const result = await registerTradesperson(registrationData);
 
       if (result.success) {
         const walletSetupChoice = formData.walletSetup;
