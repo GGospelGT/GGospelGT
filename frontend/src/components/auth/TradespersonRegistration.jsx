@@ -941,8 +941,8 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
           {currentStep === 5 && <ProfileSetup formData={formData} updateFormData={updateFormData} />}
           {currentStep === 6 && <WalletSetup formData={formData} updateFormData={updateFormData} handleFinalSubmit={handleFinalSubmit} isLoading={isLoading} showPaymentPage={showPaymentPage} setShowPaymentPage={setShowPaymentPage} />}
           {/* Debug current step */}
-          <div style={{position: 'fixed', top: '10px', right: '10px', background: 'red', color: 'white', padding: '5px', zIndex: 9999}}>
-            DEBUG: Step {currentStep}
+          <div style={{position: 'fixed', top: '10px', right: '10px', background: 'green', color: 'white', padding: '5px', zIndex: 9999}}>
+            Step {currentStep}
           </div>
         </div>
 
