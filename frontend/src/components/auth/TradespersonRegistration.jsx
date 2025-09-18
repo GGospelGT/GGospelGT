@@ -958,7 +958,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
             <span>Back</span>
           </Button>
 
-          {currentStep !== 6 && (
+          {currentStep < 6 && (
             <Button
               type="button"
               onClick={nextStep}
