@@ -62,6 +62,64 @@ async def root():
 async def health_check():
     return {"status": "healthy", "service": "serviceHub API"}
 
+@api_router.get("/api/database-info")
+async def get_database_info():
+    """Get database information for mobile access"""
+    try:
+        # Get database stats
+        db = database.get_database()
+        
+        # Count documents in collections
+        collections_info = {}
+        
+        # Check common collections
+        try:
+            collections_info["users"] = await db.users.count_documents({})
+            collections_info["jobs"] = await db.jobs.count_documents({})
+            collections_info["interests"] = await db.interests.count_documents({})
+            collections_info["reviews"] = await db.reviews.count_documents({})
+            collections_info["messages"] = await db.messages.count_documents({})
+        except Exception as e:
+            collections_info["error"] = str(e)
+        
+        # Get sample data
+        sample_data = {}
+        try:
+            if collections_info.get("users", 0) > 0:
+                sample_user = await db.users.find_one({}, {"password_hash": 0})
+                if sample_user:
+                    sample_data["sample_user"] = {
+                        "id": sample_user.get("id"),
+                        "name": sample_user.get("name"),
+                        "email": sample_user.get("email"),
+                        "role": sample_user.get("role"),
+                        "created_at": sample_user.get("created_at")
+                    }
+            
+            if collections_info.get("jobs", 0) > 0:
+                sample_job = await db.jobs.find_one({})
+                if sample_job:
+                    sample_data["sample_job"] = {
+                        "id": sample_job.get("id"),
+                        "title": sample_job.get("title"),
+                        "category": sample_job.get("category"),
+                        "location": sample_job.get("location"),
+                        "budget": sample_job.get("budget"),
+                        "status": sample_job.get("status")
+                    }
+        except Exception as e:
+            sample_data["error"] = str(e)
+        
+        return {
+            "database": "servicehub",
+            "collections": collections_info,
+            "sample_data": sample_data,
+            "timestamp": str(database.datetime.datetime.utcnow())
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
 # Include route modules
 from routes import auth, jobs, tradespeople, quotes, reviews, stats, portfolio, interests, notifications, reviews_advanced, wallet, admin, referrals, messages
 
