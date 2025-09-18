@@ -593,6 +593,27 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
+          Years of experience *
+        </label>
+        <select
+          value={formData.experienceYears}
+          onChange={(e) => updateFormData('experienceYears', e.target.value)}
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+            errors.experienceYears ? 'border-red-500' : 'border-gray-300'
+          }`}
+        >
+          <option value="">Select your experience level</option>
+          <option value="0-1">0-1 years (New to the trade)</option>
+          <option value="1-3">1-3 years (Some experience)</option>
+          <option value="3-5">3-5 years (Experienced)</option>
+          <option value="5-10">5-10 years (Very experienced)</option>
+          <option value="10+">10+ years (Expert level)</option>
+        </select>
+        {errors.experienceYears && <p className="text-red-500 text-sm mt-1">{errors.experienceYears}</p>}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           What type of business do you have? *
         </label>
         <div className="space-y-2">
