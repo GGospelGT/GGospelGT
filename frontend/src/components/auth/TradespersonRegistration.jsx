@@ -954,17 +954,22 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
             <span>Back</span>
           </Button>
 
-          <Button
-            type="button"
-            onClick={currentStep === 6 ? handleFinalSubmit : nextStep}
-            disabled={isLoading || (currentStep === 4 && !formData.skillsTestPassed)}
-            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white"
-          >
-            <span>
-              {currentStep === 6 ? 'Complete Registration' : 'Continue'}
-            </span>
-            <ArrowRight size={16} />
-          </Button>
+          {currentStep !== 6 && (
+            <Button
+              type="button"
+              onClick={nextStep}
+              disabled={isLoading || (currentStep === 4 && !formData.skillsTestPassed)}
+              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white"
+            >
+              <span>Continue</span>
+              <ArrowRight size={16} />
+            </Button>
+          )}
+          {currentStep === 6 && (
+            <div className="text-sm text-gray-600">
+              Choose your wallet setup option below
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
