@@ -1067,8 +1067,11 @@ const WalletSetup = ({ formData, updateFormData, handleFinalSubmit, isLoading, s
 
       <div className="space-y-3">
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
             console.log('🔵 FUND NOW BUTTON CLICKED');
+            updateFormData('walletSetup', 'fund_now');
             setShowPaymentPage(true);
           }}
           disabled={isLoading}
