@@ -49,9 +49,9 @@
 ##
 test_plan:
   current_focus:
-    []
+    - "Tradesperson Registration Flow Testing - Complete 6-Step Process with Step 6 Wallet Setup Focus"
   stuck_tasks: 
-    []
+    - "Tradesperson Registration Flow Testing - Complete 6-Step Process with Step 6 Wallet Setup Focus"
   completed_tasks:
     - "My Jobs Page Navigation Fix - View Interested Tradespeople"
     - "Review System Backend Testing"
