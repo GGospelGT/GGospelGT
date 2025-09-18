@@ -966,16 +966,31 @@ const WalletSetup = ({ formData, updateFormData, handleFinalSubmit, isLoading })
       </ul>
     </div>
 
-    <Button
-      onClick={() => {
-        updateFormData('walletSetup', true);
-        handleFinalSubmit();
-      }}
-      disabled={isLoading}
-      className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
-    >
-      {isLoading ? 'Completing Registration...' : 'Set Up Wallet Later & Complete Registration'}
-    </Button>
+    <div className="space-y-3">
+      <Button
+        onClick={() => {
+          // Fund Now - redirect to wallet funding after completing registration
+          updateFormData('walletSetup', 'fund_now');
+          handleFinalSubmit();
+        }}
+        disabled={isLoading}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+      >
+        {isLoading ? 'Completing Registration...' : 'Fund Now & Complete Registration'}
+      </Button>
+      
+      <Button
+        onClick={() => {
+          updateFormData('walletSetup', 'later');
+          handleFinalSubmit();
+        }}
+        disabled={isLoading}
+        variant="outline"
+        className="w-full border-green-600 text-green-600 hover:bg-green-50 py-3"
+      >
+        {isLoading ? 'Completing Registration...' : 'Set Up Wallet Later & Complete Registration'}
+      </Button>
+    </div>
   </div>
 );
 
