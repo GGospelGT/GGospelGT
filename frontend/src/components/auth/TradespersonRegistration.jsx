@@ -103,6 +103,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
 
   const { registerTradesperson } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { states: nigerianStates, loading: statesLoading } = useStates();
 
   // Fetch trade categories from API
