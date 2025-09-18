@@ -1062,6 +1062,7 @@ const WalletSetup = ({ formData, updateFormData, handleFinalSubmit, isLoading, s
         <Button
           onClick={() => {
             console.log('🔘 SET UP WALLET LATER BUTTON CLICKED');
+            alert('Set Up Wallet Later button clicked! Check console for details.');
             console.log('🔍 Current form data:', formData);
             console.log('🔍 Current step:', currentStep);
             updateFormData('walletSetup', 'later');
