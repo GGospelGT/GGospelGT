@@ -82,6 +82,7 @@ const BrowseJobsPage = () => {
   const [userInterestsLoading, setUserInterestsLoading] = useState(false);
 
   const { user, isAuthenticated, isTradesperson } = useAuth();
+  const location = useLocation();
   
   // Load user interests for tradespeople
   const loadUserInterests = async () => {
