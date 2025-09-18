@@ -1,49 +1,42 @@
 #!/usr/bin/env python3
 """
-JOB CANCELLATION FUNCTIONALITY TESTING
+TRADESPERSON REGISTRATION ENDPOINT TESTING
 
 **TESTING REQUIREMENTS FROM REVIEW REQUEST:**
 
-**ISSUE REPORTED:** 
-User cancelled a job but it's not appearing in the "Cancelled" tab of their My Jobs page. 
-The page shows "No cancelled found" even after cancelling a job.
+Test the tradesperson registration endpoint to verify it's working correctly with the phone number format fix:
 
-**CRITICAL TESTING NEEDED:**
+**1. Registration API Testing:** 
+- Test the POST /api/auth/register/tradesperson endpoint with properly formatted data
+- Use Nigerian phone number format with +234 prefix
+- Include all required fields: name, email, password, phone, location, postcode, trade_categories, experience_years, company_name, description, certifications
+- Verify successful registration response (201 status)
+- Check that user is created in the database
+- Verify JWT token is returned
 
-**1. Job Cancellation API Testing:**
-- Test the PUT /api/jobs/{job_id}/close endpoint
-- Verify that when a job is closed, its status is correctly updated to "cancelled" in the database
-- Test with homeowner credentials (francisdaniel4jb@gmail.com / Servicehub..1)
-- Verify the job close request includes proper reason and feedback
+**2. Phone Number Validation:** 
+- Test with +234 prefix: "+2348012345678"
+- Verify it passes Nigerian phone validation
+- Check that the phone number is stored correctly
 
-**2. Database Status Update Verification:**
-- Check that JobStatus.CANCELLED maps to "cancelled" string value
-- Verify the database update_job function correctly sets status to "cancelled"
-- Test that jobs collection in MongoDB gets the correct status value
+**3. Authentication Flow:** 
+- Register a new tradesperson user
+- Verify login works with the same credentials
+- Test that JWT token authentication works
+- Verify user profile data is correctly returned
 
-**3. My Jobs API Testing:**
-- Test the GET /api/jobs/my-jobs endpoint after job cancellation
-- Verify that cancelled jobs are included in the response
-- Check that the job status field is correctly set to "cancelled" in the API response
-- Test filtering/querying of jobs by status
-
-**4. Job Status Flow Testing:**
-- Create/find an active job for the test homeowner
-- Cancel the job using the close job API
-- Immediately query my-jobs to verify the cancelled job appears
-- Check that the job has proper cancelled status fields (closed_at, closure_reason, etc.)
-
-**5. Data Consistency Verification:**
-- Verify job closure timestamps are set correctly
-- Check that closure_reason and closure_feedback are saved
-- Test that job status transitions work correctly (active → cancelled)
+**4. Database Verification:** 
+- Verify user record exists in users collection
+- Check that all fields are properly saved
+- Verify password is hashed correctly
+- Confirm tradesperson role is set
 
 **EXPECTED RESULTS:**
-- ✅ Job close API should successfully update job status to "cancelled"
-- ✅ Database should contain the job with status="cancelled"
-- ✅ My jobs API should return cancelled jobs in the response
-- ✅ Job should have proper closure metadata (reason, feedback, timestamp)
-- ✅ No data synchronization issues between close and retrieve operations
+- Registration endpoint should return 201 success
+- Phone number validation should pass with +234 format
+- User should be created in database with proper data
+- Authentication flow should work end-to-end
+- JWT tokens should be valid and functional
 """
 
 import requests
