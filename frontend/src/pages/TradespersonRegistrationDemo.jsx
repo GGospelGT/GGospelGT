@@ -43,8 +43,10 @@ const TradespersonRegistrationDemo = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Button
                       onClick={() => {
+                        console.log('🚀 Multi-Step Registration button clicked');
                         setRegistrationType('multi-step');
                         setShowRegistration(true);
+                        console.log('📊 State after click:', { registrationType: 'multi-step', showRegistration: true });
                       }}
                       className="h-24 flex flex-col space-y-2 bg-green-600 hover:bg-green-700 text-white"
                     >
