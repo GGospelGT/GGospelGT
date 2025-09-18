@@ -311,6 +311,11 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
       case 1:
         if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
         if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+        if (!formData.email.trim()) {
+          newErrors.email = 'Email address is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+          newErrors.email = 'Please enter a valid email address';
+        }
         if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
         if (!formData.password || formData.password.length < 6) {
           newErrors.password = 'Password must be at least 6 characters';
