@@ -244,15 +244,6 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
     if (validateCurrentStep()) {
       const newStep = Math.min(currentStep + 1, 6);
       setCurrentStep(newStep);
-      
-      // Auto-complete registration after Step 5 (Profile Setup)
-      if (newStep === 6) {
-        console.log('🚀 Reached Step 6 - Auto-completing registration with wallet setup later');
-        setTimeout(() => {
-          updateFormData('walletSetup', 'later');
-          handleFinalSubmit();
-        }, 1000);
-      }
     }
   };
 
