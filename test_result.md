@@ -1298,6 +1298,18 @@ backend:
     stuck_count: 0
     priority: "high"
     needs_retesting: false
+
+  - task: "Tradesperson Registration 400 Bad Request Error Debugging"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/auth.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "🎯 TRADESPERSON REGISTRATION 400 BAD REQUEST ERROR DEBUGGING COMPLETED SUCCESSFULLY: Conducted comprehensive debugging of the 400 Bad Request error from the tradesperson registration endpoint using the exact frontend data format. CRITICAL ROOT CAUSE IDENTIFIED: ✅ EXACT ERROR MESSAGE CAPTURED: The 400 Bad Request error was caused by 'Email address already registered' - the email 'john.finaltest.auth@example.com' was already in the system from previous testing, NOT a validation or data format issue. ✅ FRONTEND DATA FORMAT COMPLETELY VALID: Testing with unique email addresses proves the exact frontend data format is 100% correct and accepted by the backend, registration succeeds with 200 OK response when using fresh email addresses, all fields (name, email, password, phone, location, postcode, trade_categories, experience_years, company_name, description, certifications) are properly formatted and validated. ✅ COMPREHENSIVE FIELD VALIDATION VERIFIED: Individual field testing confirmed backend validation is working correctly: Nigerian phone number validation properly rejects non-Nigerian numbers (+1234567890) and empty phones, location validation correctly rejects invalid locations and requires valid Nigerian states, trade categories validation properly rejects invalid categories ('InvalidCategory'), description field is required (422 error when missing), all other validation rules working as expected. ✅ COMPLETE AUTHENTICATION FLOW OPERATIONAL: End-to-end testing confirms full authentication workflow: Registration → Login → Protected Access all functional, JWT tokens properly generated and validated (different tokens for registration vs login as expected), user data correctly stored and retrieved (ID: bcc36562-8d67-42ce-97ab-480cc52e4e57, Role: tradesperson, Trade categories: ['Plumbing']), protected endpoints (/api/auth/me) accessible with valid tokens. ✅ BACKEND ENDPOINT FULLY FUNCTIONAL: POST /api/auth/register/tradesperson working perfectly with proper data format, returns complete user object with all required fields (id, name, email, phone, role, trade_categories, experience_years, company_name, description, certifications), JWT token with correct structure and 24-hour expiration, proper error handling for duplicate emails and validation failures. ✅ SOLUTION IDENTIFIED: The 400 Bad Request error is resolved by using unique email addresses for each registration attempt, frontend should implement proper error handling for 'Email address already registered' responses, users should be prompted to use different email or directed to login if account exists. PRODUCTION READY: The tradesperson registration endpoint is FULLY OPERATIONAL with no data format issues. The exact frontend data format is valid and works correctly. The 400 error was a duplicate email issue, not a validation problem. Registration, authentication, and data storage all working perfectly for new users with unique email addresses."
     status_history:
       - working: "NA"
         agent: "user"
