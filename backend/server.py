@@ -14,6 +14,10 @@ from routes.content import router as content_router
 from routes.public_content import router as public_content_router
 from routes.jobs_management import router as jobs_management_router
 
+# Add database inspection endpoint
+from fastapi import HTTPException
+from fastapi.responses import JSONResponse
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
