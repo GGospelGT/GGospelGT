@@ -293,10 +293,25 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
       });
 
       if (result.success) {
+        const walletSetupChoice = formData.walletSetup;
+        
         toast({
-          title: "Registration Successful!",
-          description: `Welcome to ServiceHub, ${fullName}! Your account is being reviewed and you'll be notified once approved.`,
+          title: "Registration Successful! 🎉",
+          description: `Welcome to ServiceHub, ${fullName}! Your account has been created successfully.`,
+          duration: 3000,
         });
+
+        // Redirect to Browse Jobs page after a brief delay
+        setTimeout(() => {
+          navigate('/browse-jobs', { 
+            state: { 
+              welcomeMessage: `Welcome to ServiceHub, ${fullName}! Your account has been created successfully.`,
+              walletFunded: false,
+              walletSetupLater: walletSetupChoice === 'later',
+              showWalletReminder: walletSetupChoice === 'later'
+            }
+          });
+        }, 2000);
         
         if (onComplete) {
           onComplete(result);
