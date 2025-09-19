@@ -6,11 +6,11 @@ import { useAPI } from '../hooks/useAPI';
 const StatsSection = () => {
   const { data: stats, loading, error } = useAPI(() => statsAPI.getStats());
 
-  // Fallback data while loading or on error
+  // Fallback data while loading or on error (updated to match current platform stats)
   const defaultStats = [
     {
       icon: Users,
-      number: '201',
+      number: '52',
       label: 'registered tradespeople',
       color: '#2F8140'
     },
@@ -22,7 +22,7 @@ const StatsSection = () => {
     },
     {
       icon: Star,
-      number: '403',
+      number: '40',
       label: 'customer reviews',
       color: '#2F8140'
     }
