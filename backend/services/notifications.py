@@ -387,7 +387,7 @@ serviceHub Admin Team
                 type=NotificationType.JOB_APPROVED,
                 channel=NotificationChannel.SMS,
                 subject_template="Job Approved - serviceHub",
-                content_template="✅ Your job '{job_title}' has been approved and is now live! Tradespeople can now see and apply. Check: https://app.emergent.sh/my-jobs",
+                content_template=f"✅ Your job '{{job_title}}' has been approved and is now live! Tradespeople can now see and apply. Check: {os.environ.get('FRONTEND_URL', 'https://app.emergent.sh')}/my-jobs",
                 variables=["job_title"]
             )
         }
