@@ -134,15 +134,8 @@ const HeroSection = () => {
 
       console.log('Search results:', results);
 
-      // For now, just show a success message
-      // In a real app, you'd navigate to a search results page
-      toast({
-        title: "Search completed!",
-        description: `Found ${results.pagination?.total || 0} matching jobs in ${location}.`,
-      });
-
-      // Here you would typically navigate to search results page
-      // navigate(`/search?q=${encodeURIComponent(job)}&location=${encodeURIComponent(location)}`);
+      // Navigate to search results page with query parameters  
+      navigate(`/search?q=${encodeURIComponent(job)}&location=${encodeURIComponent(location)}`);
       
     } catch (error) {
       console.error('Search error:', error);
