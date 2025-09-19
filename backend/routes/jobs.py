@@ -847,7 +847,7 @@ async def notify_job_cancellation(job_id: str, job: dict, homeowner: User, reaso
                     "homeowner_name": homeowner.name,
                     "cancellation_reason": reason,
                     "cancellation_date": datetime.utcnow().strftime("%B %d, %Y"),
-                    "browse_jobs_url": "https://servicehub.ng/browse-jobs",
+                    "browse_jobs_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.ng')}/browse-jobs",
                     "interests_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.ng')}/my-interests"
                 }
                 
