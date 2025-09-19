@@ -332,7 +332,7 @@ const Header = () => {
                     <div className="flex items-center space-x-2 px-4 py-2">
                       <User size={20} style={{color: '#2F8140'}} />
                       <span className="font-lato text-gray-700">
-                        Welcome, {user?.name?.split(' ')[0]}
+                        Welcome, {user?.name?.split(' ')[0] || 'User'}
                       </span>
                     </div>
                     
