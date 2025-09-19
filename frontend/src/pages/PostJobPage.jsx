@@ -179,7 +179,7 @@ const PostJobPage = () => {
       {/* Job Posting Form */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <JobPostingForm onComplete={handleJobComplete} />
+          <JobPostingForm onComplete={handleJobComplete} prefilledData={prefilledData} />
         </div>
       </section>
 
