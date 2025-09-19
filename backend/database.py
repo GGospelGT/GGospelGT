@@ -944,8 +944,8 @@ class Database:
 
     # Statistics operations
     async def get_platform_stats(self) -> dict:
-        # Total tradespeople
-        total_tradespeople = await self.database.tradespeople.count_documents({})
+        # Total tradespeople from users collection
+        total_tradespeople = await self.database.users.count_documents({"role": "tradesperson"})
         
         # Total reviews
         total_reviews = await self.database.reviews.count_documents({})
@@ -966,19 +966,36 @@ class Database:
         
         # Active jobs
         active_jobs = await self.database.jobs.count_documents({
-            "status": "active",
-            "expires_at": {"$gt": datetime.utcnow()}
+            "status": "active"
         })
         
-        # Count unique categories
-        categories = await self.database.tradespeople.distinct("trade_categories")
-        all_categories = set()
-        for cat_list in categories:
-            all_categories.update(cat_list)
+        # Count unique categories from tradespeople in users collection
+        users_with_categories = await self.database.users.find(
+            {"role": "tradesperson", "trade_categories": {"$exists": True, "$ne": None}},
+            {"trade_categories": 1}
+        ).to_list(length=None)
         
+        all_categories = set()
+        for user in users_with_categories:
+            trade_categories = user.get("trade_categories", [])
+            if trade_categories:
+                all_categories.update(trade_categories)
+        
+        # Also get categories from admin/trades endpoint
+        try:
+            trades_response = await self.get_all_trades()
+            if trades_response and 'trades' in trades_response:
+                admin_categories = len(trades_response['trades'])
+                # Use the larger count (either from actual tradespeople or admin trades)
+                total_categories = max(len(all_categories), admin_categories)
+            else:
+                total_categories = len(all_categories)
+        except:
+            total_categories = len(all_categories)
+
         return {
             "total_tradespeople": total_tradespeople,
-            "total_categories": len(all_categories),
+            "total_categories": total_categories,
             "total_reviews": total_reviews,
             "average_rating": average_rating,
             "total_jobs": total_jobs,
