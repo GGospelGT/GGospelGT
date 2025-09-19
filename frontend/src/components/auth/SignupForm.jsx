@@ -169,9 +169,13 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
       }
 
       if (result.success) {
+        console.log('📝 SignupForm received result:', result);
+        console.log('👤 User object:', result.user);
+        console.log('📛 User name:', result.user?.name);
+        
         toast({
           title: "Account created successfully!",
-          description: `Welcome to serviceHub, ${result.user.name}! ${
+          description: `Welcome to serviceHub, ${result.user?.name || 'valued customer'}! ${
             currentTab === 'tradesperson' 
               ? 'Your account is pending verification.' 
               : 'You can now start posting jobs.'
