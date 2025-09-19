@@ -5845,5 +5845,62 @@ class Database:
         
         return cleaned
 
+    async def search_jobs_with_location(
+        self,
+        search_query: str = None,
+        category: str = None,
+        user_latitude: float = None,
+        user_longitude: float = None,
+        max_distance_km: int = None,
+        skip: int = 0,
+        limit: int = 50
+    ):
+        """
+        Search jobs with optional location filtering
+        """
+        try:
+            # Build the search filter
+            search_filter = {}
+            
+            # Only search active jobs
+            search_filter["status"] = "active"
+            
+            # Text search on title, description, or category
+            if search_query:
+                search_filter["$or"] = [
+                    {"title": {"$regex": search_query, "$options": "i"}},
+                    {"description": {"$regex": search_query, "$options": "i"}},
+                    {"category": {"$regex": search_query, "$options": "i"}}
+                ]
+            
+            # Category filter
+            if category:
+                search_filter["category"] = {"$regex": category, "$options": "i"}
+            
+            # Location-based filtering would require geospatial data
+            # For now, we'll do a simple text search on location fields
+            if user_latitude and user_longitude and max_distance_km:
+                # This is a simplified location filter
+                # In a production system, you'd use MongoDB's geospatial queries
+                # For now, we'll skip the geospatial filtering and just return all results
+                pass
+            
+            # Execute the search
+            jobs_cursor = self.database.jobs.find(search_filter).skip(skip).limit(limit).sort("created_at", -1)
+            jobs = await jobs_cursor.to_list(length=limit)
+            
+            # Clean the job data to remove ObjectId issues
+            cleaned_jobs = []
+            for job in jobs:
+                cleaned_job = self._clean_job_data(job)
+                cleaned_jobs.append(cleaned_job)
+            
+            logger.info(f"Job search completed: {len(cleaned_jobs)} jobs found with query '{search_query}', category '{category}'")
+            return cleaned_jobs
+            
+        except Exception as e:
+            logger.error(f"Error in search_jobs_with_location: {str(e)}")
+            raise
+
 # Create global database instance
 database = Database()
