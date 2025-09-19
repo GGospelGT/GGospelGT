@@ -467,7 +467,7 @@ async def _send_application_notification(application: dict, job_posting: dict):
                     "experience_level": application.get("experience_level", "Not specified"),
                     "applied_date": datetime.utcnow().strftime("%B %d, %Y at %I:%M %p"),
                     "cover_letter": application["message"],
-                    "admin_dashboard_url": "https://servicehub.co/admin/jobs/applications"
+                    "admin_dashboard_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.co')}/admin/jobs/applications"
                 }
                 
                 # Send notification to admin
