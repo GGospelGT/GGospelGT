@@ -351,8 +351,8 @@ async def _notify_tradesperson_contact_shared(job: dict, tradesperson_id: str, i
             "job_title": job.get("title", "Untitled Job"),
             "job_location": job.get("location", ""),
             "homeowner_name": job.get("homeowner", {}).get("name", "Homeowner"),
-            "payment_url": f"https://servicehub.ng/my-interests?pay={interest_id}",
-            "view_url": f"https://servicehub.ng/my-interests"
+            "payment_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.ng')}/my-interests?pay={interest_id}",
+            "view_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.ng')}/my-interests"
         }
         
         # Send notification
