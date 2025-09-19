@@ -11,6 +11,7 @@ from services.notifications import notification_service
 from datetime import datetime
 import uuid
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
