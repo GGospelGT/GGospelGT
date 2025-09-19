@@ -107,7 +107,7 @@ class JobCloseRequest(BaseModel):
 class Job(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
-    description: str
+    description: str = ""  # Make optional with default
     category: str
     
     # Enhanced location fields (optional for backward compatibility)
@@ -118,13 +118,14 @@ class Job(BaseModel):
     home_address: Optional[str] = None  # Full home address
     
     # Legacy fields (keep for compatibility)
-    location: str  # Auto-populated from state
+    location: str = ""  # Auto-populated from state
     postcode: Optional[str] = None  # Auto-populated from zip_code, made optional
     
     budget_min: Optional[int] = None
     budget_max: Optional[int] = None
-    timeline: str
-    homeowner: Homeowner
+    budget: Optional[int] = None  # Legacy budget field for compatibility
+    timeline: Optional[str] = None  # Make optional for backward compatibility
+    homeowner: Optional[Homeowner] = None  # Make optional for backward compatibility
     status: JobStatus = JobStatus.PENDING_APPROVAL  # Default to pending approval
     quotes_count: int = 0
     interests_count: int = 0  # Add interests count field
@@ -142,9 +143,9 @@ class Job(BaseModel):
     approved_at: Optional[datetime] = None     # When approved/rejected
     approval_notes: Optional[str] = None       # Admin notes for approval/rejection
     
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    expires_at: datetime
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    expires_at: Optional[datetime] = None
 
     def dict(self, **kwargs):
         d = super().dict(**kwargs)
