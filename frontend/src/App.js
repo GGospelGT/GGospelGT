@@ -34,6 +34,7 @@ import HelpCentrePage from "./pages/HelpCentrePage";
 import BlogPage from "./pages/BlogPage";
 import CareersPage from "./pages/CareersPage";
 import TradespersonRegistrationDemo from "./pages/TradespersonRegistrationDemo";
+import SearchResultsPage from "./pages/SearchResultsPage";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 
