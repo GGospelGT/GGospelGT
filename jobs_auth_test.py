@@ -384,6 +384,9 @@ class JobsAuthTester:
                     "town": "Computer Village",
                     "zip_code": "100001",
                     "home_address": "123 Test Street, Computer Village, Lagos",
+                    "homeowner_name": self.homeowner_user.get('name', 'Test Homeowner'),
+                    "homeowner_email": self.homeowner_user.get('email', 'test@example.com'),
+                    "homeowner_phone": self.homeowner_user.get('phone', '+2348012345678'),
                     "questions": [],
                     "photos": []
                 }
