@@ -433,7 +433,7 @@ async def _send_new_job_notifications(job_posting: dict, job_id: str):
                     "experience_level": settings.get("experience_level", "Entry Level"),
                     "posted_date": datetime.utcnow().strftime("%B %d, %Y"),
                     "job_description": job_posting["content"][:200] + "..." if len(job_posting["content"]) > 200 else job_posting["content"],
-                    "application_url": f"https://servicehub.co/careers/{job_posting['slug']}"
+                    "application_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.co')}/careers/{job_posting['slug']}"
                 }
                 
                 # Send notification (this will be logged as mock email in development)
