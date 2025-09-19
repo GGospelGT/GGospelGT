@@ -386,7 +386,7 @@ async def _notify_payment_confirmation(tradesperson: dict, job: dict, interest_i
             "job_location": job.get("location", ""),
             "homeowner_name": job.get("homeowner", {}).get("name", "Homeowner"),
             "access_fee": f"₦{access_fee:,.2f}",
-            "view_url": f"https://servicehub.ng/my-interests"
+            "view_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.ng')}/my-interests"
         }
         
         # Send notification
