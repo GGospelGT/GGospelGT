@@ -969,29 +969,27 @@ class Database:
             "status": "active"
         })
         
-        # Count unique categories from tradespeople in users collection
-        users_with_categories = await self.database.users.find(
-            {"role": "tradesperson", "trade_categories": {"$exists": True, "$ne": None}},
-            {"trade_categories": 1}
-        ).to_list(length=None)
-        
-        all_categories = set()
-        for user in users_with_categories:
-            trade_categories = user.get("trade_categories", [])
-            if trade_categories:
-                all_categories.update(trade_categories)
-        
-        # Also get categories from admin/trades endpoint
+        # Get total available categories from admin trades
         try:
             trades_response = await self.get_all_trades()
             if trades_response and 'trades' in trades_response:
-                admin_categories = len(trades_response['trades'])
-                # Use the larger count (either from actual tradespeople or admin trades)
-                total_categories = max(len(all_categories), admin_categories)
+                total_categories = len(trades_response['trades'])
             else:
+                # Fallback: count unique categories from tradespeople
+                users_with_categories = await self.database.users.find(
+                    {"role": "tradesperson", "trade_categories": {"$exists": True, "$ne": None}},
+                    {"trade_categories": 1}
+                ).to_list(length=None)
+                
+                all_categories = set()
+                for user in users_with_categories:
+                    trade_categories = user.get("trade_categories", [])
+                    if trade_categories:
+                        all_categories.update(trade_categories)
                 total_categories = len(all_categories)
-        except:
-            total_categories = len(all_categories)
+        except Exception as e:
+            logger.error(f"Error getting categories count: {e}")
+            total_categories = 0
 
         return {
             "total_tradespeople": total_tradespeople,
