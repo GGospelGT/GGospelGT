@@ -4,7 +4,7 @@
 - **Frontend**: React.js (port 3000)
 - **Backend**: FastAPI (port 8001)  
 - **Database**: MongoDB (port 27017)
-- **Current Domain**: https://servicenow-3.preview.emergentagent.com
+- **Current Domain**: https://nigconnect.preview.emergentagent.com
 
 ## 🌟 RECOMMENDED: Vercel + Railway + MongoDB Atlas
 

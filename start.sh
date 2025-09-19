@@ -11,7 +11,7 @@ fi
 
 if [ -z "$FRONTEND_URL" ]; then
     echo "⚠️  Warning: FRONTEND_URL not set, using default"
-    export FRONTEND_URL="https://servicenow-3.preview.emergentagent.com"
+    export FRONTEND_URL="https://nigconnect.preview.emergentagent.com"
 fi
 
 # Set default port if not provided
