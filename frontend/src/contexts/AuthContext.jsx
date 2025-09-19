@@ -27,10 +27,13 @@ export const AuthProvider = ({ children }) => {
 
   const getCurrentUser = async () => {
     try {
+      console.log('🔍 Getting current user...');
       const userData = await authAPI.getCurrentUser();
+      console.log('✅ Current user data received:', userData);
+      console.log('👤 User name:', userData?.name);
       setUser(userData);
     } catch (error) {
-      console.error('Failed to get current user:', error);
+      console.error('❌ Failed to get current user:', error);
       // Token might be expired or invalid
       logout();
     } finally {
