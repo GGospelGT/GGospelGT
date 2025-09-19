@@ -59,7 +59,6 @@ const MyJobsPage = () => {
   const [availableTradespeoplePorReview, setAvailableTradespeoplePorReview] = useState([]);
   const [jobHiringStatuses, setJobHiringStatuses] = useState({});
   const [pendingReviewJobs, setPendingReviewJobs] = useState(new Set());
-  const [creatingData, setCreatingData] = useState(false);
 
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
