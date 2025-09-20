@@ -783,16 +783,8 @@ const MyJobsPage = () => {
                       onClick={createSampleData}
                       variant="outline"
                       className="text-gray-600 border-gray-300 hover:bg-gray-50"
-                      disabled={creatingData}
                     >
-                      {creatingData ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-                          Creating Sample Jobs...
-                        </>
-                      ) : (
-                        'Create Sample Jobs with Completed Tab'
-                      )}
+                      Create Sample Jobs with Completed Tab
                     </Button>
                   </div>
                 </div>
