@@ -22,7 +22,7 @@ import {
   Crosshair
 } from 'lucide-react';
 import { jobsAPI, interestsAPI } from '../api/services';
-import { walletAPI } from '../api/wallet';
+import { walletAPI, tradeCategoryQuestionsAPI } from '../api/wallet';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
