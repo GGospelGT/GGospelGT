@@ -8,6 +8,7 @@ from enum import Enum
 class JobStatus(str, Enum):
     PENDING_APPROVAL = "pending_approval"
     ACTIVE = "active"
+    IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
     EXPIRED = "expired"
