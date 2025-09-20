@@ -44,6 +44,7 @@ const MyJobsPage = () => {
   const [completingJobId, setCompletingJobId] = useState(null);
   const [showReviewPrompt, setShowReviewPrompt] = useState(false);
   const [completedJob, setCompletedJob] = useState(null);
+  const [creatingData, setCreatingData] = useState(false);
   
   // Review state
   const [showReviewModal, setShowReviewModal] = useState(false);
