@@ -133,7 +133,11 @@ class DorisDetailedInvestigation:
         if response.status_code == 200:
             try:
                 data = response.json()
-                interests = data.get('interests', [])
+                # Handle both list and dict response formats
+                if isinstance(data, list):
+                    interests = data
+                else:
+                    interests = data.get('interests', [])
                 
                 self.log_finding(f"Doris has {len(interests)} total interests")
                 
