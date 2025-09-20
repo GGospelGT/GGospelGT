@@ -61,7 +61,7 @@ const NotificationIndicator = () => {
 
   const handleViewAllNotifications = () => {
     setShowDropdown(false);
-    navigate('/notifications/history');
+    navigate('/notifications');
   };
 
   const handleNotificationSettings = () => {
