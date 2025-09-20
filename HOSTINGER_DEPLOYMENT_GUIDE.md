@@ -142,7 +142,7 @@ Update the Nginx config with your domain:
 ```nginx
 server {
     listen 80;
-    server_name your-domain.com www.your-domain.com;
+    server_name myservicehub.co www.myservicehub.co;
 
     # Frontend
     location / {
