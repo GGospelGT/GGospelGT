@@ -543,7 +543,7 @@ const InterestedTradespeopleePage = () => {
                     <Badge className="bg-purple-50 text-purple-700 border-purple-200">
                       Access granted - Tradesperson can contact you
                     </Badge>
-                    {isChatDisabled() ? (
+                    {isChatDisabled(tradesperson) ? (
                       <div className="space-y-1">
                         <Button
                           disabled
