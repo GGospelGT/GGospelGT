@@ -297,7 +297,7 @@ async def get_current_user_profile(current_user: User = Depends(get_current_user
             
             # Also update average rating if we have reviews
             reviews_data = await database.database.reviews.find({
-                "tradesperson_id": current_user.id
+                "reviewee_id": current_user.id
             }).to_list(length=None)
             
             if reviews_data:
