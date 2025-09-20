@@ -21,7 +21,18 @@ async def fix_homeowner_data():
     
     # Connect to database
     client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
-    db = client.get_database()
+    
+    # Get the correct database (extract from connection string or use env variable)
+    if 'test_database' in MONGO_URL or os.environ.get('DB_NAME') == 'test_database':
+        db = client.test_database
+        print(f"🔗 Connected to database: test_database")
+    else:
+        db = client.get_database()
+        print(f"🔗 Connected to database: {db.name}")
+    
+    # Check database name and collections
+    collections = await db.list_collection_names()
+    print(f"📚 Collections: {', '.join(collections)}")
     
     # Debug: Check all jobs first
     all_jobs_cursor = db.jobs.find({})
