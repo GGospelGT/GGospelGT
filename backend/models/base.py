@@ -107,7 +107,7 @@ class JobCloseRequest(BaseModel):
 class Job(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
-    description: str = ""  # Make optional with default
+    description: Optional[str] = ""  # Optional field, defaults to empty string
     category: str
     
     # Enhanced location fields (optional for backward compatibility)
