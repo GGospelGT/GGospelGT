@@ -158,6 +158,60 @@ async def test_notification(
         logger.error(f"Error sending test notification: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to send test notification")
 
+@router.patch("/{notification_id}/read")
+async def mark_notification_as_read(
+    notification_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Mark a specific notification as read"""
+    try:
+        # Verify notification belongs to current user and update status
+        updated = await database.mark_notification_as_read(notification_id, current_user.id)
+        
+        if not updated:
+            raise HTTPException(status_code=404, detail="Notification not found or not owned by user")
+        
+        return {"message": "Notification marked as read", "notification_id": notification_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error marking notification as read: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to mark notification as read")
+
+@router.patch("/mark-all-read")
+async def mark_all_notifications_as_read(current_user: User = Depends(get_current_user)):
+    """Mark all user notifications as read"""
+    try:
+        count = await database.mark_all_notifications_as_read(current_user.id)
+        
+        return {
+            "message": f"Marked {count} notifications as read",
+            "marked_count": count
+        }
+    except Exception as e:
+        logger.error(f"Error marking all notifications as read: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to mark all notifications as read")
+
+@router.delete("/{notification_id}")
+async def delete_notification(
+    notification_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a specific notification"""
+    try:
+        # Verify notification belongs to current user and delete
+        deleted = await database.delete_notification(notification_id, current_user.id)
+        
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Notification not found or not owned by user")
+        
+        return {"message": "Notification deleted successfully", "notification_id": notification_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting notification: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete notification")
+
 async def _send_notification_background(
     user_id: str,
     notification_type: NotificationType,
