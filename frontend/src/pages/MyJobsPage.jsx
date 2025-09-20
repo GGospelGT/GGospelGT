@@ -463,8 +463,6 @@ const MyJobsPage = () => {
     );
   };
 
-  };
-
   const handleCompleteAndReview = async (jobId) => {
     // Implementation will be added here
   };
