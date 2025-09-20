@@ -39,6 +39,24 @@ export const notificationsAPI = {
   sendNotification: async (notificationData) => {
     const response = await apiClient.post('/notifications/send', notificationData);
     return response.data;
+  },
+
+  // Mark specific notification as read
+  markAsRead: async (notificationId) => {
+    const response = await apiClient.patch(`/notifications/${notificationId}/read`);
+    return response.data;
+  },
+
+  // Mark all notifications as read
+  markAllAsRead: async () => {
+    const response = await apiClient.patch('/notifications/mark-all-read');
+    return response.data;
+  },
+
+  // Delete specific notification
+  deleteNotification: async (notificationId) => {
+    const response = await apiClient.delete(`/notifications/${notificationId}`);
+    return response.data;
   }
 };
 
