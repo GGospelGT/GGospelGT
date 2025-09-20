@@ -244,9 +244,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
             newErrors.category = 'Questions need to be configured for this category. Please contact support or choose a different category.';
           }
         } else {
-          // No category selected, validate generic description
-          if (!formData.description.trim()) newErrors.description = 'Job description is required';
-          else if (formData.description.length < 50) newErrors.description = 'Description must be at least 50 characters';
+          // Category is selected, so no need to validate description
         }
         break;
 
