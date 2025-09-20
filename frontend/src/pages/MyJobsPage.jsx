@@ -903,11 +903,13 @@ const MyJobsPage = () => {
 
                           <CardContent>
                             {/* Job Description */}
-                            <div className="mb-4">
-                              <p className="text-gray-700 font-lato line-clamp-2">
-                                {job.description}
-                              </p>
-                            </div>
+                            {job.description && (
+                              <div className="mb-4">
+                                <p className="text-gray-700 font-lato line-clamp-2">
+                                  {job.description}
+                                </p>
+                              </div>
+                            )}
 
                             {/* Job Details */}
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 text-sm">
