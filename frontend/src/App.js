@@ -14,6 +14,7 @@ import ProfilePage from "./pages/ProfilePage";
 import TradespersonPortfolioPage from "./pages/TradespersonPortfolioPage";
 import NotificationPreferencesPage from "./pages/NotificationPreferencesPage";
 import NotificationHistoryPage from "./pages/NotificationHistoryPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import ReviewsPage from "./pages/ReviewsPage";
 import MyReviewsPage from "./pages/MyReviewsPage";
 import MyReceivedReviewsPage from "./pages/MyReceivedReviewsPage";
