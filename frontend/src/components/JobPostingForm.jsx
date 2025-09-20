@@ -385,29 +385,10 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
     setSubmitting(true);
 
     try {
-      // Create the job using authenticated user's data
-      // Generate description from category and questions, since manual description field is removed
-      let jobDescription = `${formData.category} work requested.`;
-      
-      // If using admin questions, generate description from answers
-      if (formData.category && tradeQuestions.length > 0 && Object.keys(questionAnswers).length > 0) {
-        const answerTexts = tradeQuestions.map(question => {
-          const answer = questionAnswers[question.id];
-          if (answer !== undefined && answer !== null && answer !== '') {
-            const answerText = formatAnswerText(question, answer);
-            return `${question.question_text}: ${answerText}`;
-          }
-          return null;
-        }).filter(Boolean);
-        
-        jobDescription = answerTexts.length > 0 
-          ? answerTexts.join('\n\n') 
-          : `${formData.category} work requested. Details provided through structured questions.`;
-      }
-
+      // Create job data without description since it's been removed from the form
       const jobData = {
         title: formData.title,
-        description: jobDescription,
+        // description field completely removed - no auto-generation
         category: formData.category,
         state: formData.state,
         lga: formData.lga,
