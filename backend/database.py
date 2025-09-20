@@ -1815,6 +1815,29 @@ class Database:
         
         return result.modified_count > 0
 
+    async def mark_notification_as_read(self, notification_id: str, user_id: str) -> bool:
+        """Mark a specific notification as read for a user"""
+        result = await self.notifications_collection.update_one(
+            {"_id": notification_id, "user_id": user_id},
+            {"$set": {"status": "read", "read_at": datetime.utcnow(), "updated_at": datetime.utcnow()}}
+        )
+        return result.modified_count > 0
+
+    async def mark_all_notifications_as_read(self, user_id: str) -> int:
+        """Mark all notifications as read for a user"""
+        result = await self.notifications_collection.update_many(
+            {"user_id": user_id, "status": {"$ne": "read"}},
+            {"$set": {"status": "read", "read_at": datetime.utcnow(), "updated_at": datetime.utcnow()}}
+        )
+        return result.modified_count
+
+    async def delete_notification(self, notification_id: str, user_id: str) -> bool:
+        """Delete a specific notification for a user"""
+        result = await self.notifications_collection.delete_one(
+            {"_id": notification_id, "user_id": user_id}
+        )
+        return result.deleted_count > 0
+
     async def get_notification_stats(self) -> Dict[str, Any]:
         """Get notification delivery statistics"""
         pipeline = [
