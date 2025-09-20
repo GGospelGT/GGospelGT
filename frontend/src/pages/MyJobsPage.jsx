@@ -743,18 +743,6 @@ const MyJobsPage = () => {
                   >
                     Post Your First Job
                   </Button>
-                  
-                  {/* Testing button for completed jobs tab */}
-                  <div className="pt-4 border-t border-gray-200">
-                    <p className="text-sm text-gray-500 mb-2">For Testing: Create Sample Completed Jobs</p>
-                    <Button 
-                      onClick={createSampleData}
-                      variant="outline"
-                      className="text-gray-600 border-gray-300 hover:bg-gray-50"
-                    >
-                      Create Sample Jobs with Completed Tab
-                    </Button>
-                  </div>
                 </div>
               </div>
             ) : (
