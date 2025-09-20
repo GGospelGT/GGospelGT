@@ -429,9 +429,21 @@ const BrowseJobsPage = () => {
     }).format(value);
   };
 
-  const handleViewJobDetails = (job) => {
+  const handleViewJobDetails = async (job) => {
     setSelectedJobDetails(job);
+    setSelectedJobAnswers(null); // Reset previous answers
     setShowJobModal(true);
+    
+    // Fetch job question answers
+    try {
+      const answers = await walletAPI.tradeCategoryQuestionsAPI.getJobQuestionAnswers(job.id);
+      if (answers && answers.answers && answers.answers.length > 0) {
+        setSelectedJobAnswers(answers);
+      }
+    } catch (error) {
+      console.error('Failed to fetch job question answers:', error);
+      // Don't show error to user, just continue without answers
+    }
   };
 
   const formatDate = (dateString) => {
