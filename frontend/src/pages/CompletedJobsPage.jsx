@@ -136,7 +136,6 @@ const CompletedJobsPage = () => {
 
   const calculateStats = (jobs) => {
     const totalCompleted = jobs.length;
-    const totalEarnings = jobs.reduce((sum, job) => sum + (job.job_budget_max || 0), 0);
     const avgRating = jobs.length > 0 
       ? jobs.reduce((sum, job) => sum + (job.rating || 0), 0) / jobs.length 
       : 0;
@@ -149,7 +148,6 @@ const CompletedJobsPage = () => {
 
     setStats({
       totalCompleted,
-      totalEarnings,
       avgRating: Math.round(avgRating * 10) / 10,
       thisMonth
     });
