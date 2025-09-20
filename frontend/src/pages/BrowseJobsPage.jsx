@@ -926,10 +926,6 @@ const BrowseJobsPage = () => {
                       <span><strong>Timeline:</strong> {selectedJobDetails.timeline || 'Flexible'}</span>
                     </div>
                     <div className="flex items-center">
-                      <User size={16} className="mr-2 text-gray-500" />
-                      <span><strong>Posted by:</strong> {selectedJobDetails.homeowner?.name || 'Homeowner'}</span>
-                    </div>
-                    <div className="flex items-center">
                       <Heart size={16} className="mr-2 text-gray-500" />
                       <span><strong>Interest:</strong> {selectedJobDetails.interests_count || 0} tradespeople interested</span>
                     </div>
