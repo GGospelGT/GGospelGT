@@ -245,9 +245,9 @@ pm2 start servicehub-backend
 ## 🌍 Access Your Website
 
 Once deployed:
-- **Website**: https://your-domain.com
-- **Admin Dashboard**: https://your-domain.com/admin
-- **API Health**: https://your-domain.com/api/health
+- **Website**: https://myservicehub.co
+- **Admin Dashboard**: https://myservicehub.co/admin
+- **API Health**: https://myservicehub.co/api/health
 
 ---
 
