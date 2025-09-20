@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { 
   MapPin, 
   Calendar, 
+  DollarSign,
   CheckCircle,
   Clock,
   Briefcase,
