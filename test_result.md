@@ -47,8 +47,22 @@
 ##   test_sequence: 0
 ##   run_ui: false
 ##
+frontend:
+  - task: "Job Question Answers Display in Job Details"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/BrowseJobsPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "New task added for testing job question answers display functionality in job details modal. Implementation includes selectedJobAnswers state, handleViewJobDetails function with API call to fetch answers, and Job Requirements & Details section in modal."
+
 test_plan:
-  current_focus: []
+  current_focus: 
+    - "Job Question Answers Display in Job Details"
   stuck_tasks: []
   completed_tasks:
     - "Tradesperson Registration Endpoint Testing - Phone Number Format Fix Verification"
