@@ -288,14 +288,28 @@ async def get_current_user_profile(current_user: User = Depends(get_current_user
     # For tradespeople, calculate actual completed jobs count
     if current_user.role == UserRole.TRADESPERSON:
         try:
-            # Count completed jobs for this tradesperson
-            query = {
-                "tradesperson_id": current_user.id,
-                "job_status": "completed"
-            }
-            logger.info(f"Querying interests with: {query}")
+            # Count completed jobs for this tradesperson using aggregation
+            # We need to join with jobs collection to check job status
+            pipeline = [
+                {"$match": {"tradesperson_id": current_user.id}},
+                {"$lookup": {
+                    "from": "jobs",
+                    "localField": "job_id",
+                    "foreignField": "id",
+                    "as": "job"
+                }},
+                {"$match": {
+                    "job.status": "completed",
+                    "job": {"$ne": []}
+                }},
+                {"$count": "total"}
+            ]
             
-            completed_jobs_count = await database.database.interests.count_documents(query)
+            logger.info(f"Querying completed jobs with aggregation pipeline for tradesperson {current_user.id}")
+            
+            result = await database.database.interests.aggregate(pipeline).to_list(length=None)
+            completed_jobs_count = result[0]["total"] if result else 0
+            
             logger.info(f"Found {completed_jobs_count} completed jobs for tradesperson {current_user.id}")
             
             user_data["total_jobs"] = completed_jobs_count
