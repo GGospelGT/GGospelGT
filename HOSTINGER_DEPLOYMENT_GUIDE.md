@@ -12,7 +12,7 @@ This guide will help you deploy your ServiceHub platform on Hostinger VPS so Nig
 - **Operating System**: Ubuntu 22.04 LTS (recommended)
 
 ### 2. Domain Name
-- Purchase a domain (e.g., yourservicehub.com or yourservicehub.ng)
+- Purchase a domain (e.g., myservicehub.co or yourservicehub.com)
 - Point domain to your VPS IP address
 
 ### 3. Required Files
