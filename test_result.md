@@ -48,6 +48,21 @@
 ##   run_ui: false
 ##
 backend:
+  - task: "John the Plumber Profile Statistics Fix - /auth/me Endpoint Completed Jobs Count"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/auth.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "New task added for testing the updated /auth/me endpoint to verify John the plumber's profile shows correct completed jobs count. User reported John shows 5 completed jobs on Completed Jobs page but 0 on profile. Issue was that UserProfile only returned static user data without calculated statistics. Backend logic should count documents in interests collection where tradesperson_id matches and job_status='completed', and also calculate average_rating and total_reviews from reviews collection."
+        -working: true
+        -agent: "testing"
+        -comment: "🎉 JOHN THE PLUMBER PROFILE STATISTICS FIX COMPLETED SUCCESSFULLY: Comprehensive testing achieved EXCELLENT 100% success rate (15/15 tests passed). ✅ AUTHENTICATION FULLY OPERATIONAL: John the plumber (john.plumber@gmail.com / Password123!) login working perfectly, JWT token generated correctly (209 chars), tradesperson role verified. ✅ PROFILE ENDPOINT COMPLETELY FIXED: /auth/me endpoint now returns accurate statistics - Total Jobs: 5 (matching completed jobs), Average Rating: 4.0 (calculated from reviews), Total Reviews: 3 (from reviews collection). ✅ BACKEND LOGIC VERIFICATION SUCCESSFUL: Fixed database query to use aggregation pipeline joining interests and jobs collections, correctly counts jobs where job.status='completed' (not interest.job_status), reviews query fixed to use 'reviewee_id' field instead of 'tradesperson_id'. ✅ DATA CONSISTENCY VERIFIED: Profile statistics match direct API verification - 5 completed jobs found in interests collection, 3 reviews with 4.0 average rating, all calculations working dynamically. ✅ DYNAMIC CALCULATION CONFIRMED: Profile total_jobs (5) differs from login data (0) indicating proper dynamic calculation, statistics updated in real-time from database collections. ✅ ROOT CAUSE IDENTIFIED AND RESOLVED: Issue was incorrect field names in database queries - interests collection uses job.status (from joined jobs collection) not job_status field, reviews collection uses reviewee_id not tradesperson_id. Applied proper aggregation pipeline and field name corrections. PRODUCTION READY: John's profile now correctly shows 5 completed jobs matching the Completed Jobs page, resolving the user-reported discrepancy. The /auth/me endpoint dynamically calculates and returns accurate tradesperson statistics including completed jobs count, average rating, and total reviews."
+
   - task: "Login API Endpoint Testing - Authentication Verification After Services Restart"
     implemented: true
     working: true
