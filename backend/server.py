@@ -1,11 +1,12 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import os
-import logging
+import time
 from pathlib import Path
 from datetime import datetime
+import uuid
 
 # Import database and routes
 from database import database
@@ -19,15 +20,14 @@ from routes.jobs_management import router as jobs_management_router
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 
+# Import production logging system
+from utils.logger import get_logger, log_request
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Initialize production logger
+logger = get_logger('server')
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -41,6 +41,38 @@ async def lifespan(app: FastAPI):
 
 # Create the main app with lifespan events  
 app = FastAPI(lifespan=lifespan, redirect_slashes=False)
+
+# Add request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Log all HTTP requests with timing and response status."""
+    request_id = str(uuid.uuid4())
+    start_time = time.time()
+    
+    # Get user ID from token if available
+    user_id = None
+    auth_header = request.headers.get("authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        # You can decode the JWT here to get user_id if needed
+        # For now, we'll just log that authentication was present
+        pass
+    
+    response = await call_next(request)
+    
+    # Calculate request duration
+    duration = (time.time() - start_time) * 1000  # Convert to milliseconds
+    
+    # Log the request
+    log_request(
+        method=request.method,
+        endpoint=str(request.url.path),
+        status_code=response.status_code,
+        duration=duration,
+        user_id=user_id,
+        request_id=request_id
+    )
+    
+    return response
 
 # Create a router without prefix for health endpoints
 api_router = APIRouter()
@@ -61,7 +93,78 @@ async def root():
 
 @api_router.get("/api/health")
 async def health_check():
+    """Basic health check endpoint."""
     return {"status": "healthy", "service": "serviceHub API"}
+
+@api_router.get("/api/health/detailed")
+async def detailed_health_check():
+    """Comprehensive health check with system metrics."""
+    from utils.health_monitor import health_monitor
+    try:
+        health_data = await health_monitor.get_system_health()
+        return health_data
+    except Exception as e:
+        logger.error("Detailed health check failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Health check failed")
+
+@api_router.get("/api/health/database")
+async def database_health_check():
+    """Database-specific health check."""
+    from utils.health_monitor import health_monitor
+    try:
+        db_health = await health_monitor.get_database_health()
+        return db_health
+    except Exception as e:
+        logger.error("Database health check failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Database health check failed")
+
+@api_router.get("/api/health/history")
+async def health_history():
+    """Get recent health check history."""
+    from utils.health_monitor import health_monitor
+    try:
+        history = health_monitor.get_health_history()
+        return {"history": history, "count": len(history)}
+    except Exception as e:
+        logger.error("Health history retrieval failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Health history retrieval failed")
+
+@api_router.get("/api/metrics")
+async def get_metrics():
+    """Get system metrics in Prometheus-compatible format."""
+    from utils.health_monitor import health_monitor
+    try:
+        health_data = await health_monitor.get_system_health()
+        
+        # Convert to Prometheus-style metrics
+        metrics = []
+        
+        # System metrics
+        if "system" in health_data:
+            system = health_data["system"]
+            if "cpu" in system:
+                metrics.append(f"servicehub_cpu_usage_percent {system['cpu'].get('usage_percent', 0)}")
+            if "memory" in system:
+                metrics.append(f"servicehub_memory_usage_percent {system['memory'].get('usage_percent', 0)}")
+                metrics.append(f"servicehub_memory_total_bytes {system['memory'].get('total_gb', 0) * 1024**3}")
+            if "disk" in system:
+                metrics.append(f"servicehub_disk_usage_percent {system['disk'].get('usage_percent', 0)}")
+        
+        # Database metrics
+        if "database" in health_data and health_data["database"].get("status") == "healthy":
+            db = health_data["database"]
+            metrics.append(f"servicehub_database_connection_time_ms {db.get('connection_time_ms', 0)}")
+            metrics.append(f"servicehub_database_size_bytes {db.get('database_size_mb', 0) * 1024**2}")
+        
+        # Uptime
+        if "uptime" in health_data:
+            metrics.append(f"servicehub_uptime_seconds {health_data['uptime'].get('seconds', 0)}")
+        
+        return {"metrics": metrics, "format": "prometheus"}
+        
+    except Exception as e:
+        logger.error("Metrics retrieval failed", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Metrics retrieval failed")
 
 @api_router.get("/api/database-info")
 async def get_database_info():

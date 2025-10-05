@@ -22,8 +22,15 @@ class Database:
         self.database = None
 
     async def connect_to_mongo(self):
-        self.client = AsyncIOMotorClient(os.environ['MONGO_URL'])
-        self.database = self.client[os.environ['DB_NAME']]
+        # Try different environment variable names for MongoDB URL
+        mongo_url = os.environ.get('MONGO_URL') or os.environ.get('MONGODB_URL')
+        db_name = os.environ.get('DB_NAME') or os.environ.get('DATABASE_NAME') or 'servicehub'
+        
+        if not mongo_url:
+            raise ValueError("MongoDB URL not found. Please set MONGO_URL or MONGODB_URL environment variable.")
+        
+        self.client = AsyncIOMotorClient(mongo_url)
+        self.database = self.client[db_name]
         logger.info("Connected to MongoDB")
 
     async def close_mongo_connection(self):
