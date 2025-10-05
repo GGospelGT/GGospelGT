@@ -37,8 +37,15 @@ import CareersPage from "./pages/CareersPage";
 import TradespersonRegistrationDemo from "./pages/TradespersonRegistrationDemo";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import OfflineIndicator from "./components/OfflineIndicator";
+import { setupGlobalErrorHandling } from "./utils/errorHandler";
 
 function App() {
+  // Setup global error handling
+  useEffect(() => {
+    setupGlobalErrorHandling();
+  }, []);
   // Remove "Made with Emergent" watermark
   useEffect(() => {
     const removeWatermark = () => {
@@ -107,49 +114,52 @@ function App() {
 
   return (
     <div className="App">
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/post-job" element={<PostJobPage />} />
-            <Route path="/my-jobs" element={<MyJobsPage />} />
-            <Route path="/my-interests" element={<MyInterestsPage />} />
-            <Route path="/completed-jobs" element={<CompletedJobsPage />} />
-            <Route path="/tradesperson/:id" element={<TradespersonProfilePage />} />
-            <Route path="/browse-tradespeople" element={<BrowseTradespeopleePage />} />
-            <Route path="/job/:jobId/interested-tradespeople" element={<InterestedTradespeopleePage />} />
-            <Route path="/browse-jobs" element={<BrowseJobsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/tradesperson/:tradespersonId/portfolio" element={<TradespersonPortfolioPage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/notifications/preferences" element={<NotificationPreferencesPage />} />
-            <Route path="/notifications/history" element={<NotificationHistoryPage />} />
-            <Route path="/reviews" element={<ReviewsPage />} />
-            <Route path="/reviews/:userId" element={<ReviewsPage />} />
-            <Route path="/my-reviews" element={<MyReviewsPage />} />
-            <Route path="/my-received-reviews" element={<MyReceivedReviewsPage />} />
-            <Route path="/wallet" element={<WalletPage />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/referrals" element={<ReferralsPage />} />
-            <Route path="/verify-account" element={<VerifyAccountPage />} />
-            <Route path="/about" element={<AboutUsPage />} />
-            <Route path="/reviews-policy" element={<ReviewsPolicyPage />} />
-            <Route path="/how-it-works" element={<HowItWorksPage />} />
-            <Route path="/partnerships" element={<PartnershipPage />} />
-            <Route path="/trade-categories" element={<TradeCategoriesPage />} />
-            <Route path="/trade-categories/:categorySlug" element={<TradeCategoryDetailPage />} />
-            <Route path="/help" element={<HelpFAQsPage />} />
-            <Route path="/contact" element={<ContactUsPage />} />
-            <Route path="/join-for-free" element={<JoinForFreePage />} />
-            <Route path="/help-centre" element={<HelpCentrePage />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/blog/:slug" element={<BlogPage />} />
-            <Route path="/careers" element={<CareersPage />} />
-            <Route path="/tradesperson-registration-demo" element={<TradespersonRegistrationDemo />} />
-          </Routes>
-          <Toaster />
-        </BrowserRouter>
-      </AuthProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/post-job" element={<PostJobPage />} />
+              <Route path="/my-jobs" element={<MyJobsPage />} />
+              <Route path="/my-interests" element={<MyInterestsPage />} />
+              <Route path="/completed-jobs" element={<CompletedJobsPage />} />
+              <Route path="/tradesperson/:id" element={<TradespersonProfilePage />} />
+              <Route path="/browse-tradespeople" element={<BrowseTradespeopleePage />} />
+              <Route path="/job/:jobId/interested-tradespeople" element={<InterestedTradespeopleePage />} />
+              <Route path="/browse-jobs" element={<BrowseJobsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/tradesperson/:tradespersonId/portfolio" element={<TradespersonPortfolioPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/notifications/preferences" element={<NotificationPreferencesPage />} />
+              <Route path="/notifications/history" element={<NotificationHistoryPage />} />
+              <Route path="/reviews" element={<ReviewsPage />} />
+              <Route path="/reviews/:userId" element={<ReviewsPage />} />
+              <Route path="/my-reviews" element={<MyReviewsPage />} />
+              <Route path="/my-received-reviews" element={<MyReceivedReviewsPage />} />
+              <Route path="/wallet" element={<WalletPage />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/referrals" element={<ReferralsPage />} />
+              <Route path="/verify-account" element={<VerifyAccountPage />} />
+              <Route path="/about" element={<AboutUsPage />} />
+              <Route path="/reviews-policy" element={<ReviewsPolicyPage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+              <Route path="/partnerships" element={<PartnershipPage />} />
+              <Route path="/trade-categories" element={<TradeCategoriesPage />} />
+              <Route path="/trade-categories/:categorySlug" element={<TradeCategoryDetailPage />} />
+              <Route path="/help" element={<HelpFAQsPage />} />
+              <Route path="/contact" element={<ContactUsPage />} />
+              <Route path="/join-for-free" element={<JoinForFreePage />} />
+              <Route path="/help-centre" element={<HelpCentrePage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:slug" element={<BlogPage />} />
+              <Route path="/careers" element={<CareersPage />} />
+              <Route path="/tradesperson-registration-demo" element={<TradespersonRegistrationDemo />} />
+            </Routes>
+            <Toaster />
+            <OfflineIndicator />
+          </BrowserRouter>
+        </AuthProvider>
+      </ErrorBoundary>
     </div>
   );
 }
