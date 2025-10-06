@@ -2,34 +2,24 @@
 # Comprehensive list of trades and services for the Nigerian marketplace
 
 NIGERIAN_TRADE_CATEGORIES = [
+    # Existing trades with questions (DO NOT REMOVE)
     "Building",
-    "Concrete Works", 
+    "Electrical Repairs",
+    "Painting", 
+    "Plumbing",
     "Tiling",
-    "CCTV & Security Systems",
-    "Door & Window Installation",
+    
+    # Essential Nigerian basic trades
+    "Generator Services",
     "Air Conditioning & Refrigeration",
-    "Renovations",
-    "Relocation/Moving",
-    "Painting",
+    "Welding",
     "Carpentry",
     "General Handyman Work",
-    "Bathroom Fitting",
-    "Generator Services",
-    "Home Extensions",
-    "Scaffolding",
-    "Waste Disposal",
-    "Flooring",
-    "Plastering/POP",
-    "Cleaning",
-    "Electrical Repairs",
-    "Solar & Inverter Installation",
-    "Plumbing",
-    "Welding",
-    "Furniture Making",
-    "Interior Design",
     "Roofing",
-    "Locksmithing",
-    "Recycling"
+    "Cleaning",
+    "Solar & Inverter Installation",
+    "Bathroom Fitting",
+    "Flooring"
 ]
 
 # For validation purposes
@@ -45,40 +35,27 @@ def get_all_categories() -> list:
 TRADE_CATEGORY_GROUPS = {
     "Construction & Building": [
         "Building",
-        "Concrete Works",
-        "Home Extensions", 
-        "Renovations",
-        "Scaffolding"
+        "Tiling",
+        "Flooring"
     ],
     "Interior & Finishing": [
-        "Tiling",
-        "Flooring",
         "Painting",
-        "Plastering/POP",
         "Bathroom Fitting",
-        "Interior Design",
-        "Furniture Making"
+        "Carpentry"
     ],
     "Installation & Repair": [
-        "Door & Window Installation",
         "Air Conditioning & Refrigeration",
-        "CCTV & Security Systems",
         "Solar & Inverter Installation",
         "Generator Services"
     ],
     "Utilities & Systems": [
         "Electrical Repairs",
         "Plumbing",
-        "Welding",
-        "Locksmithing"
+        "Welding"
     ],
     "General Services": [
         "General Handyman Work",
-        "Carpentry",
         "Roofing",
-        "Cleaning",
-        "Relocation/Moving",
-        "Waste Disposal",
-        "Recycling"
+        "Cleaning"
     ]
 }

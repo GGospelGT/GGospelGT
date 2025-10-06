@@ -29,6 +29,7 @@ class Database:
         if not mongo_url:
             raise ValueError("MongoDB URL not found. Please set MONGO_URL or MONGODB_URL environment variable.")
         
+        # Use the connection string as-is since SSL options are in the URL
         self.client = AsyncIOMotorClient(mongo_url)
         self.database = self.client[db_name]
         logger.info("Connected to MongoDB")
