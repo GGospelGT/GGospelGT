@@ -39,6 +39,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
 
   // Nigerian Trade Categories - Updated comprehensive list
   const tradeCategories = [
+    "Building",
     "Concrete Works", 
     "Tiling",
     "CCTV & Security Systems",

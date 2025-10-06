@@ -69,46 +69,11 @@ const TradeCategoriesPage = () => {
       serviceCount: "200+"
     },
     {
-      name: "Concrete Works",
-      description: "Concrete pouring, foundation work, driveways, and structural concrete",
-      icon: "🏗️",
-      popular: false,
-      serviceCount: "180+"
-    },
-    {
-      name: "CCTV & Security Systems",
-      description: "Security cameras, alarm systems, and home security installations",
-      icon: "📹",
-      popular: false,
-      serviceCount: "150+"
-    },
-    {
-      name: "Door & Window Installation",
-      description: "Door and window fitting, repairs, and security installations",
-      icon: "🚪",
-      popular: false,
-      serviceCount: "160+"
-    },
-    {
       name: "Air Conditioning & Refrigeration",
       description: "AC installation, repair, and refrigeration system services",
       icon: "❄️",
       popular: true,
       serviceCount: "220+"
-    },
-    {
-      name: "Renovations",
-      description: "Complete home and office renovation and remodeling services",
-      icon: "🏠",
-      popular: true,
-      serviceCount: "180+"
-    },
-    {
-      name: "Relocation/Moving",
-      description: "Professional moving services, packing, and relocation assistance",
-      icon: "📦",
-      popular: false,
-      serviceCount: "120+"
     },
     {
       name: "General Handyman Work",
@@ -132,39 +97,11 @@ const TradeCategoriesPage = () => {
       serviceCount: "200+"
     },
     {
-      name: "Home Extensions",
-      description: "House extensions, additional rooms, and structural additions",
-      icon: "🏗️",
-      popular: false,
-      serviceCount: "90+"
-    },
-    {
-      name: "Scaffolding",
-      description: "Professional scaffolding services for construction and maintenance",
-      icon: "🏗️",
-      popular: false,
-      serviceCount: "80+"
-    },
-    {
-      name: "Waste Disposal",
-      description: "Waste removal, debris clearing, and environmental cleaning services",
-      icon: "🗑️",
-      popular: false,
-      serviceCount: "100+"
-    },
-    {
       name: "Flooring",
       description: "Floor installation, repairs, hardwood, tiles, and carpet services",
       icon: "🏠",
       popular: false,
       serviceCount: "170+"
-    },
-    {
-      name: "Plastering/POP",
-      description: "Wall plastering, POP ceiling installation, and finishing works",
-      icon: "🧱",
-      popular: false,
-      serviceCount: "160+"
     },
     {
       name: "Cleaning",
@@ -207,20 +144,6 @@ const TradeCategoriesPage = () => {
       icon: "🏠",
       popular: true,
       serviceCount: "190+"
-    },
-    {
-      name: "Locksmithing",
-      description: "Lock installation, repair, key cutting, and security services",
-      icon: "🔐",
-      popular: false,
-      serviceCount: "80+"
-    },
-    {
-      name: "Recycling",
-      description: "Waste recycling, material recovery, and environmental services",
-      icon: "♻️",
-      popular: false,
-      serviceCount: "50+"
     }
   ];
 

@@ -36,14 +36,11 @@ import PaymentPage from './PaymentPage';
 
 // Fallback trade categories (used while loading or if API fails)
 const FALLBACK_TRADE_CATEGORIES = [
-  "Building", "Concrete Works", "Tiling", "CCTV & Security Systems",
-  "Door & Window Installation", "Air Conditioning & Refrigeration", 
-  "Renovations", "Relocation/Moving", "Painting", "Carpentry",
-  "General Handyman Work", "Bathroom Fitting", "Generator Services",
-  "Home Extensions", "Scaffolding", "Waste Disposal", "Flooring",
-  "Plastering/POP", "Cleaning", "Electrical Repairs", 
-  "Solar & Inverter Installation", "Plumbing", "Welding",
-  "Furniture Making", "Interior Design", "Roofing", "Locksmithing", "Recycling"
+  "Building", "Electrical Repairs", "Painting", "Plumbing", "Tiling",
+  "Generator Services", "Air Conditioning & Refrigeration", "Welding",
+  "Carpentry", "General Handyman Work", "Roofing", "Cleaning",
+  "Solar & Inverter Installation", "Bathroom Fitting", "Flooring",
+  "Furniture Making", "Interior Design"
 ];
 
 // If needed, we can also create a separate hook for trade categories
