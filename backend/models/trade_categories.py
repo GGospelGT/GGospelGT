@@ -19,7 +19,11 @@ NIGERIAN_TRADE_CATEGORIES = [
     "Cleaning",
     "Solar & Inverter Installation",
     "Bathroom Fitting",
-    "Flooring"
+    "Flooring",
+    
+    # New trades
+    "Furniture Making",
+    "Interior Design"
 ]
 
 # For validation purposes
@@ -41,7 +45,9 @@ TRADE_CATEGORY_GROUPS = {
     "Interior & Finishing": [
         "Painting",
         "Bathroom Fitting",
-        "Carpentry"
+        "Carpentry",
+        "Furniture Making",
+        "Interior Design"
     ],
     "Installation & Repair": [
         "Air Conditioning & Refrigeration",
