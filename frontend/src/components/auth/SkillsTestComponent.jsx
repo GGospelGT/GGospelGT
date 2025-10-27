@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { skillsAPI } from '../../api/wallet';
 import { calculateTestScore } from '../../data/skillsTestQuestions';
+// Add local fallback import
+import { getQuestionsForTrades } from '../../data/skillsTestQuestions';
 
 const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
   const [testState, setTestState] = useState('intro'); // intro, active, results
@@ -36,15 +38,19 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
           const mainTrade = formData.selectedTrades[0];
           const response = await skillsAPI.getQuestionsForTrade(mainTrade);
           
-          const questions = {
-            [mainTrade]: response.questions || []
-          };
+          // If backend returns questions use them; otherwise fallback to local dataset (7 questions)
+          const backendQuestions = response?.questions || [];
+          const questions = backendQuestions.length > 0
+            ? { [mainTrade]: backendQuestions }
+            : getQuestionsForTrades([mainTrade], 7);
           
           setTestQuestions(questions);
         } catch (error) {
           console.error('Failed to load skills questions:', error);
-          // Fallback to empty questions
-          setTestQuestions({});
+          // Fallback to local dataset (7 questions) when API call fails
+          const mainTrade = formData.selectedTrades[0];
+          const questions = getQuestionsForTrades([mainTrade], 7);
+          setTestQuestions(questions);
         }
       }
     };
@@ -138,7 +144,8 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
       overallTotal: tradeResult.total,
       passed: tradeResult.passed,
       completedAt: new Date().toISOString(),
-      timeUsed: 1800 - timeRemaining
+      // Fix incorrect timeUsed calculation: initial timer is 900 seconds
+      timeUsed: 900 - timeRemaining
     };
     
     setTestResults(finalResults);
@@ -221,7 +228,7 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
               <Trophy className="h-6 w-6 text-green-600" />
               <div>
                 <span className="font-semibold text-lg text-green-800">{formData.selectedTrades[0]}</span>
-                <p className="text-sm text-green-700">Your primary trade • 20 questions</p>
+                <p className="text-sm text-green-700">Your primary trade • {getTotalQuestions()} questions</p>
               </div>
             </div>
           </div>
@@ -244,7 +251,8 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
 
         <Button
           onClick={handleStartTest}
-          disabled={Object.keys(testQuestions).length === 0}
+          // Enable only when we have questions loaded for the main trade
+          disabled={getTotalQuestions() === 0}
           className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
         >
           Start Skills Test

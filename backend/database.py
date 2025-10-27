@@ -4,6 +4,7 @@ import os
 from typing import List, Optional, Dict, Any
 import logging
 import uuid
+import certifi
 from models.notifications import (
     Notification, NotificationPreferences, NotificationChannel,
     NotificationType, NotificationStatus
@@ -20,6 +21,7 @@ class Database:
     def __init__(self):
         self.client = None
         self.database = None
+        self.connected = False
 
     async def connect_to_mongo(self):
         # Try different environment variable names for MongoDB URL
@@ -29,10 +31,45 @@ class Database:
         if not mongo_url:
             raise ValueError("MongoDB URL not found. Please set MONGO_URL or MONGODB_URL environment variable.")
         
-        # Use the connection string as-is since SSL options are in the URL
-        self.client = AsyncIOMotorClient(mongo_url)
-        self.database = self.client[db_name]
-        logger.info("Connected to MongoDB")
+        # Initialize client with TLS CA file to fix SSL handshake issues and sensible timeouts
+        timeout_ms = int(os.getenv('MONGO_TIMEOUT_MS', '15000'))
+        connect_timeout_ms = int(os.getenv('MONGO_CONNECT_TIMEOUT_MS', '15000'))
+        # Create SSL context pinned to TLS 1.2 with Certifi CA bundle
+        import ssl
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
+        try:
+            # Prefer TLS 1.2 for compatibility with certain Atlas clusters
+            ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
+            ssl_context.maximum_version = ssl.TLSVersion.TLSv1_2
+        except Exception:
+            # Fallback for older Python versions that don't support TLSVersion enum
+            pass
+
+        # Determine if TLS should be used (Atlas or explicit tls=true)
+        use_tls = mongo_url.startswith("mongodb+srv://") or ("tls=true" in mongo_url.lower())
+        try:
+            if use_tls:
+                self.client = AsyncIOMotorClient(
+                    mongo_url,
+                    tlsCAFile=certifi.where(),
+                    serverSelectionTimeoutMS=timeout_ms,
+                    connectTimeoutMS=connect_timeout_ms,
+                )
+            else:
+                self.client = AsyncIOMotorClient(
+                    mongo_url,
+                    serverSelectionTimeoutMS=timeout_ms,
+                    connectTimeoutMS=connect_timeout_ms,
+                )
+            # Verify connection with a ping
+            await self.client.admin.command('ping')
+            self.database = self.client[db_name]
+            self.connected = True
+            logger.info("Connected to MongoDB")
+        except Exception as e:
+            self.connected = False
+            logger.error(f"MongoDB connection failed: {e}")
+            # Allow app to continue running without database connection
 
     async def close_mongo_connection(self):
         if self.client:
@@ -3744,20 +3781,64 @@ class Database:
             return {}
     
     async def get_questions_for_trade(self, trade_category: str):
-        """Get all questions for a specific trade"""
+        """Get all questions for a specific trade, with JS-file fallback when DB unavailable"""
+        # Prefer database when connected
+        if self.database is not None and self.connected:
+            try:
+                questions = await self.database.skills_questions.find(
+                    {"trade_category": trade_category}
+                ).to_list(length=None)
+                # Convert ObjectIds to strings for JSON serialization
+                for question in questions:
+                    if '_id' in question:
+                        question['_id'] = str(question['_id'])
+                if questions:
+                    return questions
+            except Exception as e:
+                logger.error(f"Error getting questions for trade {trade_category}: {e}")
+        
+        # Fallback: read from frontend JS file
         try:
-            questions = await self.database.skills_questions.find(
-                {"trade_category": trade_category}
-            ).to_list(length=None)
-            
-            # Convert ObjectIds to strings for JSON serialization
-            for question in questions:
-                if '_id' in question:
-                    question['_id'] = str(question['_id'])
-            
-            return questions
+            import re, json
+            js_file_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                'frontend', 'src', 'data', 'skillsTestQuestions.js'
+            )
+            if not os.path.exists(js_file_path):
+                logger.error(f"JS skills questions file not found at {js_file_path}")
+                return []
+            with open(js_file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            match = re.search(r"export const skillsTestQuestions\s*=\s*({[\s\S]*?});", content)
+            if not match:
+                logger.error("Could not locate skillsTestQuestions object in JS file")
+                return []
+            questions_str = match.group(1)
+            # Normalize JS to JSON-like string
+            questions_str = re.sub(r"(\w+)\s*:", r"\"\\1\":", questions_str)
+            questions_str = questions_str.replace("'", '"')
+            js_data = json.loads(questions_str)
+            trade_questions = js_data.get(trade_category, [])
+            # Convert to DB-like schema expected by routes
+            formatted = []
+            for q in trade_questions:
+                formatted.append({
+                    "id": str(uuid.uuid4()),
+                    "trade_category": trade_category,
+                    "question": q.get("question"),
+                    "options": q.get("options", []),
+                    "correct_answer": q.get("correct", 0),
+                    "category": q.get("category", "General"),
+                    "explanation": q.get("explanation", ""),
+                    "difficulty": q.get("difficulty", "Medium"),
+                    "created_at": datetime.now().isoformat(),
+                    "updated_at": datetime.now().isoformat(),
+                    "created_by": "system",
+                    "is_active": True
+                })
+            return formatted
         except Exception as e:
-            print(f"Error getting questions for trade {trade_category}: {e}")
+            logger.error(f"Fallback load from JS failed for {trade_category}: {e}")
             return []
     
     async def add_skills_question(self, trade_category: str, question_data: dict):

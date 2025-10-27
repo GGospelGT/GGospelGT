@@ -1160,6 +1160,19 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
                 >
                   {isLoading ? 'Processing...' : 'Fund Now & Complete Registration'}
                 </button>
+                
+                <button
+                  onClick={() => {
+                    console.log('🔘 SET UP WALLET LATER BUTTON CLICKED (DIRECT)');
+                    updateFormData('walletSetup', 'later');
+                    handleFinalSubmit();
+                  }}
+                  disabled={isLoading}
+                  className="w-full border-2 border-gray-400 text-gray-600 hover:bg-gray-50 py-3 px-6 rounded-lg font-medium disabled:opacity-50"
+                  type="button"
+                >
+                  {isLoading ? 'Completing Registration...' : 'Set Up Wallet Later & Complete Registration'}
+                </button>
               </div>
             </div>
           )}
@@ -1298,23 +1311,6 @@ const WalletSetup = ({ formData, updateFormData, handleFinalSubmit, isLoading, s
           type="button"
         >
           {isLoading ? 'Completing Registration...' : 'Fund Now & Complete Registration'}
-        </button>
-        
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🔘 SET UP WALLET LATER BUTTON CLICKED');
-            console.log('🔍 Current form data:', formData);
-            console.log('🔍 Current step:', currentStep);
-            updateFormData('walletSetup', 'later');
-            handleFinalSubmit();
-          }}
-          disabled={isLoading}
-          className="w-full border-2 border-gray-400 text-gray-600 hover:bg-gray-50 py-3 px-6 rounded-lg font-medium disabled:opacity-50"
-          type="button"
-        >
-          {isLoading ? 'Completing Registration...' : 'Set Up Wallet Later & Complete Registration'}
         </button>
       </div>
     </div>

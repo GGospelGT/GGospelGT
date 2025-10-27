@@ -32,12 +32,21 @@ logger = get_logger('server')
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    await database.connect_to_mongo()
-    logger.info("Connected to MongoDB")
+    try:
+        await database.connect_to_mongo()
+        if getattr(database, 'connected', False):
+            logger.info("Connected to MongoDB")
+        else:
+            logger.warning("Database connection unavailable; running in degraded mode")
+    except Exception as e:
+        logger.error(f"Database connect failed during startup: {e}")
     yield
     # Shutdown
-    await database.close_mongo_connection()
-    logger.info("MongoDB connection closed")
+    try:
+        await database.close_mongo_connection()
+        logger.info("MongoDB connection closed")
+    except Exception as e:
+        logger.error(f"Error closing MongoDB connection: {e}")
 
 # Create the main app with lifespan events  
 app = FastAPI(lifespan=lifespan, redirect_slashes=False)

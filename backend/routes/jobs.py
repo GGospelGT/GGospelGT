@@ -1256,7 +1256,7 @@ async def get_job_question_answers(job_id: str):
 
 # Public Skills Questions Endpoint (no authentication required)
 @router.get("/skills-questions/{trade_category}")
-async def get_public_skills_questions(trade_category: str):
+async def get_public_skills_questions(trade_category: str, limit: int = Query(7, ge=1, le=50, description="Number of questions to return")):
     """Get skills test questions for a specific trade category (public endpoint for registration)"""
     try:
         questions = await database.get_questions_for_trade(trade_category)
@@ -1272,6 +1272,9 @@ async def get_public_skills_questions(trade_category: str):
                     'category': question.get('category', 'General'),
                     'explanation': question.get('explanation', '')
                 })
+                # Enforce cap on number of questions returned
+                if len(formatted_questions) >= limit:
+                    break
         
         return {
             'trade_category': trade_category,

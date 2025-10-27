@@ -197,7 +197,7 @@ def fix_existing_user_password():
         
         # Generate a new password hash for a known password
         from passlib.context import CryptContext
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        pwd_context = CryptContext(schemes=["bcrypt"])  # Removed deprecated="auto"
         
         new_password = "FixedPassword123!"
         new_hash = pwd_context.hash(new_password)

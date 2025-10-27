@@ -19,31 +19,21 @@ async def test_ssl_configs():
     cluster = "servicehub.fh5tlnn.mongodb.net"
     
     # Try different URL formats and SSL configurations
+    # Remove deprecated/insecure flags from SSL test configurations
+    # - Removed tlsAllowInvalidCertificates and tlsInsecure
+    # - Removed ssl=false URL parameters
+    # - Keep secure defaults with timeouts
+    
     test_configs = [
         {
-            "name": "Standard MongoDB+SRV with SSL bypass",
+            "name": "Standard MongoDB+SRV (default SSL)",
             "url": f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority&appName=ServiceHub",
-            "params": {"tlsAllowInvalidCertificates": True, "tlsInsecure": True}
+            "params": {"serverSelectionTimeoutMS": 15000}
         },
         {
-            "name": "Standard MongoDB+SRV with SSL disabled",
-            "url": f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority&appName=ServiceHub&ssl=false",
-            "params": {}
-        },
-        {
-            "name": "Direct MongoDB connection (no SRV)",
-            "url": f"mongodb://{username}:{password}@ac-r7lfn1n-shard-00-00.fh5tlnn.mongodb.net:27017,ac-r7lfn1n-shard-00-01.fh5tlnn.mongodb.net:27017,ac-r7lfn1n-shard-00-02.fh5tlnn.mongodb.net:27017/?ssl=false&replicaSet=atlas-11ay7h-shard-0&authSource=admin&retryWrites=true&w=majority",
-            "params": {}
-        },
-        {
-            "name": "URL-encoded credentials with SSL bypass",
+            "name": "Connection with longer timeout",
             "url": f"mongodb+srv://{quote_plus(username)}:{quote_plus(password)}@{cluster}/?retryWrites=true&w=majority&appName=ServiceHub",
-            "params": {"tlsAllowInvalidCertificates": True, "tlsInsecure": True, "serverSelectionTimeoutMS": 5000}
-        },
-        {
-            "name": "Custom SSL context",
-            "url": f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority&appName=ServiceHub",
-            "params": {"ssl_context": ssl.create_default_context(), "serverSelectionTimeoutMS": 5000}
+            "params": {"serverSelectionTimeoutMS": 30000, "connectTimeoutMS": 30000}
         }
     ]
     

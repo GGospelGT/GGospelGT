@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
-from models.auth import User, UserRole
+from models.auth import User, UserRole, UserStatus
 from auth.security import verify_token
 from database import database
 
@@ -36,7 +36,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     """Get current authenticated and active user."""
-    if current_user.status != "active":
+    if current_user.status != UserStatus.ACTIVE:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user account"

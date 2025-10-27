@@ -195,16 +195,21 @@ class HealthMonitor:
             services["database"] = {"status": "unhealthy", "error": str(e)}
         
         # Check environment variables
+        # Normalize DB URL env names across the app: backend connects using MONGO_URL or MONGODB_URL
         required_env_vars = [
-            "MONGODB_URL", "SECRET_KEY", "JWT_ALGORITHM"
+            "SECRET_KEY",
         ]
+        # Consider DB URL as set if either variable exists
+        has_db_url = os.getenv("MONGO_URL") or os.getenv("MONGODB_URL")
+        env_status = {
+            "MONGO_URL_or_MONGODB_URL": "set" if has_db_url else "missing",
+        }
         
-        env_status = {}
         for var in required_env_vars:
             env_status[var] = "set" if os.getenv(var) else "missing"
         
         services["environment"] = {
-            "status": "healthy" if all(os.getenv(var) for var in required_env_vars) else "degraded",
+            "status": "healthy" if (has_db_url and all(os.getenv(var) for var in required_env_vars)) else "degraded",
             "variables": env_status
         }
         

@@ -7,7 +7,7 @@ import secrets
 import os
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"])  # Removed deprecated="auto" to avoid deprecated configuration
 
 # JWT settings
 SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
@@ -71,15 +71,32 @@ def validate_nigerian_phone(phone: str) -> bool:
     
     # Pattern 1: Starting with 234 (country code) - should be 13 digits total
     if clean_phone.startswith('234') and len(clean_phone) == 13:
-        return True
+        # Validate that the number after 234 starts with valid Nigerian mobile prefixes
+        mobile_part = clean_phone[3:]  # Remove 234
+        if mobile_part.startswith(('70', '80', '81', '90', '91')):
+            return True
     
-    # Pattern 2: Starting with 0 - should be 11 digits total (08140120508)
+    # Pattern 2: Common mistake - 234 + 0 + mobile number (14 digits)
+    # Handle cases like +23408140120508 which should be +2348140120508
+    if clean_phone.startswith('2340') and len(clean_phone) == 14:
+        # Check if removing the extra 0 makes it valid
+        corrected_phone = '234' + clean_phone[4:]  # Remove the extra 0
+        mobile_part = corrected_phone[3:]
+        if mobile_part.startswith(('70', '80', '81', '90', '91')):
+            return True
+    
+    # Pattern 3: Starting with 0 - should be 11 digits total (08140120508)
     if clean_phone.startswith('0') and len(clean_phone) == 11:
-        return True
+        # Validate that it starts with valid Nigerian mobile prefixes
+        mobile_part = clean_phone[1:]  # Remove leading 0
+        if mobile_part.startswith(('70', '80', '81', '90', '91')):
+            return True
     
-    # Pattern 3: Starting with 7, 8, or 9 (without 0 prefix) - should be 10 digits total (8140120508)
+    # Pattern 4: Starting with 7, 8, or 9 (without 0 prefix) - should be 10 digits total (8140120508)
     if (clean_phone.startswith('7') or clean_phone.startswith('8') or clean_phone.startswith('9')) and len(clean_phone) == 10:
-        return True
+        # Validate that it starts with valid Nigerian mobile prefixes
+        if clean_phone.startswith(('70', '80', '81', '90', '91')):
+            return True
     
     return False
 
@@ -88,17 +105,30 @@ def format_nigerian_phone(phone: str) -> str:
     # Remove all non-digit characters
     clean_phone = ''.join(filter(str.isdigit, phone))
     
-    # If already in +234 format, return as is
+    # If already in correct +234 format, return as is
     if clean_phone.startswith('234') and len(clean_phone) == 13:
-        return f"+{clean_phone}"
+        mobile_part = clean_phone[3:]
+        if mobile_part.startswith(('70', '80', '81', '90', '91')):
+            return f"+{clean_phone}"
+    
+    # Handle common mistake: 234 + 0 + mobile number (14 digits)
+    if clean_phone.startswith('2340') and len(clean_phone) == 14:
+        # Remove the extra 0 and format correctly
+        corrected_phone = '234' + clean_phone[4:]
+        mobile_part = corrected_phone[3:]
+        if mobile_part.startswith(('70', '80', '81', '90', '91')):
+            return f"+{corrected_phone}"
     
     # If starts with 0, remove it and add +234
     if clean_phone.startswith('0') and len(clean_phone) == 11:
-        return f"+234{clean_phone[1:]}"
+        mobile_part = clean_phone[1:]
+        if mobile_part.startswith(('70', '80', '81', '90', '91')):
+            return f"+234{clean_phone[1:]}"
     
     # If starts with 7, 8, or 9 (10 digits), add +234
     if (clean_phone.startswith('7') or clean_phone.startswith('8') or clean_phone.startswith('9')) and len(clean_phone) == 10:
-        return f"+234{clean_phone}"
+        if clean_phone.startswith(('70', '80', '81', '90', '91')):
+            return f"+234{clean_phone}"
     
     # Return original if no valid pattern
     return phone

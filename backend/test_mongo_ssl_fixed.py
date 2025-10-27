@@ -19,36 +19,16 @@ async def test_ssl_configs():
     cluster = "servicehub.fh5tlnn.mongodb.net"
     
     # Try different URL formats and SSL configurations
+    # Remove deprecated insecure flags from test configurations
+    # - Removed tlsAllowInvalidCertificates and tlsInsecure
+    # - Removed ssl=false and tls=false URL parameters
+    # - Use default secure configuration with sensible timeouts
+    
     test_configs = [
         {
             "name": "Standard MongoDB+SRV (default SSL)",
             "url": f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority&appName=ServiceHub",
-            "params": {"serverSelectionTimeoutMS": 10000}
-        },
-        {
-            "name": "MongoDB+SRV with SSL certificate bypass only",
-            "url": f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority&appName=ServiceHub",
-            "params": {"tlsAllowInvalidCertificates": True, "serverSelectionTimeoutMS": 10000}
-        },
-        {
-            "name": "MongoDB+SRV with TLS insecure only",
-            "url": f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority&appName=ServiceHub",
-            "params": {"tlsInsecure": True, "serverSelectionTimeoutMS": 10000}
-        },
-        {
-            "name": "MongoDB+SRV with SSL disabled in URL",
-            "url": f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority&appName=ServiceHub&ssl=false",
-            "params": {"serverSelectionTimeoutMS": 10000}
-        },
-        {
-            "name": "MongoDB+SRV with TLS disabled in URL",
-            "url": f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority&appName=ServiceHub&tls=false",
-            "params": {"serverSelectionTimeoutMS": 10000}
-        },
-        {
-            "name": "Direct connection with SSL disabled",
-            "url": f"mongodb://ac-r7lfn1n-shard-00-00.fh5tlnn.mongodb.net:27017,ac-r7lfn1n-shard-00-01.fh5tlnn.mongodb.net:27017,ac-r7lfn1n-shard-00-02.fh5tlnn.mongodb.net:27017/?ssl=false&replicaSet=atlas-11ay7h-shard-0&authSource=admin&retryWrites=true&w=majority",
-            "params": {"username": username, "password": password, "serverSelectionTimeoutMS": 10000}
+            "params": {"serverSelectionTimeoutMS": 15000}
         },
         {
             "name": "Connection with longer timeout",

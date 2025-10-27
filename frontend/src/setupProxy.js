@@ -1,7 +1,8 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function(app) {
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+  // In dev, align with backend default port 8001 unless overridden
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
   
   console.log('🔧 Proxy Configuration:', { backendUrl });
   
