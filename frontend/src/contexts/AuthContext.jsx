@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refresh_token'));
 
   useEffect(() => {
     // Check if user is logged in on app start
@@ -35,9 +36,44 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('❌ Failed to get current user:', error);
       // Token might be expired or invalid
-      logout();
+      // Try refresh flow once
+      if (refreshToken) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          try {
+            const userData = await authAPI.getCurrentUser();
+            setUser(userData);
+          } catch (e) {
+            console.error('❌ Failed to get user after refresh:', e);
+            logout();
+          }
+        } else {
+          logout();
+        }
+      } else {
+        logout();
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    try {
+      if (!refreshToken) return false;
+      const resp = await authAPI.refreshToken(refreshToken);
+      if (resp?.access_token) {
+        localStorage.setItem('token', resp.access_token);
+        setToken(resp.access_token);
+      }
+      if (resp?.refresh_token) {
+        localStorage.setItem('refresh_token', resp.refresh_token);
+        setRefreshToken(resp.refresh_token);
+      }
+      return true;
+    } catch (error) {
+      console.error('❌ Refresh token failed:', error);
+      return false;
     }
   };
 
@@ -65,9 +101,13 @@ export const AuthProvider = ({ children }) => {
         };
       }
       
-      // Store token and user data
+      // Store tokens and user data
       localStorage.setItem('token', response.access_token);
       setToken(response.access_token);
+      if (response.refresh_token) {
+        localStorage.setItem('refresh_token', response.refresh_token);
+        setRefreshToken(response.refresh_token);
+      }
       setUser(response.user);
       
       console.log('✅ Login successful for user:', response.user.name);
@@ -105,10 +145,14 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.registerHomeowner(registrationData);
       console.log('✅ Homeowner registration API response:', response);
       
-      // If registration successful and returns token, automatically log user in
+      // If registration successful and returns tokens, automatically log user in
       if (response.access_token) {
         localStorage.setItem('token', response.access_token);
         setToken(response.access_token);
+        if (response.refresh_token) {
+          localStorage.setItem('refresh_token', response.refresh_token);
+          setRefreshToken(response.refresh_token);
+        }
         setUser(response.user);
         
         console.log('✅ Homeowner registration successful for user:', response.user.name);
@@ -135,6 +179,10 @@ export const AuthProvider = ({ children }) => {
         const authToken = userData.access_token || userData.token;
         localStorage.setItem('token', authToken);
         setToken(authToken);
+        if (userData.refresh_token) {
+          localStorage.setItem('refresh_token', userData.refresh_token);
+          setRefreshToken(userData.refresh_token);
+        }
         setUser(userData.user || userData);
         console.log('🎉 User automatically logged in after registration');
       }
@@ -175,7 +223,9 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');
     setToken(null);
+    setRefreshToken(null);
     setUser(null);
   };
 
@@ -214,6 +264,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     token,
+    refreshToken,
     login,
     loginWithToken,
     logout,
@@ -226,7 +277,8 @@ export const AuthProvider = ({ children }) => {
     isHomeowner,
     isTradesperson,
     isActive,
-    getCurrentUser
+    getCurrentUser,
+    refreshAccessToken,
   };
 
   return (

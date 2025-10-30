@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import PostJobPage from "./pages/PostJobPage";
 import MyJobsPage from "./pages/MyJobsPage";
@@ -36,10 +36,35 @@ import BlogPage from "./pages/BlogPage";
 import CareersPage from "./pages/CareersPage";
 import TradespersonRegistrationDemo from "./pages/TradespersonRegistrationDemo";
 import { Toaster } from "./components/ui/toaster";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import OfflineIndicator from "./components/OfflineIndicator";
 import { setupGlobalErrorHandling } from "./utils/errorHandler";
+
+
+// Simple ProtectedRoute wrapper
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) {
+    return <div style={{ padding: 24 }}>Loading...</div>;
+  }
+  return isAuthenticated() ? children : <Navigate to="/join-for-free" replace />;
+};
+
+// Role-based guard
+const RoleGuard = ({ allowedRoles, children }) => {
+  const { user, isAuthenticated, loading } = useAuth();
+  if (loading) {
+    return <div style={{ padding: 24 }}>Loading...</div>;
+  }
+  if (!isAuthenticated()) {
+    return <Navigate to="/join-for-free" replace />;
+  }
+  if (!allowedRoles.includes(user?.role)) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
 
 function App() {
   // Setup global error handling
@@ -89,27 +114,7 @@ function App() {
       });
     };
 
-    // Run immediately
     removeWatermark();
-
-    // Run again after a short delay (in case watermark loads after initial render)
-    const timeoutId = setTimeout(removeWatermark, 1000);
-
-    // Set up observer to catch dynamically added watermarks
-    const observer = new MutationObserver(() => {
-      removeWatermark();
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-
-    // Cleanup
-    return () => {
-      clearTimeout(timeoutId);
-      observer.disconnect();
-    };
   }, []);
 
   return (
@@ -117,29 +122,30 @@ function App() {
       <ErrorBoundary>
         <AuthProvider>
           <BrowserRouter>
+
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/post-job" element={<PostJobPage />} />
-              <Route path="/my-jobs" element={<MyJobsPage />} />
-              <Route path="/my-interests" element={<MyInterestsPage />} />
-              <Route path="/completed-jobs" element={<CompletedJobsPage />} />
+              <Route path="/my-jobs" element={<ProtectedRoute><MyJobsPage /></ProtectedRoute>} />
+              <Route path="/my-interests" element={<ProtectedRoute><MyInterestsPage /></ProtectedRoute>} />
+              <Route path="/completed-jobs" element={<ProtectedRoute><CompletedJobsPage /></ProtectedRoute>} />
               <Route path="/tradesperson/:id" element={<TradespersonProfilePage />} />
               <Route path="/browse-tradespeople" element={<BrowseTradespeopleePage />} />
-              <Route path="/job/:jobId/interested-tradespeople" element={<InterestedTradespeopleePage />} />
+              <Route path="/job/:jobId/interested-tradespeople" element={<ProtectedRoute><InterestedTradespeopleePage /></ProtectedRoute>} />
               <Route path="/browse-jobs" element={<BrowseJobsPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/tradesperson/:tradespersonId/portfolio" element={<TradespersonPortfolioPage />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/notifications/preferences" element={<NotificationPreferencesPage />} />
-              <Route path="/notifications/history" element={<NotificationHistoryPage />} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/tradesperson/:tradespersonId/portfolio" element={<ProtectedRoute><TradespersonPortfolioPage /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+              <Route path="/notifications/preferences" element={<ProtectedRoute><NotificationPreferencesPage /></ProtectedRoute>} />
+              <Route path="/notifications/history" element={<ProtectedRoute><NotificationHistoryPage /></ProtectedRoute>} />
               <Route path="/reviews" element={<ReviewsPage />} />
               <Route path="/reviews/:userId" element={<ReviewsPage />} />
-              <Route path="/my-reviews" element={<MyReviewsPage />} />
-              <Route path="/my-received-reviews" element={<MyReceivedReviewsPage />} />
-              <Route path="/wallet" element={<WalletPage />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/referrals" element={<ReferralsPage />} />
-              <Route path="/verify-account" element={<VerifyAccountPage />} />
+              <Route path="/my-reviews" element={<ProtectedRoute><MyReviewsPage /></ProtectedRoute>} />
+              <Route path="/my-received-reviews" element={<ProtectedRoute><MyReceivedReviewsPage /></ProtectedRoute>} />
+              <Route path="/wallet" element={<ProtectedRoute><WalletPage /></ProtectedRoute>} />
+              <Route path="/admin" element={<RoleGuard allowedRoles={["admin"]}><AdminDashboard /></RoleGuard>} />
+              <Route path="/referrals" element={<ProtectedRoute><ReferralsPage /></ProtectedRoute>} />
+              <Route path="/verify-account" element={<ProtectedRoute><VerifyAccountPage /></ProtectedRoute>} />
               <Route path="/about" element={<AboutUsPage />} />
               <Route path="/reviews-policy" element={<ReviewsPolicyPage />} />
               <Route path="/how-it-works" element={<HowItWorksPage />} />

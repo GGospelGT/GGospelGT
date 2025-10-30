@@ -3,11 +3,13 @@ from datetime import timedelta
 from models.auth import (
     UserLogin, LoginResponse, HomeownerRegistration, TradespersonRegistration,
     User, UserProfile, UserProfileUpdate, TradespersonProfileUpdate,
-    PasswordResetRequest, PasswordReset, UserRole, UserStatus
+    PasswordResetRequest, PasswordReset, UserRole, UserStatus,
+    RefreshTokenRequest, RefreshTokenResponse
 )
 from auth.security import (
-    verify_password, get_password_hash, create_access_token,
-    validate_password_strength, validate_nigerian_phone, format_nigerian_phone
+    verify_password, get_password_hash, create_access_token, create_refresh_token,
+    validate_password_strength, validate_nigerian_phone, format_nigerian_phone,
+    verify_refresh_token
 )
 from auth.dependencies import get_current_user, get_current_active_user
 from database import database
@@ -100,12 +102,15 @@ async def register_homeowner(registration_data: HomeownerRegistration):
             data={"sub": created_user["id"], "email": created_user["email"]},
             expires_delta=access_token_expires
         )
+        refresh_token = create_refresh_token(data={"sub": created_user["id"], "email": created_user["email"]})
         
-        # Return both user profile and access token
+        # Return both user profile and tokens
         return {
             "user": user_response.dict(),
             "access_token": access_token,
-            "token_type": "bearer"
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "expires_in": 60 * 60 * 24
         }
 
     except HTTPException:
@@ -204,6 +209,7 @@ async def register_tradesperson(registration_data: TradespersonRegistration):
             data={"sub": created_user["id"], "email": created_user["email"]},
             expires_delta=access_token_expires
         )
+        refresh_token = create_refresh_token(data={"sub": created_user["id"], "email": created_user["email"]})
 
         # Update last login
         await database.update_user_last_login(created_user["id"])
@@ -213,6 +219,7 @@ async def register_tradesperson(registration_data: TradespersonRegistration):
         
         return LoginResponse(
             access_token=access_token,
+            refresh_token=refresh_token,
             token_type="bearer",
             user=user_response,
             expires_in=60 * 60 * 24  # 24 hours in seconds
@@ -594,3 +601,40 @@ async def get_all_lgas():
         "total_states": len(all_lgas),
         "total_lgas": total_lgas
     }
+
+@router.post("/refresh", response_model=RefreshTokenResponse)
+async def refresh_tokens(request: RefreshTokenRequest):
+    """Refresh access token using a valid refresh token"""
+    try:
+        # Verify refresh token
+        payload = verify_refresh_token(request.refresh_token)
+        user_id = payload.get("sub")
+        email = payload.get("email")
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token payload"
+            )
+        
+        # Load user
+        user = await database.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        if user.get("status") == UserStatus.SUSPENDED:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account suspended")
+        
+        # Issue new tokens
+        access_token_expires = timedelta(minutes=60 * 24)
+        new_access_token = create_access_token(data={"sub": user_id, "email": email}, expires_delta=access_token_expires)
+        new_refresh_token = create_refresh_token(data={"sub": user_id, "email": email})
+        
+        return RefreshTokenResponse(
+            access_token=new_access_token,
+            refresh_token=new_refresh_token,
+            token_type="bearer",
+            expires_in=60 * 60 * 24
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Refresh failed: {str(e)}")

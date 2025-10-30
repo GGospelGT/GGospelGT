@@ -41,6 +41,11 @@ export const authAPI = {
     const response = await apiClient.post('/auth/password-reset-request', { email });
     return response.data;
   },
+
+  refreshToken: async (refreshToken) => {
+    const response = await apiClient.post('/auth/refresh', { refresh_token: refreshToken });
+    return response.data;
+  },
 };
 
 // Statistics API
