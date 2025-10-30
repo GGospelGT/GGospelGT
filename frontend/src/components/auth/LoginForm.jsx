@@ -6,86 +6,45 @@ import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '../ui/form';
+import { loginSchema } from '../../utils/validation';
 
 const LoginForm = ({ onClose, onSwitchToSignup, onSwitchToForgotPassword }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [errors, setErrors] = useState({});
+  // Remove local formData/errors state; use react-hook-form instead
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
   const { login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const updateFormData = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
+  const form = useForm({
+    resolver: zodResolver(loginSchema),
+    mode: 'onChange',
+    defaultValues: { email: '', password: '' },
+  });
+  const { handleSubmit, control, formState, setError, getValues } = form;
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-
+  const onSubmit = async () => {
+    const { email, password } = getValues();
     try {
-      const result = await login(formData.email, formData.password);
-
+      const result = await login(email, password);
       if (result.success) {
-        toast({
-          title: "Welcome back!",
-          description: `Successfully logged in as ${result.user.name}`,
-        });
-        
-        // Close the modal first
+        toast({ title: 'Welcome back!', description: `Successfully logged in as ${result.user.name}` });
         if (onClose) onClose();
-        
-        // Redirect based on user role
         if (result.user.role === 'tradesperson') {
-          // Redirect tradespeople to Browse Jobs page
           navigate('/browse-jobs');
-        } else if (result.user.role === 'homeowner') {
-          // Keep homeowners on homepage or redirect to their dashboard
-          navigate('/');
         } else {
-          // Default redirect for any other roles
           navigate('/');
         }
       } else {
-        // Ensure error is a string, not an object
-        const errorMessage = typeof result.error === 'string' 
-          ? result.error 
+        const errorMessage = typeof result.error === 'string'
+          ? result.error
           : result.error?.message || result.error?.msg || 'Login failed. Please check your credentials and try again.';
-        setErrors({ submit: errorMessage });
+        setError('root', { type: 'server', message: errorMessage });
       }
     } catch (error) {
-      setErrors({ submit: 'An unexpected error occurred. Please try again.' });
-    } finally {
-      setIsLoading(false);
+      setError('root', { type: 'server', message: 'An unexpected error occurred. Please try again.' });
     }
   };
 
@@ -95,113 +54,88 @@ const LoginForm = ({ onClose, onSwitchToSignup, onSwitchToForgotPassword }) => {
         <CardTitle className="text-2xl font-bold font-montserrat" style={{color: '#121E3C'}}>
           Welcome Back
         </CardTitle>
-        <p className="text-gray-600 font-lato">
-          Sign in to your serviceHub account
-        </p>
+        <p className="text-gray-600 font-lato">Sign in to your serviceHub account</p>
       </CardHeader>
-      
+
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email Field */}
-          <div>
-            <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <Input
-                type="email"
-                placeholder="your.email@example.com"
-                value={formData.email}
-                onChange={(e) => updateFormData('email', e.target.value)}
-                className={`pl-10 font-lato ${errors.email ? 'border-red-500' : ''}`}
-              />
-            </div>
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1 flex items-center">
-                <AlertCircle size={16} className="mr-1" />
-                {errors.email}
-              </p>
-            )}
-          </div>
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Email Field */}
+            <FormField
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                    Email Address
+                  </FormLabel>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <FormControl>
+                      <Input type="email" placeholder="your.email@example.com" className="pl-10 font-lato" {...field} />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Password Field */}
-          <div>
-            <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={(e) => updateFormData('password', e.target.value)}
-                className={`pl-10 pr-10 font-lato ${errors.password ? 'border-red-500' : ''}`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            {/* Password Field */}
+            <FormField
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
+                    Password
+                  </FormLabel>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <FormControl>
+                      <Input type={showPassword ? 'text' : 'password'} placeholder="Enter your password" className="pl-10 pr-10 font-lato" {...field} />
+                    </FormControl>
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Submit Error */}
+            {formState.errors.root?.message && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-red-700 text-sm flex items-center">
+                  <AlertCircle size={16} className="mr-2" />
+                  {formState.errors.root.message}
+                </p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <Button type="submit" disabled={!formState.isValid || formState.isSubmitting} className="w-full text-white font-lato py-3 disabled:opacity-50" style={{backgroundColor: '#2F8140'}}>
+              {formState.isSubmitting ? 'Signing in...' : 'Sign In'}
+            </Button>
+
+            {/* Forgot Password */}
+            <div className="text-center">
+              <button type="button" onClick={onSwitchToForgotPassword} className="text-sm font-lato hover:underline" style={{color: '#2F8140'}}>
+                Forgot your password?
               </button>
             </div>
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1 flex items-center">
-                <AlertCircle size={16} className="mr-1" />
-                {errors.password}
-              </p>
-            )}
-          </div>
 
-          {/* Submit Error */}
-          {errors.submit && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-700 text-sm flex items-center">
-                <AlertCircle size={16} className="mr-2" />
-                {errors.submit}
+            {/* Switch to Signup */}
+            <div className="text-center pt-4 border-t">
+              <p className="text-gray-600 font-lato text-sm">
+                Don't have an account?{' '}
+                <button type="button" onClick={onSwitchToSignup} className="font-semibold hover:underline" style={{color: '#2F8140'}}>
+                  Sign up here
+                </button>
               </p>
             </div>
-          )}
-
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full text-white font-lato py-3 disabled:opacity-50"
-            style={{backgroundColor: '#2F8140'}}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
-
-          {/* Forgot Password */}
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={onSwitchToForgotPassword}
-              className="text-sm font-lato hover:underline"
-              style={{color: '#2F8140'}}
-            >
-              Forgot your password?
-            </button>
-          </div>
-
-          {/* Switch to Signup */}
-          <div className="text-center pt-4 border-t">
-            <p className="text-gray-600 font-lato text-sm">
-              Don't have an account?{' '}
-              <button
-                type="button"
-                onClick={onSwitchToSignup}
-                className="font-semibold hover:underline"
-                style={{color: '#2F8140'}}
-              >
-                Sign up here
-              </button>
-            </p>
-          </div>
-        </form>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
