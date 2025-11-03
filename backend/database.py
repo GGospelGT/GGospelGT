@@ -5,15 +5,26 @@ from typing import List, Optional, Dict, Any
 import logging
 import uuid
 import certifi
-from models.notifications import (
-    Notification, NotificationPreferences, NotificationChannel,
-    NotificationType, NotificationStatus
-)
-from models.reviews import (
-    Review, ReviewCreate, ReviewSummary, ReviewRequest, 
-    ReviewStats, ReviewType, ReviewStatus
-)
-from models.admin import AdminRole, AdminStatus, AdminActivityType
+try:
+    from .models.notifications import (
+        Notification, NotificationPreferences, NotificationChannel,
+        NotificationType, NotificationStatus
+    )
+    from .models.reviews import (
+        Review, ReviewCreate, ReviewSummary, ReviewRequest, 
+        ReviewStats, ReviewType, ReviewStatus
+    )
+    from .models.admin import AdminRole, AdminStatus, AdminActivityType
+except ImportError:
+    from models.notifications import (
+        Notification, NotificationPreferences, NotificationChannel,
+        NotificationType, NotificationStatus
+    )
+    from models.reviews import (
+        Review, ReviewCreate, ReviewSummary, ReviewRequest, 
+        ReviewStats, ReviewType, ReviewStatus
+    )
+    from models.admin import AdminRole, AdminStatus, AdminActivityType
 
 logger = logging.getLogger(__name__)
 
@@ -132,17 +143,23 @@ class Database:
     @property
     def users_collection(self):
         """Access to users collection"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: users collection not accessible")
         return self.database.users
 
     # User authentication operations
     async def create_user(self, user_data: dict) -> dict:
         """Create a new user"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot create user")
         result = await self.database.users.insert_one(user_data)
         user_data['_id'] = str(result.inserted_id)
         return user_data
 
     async def get_user_by_id(self, user_id: str) -> Optional[dict]:
         """Get user by ID"""
+        if self.database is None:
+            return None
         user = await self.database.users.find_one({"id": user_id})
         if user:
             user['_id'] = str(user['_id'])
@@ -150,6 +167,8 @@ class Database:
 
     async def get_user_by_email(self, email: str) -> Optional[dict]:
         """Get user by email"""
+        if self.database is None:
+            return None
         user = await self.database.users.find_one({"email": email})
         if user:
             user['_id'] = str(user['_id'])
@@ -158,6 +177,8 @@ class Database:
     async def update_user(self, user_id: str, update_data: dict) -> bool:
         """Update user data"""
         update_data['updated_at'] = datetime.utcnow()
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot update user")
         result = await self.database.users.update_one(
             {"id": user_id},
             {"$set": update_data}
@@ -166,6 +187,8 @@ class Database:
 
     async def update_user_last_login(self, user_id: str):
         """Update user's last login timestamp"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot update last login")
         await self.database.users.update_one(
             {"id": user_id},
             {"$set": {"last_login": datetime.utcnow()}}
@@ -173,6 +196,8 @@ class Database:
 
     async def verify_user_email(self, user_id: str):
         """Mark user email as verified"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot verify user email")
         await self.database.users.update_one(
             {"id": user_id},
             {"$set": {"email_verified": True, "updated_at": datetime.utcnow()}}
@@ -1037,6 +1062,24 @@ class Database:
 
     # Statistics operations
     async def get_platform_stats(self) -> dict:
+        # If database is not connected, return safe defaults
+        if not self.connected or self.database is None:
+            try:
+                from models.trade_categories import NIGERIAN_TRADE_CATEGORIES
+            except Exception:
+                NIGERIAN_TRADE_CATEGORIES = []
+            custom_data = await self.get_custom_trades()
+            custom_trades = custom_data.get("trades", []) if custom_data else []
+            total_categories = len(set(NIGERIAN_TRADE_CATEGORIES + custom_trades))
+            return {
+                "total_tradespeople": 0,
+                "total_categories": total_categories,
+                "total_reviews": 0,
+                "average_rating": 0.0,
+                "total_jobs": 0,
+                "active_jobs": 0
+            }
+
         # Total tradespeople from users collection
         total_tradespeople = await self.database.users.count_documents({"role": "tradesperson"})
         
@@ -1098,8 +1141,51 @@ class Database:
 
     # Category operations
     async def get_categories_with_counts(self) -> List[dict]:
-        # Aggregate to count tradespeople by category
+        # If database is not connected, return static categories with zero counts
+        if not self.connected or self.database is None:
+            category_details = {
+                "Building & Construction": {
+                    "description": "From foundation to roofing, find experienced builders for your construction projects. Quality workmanship guaranteed.",
+                    "icon": "🏗️",
+                    "color": "from-orange-400 to-orange-600"
+                },
+                "Plumbing & Water Works": {
+                    "description": "Professional plumbers for installations, repairs, and water system maintenance. Available for emergency services.",
+                    "icon": "🔧",
+                    "color": "from-indigo-400 to-indigo-600"
+                },
+                "Electrical Installation": {
+                    "description": "Certified electricians for wiring, installations, and electrical repairs. Safe and reliable electrical services.",
+                    "icon": "⚡",
+                    "color": "from-yellow-400 to-yellow-600"
+                },
+                "Painting & Decorating": {
+                    "description": "Transform your space with professional painters and decorators. Interior and exterior painting services available.",
+                    "icon": "🎨",
+                    "color": "from-blue-400 to-blue-600"
+                },
+                "POP & Ceiling Works": {
+                    "description": "Expert ceiling installation and POP works. Modern designs and professional finishing for your interior spaces.",
+                    "icon": "🏠",
+                    "color": "from-purple-400 to-purple-600"
+                },
+                "Generator Installation & Repair": {
+                    "description": "Professional generator installation and maintenance services. Reliable power solutions for homes and businesses.",
+                    "icon": "🔌",
+                    "color": "from-red-400 to-red-600"
+                }
+            }
+            return [
+                {
+                    "title": name,
+                    "tradesperson_count": 0,
+                    **details
+                } for name, details in category_details.items()
+            ]
+
+        # Aggregate to count tradespeople by category from users collection
         pipeline = [
+            {"$match": {"role": "tradesperson", "trade_categories": {"$exists": True, "$ne": None}}},
             {"$unwind": "$trade_categories"},
             {"$group": {
                 "_id": "$trade_categories",
@@ -1108,7 +1194,7 @@ class Database:
             {"$sort": {"count": -1}}
         ]
         
-        results = await self.database.tradespeople.aggregate(pipeline).to_list(None)
+        results = await self.database.users.aggregate(pipeline).to_list(None)
         
         # Define category details for Nigeria
         category_details = {
@@ -1158,6 +1244,9 @@ class Database:
 
     async def get_featured_reviews(self, limit: int = 6) -> List[dict]:
         """Get featured reviews for homepage"""
+        # Return empty list if database is not available
+        if not self.connected or self.database is None:
+            return []
         # Get recent high-rated reviews that match the advanced review format
         # Filter for reviews that have the advanced format fields
         filters = {
@@ -2567,20 +2656,28 @@ class Database:
     @property
     def referrals_collection(self):
         """Access to referrals collection"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: referrals collection not accessible")
         return self.database.referrals
     
     @property
     def user_verifications_collection(self):
         """Access to user verifications collection"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: user verifications collection not accessible")
         return self.database.user_verifications
     
     @property
     def referral_codes_collection(self):
         """Access to referral codes collection"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: referral codes collection not accessible")
         return self.database.referral_codes
 
     async def generate_referral_code(self, user_id: str) -> str:
         """Generate unique referral code for user"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot generate referral code")
         # Get user info for code generation
         user = await self.get_user_by_id(user_id)
         if not user:
@@ -2639,6 +2736,8 @@ class Database:
 
     async def record_referral(self, referrer_code: str, referred_user_id: str) -> bool:
         """Record a referral when someone signs up with a referral code"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot record referral")
         # Find referrer by code
         referral_code_record = await self.referral_codes_collection.find_one({"code": referrer_code, "is_active": True})
         if not referral_code_record:
@@ -2688,6 +2787,8 @@ class Database:
 
     async def submit_verification_documents(self, user_id: str, document_type: str, document_url: str, full_name: str, document_number: str = None) -> str:
         """Submit verification documents"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot submit verification documents")
         verification_data = {
             "id": str(uuid.uuid4()),
             "user_id": user_id,
@@ -2712,6 +2813,8 @@ class Database:
 
     async def verify_user_documents(self, verification_id: str, admin_id: str, approved: bool, admin_notes: str = "") -> bool:
         """Admin approves or rejects user verification"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot verify documents")
         verification = await self.user_verifications_collection.find_one({"id": verification_id})
         if not verification:
             return False
@@ -2749,6 +2852,8 @@ class Database:
 
     async def _process_referral_rewards(self, verified_user_id: str):
         """Process referral rewards when user gets verified"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot process referral rewards")
         # Find pending referral for this user
         referral = await self.referrals_collection.find_one({
             "referred_user_id": verified_user_id,

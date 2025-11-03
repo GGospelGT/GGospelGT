@@ -4,15 +4,15 @@ from typing import List, Optional
 from datetime import datetime
 import logging
 
-from database import database
-from models.content import (
+from ..database import database
+from ..models.content import (
     ContentItem, ContentCreate, ContentUpdate, ContentAnalytics, 
     ContentComment, MediaFile, ContentTemplate, ContentWorkflow,
     ContentType, ContentStatus, ContentCategory, ContentVisibility,
     ContentStatistics, generate_slug, extract_template_variables, validate_content_settings
 )
-from models.admin import AdminPermission
-from routes.admin_management import get_current_admin, require_permission
+from ..models.admin import AdminPermission
+from .admin_management import get_current_admin, require_permission
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer()

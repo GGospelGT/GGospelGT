@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
-from models import QuoteCreate, Quote, QuotesResponse, Job
-from models.auth import User
-from auth.dependencies import get_current_active_user, get_current_tradesperson, get_current_homeowner
-from database import database
+from ..models import QuoteCreate, Quote, QuotesResponse, Job
+from ..models.auth import User
+from ..auth.dependencies import get_current_active_user, get_current_tradesperson, get_current_homeowner
+from ..database import database
 from datetime import datetime
 import uuid
 

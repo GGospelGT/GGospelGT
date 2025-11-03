@@ -14,60 +14,24 @@ services:
     networks:
       - servicehub-network
 
-  # Backend Service  
+  # Backend Service
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
       - "8001:8001"
+    env_file:
+      - ./backend/.env
     environment:
-      - MONGO_URL=mongodb://mongodb:27017/servicehub
       - TERMII_API_KEY=${TERMII_API_KEY}
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
       - SENDER_EMAIL=${SENDER_EMAIL}
-      - DB_NAME=servicehub
       - CORS_ORIGINS=http://localhost:3000
-    depends_on:
-      - mongodb
     volumes:
-      - ./backend:/app
+      - ./backend:/app/backend
     networks:
       - servicehub-network
-
-  # MongoDB Service
-  mongodb:
-    image: mongo:7.0
-    container_name: servicehub-mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-      - ./mongodb-init:/docker-entrypoint-initdb.d
-    environment:
-      - MONGO_INITDB_DATABASE=servicehub
-    networks:
-      - servicehub-network
-
-  # MongoDB Admin Interface (optional)
-  mongo-express:
-    image: mongo-express:1.0.2
-    container_name: servicehub-mongo-express
-    ports:
-      - "8081:8081"
-    environment:
-      - ME_CONFIG_MONGODB_SERVER=mongodb
-      - ME_CONFIG_MONGODB_PORT=27017
-      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-      - ME_CONFIG_BASICAUTH_USERNAME=admin
-      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
-    depends_on:
-      - mongodb
-    networks:
-      - servicehub-network
-
-volumes:
-  mongodb_data:
 
 networks:
   servicehub-network:

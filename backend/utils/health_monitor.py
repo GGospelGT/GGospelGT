@@ -10,7 +10,7 @@ import os
 from datetime import datetime, timedelta
 from typing import Dict, Any, List
 from fastapi import HTTPException
-from database import database
+from ..database import database
 from utils.logger import get_logger
 
 logger = get_logger('health_monitor')

@@ -1,15 +1,16 @@
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query
 from typing import List, Optional
-from models.reviews import (
+from ..models.reviews import (
     Review, ReviewCreate, ReviewUpdate, ReviewResponse, ReviewSummary,
     ReviewsListResponse, ReviewStats, ReviewType, ReviewStatus,
-    ReviewRequest, ReviewHelpful
+    ReviewRequest, ReviewHelpful, ReviewFilters,
+    AdvancedReviewSearchRequest, AdvancedReviewSearchResponse
 )
-from models.auth import User
-from models.notifications import NotificationType
-from auth.dependencies import get_current_user, get_current_homeowner, get_current_tradesperson
-from database import database
-from services.notifications import notification_service
+from ..models.auth import User
+from ..models.notifications import NotificationType
+from ..auth.dependencies import get_current_user, get_current_homeowner, get_current_tradesperson
+from ..database import database
+from ..services.notifications import notification_service
 from datetime import datetime, timedelta
 import logging
 import os

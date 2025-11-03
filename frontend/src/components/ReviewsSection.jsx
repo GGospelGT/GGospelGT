@@ -65,7 +65,12 @@ const ReviewsSection = () => {
     };
   };
 
-  const displayReviews = loading ? defaultReviews : (reviews || defaultReviews).map(transformReview);
+  // Normalize API response: ensure we always have an array to map over
+  const rawReviews = Array.isArray(reviews)
+    ? reviews
+    : (reviews?.reviews || defaultReviews);
+
+  const displayReviews = loading ? defaultReviews : rawReviews.map(transformReview);
 
   if (error) {
     console.warn('Failed to load reviews, using defaults:', error);

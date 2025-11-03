@@ -9,8 +9,8 @@ const config = {
 module.exports = {
   devServer: {
     allowedHosts: 'all',
-    host: '0.0.0.0',
-    port: 3000,
+    host: process.env.HOST || '0.0.0.0',
+    port: parseInt(process.env.PORT || '3000', 10),
     client: {
       webSocketURL: 'auto://0.0.0.0:0/ws'
     }

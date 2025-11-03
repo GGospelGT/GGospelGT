@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, Query, Depends, BackgroundTasks
 from typing import Optional
-from models import JobCreate, JobUpdate, JobCloseRequest, Job, JobsResponse
-from models.base import JobStatus
-from models.auth import User
-from models.notifications import NotificationType
-from auth.dependencies import get_current_active_user, get_current_homeowner
-from database import database
-from services.notifications import notification_service
+from ..models import JobCreate, JobUpdate, JobCloseRequest, Job, JobsResponse
+from ..models.base import JobStatus
+from ..models.auth import User
+from ..models.notifications import NotificationType
+from ..auth.dependencies import get_current_active_user, get_current_homeowner
+from ..database import database
+from ..services.notifications import notification_service
 from datetime import datetime, timedelta
 import uuid
 import logging
@@ -24,7 +24,7 @@ async def get_states_public():
     custom_states = await database.get_custom_states()
     
     # Get default states from constants
-    from models.nigerian_states import NIGERIAN_STATES
+    from ..models.nigerian_states import NIGERIAN_STATES
     
     # Combine both lists and remove duplicates
     all_states = list(set(NIGERIAN_STATES + custom_states))
@@ -40,7 +40,7 @@ async def create_job(
 ):
     """Create a new job posting"""
     try:
-        from models.nigerian_lgas import validate_lga_for_state, validate_zip_code
+        from ..models.nigerian_lgas import validate_lga_for_state, validate_zip_code
         
         # Convert to dict and prepare for database
         job_dict = job_data.dict()

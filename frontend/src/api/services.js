@@ -52,12 +52,23 @@ export const authAPI = {
 export const statsAPI = {
   getStats: async () => {
     const response = await apiClient.get('/stats');
-    return response.data;
+    const d = response.data || {};
+    // Normalize stats shape to ensure numeric fields and consistent keys
+    return {
+      ...d,
+      total_tradespeople: Number(d.total_tradespeople ?? d.totalTradespeople ?? 0),
+      total_categories: Number(d.total_categories ?? d.totalCategories ?? d.categories_count ?? 0),
+      total_reviews: Number(d.total_reviews ?? d.totalReviews ?? 0),
+    };
   },
 
   getCategories: async () => {
     const response = await apiClient.get('/stats/categories');
-    return response.data;
+    const data = response.data;
+    // Always return an array of categories
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.categories)) return data.categories;
+    return [];
   },
 };
 
@@ -265,6 +276,10 @@ export const reviewsAPI = {
 
   getFeaturedReviews: async (limit = 4) => {
     const response = await apiClient.get(`/reviews/featured?limit=${limit}`);
-    return response.data;
+    const data = response.data;
+    // Normalize to always return an array
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.reviews)) return data.reviews;
+    return [];
   },
 };

@@ -1,15 +1,19 @@
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from typing import List, Dict, Any
-from auth.dependencies import get_current_user
-from models.auth import User
-from database import database
-from models.notifications import (
-    NotificationPreferences, UpdatePreferencesRequest,
-    NotificationHistory, NotificationStatsResponse,
-    NotificationRequest, NotificationResponse,
-    NotificationType, NotificationChannel
+from ..auth.dependencies import get_current_user
+from ..models.auth import User
+from ..models.notifications import (
+    NotificationPreferences,
+    UpdatePreferencesRequest,
+    NotificationHistory,
+    NotificationStatsResponse,
+    NotificationRequest,
+    NotificationResponse,
+    NotificationType,
+    NotificationChannel,
 )
-from services.notifications import notification_service
+from ..database import database
+from ..services.notifications import notification_service
 import logging
 import os
 

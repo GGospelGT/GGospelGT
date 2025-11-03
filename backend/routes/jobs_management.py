@@ -6,16 +6,16 @@ import logging
 import uuid
 import os
 
-from database import database
-from models.content import (
+from ..database import database
+from ..models.content import (
     JobPosting, JobApplication, JobApplicationCreate, JobApplicationUpdate,
     JobDepartment, JobType, JobExperienceLevel, ContentStatus,
     JobStatistics, generate_slug
 )
-from models.admin import AdminPermission
-from models.notifications import NotificationType
-from routes.admin_management import get_current_admin, require_permission
-from services.notifications import notification_service
+from ..models.admin import AdminPermission
+from ..models.notifications import NotificationType
+from .admin_management import get_current_admin, require_permission
+from ..services.notifications import notification_service
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer()

@@ -6,9 +6,9 @@ from models import (
 )
 from models.auth import User
 from models.notifications import NotificationType
-from auth.dependencies import get_current_tradesperson, get_current_homeowner, get_current_active_user
-from database import database
-from services.notifications import notification_service
+from ..auth.dependencies import get_current_tradesperson, get_current_homeowner, get_current_active_user
+from ..database import database
+from ..services.notifications import notification_service
 from datetime import datetime
 import uuid
 import logging

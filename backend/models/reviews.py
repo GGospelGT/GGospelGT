@@ -163,3 +163,37 @@ class ReviewInvitation(BaseModel):
     tradesperson_reviewed: bool = Field(default=False)
     expires_at: datetime = Field(..., description="When invitation expires")
     reminder_sent: bool = Field(default=False)
+
+# -----------------------------
+# Advanced search model additions
+# -----------------------------
+class ReviewFilters(BaseModel):
+    """Filters for advanced review search"""
+    review_type: Optional[ReviewType] = Field(None, description="Type of review")
+    status: Optional[ReviewStatus] = Field(None, description="Status of review")
+    min_rating: Optional[int] = Field(None, ge=1, le=5, description="Minimum rating")
+    max_rating: Optional[int] = Field(None, ge=1, le=5, description="Maximum rating")
+    category: Optional[ReviewCategory] = Field(None, description="Category filter")
+    reviewer_id: Optional[str] = Field(None, description="Filter by reviewer ID")
+    reviewee_id: Optional[str] = Field(None, description="Filter by reviewee ID")
+    would_recommend: Optional[bool] = Field(None, description="Would recommend flag")
+    has_photos: Optional[bool] = Field(None, description="Whether review has photos")
+    created_after: Optional[datetime] = Field(None, description="Created after date")
+    created_before: Optional[datetime] = Field(None, description="Created before date")
+    search_query: Optional[str] = Field(None, description="Free-text search query")
+    sort_by: Optional[str] = Field("created_at", description="Sort field")
+    sort_order: Optional[str] = Field("desc", description="Sort order: asc or desc")
+
+class AdvancedReviewSearchRequest(BaseModel):
+    """Advanced review search request with filters and pagination"""
+    filters: Optional[ReviewFilters] = Field(None, description="Filters to apply")
+    page: int = Field(1, ge=1, description="Page number")
+    limit: int = Field(10, ge=1, le=100, description="Items per page")
+
+class AdvancedReviewSearchResponse(BaseModel):
+    """Advanced review search response with results and metadata"""
+    reviews: List[Review] = Field(default=[], description="List of reviews matching filters")
+    total: int = Field(0, description="Total number of matching reviews")
+    page: int = Field(1, description="Current page")
+    limit: int = Field(10, description="Items per page")
+    total_pages: int = Field(0, description="Total pages")

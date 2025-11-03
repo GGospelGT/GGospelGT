@@ -7,13 +7,13 @@ import os
 from PIL import Image
 import io
 
-from auth.dependencies import get_current_user, get_current_tradesperson
-from database import database
-from models.base import (
+from ..auth.dependencies import get_current_user, get_current_tradesperson
+from ..database import database
+from ..models.base import (
     Wallet, WalletTransaction, WalletFundingRequest, WalletResponse,
-    BankDetails, TransactionType, TransactionStatus
+    TransactionType, TransactionStatus, BankDetails
 )
-from models.auth import User
+from ..models.auth import User
 
 router = APIRouter(prefix="/api/wallet", tags=["wallet"])
 

@@ -57,6 +57,16 @@ const RoleGuard = ({ allowedRoles, children }) => {
   if (loading) {
     return <div style={{ padding: 24 }}>Loading...</div>;
   }
+
+  // Allow admin route to render regardless of regular AuthContext state.
+  // AdminDashboard itself handles login and stores admin_token/admin_info for subsequent API calls.
+  const isAdminRoute = typeof window !== 'undefined' && window.location.pathname === '/admin';
+  const hasAdminToken = typeof window !== 'undefined' && !!localStorage.getItem('admin_token');
+  if (isAdminRoute) {
+    // If admin token exists, proceed; otherwise, render AdminDashboard to show the admin login form.
+    return children;
+  }
+
   if (!isAuthenticated()) {
     return <Navigate to="/join-for-free" replace />;
   }

@@ -1,11 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
-import sys
-import os
-backend_dir = os.path.dirname(os.path.dirname(__file__))
-sys.path.insert(0, backend_dir)
-import models
-from database import database
+from .. import models
+from ..database import database
 from datetime import datetime
 import uuid
 
@@ -52,6 +48,18 @@ async def get_tradespeople(
 ):
     """Get tradespeople with filters and search"""
     try:
+        # Gracefully handle degraded mode when database is not connected
+        if not getattr(database, "connected", False) or getattr(database, "database", None) is None:
+            total_pages = 0
+            return {
+                "tradespeople": [],
+                "data": [],
+                "total": 0,
+                "total_pages": total_pages,
+                "current_page": page,
+                "limit": limit
+            }
+
         skip = (page - 1) * limit
         
         # Build filters for users collection where role is tradesperson
@@ -97,8 +105,8 @@ async def get_tradespeople(
         else:
             sort_criteria = [("average_rating", -1)]
         
-        # Get tradespeople from users collection
-        users_collection = database.database.users
+        # Get tradespeople from users collection using guarded accessor
+        users_collection = database.users_collection
         cursor = users_collection.find(filters)
         
         # Apply sorting
@@ -116,8 +124,8 @@ async def get_tradespeople(
         tradespeople = []
         for tp in tradespeople_raw:
             # Calculate additional stats if needed
-            portfolio_count = await database.database.portfolio.count_documents({"tradesperson_id": tp.get("id", "")})
-            reviews_count = await database.database.reviews.count_documents({"reviewee_id": tp.get("id", "")})
+            portfolio_count = await database.portfolio_collection.count_documents({"tradesperson_id": tp.get("id", "")})
+            reviews_count = await database.reviews_collection.count_documents({"reviewee_id": tp.get("id", "")})
             completed_jobs = await database.database.jobs.count_documents({
                 "assigned_tradesperson_id": tp.get("id", ""),
                 "status": "completed"
@@ -131,7 +139,7 @@ async def get_tradespeople(
                     {"$match": {"reviewee_id": tp.get("id", "")}},
                     {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}}}
                 ]
-                rating_result = await database.database.reviews.aggregate(reviews_pipeline).to_list(length=1)
+                rating_result = await database.reviews_collection.aggregate(reviews_pipeline).to_list(length=1)
                 if rating_result:
                     avg_rating = round(rating_result[0]["avg_rating"], 1)
             
@@ -184,14 +192,18 @@ async def get_tradespeople(
 async def get_tradesperson(tradesperson_id: str):
     """Get a specific tradesperson by ID"""
     try:
+        # Gracefully handle degraded mode when database is not connected
+        if not getattr(database, "connected", False) or getattr(database, "database", None) is None:
+            raise HTTPException(status_code=503, detail="Database unavailable")
+
         # Get user from users collection where role is tradesperson
         user = await database.get_user_by_id(tradesperson_id)
         if not user or user.get("role") != "tradesperson":
             raise HTTPException(status_code=404, detail="Tradesperson not found")
         
         # Calculate additional stats
-        portfolio_count = await database.database.portfolio.count_documents({"tradesperson_id": tradesperson_id})
-        reviews_count = await database.database.reviews.count_documents({"reviewee_id": tradesperson_id})
+        portfolio_count = await database.portfolio_collection.count_documents({"tradesperson_id": tradesperson_id})
+        reviews_count = await database.reviews_collection.count_documents({"reviewee_id": tradesperson_id})
         completed_jobs = await database.database.jobs.count_documents({
             "assigned_tradesperson_id": tradesperson_id,
             "status": "completed"
@@ -205,12 +217,12 @@ async def get_tradesperson(tradesperson_id: str):
                 {"$match": {"reviewee_id": tradesperson_id}},
                 {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}}}
             ]
-            rating_result = await database.database.reviews.aggregate(reviews_pipeline).to_list(length=1)
+            rating_result = await database.reviews_collection.aggregate(reviews_pipeline).to_list(length=1)
             if rating_result:
                 avg_rating = round(rating_result[0]["avg_rating"], 1)
         
         # Get recent portfolio items (limit 6 for preview)
-        portfolio_items = await database.database.portfolio.find(
+        portfolio_items = await database.portfolio_collection.find(
             {"tradesperson_id": tradesperson_id, "is_public": True}
         ).sort("created_at", -1).limit(6).to_list(length=6)
         
@@ -226,7 +238,7 @@ async def get_tradesperson(tradesperson_id: str):
             })
         
         # Get recent reviews (limit 5 for preview)
-        recent_reviews = await database.database.reviews.find(
+        recent_reviews = await database.reviews_collection.find(
             {"reviewee_id": tradesperson_id}
         ).sort("created_at", -1).limit(5).to_list(length=5)
         

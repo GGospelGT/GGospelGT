@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import uuid
 import json
 import os
-from models.notifications import (
+from ..models.notifications import (
     NotificationType, NotificationChannel, NotificationStatus,
     Notification, NotificationTemplate, NotificationPreferences
 )

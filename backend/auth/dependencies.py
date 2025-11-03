@@ -1,14 +1,14 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
-from models.auth import User, UserRole, UserStatus
-from auth.security import verify_token
-from database import database
+from ..models.auth import User, UserRole, UserStatus
+from ..auth.security import verify_token
+from ..database import database
 # Additional imports for admin auth
 import os
 import jwt
 from datetime import datetime, timedelta
-from models.admin import AdminRole, AdminPermission, get_admin_permissions
+from ..models.admin import AdminRole, AdminPermission, get_admin_permissions
 
 security = HTTPBearer()
 
@@ -28,16 +28,46 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except HTTPException:
         raise
     
-    # Get user from database
-    user_data = await database.get_user_by_id(user_id)
-    if user_data is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    # If DB is connected, load from database
+    if getattr(database, "connected", False):
+        user_data = await database.get_user_by_id(user_id)
+        if user_data is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return User(**user_data)
     
-    return User(**user_data)
+    # Degraded mode: synthesize user from token claims
+    role = payload.get("role")
+    status_value = payload.get("status")
+    try:
+        role_enum = UserRole(role) if role else UserRole.HOMEOWNER
+    except Exception:
+        role_enum = UserRole.HOMEOWNER
+    try:
+        status_enum = UserStatus(status_value) if status_value else UserStatus.ACTIVE
+    except Exception:
+        status_enum = UserStatus.ACTIVE
+
+    synthetic = User(
+        id=user_id,
+        name=payload.get("name") or "New User",
+        email=payload.get("email") or "user@example.com",
+        phone=payload.get("phone") or "+2340000000000",
+        role=role_enum,
+        status=status_enum,
+        location=payload.get("location") or "",
+        postcode=payload.get("postcode") or "",
+        trade_categories=payload.get("trade_categories"),
+        experience_years=payload.get("experience_years"),
+        company_name=payload.get("company_name"),
+        description=payload.get("description"),
+        certifications=payload.get("certifications"),
+        # Keep review/job stats defaulted by model
+    )
+    return synthetic
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
     """Get current authenticated and active user."""

@@ -8,8 +8,8 @@ import jwt
 import secrets
 import string
 
-from database import database
-from models.admin import (
+from ..database import database
+from ..models.admin import (
     Admin, AdminCreate, AdminUpdate, AdminLogin, AdminLoginResponse,
     AdminPasswordChange, AdminPasswordReset, AdminActivity, AdminActivityType,
     AdminRole, AdminStatus, AdminPermission, get_admin_permissions, has_permission, can_manage_role
@@ -35,6 +35,20 @@ async def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(
         
         if not admin_id:
             raise HTTPException(status_code=401, detail="Invalid token")
+        
+        # Degraded mode: synthesize admin from token without DB access
+        if not getattr(database, "connected", False):
+            return {
+                "id": admin_id,
+                "username": payload.get("username") or "superadmin",
+                "email": "admin@servicehub.co",
+                "full_name": "Super Administrator",
+                "role": payload.get("role") or AdminRole.SUPER_ADMIN.value,
+                "status": AdminStatus.ACTIVE.value,
+                "must_change_password": False,
+                "last_login": None,
+                "created_at": datetime.utcnow(),
+            }
         
         admin = await database.get_admin_by_id(admin_id)
         if not admin:
@@ -109,13 +123,56 @@ async def log_admin_activity(
         user_agent=request.headers.get("user-agent") if request else None
     )
     
-    await database.create_admin_activity(activity.dict())
+    # Guard logging when DB is disconnected (degraded mode)
+    if getattr(database, "connected", False):
+        await database.create_admin_activity(activity.dict())
+    else:
+        logger.warning("Skipping admin activity logging due to database not connected")
 
 # Routes
 
 @router.post("/login", response_model=AdminLoginResponse)
 async def admin_login(login_data: AdminLogin, request: Request):
     """Admin login with role-based authentication"""
+    
+    # Degraded mode: allow emergency superadmin login without DB access
+    if not getattr(database, "connected", False):
+        if login_data.username == "admin" and login_data.password == "servicehub2024":
+            admin = {
+                "id": "super-admin-ephemeral",
+                "username": "superadmin",
+                "email": "admin@servicehub.co",
+                "full_name": "Super Administrator",
+                "role": AdminRole.SUPER_ADMIN.value,
+                "status": AdminStatus.ACTIVE.value,
+                "permissions": [perm.value for perm in get_admin_permissions(AdminRole.SUPER_ADMIN)],
+                "must_change_password": False,
+                "created_at": datetime.utcnow(),
+                "last_login": None
+            }
+            # Create access token
+            access_token = create_access_token(admin["id"], admin["username"], admin["role"])
+            admin_role = AdminRole(admin["role"])
+            permissions = [perm.value for perm in get_admin_permissions(admin_role)]
+            admin_response = {
+                "id": admin["id"],
+                "username": admin["username"],
+                "email": admin["email"],
+                "full_name": admin["full_name"],
+                "role": admin["role"],
+                "status": admin["status"],
+                "must_change_password": admin.get("must_change_password", False),
+                "last_login": admin.get("last_login"),
+                "created_at": admin["created_at"]
+            }
+            return AdminLoginResponse(
+                access_token=access_token,
+                expires_in=8 * 3600,
+                admin=admin_response,
+                permissions=permissions
+            )
+        else:
+            raise HTTPException(status_code=503, detail="Database offline; only emergency admin login is available")
     
     # First check if it's the legacy admin credentials for backward compatibility
     if login_data.username == "admin" and login_data.password == "servicehub2024":
@@ -165,7 +222,8 @@ async def admin_login(login_data: AdminLogin, request: Request):
             raise HTTPException(status_code=401, detail="Invalid username or password")
     
     # Update login information
-    await database.update_admin_login(admin["id"])
+    if getattr(database, "connected", False):
+        await database.update_admin_login(admin["id"])
     
     # Create access token (centralized)
     access_token = create_access_token(admin["id"], admin["username"], admin["role"])
@@ -242,6 +300,19 @@ async def get_all_admins(
 ):
     """Get all admins (Super Admin only)"""
     
+    # Degraded mode: avoid database calls and return safe fallback
+    if not getattr(database, "connected", True):
+        return {
+            "admins": [],
+            "pagination": {
+                "skip": skip,
+                "limit": limit,
+                "total": 0
+            },
+            "degraded_mode": True,
+            "message": "Database unavailable; returning empty admin list"
+        }
+    
     admins = await database.get_all_admins(skip=skip, limit=limit, role=role, status=status)
     total_count = await database.get_admins_count(role=role, status=status)
     
@@ -267,6 +338,10 @@ async def create_admin(
     request: Request = None
 ):
     """Create new admin (Super Admin only)"""
+    
+    # Degraded mode: reject writes when database is unavailable
+    if not getattr(database, "connected", True):
+        raise HTTPException(status_code=503, detail="Database unavailable; write operations are disabled in degraded mode")
     
     # Check if admin can manage this role
     current_admin_role = AdminRole(admin["role"])
@@ -331,6 +406,10 @@ async def update_admin(
 ):
     """Update admin (Super Admin only)"""
     
+    # Degraded mode: reject writes when database is unavailable
+    if not getattr(database, "connected", True):
+        raise HTTPException(status_code=503, detail="Database unavailable; write operations are disabled in degraded mode")
+    
     # Get target admin
     target_admin = await database.get_admin_by_id(admin_id)
     if not target_admin:
@@ -387,6 +466,10 @@ async def delete_admin(
 ):
     """Delete admin (Super Admin only)"""
     
+    # Degraded mode: reject writes when database is unavailable
+    if not getattr(database, "connected", True):
+        raise HTTPException(status_code=503, detail="Database unavailable; write operations are disabled in degraded mode")
+    
     # Prevent self-deletion
     if admin_id == admin["id"]:
         raise HTTPException(status_code=400, detail="Cannot delete your own account")
@@ -432,6 +515,10 @@ async def reset_admin_password(
     request: Request = None
 ):
     """Reset admin password (Super Admin only)"""
+    
+    # Degraded mode: reject writes when database is unavailable
+    if not getattr(database, "connected", True):
+        raise HTTPException(status_code=503, detail="Database unavailable; write operations are disabled in degraded mode")
     
     # Get target admin
     target_admin = await database.get_admin_by_id(admin_id)
@@ -479,6 +566,10 @@ async def change_password(
 ):
     """Change own password"""
     
+    # Degraded mode: reject writes when database is unavailable
+    if not getattr(database, "connected", True):
+        raise HTTPException(status_code=503, detail="Database unavailable; write operations are disabled in degraded mode")
+    
     # Verify current password
     if not verify_password(password_data.current_password, admin["password_hash"]):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
@@ -512,7 +603,20 @@ async def get_admin_roles(admin: dict = Depends(get_current_admin)):
     
     current_admin_role = AdminRole(admin["role"])
     
-    # Return roles that current admin can assign
+    # Degraded mode: return available roles based on static permissions only
+    if not getattr(database, "connected", True):
+        available_roles = []
+        for role in AdminRole:
+            if can_manage_role(current_admin_role, role) or role == current_admin_role:
+                permissions = [perm.value for perm in get_admin_permissions(role)]
+                available_roles.append({
+                    "role": role.value,
+                    "name": role.value.replace("_", " ").title(),
+                    "permissions": permissions,
+                    "can_assign": can_manage_role(current_admin_role, role)
+                })
+        return {"roles": available_roles, "degraded_mode": True}
+    
     available_roles = []
     for role in AdminRole:
         if can_manage_role(current_admin_role, role) or role == current_admin_role:
@@ -526,20 +630,6 @@ async def get_admin_roles(admin: dict = Depends(get_current_admin)):
     
     return {"roles": available_roles}
 
-@router.get("/permissions")
-async def get_admin_permissions_list(admin: dict = Depends(get_current_admin)):
-    """Get all available permissions"""
-    
-    permissions = []
-    for perm in AdminPermission:
-        permissions.append({
-            "permission": perm.value,
-            "name": perm.value.replace("_", " ").title(),
-            "description": f"Allows {perm.value.replace('_', ' ')}"
-        })
-    
-    return {"permissions": permissions}
-
 @router.get("/activity")
 async def get_admin_activity(
     skip: int = 0,
@@ -549,6 +639,14 @@ async def get_admin_activity(
     admin: dict = Depends(require_permission(AdminPermission.MANAGE_ADMINS))
 ):
     """Get admin activity logs"""
+    
+    # Degraded mode: no DB access, return empty activity list
+    if not getattr(database, "connected", True):
+        return {
+            "activities": [],
+            "pagination": {"skip": skip, "limit": limit, "total": 0},
+            "degraded_mode": True
+        }
     
     activities = await database.get_admin_activities(
         skip=skip, limit=limit, admin_id=admin_id, activity_type=activity_type
@@ -567,6 +665,24 @@ async def get_admin_activity(
 @router.get("/stats")
 async def get_admin_stats(admin: dict = Depends(require_permission(AdminPermission.VIEW_SYSTEM_STATS))):
     """Get admin statistics"""
+    
+    # Degraded mode: return minimal stats without DB
+    if not getattr(database, "connected", True):
+        return {
+            "admin_stats": {
+                "total_admins": 0,
+                "active_admins": 0,
+                "recent_activities": 0,
+                "total_logins": admin.get("login_count", 0)
+            },
+            "current_admin": {
+                "username": admin["username"],
+                "role": admin["role"],
+                "login_count": admin.get("login_count", 0),
+                "last_login": admin.get("last_login")
+            },
+            "degraded_mode": True
+        }
     
     stats = await database.get_admin_stats()
     

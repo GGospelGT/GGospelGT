@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent } from '../ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
@@ -28,6 +28,10 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login', defaultTab = 'trade
         className="max-w-4xl max-h-[90vh] overflow-y-auto p-0"
         onPointerDownOutside={(e) => { e.preventDefault(); }}
       >
+        {/* Hidden title to satisfy accessibility requirements */}
+        <DialogTitle className="sr-only">
+          {mode === 'login' ? 'Login' : mode === 'forgotPassword' ? 'Forgot Password' : 'Sign Up'}
+        </DialogTitle>
         {mode === 'login' ? (
           <LoginForm 
             onClose={handleClose} 

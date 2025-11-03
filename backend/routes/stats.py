@@ -1,10 +1,6 @@
 from fastapi import APIRouter, HTTPException
-import sys
-import os
-backend_dir = os.path.dirname(os.path.dirname(__file__))
-sys.path.insert(0, backend_dir)
-import models
-from database import database
+from .. import models
+from ..database import database
 
 router = APIRouter(prefix="/api/stats", tags=["statistics"])
 

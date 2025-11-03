@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
-from models.messages import (
-    Message, MessageCreate, Conversation, ConversationCreate, 
+from ..models.messages import (
+    Conversation, ConversationCreate, Message, MessageCreate,
     ConversationList, MessageList
 )
-from models.auth import User
-from models.notifications import NotificationType
-from auth.dependencies import get_current_active_user, get_current_homeowner
-from database import database
-from services.notifications import notification_service
+from ..models.auth import User
+from ..models.notifications import NotificationType
+from ..auth.dependencies import get_current_active_user, get_current_homeowner
+from ..database import database
+from ..services.notifications import notification_service
 from datetime import datetime
 import uuid
 import logging

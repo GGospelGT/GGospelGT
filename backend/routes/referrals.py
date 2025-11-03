@@ -6,9 +6,9 @@ import uuid
 from PIL import Image
 import io
 
-from auth.dependencies import get_current_user
-from database import database
-from models.base import (
+from ..auth.dependencies import get_current_user
+from ..database import database
+from ..models.base import (
     ReferralStats, DocumentUpload, VerificationSubmission,
     DocumentType, WithdrawalRequest, WalletResponseWithReferrals
 )

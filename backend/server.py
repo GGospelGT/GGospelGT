@@ -9,20 +9,31 @@ from datetime import datetime
 import uuid
 import asyncio
 
-# Import database and routes
-from database import database
-from routes import jobs, tradespeople, quotes, reviews, stats, auth
-from routes.admin_management import router as admin_management_router
-from routes.content import router as content_router
-from routes.public_content import router as public_content_router
-from routes.jobs_management import router as jobs_management_router
+# Import database and routes (support both package and script execution)
+try:
+    from .database import database
+    from .routes import jobs, tradespeople, quotes, reviews, stats, auth
+    from .routes.admin_management import router as admin_management_router
+    from .routes.content import router as content_router
+    from .routes.public_content import router as public_content_router
+    from .routes.jobs_management import router as jobs_management_router
+except ImportError:
+    from database import database
+    from routes import jobs, tradespeople, quotes, reviews, stats, auth
+    from routes.admin_management import router as admin_management_router
+    from routes.content import router as content_router
+    from routes.public_content import router as public_content_router
+    from routes.jobs_management import router as jobs_management_router
 
 # Add database inspection endpoint
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 
 # Import production logging system
-from utils.logger import get_logger, log_request
+try:
+    from .utils.logger import get_logger, log_request
+except ImportError:
+    from utils.logger import get_logger, log_request
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -43,6 +54,9 @@ async def lifespan(app: FastAPI):
         if getattr(database, 'connected', False):
             logger.info("Connected to MongoDB")
         else:
+            allow_degraded = os.getenv("ALLOW_DEGRADED_MODE", "true").lower() in ("1", "true", "yes")
+            if not allow_degraded:
+                raise RuntimeError("Database connection unavailable and ALLOW_DEGRADED_MODE=false; aborting startup")
             logger.warning("Database connection unavailable; running in degraded mode")
     except Exception as e:
         logger.error(f"Database connect failed during startup: {e}")
@@ -114,7 +128,7 @@ async def health_check():
 @api_router.get("/api/health/detailed")
 async def detailed_health_check():
     """Comprehensive health check with system metrics."""
-    from utils.health_monitor import health_monitor
+    from .utils.health_monitor import health_monitor
     try:
         health_data = await health_monitor.get_system_health()
         return health_data
@@ -125,7 +139,7 @@ async def detailed_health_check():
 @api_router.get("/api/health/database")
 async def database_health_check():
     """Database-specific health check."""
-    from utils.health_monitor import health_monitor
+    from .utils.health_monitor import health_monitor
     try:
         db_health = await health_monitor.get_database_health()
         return db_health
@@ -136,7 +150,7 @@ async def database_health_check():
 @api_router.get("/api/health/history")
 async def health_history():
     """Get recent health check history."""
-    from utils.health_monitor import health_monitor
+    from .utils.health_monitor import health_monitor
     try:
         history = health_monitor.get_health_history()
         return {"history": history, "count": len(history)}
@@ -185,6 +199,23 @@ async def get_metrics():
 async def get_database_info():
     """Get database information for mobile access"""
     try:
+        # If database is unavailable, return safe defaults
+        if not database.connected or database.database is None:
+            return {
+                "database": "servicehub (degraded mode)",
+                "collections": {
+                    "users": 0,
+                    "jobs": 0,
+                    "interests": 0,
+                    "reviews": 0,
+                    "messages": 0,
+                    "notifications": 0
+                },
+                "sample_data": {},
+                "timestamp": str(datetime.utcnow()),
+                "mobile_access": True
+            }
+
         # Get database instance
         db = database.database
         
@@ -245,23 +276,25 @@ async def get_database_info():
 async def get_users_summary():
     """Get user statistics for mobile viewing"""
     try:
-        db = database.database
-        
-        # Count users by role
-        total_users = await db.users.count_documents({})
-        homeowners = await db.users.count_documents({"role": "homeowner"})
-        tradespeople = await db.users.count_documents({"role": "tradesperson"})
-        
-        # Get recent users
+        # Ensure database is available
+        if not getattr(database, "connected", False) or getattr(database, "database", None) is None:
+            raise HTTPException(status_code=503, detail="Database unavailable")
+
+        # Count users by role using database helper methods
+        total_users = await database.get_total_users_count()
+        homeowners = await database.get_users_count_by_role("homeowner")
+        tradespeople = await database.get_users_count_by_role("tradesperson")
+
+        # Get recent users from users collection
         recent_users = []
-        async for user in db.users.find({}, {"password_hash": 0}).sort("created_at", -1).limit(5):
+        async for user in database.users_collection.find({}, {"password_hash": 0}).sort("created_at", -1).limit(5):
             recent_users.append({
                 "name": user.get("name"),
                 "email": user.get("email"),
                 "role": user.get("role"),
                 "created_at": str(user.get("created_at"))
             })
-        
+
         return {
             "total_users": total_users,
             "homeowners": homeowners,
@@ -269,6 +302,8 @@ async def get_users_summary():
             "recent_users": recent_users,
             "mobile_friendly": True
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -305,7 +340,7 @@ async def get_jobs_summary():
         raise HTTPException(status_code=500, detail=str(e))
 
 # Include route modules
-from routes import auth, jobs, tradespeople, quotes, reviews, stats, portfolio, interests, notifications, reviews_advanced, wallet, admin, referrals, messages
+from .routes import auth, jobs, tradespeople, quotes, reviews, stats, portfolio, interests, notifications, reviews_advanced, wallet, admin, referrals, messages
 
 app.include_router(auth.router)
 app.include_router(jobs.router)

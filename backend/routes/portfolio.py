@@ -9,9 +9,9 @@ from PIL import Image
 import io
 
 from models import PortfolioItemCreate, PortfolioItem, PortfolioResponse, PortfolioItemCategory
-from models.auth import User
-from auth.dependencies import get_current_tradesperson, get_current_active_user
-from database import database
+from ..models.auth import User
+from ..auth.dependencies import get_current_tradesperson, get_current_active_user
+from ..database import database
 
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 

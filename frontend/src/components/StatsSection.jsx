@@ -29,22 +29,28 @@ const StatsSection = () => {
   ];
 
   // Use real stats if available, otherwise use defaults
-  const displayStats = stats ? [
+  const hasValidStats = stats && (
+    typeof stats.total_tradespeople !== 'undefined' ||
+    typeof stats.total_categories !== 'undefined' ||
+    typeof stats.total_reviews !== 'undefined'
+  );
+
+  const displayStats = hasValidStats ? [
     {
       icon: Users,
-      number: stats.total_tradespeople.toLocaleString(),
+      number: Number(stats.total_tradespeople ?? 0).toLocaleString(),
       label: 'registered tradespeople',
       color: '#2F8140'
     },
     {
       icon: Wrench,
-      number: `${stats.total_categories}+`,
+      number: `${Number(stats.total_categories ?? 0)}+`,
       label: 'trade categories',
       color: '#121E3C'
     },
     {
       icon: Star,
-      number: stats.total_reviews.toLocaleString(),
+      number: Number(stats.total_reviews ?? 0).toLocaleString(),
       label: 'customer reviews',
       color: '#2F8140'
     }

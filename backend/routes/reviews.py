@@ -6,11 +6,11 @@ import logging
 backend_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, backend_dir)
 import models
-from models.reviews import Review as AdvancedReview
-from database import database
+from ..models.reviews import Review as AdvancedReview
+from ..database import database
 from datetime import datetime
 import uuid
-from auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +117,17 @@ async def get_my_reviews(
 ):
     """Get reviews written by current user"""
     try:
+        # If database is not connected, return empty response
+        if not database.connected or database.database is None:
+            total = 0
+            total_pages = 0
+            return {
+                "reviews": [],
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "total_pages": total_pages
+            }
         # Get reviews written by current user
         skip = (page - 1) * limit
         
@@ -160,6 +171,17 @@ async def get_received_reviews(
 ):
     """Get reviews received by current tradesperson"""
     try:
+        # If database is not connected, return empty response
+        if not database.connected or database.database is None:
+            total = 0
+            total_pages = 0
+            return {
+                "reviews": [],
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "total_pages": total_pages
+            }
         # Only allow tradespeople to access this endpoint
         if current_user.role != 'tradesperson':
             raise HTTPException(
