@@ -136,7 +136,7 @@ const HelpFAQsPage = () => {
       },
       {
         question: "What are the bank details for funding my wallet?",
-        answer: "Bank: Kuda Bank | Account Name: Francis Erayefa Samuel | Account Number: 1100023164. Always upload your payment proof after transferring to ensure quick processing."
+        answer: "Bank: Kuda Bank | Account Name: ServiceHub Limited | Account Number: 3002912005. Always upload your payment proof after transferring to ensure quick processing."
       },
       {
         question: "Is there a minimum amount I can add to my wallet?",

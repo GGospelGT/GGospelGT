@@ -430,8 +430,8 @@ class JobAccessFeeUpdate(BaseModel):
 # Bank Details Model for Frontend
 class BankDetails(BaseModel):
     bank_name: str = "Kuda Bank"
-    account_name: str = "Francis Erayefa Samuel"
-    account_number: str = "1100023164"
+    account_name: str = "ServiceHub Limited"
+    account_number: str = "3002912005"
 
 # Referral System Models
 class ReferralStatus(str, Enum):
