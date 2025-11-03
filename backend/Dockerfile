@@ -20,11 +20,12 @@ COPY requirements.txt .
 RUN python -m pip install --upgrade pip && \
     pip install --no-cache-dir --default-timeout=120 -r requirements.txt
 
-# Copy source code into /app so 'backend' is on sys.path
-COPY . .
+# Copy source code into /app/backend so the package path 'backend.server' resolves
+COPY . /app/backend
 
 # Expose port
 EXPOSE 8001
 
-# Start the application via uvicorn using package path
+# Start the application via uvicorn using package path; with WORKDIR=/app and code in /app/backend,
+# Python can import 'backend.server' successfully
 CMD ["uvicorn", "backend.server:app", "--host", "0.0.0.0", "--port", "8001"]
