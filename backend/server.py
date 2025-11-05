@@ -106,11 +106,19 @@ async def log_requests(request: Request, call_next):
 # Create a router without prefix for health endpoints
 api_router = APIRouter()
 
-# Add CORS middleware
+# Add CORS middleware (configurable via environment variable)
+# ALLOWED_ORIGINS can be a comma-separated list of origins, e.g.
+# "https://my-servicehub.vercel.app, http://localhost:3001"
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "*")
+if allowed_origins_env.strip() == "*" or allowed_origins_env.strip() == "":
+    allowed_origins = ["*"]
+else:
+    allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

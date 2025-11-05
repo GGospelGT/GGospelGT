@@ -834,7 +834,8 @@ async def request_password_reset(request_data: PasswordResetRequest):
         try:
             # Get frontend URL from environment
             frontend_url = os.environ.get('FRONTEND_URL', 'https://servicehub.ng')
-            reset_link = f"{frontend_url}/reset-password?token={reset_token}"
+            # Normalize to avoid double slashes when env has trailing '/'
+            reset_link = f"{frontend_url.rstrip('/')}/reset-password?token={reset_token}"
             
             # Initialize email service
             email_service = None

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+﻿import React, { useEffect } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./components/HomePage";
@@ -35,6 +35,7 @@ import HelpCentrePage from "./pages/HelpCentrePage";
 import BlogPage from "./pages/BlogPage";
 import CareersPage from "./pages/CareersPage";
 import TradespersonRegistrationDemo from "./pages/TradespersonRegistrationDemo";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -125,10 +126,8 @@ function App() {
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/blog/:slug" element={<BlogPage />} />
               <Route path="/careers" element={<CareersPage />} />
-              <Route path="/tradesperson-registration-demo" element={<TradespersonRegistrationDemo />} />
-            </Routes>
-            <Toaster />
-            <OfflineIndicator />
+              <Route path="/tradesperson-registration-demo" element={<TradespersonRegistrationDemo />} />              <Route path="/reset-password" element={<ResetPasswordPage />} />            </Routes>            <Toaster />
+
           </BrowserRouter>
         </AuthProvider>
       </ErrorBoundary>
@@ -137,3 +136,8 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
