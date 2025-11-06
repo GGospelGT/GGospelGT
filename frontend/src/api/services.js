@@ -178,6 +178,12 @@ export const jobsAPI = {
     return response.data;
   },
 
+  // Text-based search that supports string location (e.g., state names)
+  searchJobsText: async (params = {}) => {
+    const response = await apiClient.get('/jobs/search-text', { params });
+    return response.data;
+  },
+
   updateJob: async (jobId, jobData) => {
     const response = await apiClient.put(`/jobs/${jobId}`, jobData);
     return response.data;

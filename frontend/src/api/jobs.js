@@ -68,6 +68,12 @@ export const jobsAPI = {
     return response.data;
   },
 
+  // Search jobs using text query and string location
+  searchJobsText: async (searchParams = {}) => {
+    const response = await apiClient.get('/jobs/search-text', { params: searchParams });
+    return response.data;
+  },
+
   // Get jobs by category
   getJobsByCategory: async (category, params = {}) => {
     const response = await apiClient.get(`/jobs/category/${category}`, { params });

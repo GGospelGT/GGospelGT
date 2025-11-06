@@ -129,7 +129,7 @@ const HeroSection = () => {
     
     try {
       // Search for existing jobs
-      const results = await jobsAPI.searchJobs({
+      const results = await jobsAPI.searchJobsText({
         q: job,
         location: location,
         limit: 10

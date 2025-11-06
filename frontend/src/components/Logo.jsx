@@ -3,7 +3,7 @@ import React from 'react';
 const Logo = ({ size = 'medium', variant = 'light' }) => {
   const sizes = {
     small: { container: 'px-2 py-1', iconBox: 'w-7 h-7', iconPx: 24, text: 'text-sm' },
-    medium: { container: 'px-3 py-2', iconBox: 'w-9 h-9', iconPx: 28, text: 'text-lg' },
+    medium: { container: 'px-3 py-2', iconBox: 'w-10 h-10', iconPx: 32, text: 'text-lg' },
     large: { container: 'px-4 py-3', iconBox: 'w-11 h-11', iconPx: 32, text: 'text-xl' }
   };
 
@@ -38,12 +38,12 @@ const Logo = ({ size = 'medium', variant = 'light' }) => {
       {/* Wordmark */}
       <div className="flex items-center">
         <span
-          className={`${currentSize.text} font-bold font-montserrat`}
+          className={`${currentSize.text} font-extrabold font-montserrat`}
           style={{ color: variant === 'dark' ? 'white' : '#121E3C' }}
         >
           Service
         </span>
-        <span className={`${currentSize.text} font-bold font-montserrat`} style={{ color: '#2F8140' }}>
+        <span className={`${currentSize.text} font-extrabold font-montserrat`} style={{ color: '#2F8140' }}>
           Hub
         </span>
       </div>
