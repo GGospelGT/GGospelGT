@@ -69,13 +69,6 @@ const TradeCategoriesPage = () => {
       popular: true,
       serviceCount: "350+"
     },
-    {
-      name: "Cleaning",
-      description: "Professional cleaning services for homes, offices, and commercial spaces",
-      icon: "🧽",
-      popular: true,
-      serviceCount: "250+"
-    },
     
     // Column 2
     {
@@ -119,13 +112,6 @@ const TradeCategoriesPage = () => {
       icon: "🔥",
       popular: false,
       serviceCount: "110+"
-    },
-    {
-      name: "Relocation/Moving",
-      description: "Moving, relocation, and logistics services for homes and offices",
-      icon: "🚚",
-      popular: false,
-      serviceCount: "100+"
     },
     
     // Column 3
@@ -171,13 +157,6 @@ const TradeCategoriesPage = () => {
       popular: false,
       serviceCount: "95+"
     },
-    {
-      name: "Waste Disposal",
-      description: "Waste collection, disposal, and management services",
-      icon: "🗑️",
-      popular: false,
-      serviceCount: "85+"
-    },
     
     // Column 4
     {
@@ -222,13 +201,7 @@ const TradeCategoriesPage = () => {
       popular: true,
       serviceCount: "300+"
     },
-    {
-      name: "Recycling",
-      description: "Waste recycling, collection, and environmental services",
-      icon: "♻️",
-      popular: false,
-      serviceCount: "70+"
-    }
+  
   ];
 
   // Filter categories based on search term

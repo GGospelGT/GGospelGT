@@ -60,7 +60,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
   const navigate = useNavigate();
   const { states: nigerianStates, loading: statesLoading } = useStates();
 
-  // Nigerian Trade Categories - Updated comprehensive list
+  // Nigerian Trade Categories - Canonical 24 approved list
   const tradeCategories = [
     // Column 1
     "Building",
@@ -69,7 +69,6 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
     "Door & Window Installation",
     "Air Conditioning & Refrigeration",
     "Plumbing",
-    "Cleaning",
     
     // Column 2
     "Home Extensions",
@@ -78,7 +77,6 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
     "Bathroom Fitting",
     "Generator Services",
     "Welding",
-    "Relocation/Moving",
     
     // Column 3
     "Renovations",
@@ -87,7 +85,6 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
     "Interior Design",
     "Solar & Inverter Installation",
     "Locksmithing",
-    "Waste Disposal",
     
     // Column 4
     "Roofing",
@@ -95,8 +92,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
     "Furniture Making",
     "Electrical Repairs",
     "CCTV & Security Systems",
-    "General Handyman Work",
-    "Recycling"
+    "General Handyman Work"
   ];
 
   const onSubmit = async (values) => {

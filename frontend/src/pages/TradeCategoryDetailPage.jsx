@@ -322,37 +322,7 @@ const TradeCategoryDetailPage = () => {
         "Doesn't discuss permits"
       ]
     },
-    "relocation-moving": {
-      name: "Relocation/Moving",
-      description: "Professional moving and relocation services for homes and offices",
-      services: [
-        "Residential moving",
-        "Office relocations",
-        "Packing services",
-        "Loading and unloading",
-        "Furniture assembly",
-        "Storage solutions"
-      ],
-      averagePrice: "₦20,000 - ₦200,000",
-      timeframe: "4 hours - 2 days",
-      materials: ["Moving boxes", "Packing materials", "Moving truck", "Dollies", "Straps", "Protective covers"],
-      whatToExpected: "Moving professionals handle packing, loading, transportation, and unloading of belongings with care and efficiency.",
-      whenToHire: "When relocating homes or offices, need professional packing, or require specialized moving equipment.",
-      tips: [
-        "Get written estimates from multiple movers",
-        "Verify insurance coverage",
-        "Inventory valuable items",
-        "Pack essentials separately",
-        "Confirm moving date and timeline"
-      ],
-      redFlags: [
-        "No insurance or bonding",
-        "Extremely low estimates",
-        "Demands cash payment only",
-        "No written contract",
-        "Cannot provide references"
-      ]
-    },
+    
     "general-handyman-work": {
       name: "General Handyman Work",
       description: "Multi-skilled professionals for various home maintenance and repair tasks",
@@ -570,37 +540,7 @@ const TradeCategoryDetailPage = () => {
         "Cannot handle modern lock systems"
       ]
     },
-    "recycling": {
-      name: "Recycling",
-      description: "Waste management and recycling services for various materials",
-      services: [
-        "Material collection",
-        "Sorting and processing",
-        "Electronics recycling",
-        "Metal recycling",
-        "Paper and cardboard recycling",
-        "Consultation services"
-      ],
-      averagePrice: "₦5,000 - ₦50,000",
-      timeframe: "1-3 hours",
-      materials: ["Collection containers", "Transportation", "Processing equipment", "Safety gear", "Documentation", "Certifications"],
-      whatToExpect: "Recycling professionals collect, sort, and process recyclable materials according to environmental standards and regulations.",
-      whenToHire: "For large-scale waste disposal, specialized recycling needs, or environmental compliance requirements.",
-      tips: [
-        "Understand what materials are accepted",
-        "Check environmental certifications",
-        "Discuss pickup schedules",
-        "Verify proper disposal methods",
-        "Ask about documentation provided"
-      ],
-      redFlags: [
-        "No environmental certifications",
-        "Cannot handle specialized materials",
-        "Poor sorting practices",
-        "No documentation provided",
-        "Environmentally harmful practices"
-      ]
-    },
+    
     "home-extensions": {
       name: "Home Extensions",
       description: "Professional home extension and addition services",
@@ -663,37 +603,7 @@ const TradeCategoryDetailPage = () => {
         "Ignores safety regulations"
       ]
     },
-    "waste-disposal": {
-      name: "Waste Disposal",
-      description: "Professional waste collection and disposal services",
-      services: [
-        "Construction waste removal",
-        "Household waste collection",
-        "Hazardous waste disposal",
-        "Bulk item removal",
-        "Recycling services",
-        "Skip hire services"
-      ],
-      averagePrice: "₦10,000 - ₦100,000",
-      timeframe: "1-3 hours",
-      materials: ["Collection vehicles", "Containers", "Safety equipment", "Disposal documentation", "Protective gear", "Sorting equipment"],
-      whatToExpect: "Waste disposal professionals collect, transport, and dispose of various waste types according to environmental regulations.",
-      whenToHire: "For large cleanouts, construction waste, hazardous materials, or regular waste collection services.",
-      tips: [
-        "Understand what waste types are accepted",
-        "Check environmental compliance",
-        "Verify proper disposal methods",
-        "Get documentation for hazardous waste",
-        "Compare pricing and service levels"
-      ],
-      redFlags: [
-        "No proper licenses for waste handling",
-        "Illegal dumping practices",
-        "Cannot handle hazardous materials",
-        "No documentation provided",
-        "Damages property during collection"
-      ]
-    },
+    
     "flooring": {
       name: "Flooring",
       description: "Professional flooring installation and repair services",
@@ -787,37 +697,7 @@ const TradeCategoryDetailPage = () => {
         "No warranty offered"
       ]
     },
-    "cleaning": {
-      name: "Cleaning",
-      description: "Professional cleaning services for homes, offices, and commercial spaces",
-      services: [
-        "Regular house cleaning",
-        "Deep cleaning services",
-        "Office cleaning",
-        "Post-construction cleanup",
-        "Carpet and upholstery cleaning",
-        "Window cleaning"
-      ],
-      averagePrice: "₦5,000 - ₦50,000",
-      timeframe: "2 hours - 2 days",
-      materials: ["Cleaning chemicals", "Microfiber cloths", "Vacuum cleaners", "Mops", "Brushes", "Protective equipment"],
-      whatToExpect: "Professional cleaners use proper techniques and equipment to thoroughly clean spaces while respecting your property and belongings.",
-      whenToHire: "For regular maintenance, deep cleaning, move-in/out cleaning, post-renovation cleanup, or special events.",
-      tips: [
-        "Discuss cleaning supplies and chemicals used",
-        "Secure valuable items before cleaning",
-        "Specify areas requiring special attention",
-        "Ask about insurance coverage",
-        "Establish cleaning schedules and routines"
-      ],
-      redFlags: [
-        "Doesn't bring proper cleaning supplies",
-        "Cannot provide references",
-        "No insurance or bonding",
-        "Rushes through the cleaning",
-        "Damages property without accountability"
-      ]
-    },
+    
     "generator-services": {
       name: "Generator Services",
       description: "Generator installation, maintenance, and repair services for reliable power backup",

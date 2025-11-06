@@ -9,7 +9,6 @@ NIGERIAN_TRADE_CATEGORIES = [
     "Door & Window Installation",
     "Air Conditioning & Refrigeration",
     "Plumbing",
-    "Cleaning",
     
     # Column 2
     "Home Extensions",
@@ -18,7 +17,6 @@ NIGERIAN_TRADE_CATEGORIES = [
     "Bathroom Fitting",
     "Generator Services",
     "Welding",
-    "Relocation/Moving",
     
     # Column 3
     "Renovations",
@@ -27,7 +25,6 @@ NIGERIAN_TRADE_CATEGORIES = [
     "Interior Design",
     "Solar & Inverter Installation",
     "Locksmithing",
-    "Waste Disposal",
     
     # Column 4
     "Roofing",
@@ -35,8 +32,7 @@ NIGERIAN_TRADE_CATEGORIES = [
     "Furniture Making",
     "Electrical Repairs",
     "CCTV & Security Systems",
-    "General Handyman Work",
-    "Recycling"
+    "General Handyman Work"
 ]
 
 # For validation purposes
@@ -80,10 +76,6 @@ TRADE_CATEGORY_GROUPS = {
         "Interior Design"
     ],
     "General Services": [
-        "General Handyman Work",
-        "Cleaning",
-        "Relocation/Moving",
-        "Waste Disposal",
-        "Recycling"
+        "General Handyman Work"
     ]
 }

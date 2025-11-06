@@ -38,16 +38,16 @@ import PaymentPage from './PaymentPage';
 const FALLBACK_TRADE_CATEGORIES = [
   // Column 1
   "Building", "Concrete Works", "Tiling", "Door & Window Installation",
-  "Air Conditioning & Refrigeration", "Plumbing", "Cleaning",
+  "Air Conditioning & Refrigeration", "Plumbing",
   // Column 2
   "Home Extensions", "Scaffolding", "Flooring", "Bathroom Fitting",
-  "Generator Services", "Welding", "Relocation/Moving",
+  "Generator Services", "Welding",
   // Column 3
   "Renovations", "Painting", "Carpentry", "Interior Design",
-  "Solar & Inverter Installation", "Locksmithing", "Waste Disposal",
+  "Solar & Inverter Installation", "Locksmithing",
   // Column 4
   "Roofing", "Plastering/POP", "Furniture Making", "Electrical Repairs",
-  "CCTV & Security Systems", "General Handyman Work", "Recycling"
+  "CCTV & Security Systems", "General Handyman Work"
 ];
 
 // If needed, we can also create a separate hook for trade categories
@@ -335,7 +335,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleFinalSubmit = async () => {
+  const handleFinalSubmit = async (walletSetupOverride) => {
     console.log('🚀 handleFinalSubmit called, current step:', currentStep);
     console.log('🔍 Form data:', formData);
     
@@ -349,7 +349,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
     
     try {
       const fullName = `${formData.firstName} ${formData.lastName}`;
-      
+
       // Ensure description meets minimum length requirement
       const description = formData.profileDescription && formData.profileDescription.length >= 50 
         ? formData.profileDescription 
@@ -364,11 +364,14 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         '10+': 15
       };
 
+      // Use robust Nigerian phone formatter to avoid invalid formats
+      const formattedPhone = formatNigerianPhone(formData.phone);
+
       const registrationData = {
         name: fullName,
         email: formData.email, // Use the actual email from the form
         password: formData.password,
-        phone: `+234${formData.phone}`, // Ensure Nigerian format
+        phone: formattedPhone,
         location: formData.state,
         postcode: '000000', // Placeholder postcode
         trade_categories: formData.selectedTrades,
@@ -382,7 +385,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
       const result = await registerTradesperson(registrationData);
 
       if (result.success) {
-        const walletSetupChoice = formData.walletSetup;
+        const walletSetupChoice = walletSetupOverride ?? formData.walletSetup;
         const fullName = `${formData.firstName} ${formData.lastName}`;
         
         console.log('✅ Registration successful, result:', result);
@@ -1172,7 +1175,8 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
                   onClick={() => {
                     console.log('🔘 SET UP WALLET LATER BUTTON CLICKED (DIRECT)');
                     updateFormData('walletSetup', 'later');
-                    handleFinalSubmit();
+                    // Pass explicit override to avoid async state race
+                    handleFinalSubmit('later');
                   }}
                   disabled={isLoading}
                   className="w-full border-2 border-gray-400 text-gray-600 hover:bg-gray-50 py-3 px-6 rounded-lg font-medium disabled:opacity-50"

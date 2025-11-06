@@ -17,8 +17,7 @@ const FALLBACK_TRADE_CATEGORIES = [
   "Door & Window Installation",
   "Air Conditioning & Refrigeration",
   "Plumbing",
-  "Cleaning",
-  
+
   // Column 2
   "Home Extensions",
   "Scaffolding",
@@ -26,8 +25,7 @@ const FALLBACK_TRADE_CATEGORIES = [
   "Bathroom Fitting",
   "Generator Services",
   "Welding",
-  "Relocation/Moving",
-  
+
   // Column 3
   "Renovations",
   "Painting",
@@ -35,16 +33,14 @@ const FALLBACK_TRADE_CATEGORIES = [
   "Interior Design",
   "Solar & Inverter Installation",
   "Locksmithing",
-  "Waste Disposal",
-  
+
   // Column 4
   "Roofing",
   "Plastering/POP",
   "Furniture Making",
   "Electrical Repairs",
   "CCTV & Security Systems",
-  "General Handyman Work",
-  "Recycling"
+  "General Handyman Work"
 ];
 
 const HeroSection = () => {

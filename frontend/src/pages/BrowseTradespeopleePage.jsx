@@ -60,9 +60,13 @@ const BrowseTradespeopleePage = () => {
   useEffect(() => {
     // Initialize trade categories with fallback
     setTradeCategories([
-      'Plumbing', 'Electrical', 'Carpentry', 'Painting', 'Roofing', 
-      'HVAC', 'Landscaping', 'Cleaning', 'Handyman', 'Masonry',
-      'Welding', 'Tiling', 'Security', 'Interior Design', 'Moving'
+      'Building', 'Concrete Works', 'Tiling', 'Door & Window Installation',
+      'Air Conditioning & Refrigeration', 'Plumbing', 'Home Extensions',
+      'Scaffolding', 'Flooring', 'Bathroom Fitting', 'Generator Services',
+      'Welding', 'Renovations', 'Painting', 'Carpentry', 'Interior Design',
+      'Solar & Inverter Installation', 'Locksmithing', 'Roofing',
+      'Plastering/POP', 'Furniture Making', 'Electrical Repairs',
+      'CCTV & Security Systems', 'General Handyman Work'
     ]);
     
     // Get initial search params from URL or location state

@@ -866,40 +866,102 @@ export const skillsTestQuestions = {
   // Add more trade categories: 'Roofing', 'Carpentry', etc.
 };
 
+// Canonical → local category alias map to ensure coverage for all 24 trades
+// When a canonical trade has no dedicated question set yet, map to the closest available category.
+const TRADE_ALIAS_MAP = {
+  // Column 1
+  "Building": "Building",
+  "Concrete Works": "Building",
+  "Tiling": "Tiling",
+  "Door & Window Installation": "Building",
+  "Air Conditioning & Refrigeration": "Electrical Repairs",
+  "Plumbing": "Plumbing",
+
+  // Column 2
+  "Home Extensions": "Building",
+  "Scaffolding": "Building",
+  "Flooring": "Tiling",
+  "Bathroom Fitting": "Plumbing",
+  "Generator Services": "Electrical Repairs",
+  "Welding": "Building",
+
+  // Column 3
+  "Renovations": "Building",
+  "Painting": "Painting",
+  "Carpentry": "Building",
+  "Interior Design": "Painting",
+  "Solar & Inverter Installation": "Electrical Repairs",
+  "Locksmithing": "Building",
+
+  // Column 4
+  "Roofing": "Building",
+  "Plastering/POP": "Painting",
+  "Furniture Making": "Building",
+  "Electrical Repairs": "Electrical Repairs",
+  "CCTV & Security Systems": "Electrical Repairs",
+  "General Handyman Work": "Building"
+};
+
 // Function to get questions for specific trades
 export const getQuestionsForTrades = (selectedTrades, questionsPerTrade = 20) => {
   const allQuestions = {};
-  
+
   selectedTrades.forEach(trade => {
-    if (skillsTestQuestions[trade]) {
-      // Randomly select questions if more than required are available
-      const tradeQuestions = skillsTestQuestions[trade];
+    // Determine the base category that has questions
+    const baseCategory = skillsTestQuestions[trade]
+      ? trade
+      : TRADE_ALIAS_MAP[trade];
+
+    let sourceCategory = null;
+    if (baseCategory && skillsTestQuestions[baseCategory]) {
+      sourceCategory = baseCategory;
+    } else if (skillsTestQuestions["Building"]) {
+      // Safe global fallback to Building if nothing else matches
+      sourceCategory = "Building";
+    }
+
+    if (sourceCategory) {
+      const tradeQuestions = skillsTestQuestions[sourceCategory] || [];
+
       if (tradeQuestions.length > questionsPerTrade) {
-        // Shuffle and take required number
         const shuffled = [...tradeQuestions].sort(() => 0.5 - Math.random());
         allQuestions[trade] = shuffled.slice(0, questionsPerTrade);
       } else {
         allQuestions[trade] = tradeQuestions;
       }
+    } else {
+      // If absolutely no fallback available, set empty array to allow skip logic upstream
+      allQuestions[trade] = [];
     }
   });
-  
+
   return allQuestions;
 };
 
 // Function to calculate test score
 export const calculateTestScore = (answers, questions) => {
-  const totalQuestions = questions.length;
+  const totalQuestions = Array.isArray(questions) ? questions.length : 0;
   let correctAnswers = 0;
-  
+
+  if (totalQuestions === 0) {
+    // Graceful handling when no questions are available
+    return {
+      score: 100,
+      correct: 0,
+      total: 0,
+      passed: true
+    };
+  }
+
   questions.forEach((question, index) => {
     if (answers[index] === question.correct) {
       correctAnswers++;
     }
   });
-  
+
+  const percentage = (correctAnswers / totalQuestions) * 100;
   return {
-    score: Math.round((correctAnswers / totalQuestions) * 100),
+    score: Math.round(percentage),
     correct: correctAnswers,
     total: totalQuestions,
     passed: (correctAnswers / totalQuestions) >= 0.8 // 80% pass rate

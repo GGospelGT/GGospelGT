@@ -28,11 +28,37 @@ NIGERIAN_POSTCODES = [
 ]
 
 TRADE_CATEGORIES = [
-    "Building & Construction", "Plumbing & Water Works", "Electrical Installation", 
-    "Painting & Decorating", "Tiling & Marble Works", "Carpentry & Woodwork", 
-    "Roofing & Waterproofing", "POP & Ceiling Works", "Welding & Fabrication",
-    "Air Conditioning & Refrigeration", "Generator Installation & Repair", "Solar Installation",
-    "Landscaping & Gardening", "Interior Decoration", "House Cleaning Services"
+    # Column 1
+    "Building",
+    "Concrete Works",
+    "Tiling",
+    "Door & Window Installation",
+    "Air Conditioning & Refrigeration",
+    "Plumbing",
+
+    # Column 2
+    "Home Extensions",
+    "Scaffolding",
+    "Flooring",
+    "Bathroom Fitting",
+    "Generator Services",
+    "Welding",
+
+    # Column 3
+    "Renovations",
+    "Painting",
+    "Carpentry",
+    "Interior Design",
+    "Solar & Inverter Installation",
+    "Locksmithing",
+
+    # Column 4
+    "Roofing",
+    "Plastering/POP",
+    "Furniture Making",
+    "Electrical Repairs",
+    "CCTV & Security Systems",
+    "General Handyman Work"
 ]
 
 CERTIFICATIONS = [
