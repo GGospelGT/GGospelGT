@@ -29,7 +29,7 @@ const TradespeopleCTA = () => {
 
   return (
     <>
-      <section className="py-16" style={{background: 'linear-gradient(135deg, #2F8140 0%, #121E3C 100%)'}}>
+      <section className="py-16" style={{background: 'linear-gradient(135deg, #34D164 0%, #121E3C 100%)'}}>
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

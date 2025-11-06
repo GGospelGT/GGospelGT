@@ -318,7 +318,7 @@ const ProfilePage = () => {
         <Header />
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-md mx-auto text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-4" style={{borderColor: '#2F8140'}}></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-4" style={{borderColor: '#34D164'}}></div>
             <p className="text-gray-600 font-lato">Loading your profile...</p>
           </div>
         </div>
@@ -342,7 +342,7 @@ const ProfilePage = () => {
             <Button 
               onClick={() => window.location.reload()}
               className="text-white font-lato"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               Sign In
             </Button>
@@ -386,7 +386,7 @@ const ProfilePage = () => {
                       onClick={handleSave}
                       disabled={loading}
                       className="text-white font-lato"
-                      style={{backgroundColor: '#2F8140'}}
+                      style={{backgroundColor: '#34D164'}}
                     >
                       <Save size={16} className="mr-2" />
                       {loading ? 'Saving...' : 'Save Changes'}
@@ -396,7 +396,7 @@ const ProfilePage = () => {
                   <Button
                     onClick={handleEditToggle}
                     className="text-white font-lato"
-                    style={{backgroundColor: '#2F8140'}}
+                    style={{backgroundColor: '#34D164'}}
                   >
                     <Edit3 size={16} className="mr-2" />
                     Edit Profile
@@ -450,7 +450,7 @@ const ProfilePage = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                      <User size={20} className="mr-2" style={{color: '#2F8140'}} />
+                      <User size={20} className="mr-2" style={{color: '#34D164'}} />
                       Basic Information
                     </CardTitle>
                   </CardHeader>
@@ -565,7 +565,7 @@ const ProfilePage = () => {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                          <Briefcase size={20} className="mr-2" style={{color: '#2F8140'}} />
+                          <Briefcase size={20} className="mr-2" style={{color: '#34D164'}} />
                           Professional Information
                         </CardTitle>
                       </CardHeader>
@@ -646,20 +646,20 @@ const ProfilePage = () => {
                           <div className="text-center">
                             <div className="flex items-center justify-center space-x-1 mb-1">
                               <Star size={16} className="text-yellow-400 fill-current" />
-                              <span className="text-lg font-bold font-montserrat" style={{color: '#2F8140'}}>
+                              <span className="text-lg font-bold font-montserrat" style={{color: '#34D164'}}>
                                 {profileData.average_rating?.toFixed(1) || '0.0'}
                               </span>
                             </div>
                             <p className="text-sm text-gray-600 font-lato">Average Rating</p>
                           </div>
                           <div className="text-center">
-                            <div className="text-lg font-bold font-montserrat mb-1" style={{color: '#2F8140'}}>
+                            <div className="text-lg font-bold font-montserrat mb-1" style={{color: '#34D164'}}>
                               {profileData.total_reviews || 0}
                             </div>
                             <p className="text-sm text-gray-600 font-lato">Total Reviews</p>
                           </div>
                           <div className="text-center">
-                            <div className="text-lg font-bold font-montserrat mb-1" style={{color: '#2F8140'}}>
+                            <div className="text-lg font-bold font-montserrat mb-1" style={{color: '#34D164'}}>
                               {profileData.total_jobs || 0}
                             </div>
                             <p className="text-sm text-gray-600 font-lato">Jobs Completed</p>
@@ -672,7 +672,7 @@ const ProfilePage = () => {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                          <Award size={20} className="mr-2" style={{color: '#2F8140'}} />
+                          <Award size={20} className="mr-2" style={{color: '#34D164'}} />
                           Certifications
                         </CardTitle>
                       </CardHeader>
@@ -710,7 +710,7 @@ const ProfilePage = () => {
                             {profileData.certifications?.length > 0 ? (
                               profileData.certifications.map((cert, index) => (
                                 <div key={index} className="flex items-center space-x-2">
-                                  <Award size={14} style={{color: '#2F8140'}} />
+                                  <Award size={14} style={{color: '#34D164'}} />
                                   <span className="text-gray-700 font-lato">{cert}</span>
                                 </div>
                               ))
@@ -732,14 +732,14 @@ const ProfilePage = () => {
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                          <Camera size={20} className="mr-2" style={{color: '#2F8140'}} />
+                          <Camera size={20} className="mr-2" style={{color: '#34D164'}} />
                           My Portfolio
                         </CardTitle>
                         
                         <Button
                           onClick={() => setShowUploadForm(!showUploadForm)}
                           className="text-white font-lato"
-                          style={{backgroundColor: '#2F8140'}}
+                          style={{backgroundColor: '#34D164'}}
                         >
                           <Plus size={16} className="mr-2" />
                           Add Portfolio Item
@@ -829,7 +829,7 @@ const ProfilePage = () => {
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                        <Star size={20} className="mr-2" style={{color: '#2F8140'}} />
+                        <Star size={20} className="mr-2" style={{color: '#34D164'}} />
                         Customer Reviews
                       </CardTitle>
                     </CardHeader>
@@ -936,7 +936,7 @@ const ProfilePage = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                      <Settings size={20} className="mr-2" style={{color: '#2F8140'}} />
+                      <Settings size={20} className="mr-2" style={{color: '#34D164'}} />
                       Account Settings
                     </CardTitle>
                   </CardHeader>
@@ -947,7 +947,7 @@ const ProfilePage = () => {
                           Account Status
                         </h3>
                         <div className="flex items-center space-x-2">
-                          <Shield size={16} style={{color: '#2F8140'}} />
+                          <Shield size={16} style={{color: '#34D164'}} />
                           <span className="text-gray-700 font-lato capitalize">{profileData.status}</span>
                         </div>
                       </div>
@@ -998,7 +998,7 @@ const ProfilePage = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                      <Clock size={20} className="mr-2" style={{color: '#2F8140'}} />
+                      <Clock size={20} className="mr-2" style={{color: '#34D164'}} />
                       Account Activity
                     </CardTitle>
                   </CardHeader>
@@ -1006,7 +1006,7 @@ const ProfilePage = () => {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between py-2 border-b">
                         <div className="flex items-center space-x-2">
-                          <Calendar size={16} style={{color: '#2F8140'}} />
+                          <Calendar size={16} style={{color: '#34D164'}} />
                           <span className="font-lato">Member since</span>
                         </div>
                         <span className="text-gray-600 font-lato">{formatDate(profileData.created_at)}</span>
@@ -1014,7 +1014,7 @@ const ProfilePage = () => {
                       
                       <div className="flex items-center justify-between py-2 border-b">
                         <div className="flex items-center space-x-2">
-                          <Clock size={16} style={{color: '#2F8140'}} />
+                          <Clock size={16} style={{color: '#34D164'}} />
                           <span className="font-lato">Last login</span>
                         </div>
                         <span className="text-gray-600 font-lato">{formatDate(profileData.last_login)}</span>
@@ -1022,7 +1022,7 @@ const ProfilePage = () => {
                       
                       <div className="flex items-center justify-between py-2">
                         <div className="flex items-center space-x-2">
-                          <Edit3 size={16} style={{color: '#2F8140'}} />
+                          <Edit3 size={16} style={{color: '#34D164'}} />
                           <span className="font-lato">Profile updated</span>
                         </div>
                         <span className="text-gray-600 font-lato">{formatDate(profileData.updated_at)}</span>

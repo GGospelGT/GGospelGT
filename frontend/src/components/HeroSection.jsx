@@ -180,7 +180,7 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl lg:text-6xl font-bold font-montserrat mb-6" style={{color: '#121E3C'}}>
             The reliable way to hire a{' '}
-            <span style={{color: '#2F8140'}}>tradesperson</span>
+            <span style={{color: '#34D164'}}>tradesperson</span>
           </h1>
           <p className="text-xl text-gray-600 font-lato mb-8 max-w-2xl mx-auto">
             Post your job for free and connect with vetted, local tradespeople across Nigeria. 
@@ -308,7 +308,7 @@ const HeroSection = () => {
             <Button 
               onClick={() => navigate('/post-job')}
               className="text-white px-8 py-3 text-lg font-lato font-semibold hover:opacity-90"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               <Plus size={20} className="mr-2" />
               Post a Job Now

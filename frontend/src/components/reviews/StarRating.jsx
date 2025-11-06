@@ -145,7 +145,7 @@ export const RatingSummary = ({
     <div className={`bg-white p-6 rounded-lg border ${className}`}>
       <div className="flex items-center space-x-4 mb-4">
         <div className="text-center">
-          <div className="text-3xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+          <div className="text-3xl font-bold font-montserrat" style={{color: '#34D164'}}>
             {averageRating > 0 ? averageRating.toFixed(1) : 'N/A'}
           </div>
           <StarRating rating={averageRating} size="sm" showValue={false} />
@@ -168,7 +168,7 @@ export const RatingSummary = ({
                     className="h-2 rounded-full"
                     style={{
                       width: `${percentage}%`,
-                      backgroundColor: '#2F8140'
+                      backgroundColor: '#34D164'
                     }}
                   />
                 </div>

@@ -28,7 +28,7 @@ const Logo = ({ size = 'medium', variant = 'light' }) => {
             // Fallback: try SVG in public; if that fails, show a simple green dot
             const img = e.target;
             if (img.src.endsWith('/brand-logo.svg')) {
-              img.outerHTML = `<span style=\"display:inline-block;width:${currentSize.iconPx}px;height:${currentSize.iconPx}px;background:#2F8140;border-radius:9999px\"></span>`;
+              img.outerHTML = `<span style=\"display:inline-block;width:${currentSize.iconPx}px;height:${currentSize.iconPx}px;background:#34D164;border-radius:9999px\"></span>`;
             } else {
               img.src = '/brand-logo.svg';
             }
@@ -43,7 +43,7 @@ const Logo = ({ size = 'medium', variant = 'light' }) => {
         >
           Service
         </span>
-        <span className={`${currentSize.text} font-extrabold font-montserrat`} style={{ color: '#2F8140' }}>
+        <span className={`${currentSize.text} font-extrabold font-montserrat`} style={{ color: '#34D164' }}>
           Hub
         </span>
       </div>

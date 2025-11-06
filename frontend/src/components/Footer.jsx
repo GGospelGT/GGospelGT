@@ -104,7 +104,7 @@ const Footer = () => {
                       target={social.href !== '#' ? '_blank' : '_self'}
                       rel={social.href !== '#' ? 'noopener noreferrer' : undefined}
                       title={social.label}
-                      className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-[#2F8140] transition-colors"
+                      className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-[#34D164] transition-colors"
                     >
                       <IconComponent size={16} />
                     </a>
@@ -171,9 +171,9 @@ const Footer = () => {
                   type="email"
                   placeholder="Enter your email"
                   className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none font-lato"
-                  style={{borderColor: '#2F8140', focusBorderColor: '#2F8140'}}
+                  style={{borderColor: '#34D164', focusBorderColor: '#34D164'}}
                 />
-                <Button className="text-white px-6 font-lato" style={{backgroundColor: '#2F8140'}}>
+                <Button className="text-white px-6 font-lato" style={{backgroundColor: '#34D164'}}>
                   Subscribe
                 </Button>
               </div>

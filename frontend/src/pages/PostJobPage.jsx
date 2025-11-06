@@ -43,7 +43,7 @@ const PostJobPage = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-2xl mx-auto text-center">
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" 
-                 style={{backgroundColor: '#2F8140'}}>
+                 style={{backgroundColor: '#34D164'}}>
               <CheckCircle size={40} className="text-white" />
             </div>
             
@@ -64,7 +64,7 @@ const PostJobPage = () => {
                 <div className="space-y-4 text-left">
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold mt-1" 
-                         style={{backgroundColor: '#2F8140'}}>
+                         style={{backgroundColor: '#34D164'}}>
                       1
                     </div>
                     <div>
@@ -75,7 +75,7 @@ const PostJobPage = () => {
                   
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold mt-1" 
-                         style={{backgroundColor: '#2F8140'}}>
+                         style={{backgroundColor: '#34D164'}}>
                       2
                     </div>
                     <div>
@@ -86,7 +86,7 @@ const PostJobPage = () => {
                   
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold mt-1" 
-                         style={{backgroundColor: '#2F8140'}}>
+                         style={{backgroundColor: '#34D164'}}>
                       3
                     </div>
                     <div>
@@ -102,7 +102,7 @@ const PostJobPage = () => {
               <Button 
                 onClick={() => navigate('/')}
                 className="text-white font-lato px-8"
-                style={{backgroundColor: '#2F8140'}}
+                style={{backgroundColor: '#34D164'}}
               >
                 Back to Home
               </Button>
@@ -141,7 +141,7 @@ const PostJobPage = () => {
                 return (
                   <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
                     <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" 
-                         style={{backgroundColor: '#2F8140'}}>
+                         style={{backgroundColor: '#34D164'}}>
                       <IconComponent size={24} className="text-white" />
                     </div>
                     <h3 className="font-semibold font-montserrat mb-2" style={{color: '#121E3C'}}>
@@ -177,19 +177,19 @@ const PostJobPage = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
               <div>
-                <div className="text-3xl font-bold font-montserrat" style={{color: '#2F8140'}}>100+</div>
+                <div className="text-3xl font-bold font-montserrat" style={{color: '#34D164'}}>100+</div>
                 <div className="text-sm text-gray-600 font-lato">Verified Tradespeople</div>
               </div>
               <div>
-                <div className="text-3xl font-bold font-montserrat" style={{color: '#2F8140'}}>15+</div>
+                <div className="text-3xl font-bold font-montserrat" style={{color: '#34D164'}}>15+</div>
                 <div className="text-sm text-gray-600 font-lato">Trade Categories</div>
               </div>
               <div>
-                <div className="text-3xl font-bold font-montserrat" style={{color: '#2F8140'}}>200+</div>
+                <div className="text-3xl font-bold font-montserrat" style={{color: '#34D164'}}>200+</div>
                 <div className="text-sm text-gray-600 font-lato">Happy Customers</div>
               </div>
               <div>
-                <div className="text-3xl font-bold font-montserrat" style={{color: '#2F8140'}}>4.8★</div>
+                <div className="text-3xl font-bold font-montserrat" style={{color: '#34D164'}}>4.8★</div>
                 <div className="text-sm text-gray-600 font-lato">Average Rating</div>
               </div>
             </div>

@@ -12,7 +12,7 @@ const StatsSection = () => {
       icon: Users,
       number: '52',
       label: 'registered tradespeople',
-      color: '#2F8140'
+      color: '#34D164'
     },
     {
       icon: Wrench,
@@ -24,7 +24,7 @@ const StatsSection = () => {
       icon: Star,
       number: '40',
       label: 'customer reviews',
-      color: '#2F8140'
+      color: '#34D164'
     }
   ];
 
@@ -40,7 +40,7 @@ const StatsSection = () => {
       icon: Users,
       number: Number(stats.total_tradespeople ?? 0).toLocaleString(),
       label: 'registered tradespeople',
-      color: '#2F8140'
+      color: '#34D164'
     },
     {
       icon: Wrench,
@@ -52,7 +52,7 @@ const StatsSection = () => {
       icon: Star,
       number: Number(stats.total_reviews ?? 0).toLocaleString(),
       label: 'customer reviews',
-      color: '#2F8140'
+      color: '#34D164'
     }
   ] : defaultStats;
 

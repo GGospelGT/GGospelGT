@@ -47,7 +47,7 @@ const ReviewsPolicyPage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FileText size={32} style={{color: '#2F8140'}} />
+              <FileText size={32} style={{color: '#34D164'}} />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold font-montserrat mb-4" style={{color: '#121E3C'}}>
               Reviews & Ratings Policy
@@ -72,7 +72,7 @@ const ReviewsPolicyPage = () => {
                 <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-shadow">
                   <CardContent className="p-6 text-center">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <highlight.icon size={24} style={{color: '#2F8140'}} />
+                      <highlight.icon size={24} style={{color: '#34D164'}} />
                     </div>
                     <h3 className="font-semibold font-montserrat mb-2" style={{color: '#121E3C'}}>
                       {highlight.title}
@@ -97,7 +97,7 @@ const ReviewsPolicyPage = () => {
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold font-montserrat flex items-center" style={{color: '#121E3C'}}>
-                  <MessageCircle className="mr-3" size={28} style={{color: '#2F8140'}} />
+                  <MessageCircle className="mr-3" size={28} style={{color: '#34D164'}} />
                   Introduction
                 </CardTitle>
               </CardHeader>
@@ -112,7 +112,7 @@ const ReviewsPolicyPage = () => {
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold font-montserrat flex items-center" style={{color: '#121E3C'}}>
-                  <Users className="mr-3" size={28} style={{color: '#2F8140'}} />
+                  <Users className="mr-3" size={28} style={{color: '#34D164'}} />
                   Review Guidelines for Homeowners
                 </CardTitle>
               </CardHeader>
@@ -224,7 +224,7 @@ const ReviewsPolicyPage = () => {
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold font-montserrat flex items-center" style={{color: '#121E3C'}}>
-                  <Shield className="mr-3" size={28} style={{color: '#2F8140'}} />
+                  <Shield className="mr-3" size={28} style={{color: '#34D164'}} />
                   When Will ServiceHub Remove a Review?
                 </CardTitle>
               </CardHeader>
@@ -295,7 +295,7 @@ const ReviewsPolicyPage = () => {
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold font-montserrat flex items-center" style={{color: '#121E3C'}}>
-                  <FileText className="mr-3" size={28} style={{color: '#2F8140'}} />
+                  <FileText className="mr-3" size={28} style={{color: '#34D164'}} />
                   Review Management
                 </CardTitle>
               </CardHeader>
@@ -351,7 +351,7 @@ const ReviewsPolicyPage = () => {
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold font-montserrat flex items-center" style={{color: '#121E3C'}}>
-                  <Users className="mr-3" size={28} style={{color: '#2F8140'}} />
+                  <Users className="mr-3" size={28} style={{color: '#34D164'}} />
                   Review Guidelines for Tradespeople
                 </CardTitle>
               </CardHeader>
@@ -399,7 +399,7 @@ const ReviewsPolicyPage = () => {
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold font-montserrat flex items-center" style={{color: '#121E3C'}}>
-                    <Scale className="mr-3" size={24} style={{color: '#2F8140'}} />
+                    <Scale className="mr-3" size={24} style={{color: '#34D164'}} />
                     Disputes
                   </CardTitle>
                 </CardHeader>
@@ -413,7 +413,7 @@ const ReviewsPolicyPage = () => {
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold font-montserrat flex items-center" style={{color: '#121E3C'}}>
-                    <Clock className="mr-3" size={24} style={{color: '#2F8140'}} />
+                    <Clock className="mr-3" size={24} style={{color: '#34D164'}} />
                     Policy Purpose
                   </CardTitle>
                 </CardHeader>

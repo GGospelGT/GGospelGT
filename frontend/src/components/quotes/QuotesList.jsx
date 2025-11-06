@@ -174,7 +174,7 @@ const QuotesList = ({ jobId, quotes: initialQuotes, onQuoteUpdate }) => {
               <div className="flex items-start space-x-4">
                 {/* Tradesperson Avatar */}
                 <div className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-lg" 
-                     style={{backgroundColor: '#2F8140'}}>
+                     style={{backgroundColor: '#34D164'}}>
                   {quote.tradesperson?.name?.charAt(0) || 'T'}
                 </div>
 
@@ -235,12 +235,12 @@ const QuotesList = ({ jobId, quotes: initialQuotes, onQuoteUpdate }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center mb-2">
-                  <DollarSign size={20} style={{color: '#2F8140'}} />
+                  <DollarSign size={20} style={{color: '#34D164'}} />
                   <span className="font-semibold font-montserrat ml-2" style={{color: '#121E3C'}}>
                     Quote Price
                   </span>
                 </div>
-                <p className="text-2xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                <p className="text-2xl font-bold font-montserrat" style={{color: '#34D164'}}>
                   {formatCurrency(quote.price)}
                 </p>
               </div>
@@ -320,7 +320,7 @@ const QuotesList = ({ jobId, quotes: initialQuotes, onQuoteUpdate }) => {
                     onClick={() => handleQuoteAction(quote.id, 'accepted')}
                     disabled={processingQuote === quote.id}
                     className="text-white font-lato flex-1"
-                    style={{backgroundColor: '#2F8140'}}
+                    style={{backgroundColor: '#34D164'}}
                   >
                     <CheckCircle size={16} className="mr-2" />
                     {processingQuote === quote.id ? 'Processing...' : 'Accept Quote'}

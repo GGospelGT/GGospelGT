@@ -263,7 +263,7 @@ const TradeCategoriesPage = () => {
               {/* Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-green-50 rounded-lg p-6">
-                  <div className="text-3xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                  <div className="text-3xl font-bold font-montserrat" style={{color: '#34D164'}}>
                     {tradeCategories.length}
                   </div>
                   <div className="text-sm text-gray-600 font-lato">Trade Categories</div>
@@ -426,7 +426,7 @@ const TradeCategoriesPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle size={32} style={{color: '#2F8140'}} />
+                    <CheckCircle size={32} style={{color: '#34D164'}} />
                   </div>
                   <h3 className="font-semibold font-montserrat text-lg mb-2">Verified Professionals</h3>
                   <p className="text-gray-600 font-lato">All tradespeople are verified and background-checked for your safety</p>

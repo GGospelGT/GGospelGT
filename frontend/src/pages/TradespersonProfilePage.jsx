@@ -220,7 +220,7 @@ const TradespersonProfilePage = () => {
         <Header />
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{color: '#2F8140'}} />
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{color: '#34D164'}} />
             <p className="text-gray-600">Loading profile...</p>
           </div>
         </div>
@@ -236,7 +236,7 @@ const TradespersonProfilePage = () => {
         <div className="text-center py-20">
           <h2 className="text-2xl font-bold mb-4">Tradesperson Not Found</h2>
           <p className="text-gray-600 mb-6">The profile you're looking for doesn't exist.</p>
-          <Button onClick={() => navigate('/')} style={{backgroundColor: '#2F8140'}} className="text-white">
+          <Button onClick={() => navigate('/')} style={{backgroundColor: '#34D164'}} className="text-white">
             Go Home
           </Button>
         </div>
@@ -341,7 +341,7 @@ const TradespersonProfilePage = () => {
                     <Button
                       onClick={handleHireTradesperson}
                       className="text-white flex items-center gap-2"
-                      style={{backgroundColor: '#2F8140'}}
+                      style={{backgroundColor: '#34D164'}}
                     >
                       <Briefcase size={18} />
                       Hire Now

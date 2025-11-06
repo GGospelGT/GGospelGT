@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 612" width="612" height="612">
   <!-- Approximate brand mark shaped as a bold, slanted S composed of two rounded bars -->
-  <rect x="120" y="190" width="372" height="96" rx="48" fill="#2F8140" transform="rotate(-28 306 238)" />
-  <rect x="120" y="326" width="372" height="96" rx="48" fill="#2F8140" transform="rotate(28 306 374)" />
+  <rect x="120" y="190" width="372" height="96" rx="48" fill="#34D164" transform="rotate(-28 306 238)" />
+  <rect x="120" y="326" width="372" height="96" rx="48" fill="#34D164" transform="rotate(28 306 374)" />
 </svg>

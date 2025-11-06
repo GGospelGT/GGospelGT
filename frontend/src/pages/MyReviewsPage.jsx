@@ -255,7 +255,7 @@ const MyReviewsPage = () => {
             {/* Reviews List */}
             {loading ? (
               <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#2F8140'}}></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#34D164'}}></div>
                 <p className="text-gray-600 font-lato">Loading your reviews...</p>
               </div>
             ) : reviews.length === 0 ? (
@@ -271,7 +271,7 @@ const MyReviewsPage = () => {
                   <Button
                     onClick={() => window.location.href = '/my-jobs'}
                     className="text-white font-lato"
-                    style={{backgroundColor: '#2F8140'}}
+                    style={{backgroundColor: '#34D164'}}
                   >
                     <Briefcase size={16} className="mr-2" />
                     View My Jobs

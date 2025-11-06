@@ -6,7 +6,7 @@
 
 **From Your Style Guide:**
 - **Navy Blue**: `#121E3C` - Primary brand color for headings and buttons
-- **Service Green**: `#2F8140` - Accent color for highlights and CTAs  
+- **Service Green**: `#34D164` - Accent color for highlights and CTAs  
 - **Light Gray**: `#E55E55` - Supporting color for subtle elements
 - **Pure White**: `#FFFFFF` - Clean backgrounds and text
 
@@ -17,14 +17,14 @@
 ### 🎨 **Visual Implementation Details**
 
 #### **1. Header & Navigation**
-- ✅ Logo icon: Green circle (`#2F8140`) with white "S"
+- ✅ Logo icon: Green circle (`#34D164`) with white "S"
 - ✅ Brand name: Navy blue (`#121E3C`) with Montserrat Bold
 - ✅ Navigation links: Hover effect changes to service green
 - ✅ CTA button: Service green background with white text
 
 #### **2. Hero Section**
 - ✅ Main heading: Navy blue (`#121E3C`) with Montserrat Bold  
-- ✅ "tradesperson" highlight: Service green (`#2F8140`)
+- ✅ "tradesperson" highlight: Service green (`#34D164`)
 - ✅ Search button: Navy blue background (`#121E3C`)
 - ✅ Body text: Lato Regular font
 - ✅ Subtle gradient background for depth
@@ -35,7 +35,7 @@
 - ✅ Labels: Lato Regular for readability
 
 #### **4. How It Works Section**
-- ✅ Step circles: Service green (`#2F8140`)
+- ✅ Step circles: Service green (`#34D164`)
 - ✅ Icon backgrounds: Navy blue (`#121E3C`)
 - ✅ Headings: Navy blue with Montserrat Bold
 - ✅ CTA button: Service green background
@@ -59,7 +59,7 @@
 ```css
 /* Custom Brand Colors */
 Navy Blue: #121E3C
-Service Green: #2F8140
+Service Green: #34D164
 Light Gray: #E55E55
 Pure White: #FFFFFF
 
@@ -86,7 +86,7 @@ font-family: 'Lato' (Body text)
 
 #### **Color Usage Hierarchy**
 1. **Primary**: Navy Blue (`#121E3C`) - Headlines, main text, primary buttons
-2. **Accent**: Service Green (`#2F8140`) - Highlights, hover states, secondary CTAs
+2. **Accent**: Service Green (`#34D164`) - Highlights, hover states, secondary CTAs
 3. **Supporting**: Light Gray (`#E55E55`) - Subtle backgrounds and borders
 4. **Base**: Pure White (`#FFFFFF`) - Clean backgrounds and contrast text
 

@@ -484,7 +484,7 @@ const InterestedTradespeopleePage = () => {
                     onClick={() => handleShareContact(tradesperson.interest_id)}
                     disabled={actionLoading[tradesperson.interest_id]}
                     className="text-white flex items-center gap-2"
-                    style={{backgroundColor: '#2F8140'}}
+                    style={{backgroundColor: '#34D164'}}
                   >
                     {actionLoading[tradesperson.interest_id] ? (
                       <>
@@ -630,7 +630,7 @@ const InterestedTradespeopleePage = () => {
         <Header />
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{color: '#2F8140'}} />
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{color: '#34D164'}} />
             <p className="text-gray-600">Loading interested tradespeople...</p>
           </div>
         </div>
@@ -765,7 +765,7 @@ const InterestedTradespeopleePage = () => {
                 <Button 
                   onClick={() => navigate('/my-jobs')}
                   className="text-white"
-                  style={{backgroundColor: '#2F8140'}}
+                  style={{backgroundColor: '#34D164'}}
                 >
                   Back to My Jobs
                 </Button>
@@ -816,7 +816,7 @@ const InterestedTradespeopleePage = () => {
 
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <Contact size={20} style={{color: '#2F8140'}} />
+                    <Contact size={20} style={{color: '#34D164'}} />
                     <h3 className="text-2xl font-bold font-montserrat">
                       {selectedTradesperson.tradesperson_name}
                     </h3>

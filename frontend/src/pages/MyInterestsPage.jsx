@@ -431,7 +431,7 @@ const MyInterestsPage = () => {
         <Header />
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{color: '#2F8140'}} />
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{color: '#34D164'}} />
             <p className="text-gray-600">Loading your interests...</p>
           </div>
         </div>
@@ -481,7 +481,7 @@ const MyInterestsPage = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 font-lato">Wallet Balance</p>
-                      <p className="text-xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                      <p className="text-xl font-bold font-montserrat" style={{color: '#34D164'}}>
                         {walletBalance} coins
                       </p>
                     </div>
@@ -600,7 +600,7 @@ const MyInterestsPage = () => {
                   <Button 
                     onClick={() => navigate('/browse-jobs')}
                     className="text-white"
-                    style={{backgroundColor: '#2F8140'}}
+                    style={{backgroundColor: '#34D164'}}
                   >
                     Browse Available Jobs
                   </Button>
@@ -664,7 +664,7 @@ const MyInterestsPage = () => {
                               onClick={() => handlePayForAccess(interest.id, interest.access_fee_coins || 0)}
                               disabled={paymentLoading[interest.id]}
                               className="text-white"
-                              style={{backgroundColor: '#2F8140'}}
+                              style={{backgroundColor: '#34D164'}}
                             >
                               {paymentLoading[interest.id] ? (
                                 <>
@@ -696,7 +696,7 @@ const MyInterestsPage = () => {
                               <Button
                                 onClick={() => handleStartChatAfterPayment(interest)}
                                 className="text-white"
-                                style={{backgroundColor: '#2F8140'}}
+                                style={{backgroundColor: '#34D164'}}
                               >
                                 <MessageCircle className="w-4 h-4 mr-2" />
                                 Chat with Homeowner
@@ -791,7 +791,7 @@ const MyInterestsPage = () => {
                   // You could add functionality to open phone/email app here
                 }}
                 className="text-white"
-                style={{backgroundColor: '#2F8140'}}
+                style={{backgroundColor: '#34D164'}}
               >
                 <Phone className="w-4 h-4 mr-2" />
                 Contact Now

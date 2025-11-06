@@ -194,7 +194,7 @@ const ReviewsPage = () => {
             <Button 
               onClick={() => navigate('/')}
               className="text-white font-lato"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               Go to Homepage
             </Button>
@@ -328,7 +328,7 @@ const ReviewsPage = () => {
                 
                 <Card>
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                    <div className="text-2xl font-bold font-montserrat" style={{color: '#34D164'}}>
                       {Object.keys(reviewSummary.category_averages).length}
                     </div>
                     <div className="text-sm text-gray-600 font-lato">Categories Rated</div>
@@ -354,7 +354,7 @@ const ReviewsPage = () => {
             <TabsContent value="received" className="space-y-4">
               {loading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#2F8140'}}></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#34D164'}}></div>
                   <p className="text-gray-600 font-lato">Loading reviews...</p>
                 </div>
               ) : reviews.length === 0 ? (
@@ -392,7 +392,7 @@ const ReviewsPage = () => {
               <TabsContent value="written" className="space-y-4">
                 {loading ? (
                   <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#2F8140'}}></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#34D164'}}></div>
                     <p className="text-gray-600 font-lato">Loading your reviews...</p>
                   </div>
                 ) : myReviews.length === 0 ? (
@@ -442,7 +442,7 @@ const ReviewsPage = () => {
                     key={page}
                     variant={pagination.page === page ? "default" : "outline"}
                     onClick={() => handlePageChange(page)}
-                    style={pagination.page === page ? {backgroundColor: '#2F8140'} : {}}
+                    style={pagination.page === page ? {backgroundColor: '#34D164'} : {}}
                   >
                     {page}
                   </Button>

@@ -263,7 +263,7 @@ const BrowseTradespeopleePage = () => {
                         handleContactTradesperson(tradesperson);
                       }}
                       className="text-white"
-                      style={{backgroundColor: '#2F8140'}}
+                      style={{backgroundColor: '#34D164'}}
                     >
                       <MessageCircle size={16} />
                     </Button>
@@ -385,7 +385,7 @@ const BrowseTradespeopleePage = () => {
                   handleContactTradesperson(tradesperson);
                 }}
                 className="flex-1 text-white"
-                style={{backgroundColor: '#2F8140'}}
+                style={{backgroundColor: '#34D164'}}
               >
                 <MessageCircle size={16} className="mr-1" />
                 Contact
@@ -435,7 +435,7 @@ const BrowseTradespeopleePage = () => {
                 className="w-full"
               />
             </div>
-            <Button type="submit" style={{backgroundColor: '#2F8140'}} className="text-white">
+            <Button type="submit" style={{backgroundColor: '#34D164'}} className="text-white">
               <Search size={18} className="mr-2" />
               Search
             </Button>
@@ -547,7 +547,7 @@ const BrowseTradespeopleePage = () => {
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{color: '#2F8140'}} />
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{color: '#34D164'}} />
               <p className="text-gray-600">Loading tradespeople...</p>
             </div>
           </div>
@@ -560,7 +560,7 @@ const BrowseTradespeopleePage = () => {
             <p className="text-gray-500 mb-6">
               Try adjusting your search criteria or clearing filters.
             </p>
-            <Button onClick={clearFilters} style={{backgroundColor: '#2F8140'}} className="text-white">
+            <Button onClick={clearFilters} style={{backgroundColor: '#34D164'}} className="text-white">
               Clear All Filters
             </Button>
           </div>

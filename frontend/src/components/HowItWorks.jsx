@@ -49,7 +49,7 @@ const HowItWorks = () => {
               return (
                 <div key={index} className="text-center">
                   <div className="relative mb-6">
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{backgroundColor: '#2F8140'}}>
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{backgroundColor: '#34D164'}}>
                       <span className="text-2xl font-bold font-montserrat text-white">{step.number}</span>
                     </div>
                     <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto -mt-6 ml-14" style={{backgroundColor: '#121E3C'}}>
@@ -71,7 +71,7 @@ const HowItWorks = () => {
             <Button 
               onClick={handleSeeHowItWorks}
               className="text-white px-8 py-3 text-lg font-lato hover:opacity-90" 
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               See how it works
             </Button>

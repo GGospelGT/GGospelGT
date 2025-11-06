@@ -494,7 +494,7 @@ const BrowseJobsPage = () => {
             <Button 
               onClick={() => window.location.reload()}
               className="text-white font-lato"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               Sign In
             </Button>
@@ -684,7 +684,7 @@ const BrowseJobsPage = () => {
                       <Button
                         onClick={() => navigate('/wallet')}
                         className="text-white font-lato text-sm px-3 py-1"
-                        style={{backgroundColor: '#2F8140'}}
+                        style={{backgroundColor: '#34D164'}}
                       >
                         Manage Wallet
                       </Button>
@@ -801,7 +801,7 @@ const BrowseJobsPage = () => {
                       <Button 
                         onClick={() => loadJobsBasedOnFilters()}
                         className="text-white font-lato"
-                        style={{backgroundColor: '#2F8140'}}
+                        style={{backgroundColor: '#34D164'}}
                       >
                         Refresh Jobs
                       </Button>
@@ -858,7 +858,7 @@ const BrowseJobsPage = () => {
                               }}
                               disabled={showingInterest === job.id}
                               className="text-white font-lato"
-                              style={{backgroundColor: '#2F8140'}}
+                              style={{backgroundColor: '#34D164'}}
                             >
                               {showingInterest === job.id ? 'Showing Interest...' : 'Show Interest'}
                             </Button>
@@ -876,7 +876,7 @@ const BrowseJobsPage = () => {
                             variant={page === pagination.page ? "default" : "outline"}
                             onClick={() => loadJobsBasedOnFilters(page)}
                             className="font-lato"
-                            style={page === pagination.page ? {backgroundColor: '#2F8140', color: 'white'} : {}}
+                            style={page === pagination.page ? {backgroundColor: '#34D164', color: 'white'} : {}}
                           >
                             {page}
                           </Button>
@@ -944,7 +944,7 @@ const BrowseJobsPage = () => {
                   <div className="space-y-3">
                     {selectedJobDetails.budget_min && selectedJobDetails.budget_max ? (
                       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <div className="text-2xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                        <div className="text-2xl font-bold font-montserrat" style={{color: '#34D164'}}>
                           {formatCurrency(selectedJobDetails.budget_min)} - {formatCurrency(selectedJobDetails.budget_max)}
                         </div>
                         <div className="text-sm text-gray-600">Budget Range</div>
@@ -1021,7 +1021,7 @@ const BrowseJobsPage = () => {
                     disabled={loadingStates.showInterest[selectedJobDetails.id] || 
                              (userInterests && userInterests.includes(selectedJobDetails.id))}
                     className="text-white font-lato"
-                    style={{backgroundColor: '#2F8140'}}
+                    style={{backgroundColor: '#34D164'}}
                   >
                     {loadingStates.showInterest[selectedJobDetails.id] ? (
                       <>

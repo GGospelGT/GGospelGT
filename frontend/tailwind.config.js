@@ -16,22 +16,22 @@ module.exports = {
   			// serviceHub Brand Colors
   			'servicehub': {
   				'navy': '#121E3C',
-  				'green': '#2F8140',
+  				'green': '#34D164',
   				'gray': '#E55E55',
   				'white': '#FFFFFF'
   			},
             // Flatten Tailwind's green palette so every shade equals the logo hex
             green: {
-                50: '#2F8140',
-                100: '#2F8140',
-                200: '#2F8140',
-                300: '#2F8140',
-                400: '#2F8140',
-                500: '#2F8140',
-                600: '#2F8140',
-                700: '#2F8140',
-                800: '#2F8140',
-                900: '#2F8140'
+                50: '#34D164',
+                100: '#34D164',
+                200: '#34D164',
+                300: '#34D164',
+                400: '#34D164',
+                500: '#34D164',
+                600: '#34D164',
+                700: '#34D164',
+                800: '#34D164',
+                900: '#34D164'
             },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

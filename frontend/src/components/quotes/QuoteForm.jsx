@@ -110,7 +110,7 @@ const QuoteForm = ({ job, onQuoteSubmitted, onCancel }) => {
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-xl font-bold font-montserrat flex items-center" style={{color: '#121E3C'}}>
-          <MessageSquare className="mr-2" style={{color: '#2F8140'}} />
+          <MessageSquare className="mr-2" style={{color: '#34D164'}} />
           Submit Your Quote
         </CardTitle>
         <div className="bg-gray-50 p-4 rounded-lg">
@@ -256,7 +256,7 @@ const QuoteForm = ({ job, onQuoteSubmitted, onCancel }) => {
               type="submit"
               disabled={isSubmitting}
               className="text-white font-lato px-8 disabled:opacity-50"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               {isSubmitting ? 'Submitting Quote...' : 'Submit Quote'}
             </Button>

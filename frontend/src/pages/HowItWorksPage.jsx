@@ -203,7 +203,7 @@ const HowItWorksPage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Play size={40} style={{color: '#2F8140'}} />
+              <Play size={40} style={{color: '#34D164'}} />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold font-montserrat mb-6" style={{color: '#121E3C'}}>
               How ServiceHub Works
@@ -252,9 +252,9 @@ const HowItWorksPage = () => {
                       {/* Step Number & Icon */}
                       <div className="md:col-span-2 text-center">
                         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <stepData.icon size={32} style={{color: '#2F8140'}} />
+                          <stepData.icon size={32} style={{color: '#34D164'}} />
                         </div>
-                        <div className="text-3xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                        <div className="text-3xl font-bold font-montserrat" style={{color: '#34D164'}}>
                           {stepData.step}
                         </div>
                       </div>
@@ -312,7 +312,7 @@ const HowItWorksPage = () => {
                 <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
                   <CardContent className="p-6 text-center">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <feature.icon size={32} style={{color: '#2F8140'}} />
+                      <feature.icon size={32} style={{color: '#34D164'}} />
                     </div>
                     <h3 className="text-xl font-bold font-montserrat mb-3" style={{color: '#121E3C'}}>
                       {feature.title}
@@ -455,7 +455,7 @@ const HowItWorksPage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Shield size={40} style={{color: '#2F8140'}} />
+              <Shield size={40} style={{color: '#34D164'}} />
             </div>
             
             <h2 className="text-3xl font-bold font-montserrat mb-6" style={{color: '#121E3C'}}>
@@ -465,7 +465,7 @@ const HowItWorksPage = () => {
             <div className="grid md:grid-cols-3 gap-8 mb-12">
               <div className="text-center">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <UserCheck size={24} style={{color: '#2F8140'}} />
+                  <UserCheck size={24} style={{color: '#34D164'}} />
                 </div>
                 <h3 className="font-semibold font-montserrat mb-2">ID Verification</h3>
                 <p className="text-sm text-gray-600 font-lato">All professionals verify their identity with Nigerian ID documents</p>
@@ -473,7 +473,7 @@ const HowItWorksPage = () => {
               
               <div className="text-center">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Star size={24} style={{color: '#2F8140'}} />
+                  <Star size={24} style={{color: '#34D164'}} />
                 </div>
                 <h3 className="font-semibold font-montserrat mb-2">Honest Reviews</h3>
                 <p className="text-sm text-gray-600 font-lato">Only verified job completions can leave reviews</p>
@@ -481,7 +481,7 @@ const HowItWorksPage = () => {
               
               <div className="text-center">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle size={24} style={{color: '#2F8140'}} />
+                  <MessageCircle size={24} style={{color: '#34D164'}} />
                 </div>
                 <h3 className="font-semibold font-montserrat mb-2">24/7 Support</h3>
                 <p className="text-sm text-gray-600 font-lato">Our team is here to help resolve any issues</p>

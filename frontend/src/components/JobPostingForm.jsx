@@ -1018,7 +1018,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
           className="h-2 rounded-full transition-all duration-300"
           style={{
             width: `${(currentStep / totalSteps) * 100}%`,
-            backgroundColor: '#2F8140'
+            backgroundColor: '#34D164'
           }}
         />
       </div>
@@ -1185,7 +1185,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                                       nextStep();
                                     }}
                                     className="flex items-center space-x-2 text-white"
-                                    style={{backgroundColor: '#2F8140'}}
+                                    style={{backgroundColor: '#34D164'}}
                                   >
                                     <span>Continue to Next Step</span>
                                     <ArrowRight size={16} />
@@ -1195,7 +1195,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                                     type="button"
                                     onClick={goToNextQuestion}
                                     className="flex items-center space-x-2 text-white"
-                                    style={{backgroundColor: '#2F8140'}}
+                                    style={{backgroundColor: '#34D164'}}
                                   >
                                     <span>Next Question</span>
                                     <ArrowRight size={16} />
@@ -1475,7 +1475,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                 }`}
               >
                 <div className="flex items-center mb-2">
-                  <DollarSign size={20} className="mr-2" style={{color: '#2F8140'}} />
+                  <DollarSign size={20} className="mr-2" style={{color: '#34D164'}} />
                   <h3 className="font-semibold font-montserrat">Set Budget Range</h3>
                 </div>
                 <p className="text-sm text-gray-600 font-lato">
@@ -1492,7 +1492,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                 }`}
               >
                 <div className="flex items-center mb-2">
-                  <User size={20} className="mr-2" style={{color: '#2F8140'}} />
+                  <User size={20} className="mr-2" style={{color: '#34D164'}} />
                   <h3 className="font-semibold font-montserrat">Discuss with Pros</h3>
                 </div>
                 <p className="text-sm text-gray-600 font-lato">
@@ -1855,7 +1855,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
         <div className="bg-white rounded-lg max-w-md w-full p-6">
           <div className="text-center mb-6">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <User size={32} style={{color: '#2F8140'}} />
+              <User size={32} style={{color: '#34D164'}} />
             </div>
             <h3 className="text-xl font-bold font-montserrat mb-2" style={{color: '#121E3C'}}>
               Almost ready to post your job!
@@ -1868,19 +1868,19 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
           <div className="space-y-4 mb-6">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <Check size={16} style={{color: '#2F8140'}} />
+                <Check size={16} style={{color: '#34D164'}} />
               </div>
               <span className="text-sm font-lato">Track interested tradespeople</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <Check size={16} style={{color: '#2F8140'}} />
+                <Check size={16} style={{color: '#34D164'}} />
               </div>
               <span className="text-sm font-lato">Get email and SMS notifications</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <Check size={16} style={{color: '#2F8140'}} />
+                <Check size={16} style={{color: '#34D164'}} />
               </div>
               <span className="text-sm font-lato">Rate and review tradespeople</span>
             </div>
@@ -1890,7 +1890,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
             <Button
               onClick={continueToAccountCreation}
               className="w-full text-white font-lato"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               I'm new - Create Account
             </Button>
@@ -2064,7 +2064,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                       onClick={nextStep}
                       disabled={submitting}
                       className="flex items-center text-white font-lato"
-                      style={{backgroundColor: '#2F8140'}}
+                      style={{backgroundColor: '#34D164'}}
                     >
                       Next
                       <ArrowRight size={16} className="ml-2" />
@@ -2074,7 +2074,7 @@ const JobPostingForm = ({ onClose, onJobPosted }) => {
                       type="submit"
                       disabled={submitting}
                       className="flex items-center text-white font-lato"
-                      style={{backgroundColor: '#2F8140'}}
+                      style={{backgroundColor: '#34D164'}}
                     >
                       {submitting ? 'Submitting...' : (isUserAuthenticated() ? 'Post Job' : 'Create Account & Post Job')}
                       <CheckCircle size={16} className="ml-2" />

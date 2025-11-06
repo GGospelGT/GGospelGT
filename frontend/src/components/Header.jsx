@@ -47,7 +47,7 @@ const Header = () => {
             {!isTradesperson() && (
               <a 
                 onClick={() => navigate('/about')}
-                className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
+                className="text-gray-700 font-lato transition-colors hover:text-[#34D164] cursor-pointer"
               >
                 About us
               </a>
@@ -57,11 +57,11 @@ const Header = () => {
               <>
                 <a 
                   onClick={() => navigate('/how-it-works')}
-                  className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
+                  className="text-gray-700 font-lato transition-colors hover:text-[#34D164] cursor-pointer"
                 >
                   How it works
                 </a>
-                <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]">
+                <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#34D164]">
                   Find tradespeople
                 </a>
                 {/* Only show "Join as tradesperson" if user is not already a tradesperson */}
@@ -72,7 +72,7 @@ const Header = () => {
                       e.preventDefault();
                       handleAuthClick('signup');
                     }}
-                    className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]"
+                    className="text-gray-700 font-lato transition-colors hover:text-[#34D164]"
                   >
                     Join as tradesperson
                   </a>
@@ -86,7 +86,7 @@ const Header = () => {
             {isAuthenticated() ? (
               <>
                 <div className="flex items-center space-x-2">
-                  <User size={20} style={{color: '#2F8140'}} />
+                  <User size={20} style={{color: '#34D164'}} />
                   <span className="font-lato text-gray-700">
                     Welcome, {user?.name?.split(' ')[0] || 'User'}
                   </span>
@@ -98,7 +98,7 @@ const Header = () => {
                     <Button 
                       variant="ghost"
                       onClick={() => navigate('/browse-tradespeople')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                      className="text-gray-700 font-lato hover:text-[#34D164] flex items-center space-x-1"
                     >
                       <Search size={16} />
                       <span>Find Tradespeople</span>
@@ -107,7 +107,7 @@ const Header = () => {
                     <Button 
                       onClick={() => navigate('/post-job')}
                       className="font-lato text-white hover:opacity-90" 
-                      style={{backgroundColor: '#2F8140'}}
+                      style={{backgroundColor: '#34D164'}}
                     >
                       Post a job
                     </Button>
@@ -117,7 +117,7 @@ const Header = () => {
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="ghost"
-                          className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] flex items-center space-x-1"
                         >
                           <User size={16} />
                           <span>Menu</span>
@@ -171,7 +171,7 @@ const Header = () => {
                     <Button 
                       variant="ghost"
                       onClick={() => navigate('/browse-jobs')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                      className="text-gray-700 font-lato hover:text-[#34D164] flex items-center space-x-1"
                     >
                       <Search size={16} />
                       <span>Browse Jobs</span>
@@ -182,7 +182,7 @@ const Header = () => {
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="ghost"
-                          className="text-gray-700 font-lato hover:text-[#2F8140] flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] flex items-center space-x-1"
                         >
                           <User size={16} />
                           <span>Menu</span>
@@ -254,14 +254,14 @@ const Header = () => {
                 <Button 
                   variant="ghost" 
                   onClick={() => handleAuthClick('login')}
-                  className="text-gray-700 font-lato hover:text-[#2F8140]"
+                  className="text-gray-700 font-lato hover:text-[#34D164]"
                 >
                   Sign in
                 </Button>
                 <Button 
                   onClick={() => handleAuthClick('signup')}
                   className="font-lato text-white hover:opacity-90" 
-                  style={{backgroundColor: '#2F8140'}}
+                  style={{backgroundColor: '#34D164'}}
                 >
                   Join serviceHub
                 </Button>
@@ -290,7 +290,7 @@ const Header = () => {
                     navigate('/about');
                     setIsMenuOpen(false);
                   }}
-                  className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
+                  className="text-gray-700 font-lato transition-colors hover:text-[#34D164] cursor-pointer"
                 >
                   About us
                 </a>
@@ -303,11 +303,11 @@ const Header = () => {
                       navigate('/how-it-works');
                       setIsMenuOpen(false);
                     }}
-                    className="text-gray-700 font-lato transition-colors hover:text-[#2F8140] cursor-pointer"
+                    className="text-gray-700 font-lato transition-colors hover:text-[#34D164] cursor-pointer"
                   >
                     How it works
                   </a>
-                  <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]">
+                  <a href="#" className="text-gray-700 font-lato transition-colors hover:text-[#34D164]">
                     Find tradespeople
                   </a>
                   {/* Only show "Join as tradesperson" if user is not already a tradesperson */}
@@ -319,7 +319,7 @@ const Header = () => {
                         handleAuthClick('signup');
                         setIsMenuOpen(false);
                       }}
-                      className="text-gray-700 font-lato transition-colors hover:text-[#2F8140]"
+                      className="text-gray-700 font-lato transition-colors hover:text-[#34D164]"
                     >
                       Join as tradesperson
                     </a>
@@ -330,7 +330,7 @@ const Header = () => {
                 {isAuthenticated() ? (
                   <>
                     <div className="flex items-center space-x-2 px-4 py-2">
-                      <User size={20} style={{color: '#2F8140'}} />
+                      <User size={20} style={{color: '#34D164'}} />
                       <span className="font-lato text-gray-700">
                         Welcome, {user?.name?.split(' ')[0] || 'User'}
                       </span>
@@ -345,7 +345,7 @@ const Header = () => {
                             navigate('/browse-tradespeople');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <Search size={16} />
                           <span>Find Tradespeople</span>
@@ -357,7 +357,7 @@ const Header = () => {
                             setIsMenuOpen(false);
                           }}
                           className="font-lato text-white justify-start" 
-                          style={{backgroundColor: '#2F8140'}}
+                          style={{backgroundColor: '#34D164'}}
                         >
                           Post a job
                         </Button>
@@ -372,7 +372,7 @@ const Header = () => {
                             navigate('/my-jobs');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <Briefcase size={16} />
                           <span>My Jobs</span>
@@ -384,7 +384,7 @@ const Header = () => {
                             navigate('/my-reviews');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <Star size={16} />
                           <span>My Reviews</span>
@@ -400,7 +400,7 @@ const Header = () => {
                             navigate('/help');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <HelpCircle size={16} />
                           <span>Help</span>
@@ -412,7 +412,7 @@ const Header = () => {
                             navigate('/contact');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <MessageSquare size={16} />
                           <span>Contact</span>
@@ -428,7 +428,7 @@ const Header = () => {
                             navigate('/profile');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <User size={16} />
                           <span>Profile</span>
@@ -456,7 +456,7 @@ const Header = () => {
                             navigate('/browse-jobs');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <Search size={16} />
                           <span>Browse Jobs</span>
@@ -472,7 +472,7 @@ const Header = () => {
                             navigate('/my-interests');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <Heart size={16} />
                           <span>My Interests</span>
@@ -484,7 +484,7 @@ const Header = () => {
                             navigate('/completed-jobs');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <CheckCircle size={16} />
                           <span>Completed Jobs</span>
@@ -496,7 +496,7 @@ const Header = () => {
                             navigate('/wallet');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <span>💰</span>
                           <span>Wallet</span>
@@ -507,7 +507,7 @@ const Header = () => {
                             navigate('/referrals');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <span>🎁</span>
                           <span>Referrals</span>
@@ -518,7 +518,7 @@ const Header = () => {
                             navigate('/my-received-reviews');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <Star size={16} />
                           <span>My Received Reviews</span>
@@ -534,7 +534,7 @@ const Header = () => {
                             navigate('/help');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <HelpCircle size={16} />
                           <span>Help</span>
@@ -545,7 +545,7 @@ const Header = () => {
                             navigate('/contact');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <MessageSquare size={16} />
                           <span>Contact</span>
@@ -561,7 +561,7 @@ const Header = () => {
                             navigate('/profile');
                             setIsMenuOpen(false);
                           }}
-                          className="text-gray-700 font-lato hover:text-[#2F8140] justify-start flex items-center space-x-1"
+                          className="text-gray-700 font-lato hover:text-[#34D164] justify-start flex items-center space-x-1"
                         >
                           <User size={16} />
                           <span>Profile</span>
@@ -590,14 +590,14 @@ const Header = () => {
                     <Button 
                       variant="ghost" 
                       onClick={() => handleAuthClick('login')}
-                      className="text-gray-700 font-lato hover:text-[#2F8140] justify-start"
+                      className="text-gray-700 font-lato hover:text-[#34D164] justify-start"
                     >
                       Sign in
                     </Button>
                     <Button 
                       onClick={() => handleAuthClick('signup')}
                       className="font-lato text-white justify-start" 
-                      style={{backgroundColor: '#2F8140'}}
+                      style={{backgroundColor: '#34D164'}}
                     >
                       Join serviceHub
                     </Button>

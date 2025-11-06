@@ -221,7 +221,7 @@ const JobsMap = ({
   };
 
   const createJobMarkerIcon = (job, isSelected) => {
-    const color = isSelected ? '#2F8140' : '#3B82F6'; // Brand green if selected, blue otherwise
+    const color = isSelected ? '#34D164' : '#3B82F6'; // Brand green if selected, blue otherwise
     const size = isSelected ? 28 : 24;
 
     return {

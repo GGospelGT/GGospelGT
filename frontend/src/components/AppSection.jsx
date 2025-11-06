@@ -87,10 +87,10 @@ const AppSection = () => {
                   <div className="absolute inset-0 bg-gradient-to-b from-green-400 to-green-600 p-6">
                     <div className="bg-white rounded-lg p-4 mb-4">
                       <div className="flex items-center space-x-2 mb-2">
-                        <div className="w-4 h-4 rounded-full" style={{backgroundColor: '#2F8140'}}></div>
+                        <div className="w-4 h-4 rounded-full" style={{backgroundColor: '#34D164'}}></div>
                         <span className="text-xs font-semibold font-montserrat">
                           <span style={{color: '#121E3C'}}>Service</span>
-                          <span style={{color: '#2F8140'}}>Hub</span>
+                          <span style={{color: '#34D164'}}>Hub</span>
                         </span>
                       </div>
                       <div className="text-left text-xs space-y-1">

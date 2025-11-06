@@ -861,9 +861,9 @@ async def request_password_reset(request_data: PasswordResetRequest):
                 <style>
                     body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
                     .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                    .header {{ background-color: #2F8140; color: white; padding: 20px; text-align: center; }}
+                    .header {{ background-color: #34D164; color: white; padding: 20px; text-align: center; }}
                     .content {{ background-color: #f9f9f9; padding: 30px; }}
-                    .button {{ display: inline-block; background-color: #2F8140; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+                    .button {{ display: inline-block; background-color: #34D164; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
                     .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
                     .warning {{ color: #d32f2f; font-weight: bold; margin-top: 20px; }}
                 </style>

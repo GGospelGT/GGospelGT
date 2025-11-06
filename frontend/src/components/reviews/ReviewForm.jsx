@@ -263,7 +263,7 @@ const ReviewForm = ({
               <label
                 htmlFor="photo-upload"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white cursor-pointer"
-                style={{backgroundColor: '#2F8140'}}
+                style={{backgroundColor: '#34D164'}}
               >
                 Choose Photos
               </label>
@@ -335,7 +335,7 @@ const ReviewForm = ({
               type="submit"
               disabled={loading}
               className="text-white font-lato px-8"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               {loading ? (
                 <>

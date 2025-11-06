@@ -114,13 +114,13 @@ const LoginForm = ({ onClose, onSwitchToSignup, onSwitchToForgotPassword }) => {
             )}
 
             {/* Submit Button */}
-            <Button type="submit" disabled={!formState.isValid || formState.isSubmitting} className="w-full text-white font-lato py-3 disabled:opacity-50" style={{backgroundColor: '#2F8140'}}>
+            <Button type="submit" disabled={!formState.isValid || formState.isSubmitting} className="w-full text-white font-lato py-3 disabled:opacity-50" style={{backgroundColor: '#34D164'}}>
               {formState.isSubmitting ? 'Signing in...' : 'Sign In'}
             </Button>
 
             {/* Forgot Password */}
             <div className="text-center">
-              <button type="button" onClick={onSwitchToForgotPassword} className="text-sm font-lato hover:underline" style={{color: '#2F8140'}}>
+              <button type="button" onClick={onSwitchToForgotPassword} className="text-sm font-lato hover:underline" style={{color: '#34D164'}}>
                 Forgot your password?
               </button>
             </div>
@@ -129,7 +129,7 @@ const LoginForm = ({ onClose, onSwitchToSignup, onSwitchToForgotPassword }) => {
             <div className="text-center pt-4 border-t">
               <p className="text-gray-600 font-lato text-sm">
                 Don't have an account?{' '}
-                <button type="button" onClick={onSwitchToSignup} className="font-semibold hover:underline" style={{color: '#2F8140'}}>
+                <button type="button" onClick={onSwitchToSignup} className="font-semibold hover:underline" style={{color: '#34D164'}}>
                   Sign up here
                 </button>
               </p>

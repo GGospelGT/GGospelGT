@@ -207,7 +207,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
           ) : (
             <div className="text-center mb-6">
               <div className="inline-flex items-center space-x-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200">
-                <Wrench size={20} style={{color: '#2F8140'}} />
+                <Wrench size={20} style={{color: '#34D164'}} />
                 <span className="font-semibold text-green-800 font-montserrat">Tradesperson Registration</span>
               </div>
             </div>
@@ -389,7 +389,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
                           value={category}
                           {...register('trade_categories')}
                           className="rounded"
-                          style={{accentColor: '#2F8140'}}
+                          style={{accentColor: '#34D164'}}
                         />
                         <span className="text-sm font-lato">{category}</span>
                       </label>
@@ -415,7 +415,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
               type="submit"
               disabled={!isValid || isSubmitting}
               className="w-full text-white font-lato py-3 disabled:opacity-50"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               {isSubmitting ? 'Creating Account...' : `Create ${showOnlyTradesperson ? 'Tradesperson' : (activeTab === 'homeowner' ? 'Homeowner' : 'Tradesperson')} Account`}
             </Button>

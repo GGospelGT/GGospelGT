@@ -163,7 +163,7 @@ const TradespersonPortfolioPage = () => {
                         <div className="flex items-center space-x-4 mb-3">
                           <div className="flex items-center">
                             <Star size={16} className="text-yellow-400 fill-current mr-1" />
-                            <span className="font-semibold" style={{color: '#2F8140'}}>
+                            <span className="font-semibold" style={{color: '#34D164'}}>
                               {tradesperson?.average_rating?.toFixed(1) || '0.0'}
                             </span>
                             <span className="text-gray-600 ml-1">
@@ -192,7 +192,7 @@ const TradespersonPortfolioPage = () => {
                       {/* Contact Button */}
                       <Button
                         className="text-white font-lato"
-                        style={{backgroundColor: '#2F8140'}}
+                        style={{backgroundColor: '#34D164'}}
                       >
                         Contact Tradesperson
                       </Button>
@@ -224,7 +224,7 @@ const TradespersonPortfolioPage = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                  <Award size={20} className="mr-2" style={{color: '#2F8140'}} />
+                  <Award size={20} className="mr-2" style={{color: '#34D164'}} />
                   Portfolio ({portfolioItems.length} items)
                 </CardTitle>
               </CardHeader>
@@ -253,7 +253,7 @@ const TradespersonPortfolioPage = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                      <Award size={20} className="mr-2" style={{color: '#2F8140'}} />
+                      <Award size={20} className="mr-2" style={{color: '#34D164'}} />
                       Professional Details
                     </CardTitle>
                   </CardHeader>
@@ -275,7 +275,7 @@ const TradespersonPortfolioPage = () => {
                         <div className="space-y-2">
                           {tradesperson.certifications.map((cert, index) => (
                             <div key={index} className="flex items-center space-x-2">
-                              <Award size={14} style={{color: '#2F8140'}} />
+                              <Award size={14} style={{color: '#34D164'}} />
                               <span className="text-gray-700 font-lato">{cert}</span>
                             </div>
                           ))}
@@ -289,7 +289,7 @@ const TradespersonPortfolioPage = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center font-montserrat" style={{color: '#121E3C'}}>
-                      <User size={20} className="mr-2" style={{color: '#2F8140'}} />
+                      <User size={20} className="mr-2" style={{color: '#34D164'}} />
                       Account Information
                     </CardTitle>
                   </CardHeader>
@@ -297,7 +297,7 @@ const TradespersonPortfolioPage = () => {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between py-2 border-b">
                         <div className="flex items-center space-x-2">
-                          <Calendar size={16} style={{color: '#2F8140'}} />
+                          <Calendar size={16} style={{color: '#34D164'}} />
                           <span className="font-lato">Member since</span>
                         </div>
                         <span className="text-gray-600 font-lato">
@@ -307,7 +307,7 @@ const TradespersonPortfolioPage = () => {
                       
                       <div className="flex items-center justify-between py-2 border-b">
                         <div className="flex items-center space-x-2">
-                          <Award size={16} style={{color: '#2F8140'}} />
+                          <Award size={16} style={{color: '#34D164'}} />
                           <span className="font-lato">Verified Tradesperson</span>
                         </div>
                         <Badge className={tradesperson.verified_tradesperson ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>

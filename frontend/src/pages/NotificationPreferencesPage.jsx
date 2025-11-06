@@ -158,7 +158,7 @@ const NotificationPreferencesPage = () => {
             <Button 
               onClick={() => navigate('/')}
               className="text-white font-lato"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               Go to Homepage
             </Button>
@@ -176,7 +176,7 @@ const NotificationPreferencesPage = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#2F8140'}}></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#34D164'}}></div>
               <p className="text-gray-600 font-lato">Loading notification preferences...</p>
             </div>
           </div>
@@ -267,7 +267,7 @@ const NotificationPreferencesPage = () => {
                               className={`justify-start font-lato ${
                                 isSelected ? 'text-white' : ''
                               }`}
-                              style={isSelected ? {backgroundColor: '#2F8140'} : {}}
+                              style={isSelected ? {backgroundColor: '#34D164'} : {}}
                             >
                               <OptionIcon size={14} className="mr-2" />
                               {option.value === NotificationChannels.BOTH ? 'Both' : 
@@ -289,7 +289,7 @@ const NotificationPreferencesPage = () => {
               onClick={handleSavePreferences}
               disabled={saving}
               className="text-white font-lato px-8"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               {saving ? (
                 <>

@@ -137,7 +137,7 @@ const AboutUsPage = () => {
                   </div>
                   
                   <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 p-8 rounded-xl">
-                    <h3 className="text-xl font-bold font-montserrat mb-4" style={{color: '#2F8140'}}>
+                    <h3 className="text-xl font-bold font-montserrat mb-4" style={{color: '#34D164'}}>
                       Our Simple Mission
                     </h3>
                     <p className="text-gray-800 font-lato text-lg leading-relaxed">
@@ -171,7 +171,7 @@ const AboutUsPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-4xl md:text-5xl font-bold font-montserrat mb-2" style={{color: '#2F8140'}}>
+                  <div className="text-4xl md:text-5xl font-bold font-montserrat mb-2" style={{color: '#34D164'}}>
                     {stat.number}{stat.suffix}
                   </div>
                   <div className="text-gray-600 font-lato font-medium">
@@ -194,7 +194,7 @@ const AboutUsPage = () => {
                 <CardContent className="p-8">
                   <div className="flex items-center mb-6">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                      <Target size={24} style={{color: '#2F8140'}} />
+                      <Target size={24} style={{color: '#34D164'}} />
                     </div>
                     <h3 className="text-2xl font-bold font-montserrat" style={{color: '#121E3C'}}>
                       Our Mission
@@ -246,7 +246,7 @@ const AboutUsPage = () => {
                 <CardContent className="p-8">
                   <div className="flex items-center mb-6">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                      <Eye size={24} style={{color: '#2F8140'}} />
+                      <Eye size={24} style={{color: '#34D164'}} />
                     </div>
                     <h3 className="text-2xl font-bold font-montserrat" style={{color: '#121E3C'}}>
                       Our Vision
@@ -300,7 +300,7 @@ const AboutUsPage = () => {
                 <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
                   <CardContent className="p-8">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <value.icon size={32} style={{color: '#2F8140'}} />
+                      <value.icon size={32} style={{color: '#34D164'}} />
                     </div>
                     
                     <h3 className="text-xl font-bold font-montserrat mb-4 text-center" style={{color: '#121E3C'}}>

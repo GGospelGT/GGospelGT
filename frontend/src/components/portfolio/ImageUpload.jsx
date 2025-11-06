@@ -302,7 +302,7 @@ const ImageUpload = ({ onUploadSuccess, onCancel }) => {
               onClick={handleUpload}
               disabled={uploading || !selectedFile}
               className="text-white font-lato"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               {uploading ? (
                 <>

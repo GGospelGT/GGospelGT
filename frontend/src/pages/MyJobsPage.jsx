@@ -579,7 +579,7 @@ const MyJobsPage = () => {
                   </div>
                   {selectedJob.budget_min && selectedJob.budget_max && (
                     <div className="text-right">
-                      <div className="text-xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                      <div className="text-xl font-bold font-montserrat" style={{color: '#34D164'}}>
                         {formatCurrency(selectedJob.budget_min)} - {formatCurrency(selectedJob.budget_max)}
                       </div>
                       <div className="text-sm text-gray-500 font-lato">Your Budget</div>
@@ -597,7 +597,7 @@ const MyJobsPage = () => {
               
               {interestsLoading ? (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#2F8140'}}></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#34D164'}}></div>
                   <p className="text-gray-600 font-lato">Loading interested tradespeople...</p>
                 </div>
               ) : interestedTradespeople.length === 0 ? (
@@ -661,7 +661,7 @@ const MyJobsPage = () => {
                               <Button
                                 onClick={() => handleShareContact(person.interest_id)}
                                 className="text-white font-lato"
-                                style={{backgroundColor: '#2F8140'}}
+                                style={{backgroundColor: '#34D164'}}
                               >
                                 Share Contact Details
                               </Button>
@@ -739,7 +739,7 @@ const MyJobsPage = () => {
                 <div className="space-y-4">
                   <Button 
                     onClick={() => window.location.href = '/post-job'}
-                    className="bg-[#2F8140] hover:bg-[#245a32] text-white font-montserrat"
+                    className="bg-[#34D164] hover:bg-[#245a32] text-white font-montserrat"
                   >
                     Post Your First Job
                   </Button>
@@ -886,7 +886,7 @@ const MyJobsPage = () => {
                               <div className="text-right space-y-2">
                                 {job.budget_min && job.budget_max ? (
                                   <div>
-                                    <div className="text-lg font-bold font-montserrat" style={{color: '#2F8140'}}>
+                                    <div className="text-lg font-bold font-montserrat" style={{color: '#34D164'}}>
                                       {formatCurrency(job.budget_min)} - {formatCurrency(job.budget_max)}
                                     </div>
                                     <div className="text-sm text-gray-500 font-lato">Budget Range</div>
@@ -943,7 +943,7 @@ const MyJobsPage = () => {
                                 <Button
                                   onClick={() => handleViewInterestedTradespeople(job)}
                                   className="text-white font-lato"
-                                  style={{backgroundColor: '#2F8140'}}
+                                  style={{backgroundColor: '#34D164'}}
                                   disabled={!job.interests_count || job.interests_count === 0}
                                 >
                                   <Users size={16} className="mr-2" />
@@ -1037,7 +1037,7 @@ const MyJobsPage = () => {
                                     <Button
                                       onClick={() => handleLeaveReview(job)}
                                       className="font-lato text-white"
-                                      style={{backgroundColor: '#2F8140'}}
+                                      style={{backgroundColor: '#34D164'}}
                                     >
                                       <Star size={16} className="mr-2" />
                                       Leave Review
@@ -1057,7 +1057,7 @@ const MyJobsPage = () => {
                                   <Button
                                     onClick={() => handleCompleteJob(job.id)}
                                     className="font-lato text-white"
-                                    style={{backgroundColor: '#2F8140'}}
+                                    style={{backgroundColor: '#34D164'}}
                                     disabled={completingJobId === job.id}
                                   >
                                     {completingJobId === job.id ? (

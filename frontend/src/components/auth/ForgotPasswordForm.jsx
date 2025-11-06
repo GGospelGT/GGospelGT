@@ -143,7 +143,7 @@ const ForgotPasswordForm = ({ onClose, onBackToLogin }) => {
               <Button
                 onClick={handleBackToLogin}
                 className="w-full text-white font-lato"
-                style={{backgroundColor: '#2F8140'}}
+                style={{backgroundColor: '#34D164'}}
               >
                 Back to Sign In
               </Button>
@@ -191,7 +191,7 @@ const ForgotPasswordForm = ({ onClose, onBackToLogin }) => {
               type="submit"
               disabled={isLoading}
               className="w-full text-white font-lato py-3 disabled:opacity-50"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               {isLoading ? 'Sending Reset Link...' : 'Send Reset Link'}
             </Button>

@@ -299,7 +299,7 @@ const NotificationsPage = () => {
             <Button 
               onClick={() => navigate('/')}
               className="text-white font-lato"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               Go to Homepage
             </Button>
@@ -415,7 +415,7 @@ const NotificationsPage = () => {
                     onClick={markAllAsRead}
                     disabled={actionLoading.has('mark-all') || pagination.unread === 0}
                     className="flex items-center space-x-2"
-                    style={{backgroundColor: '#2F8140'}}
+                    style={{backgroundColor: '#34D164'}}
                   >
                     {actionLoading.has('mark-all') ? (
                       <RefreshCw size={16} className="animate-spin" />

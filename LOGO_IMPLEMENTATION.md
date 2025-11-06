@@ -5,9 +5,9 @@
 ### 🎯 **Logo Design Elements**
 
 **From Your Brand Logo:**
-- **Green Circle**: `#2F8140` background with person icon
+- **Green Circle**: `#34D164` background with person icon
 - **Service**: White text (on dark backgrounds) / Navy blue `#121E3C` (on light backgrounds)
-- **Hub**: Green text `#2F8140` 
+- **Hub**: Green text `#34D164` 
 - **Professional Person Icon**: Representing tradespeople and service professionals
 
 ### 🔧 **Technical Implementation**
@@ -31,10 +31,10 @@ sizes: {
 #### **Color Variants**
 - **Light Variant**: For white/light backgrounds
   - "Service" in navy blue `#121E3C`
-  - "Hub" in service green `#2F8140`
+  - "Hub" in service green `#34D164`
 - **Dark Variant**: For dark backgrounds (footer)
   - "Service" in white `#FFFFFF`
-  - "Hub" in service green `#2F8140`
+  - "Hub" in service green `#34D164`
 
 ### 📱 **Logo Placement**
 
@@ -65,7 +65,7 @@ sizes: {
 
 #### **Typography Treatment**
 - ✅ **"Service"**: Always in Montserrat Bold
-- ✅ **"Hub"**: Always in service green `#2F8140`
+- ✅ **"Hub"**: Always in service green `#34D164`
 - ✅ **Consistent Spacing**: Proper letter spacing and alignment
 - ✅ **No Separation**: Single word treatment as "ServiceHub"
 
@@ -93,10 +93,10 @@ sizes: {
 
 #### **Brand Colors Used**
 ```css
-Green Circle: #2F8140
+Green Circle: #34D164
 Navy Blue Text: #121E3C  
 White Text: #FFFFFF
-Green Text: #2F8140
+Green Text: #34D164
 ```
 
 #### **Typography**
@@ -122,7 +122,7 @@ font-weight: 700 (Bold)
 ### 🚀 **Logo Usage Guidelines**
 
 #### **Do's:**
-- ✅ Use official colors (`#2F8140` green, `#121E3C` navy)
+- ✅ Use official colors (`#34D164` green, `#121E3C` navy)
 - ✅ Maintain proper proportions between icon and text
 - ✅ Use appropriate variant (light/dark) for background
 - ✅ Keep adequate white space around logo

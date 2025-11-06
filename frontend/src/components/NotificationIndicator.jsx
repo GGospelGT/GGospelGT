@@ -127,7 +127,7 @@ const NotificationIndicator = () => {
             <div className="max-h-64 overflow-y-auto">
               {loading ? (
                 <div className="p-4 text-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 mx-auto mb-2" style={{borderColor: '#2F8140'}}></div>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 mx-auto mb-2" style={{borderColor: '#34D164'}}></div>
                   <p className="text-sm text-gray-600 font-lato">Loading...</p>
                 </div>
               ) : recentNotifications.length === 0 ? (

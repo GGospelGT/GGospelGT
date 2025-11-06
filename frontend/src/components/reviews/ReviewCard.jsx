@@ -256,7 +256,7 @@ const ReviewCard = ({
                   onClick={handleReplySubmit}
                   disabled={!replyText.trim() || submittingReply}
                   className="text-white"
-                  style={{backgroundColor: '#2F8140'}}
+                  style={{backgroundColor: '#34D164'}}
                 >
                   {submittingReply ? 'Posting...' : 'Post Response'}
                 </Button>

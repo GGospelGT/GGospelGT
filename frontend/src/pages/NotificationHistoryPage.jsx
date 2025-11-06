@@ -131,7 +131,7 @@ const NotificationHistoryPage = () => {
             <Button 
               onClick={() => navigate('/')}
               className="text-white font-lato"
-              style={{backgroundColor: '#2F8140'}}
+              style={{backgroundColor: '#34D164'}}
             >
               Go to Homepage
             </Button>
@@ -149,7 +149,7 @@ const NotificationHistoryPage = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#2F8140'}}></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#34D164'}}></div>
               <p className="text-gray-600 font-lato">Loading notification history...</p>
             </div>
           </div>
@@ -192,7 +192,7 @@ const NotificationHistoryPage = () => {
               <div className="flex items-center space-x-4">
                 <div className="text-right">
                   <div className="text-sm text-gray-500 font-lato">Total Notifications</div>
-                  <div className="text-2xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                  <div className="text-2xl font-bold font-montserrat" style={{color: '#34D164'}}>
                     {pagination.total}
                   </div>
                 </div>
@@ -209,7 +209,7 @@ const NotificationHistoryPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                <div className="text-2xl font-bold font-montserrat" style={{color: '#34D164'}}>
                   {pagination.total}
                 </div>
                 <div className="text-sm text-gray-600 font-lato">Total Notifications</div>
@@ -348,7 +348,7 @@ const NotificationHistoryPage = () => {
                         size="sm"
                         onClick={() => handlePageChange(page)}
                         className="font-lato"
-                        style={currentPage === page ? {backgroundColor: '#2F8140'} : {}}
+                        style={currentPage === page ? {backgroundColor: '#34D164'} : {}}
                       >
                         {page}
                       </Button>

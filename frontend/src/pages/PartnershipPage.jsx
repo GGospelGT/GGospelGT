@@ -222,7 +222,7 @@ const PartnershipPage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Handshake size={40} style={{color: '#2F8140'}} />
+              <Handshake size={40} style={{color: '#34D164'}} />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold font-montserrat mb-6" style={{color: '#121E3C'}}>
               Partner with ServiceHub
@@ -261,7 +261,7 @@ const PartnershipPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-4xl md:text-5xl font-bold font-montserrat mb-2" style={{color: '#2F8140'}}>
+                  <div className="text-4xl md:text-5xl font-bold font-montserrat mb-2" style={{color: '#34D164'}}>
                     {stat.number}
                   </div>
                   <div className="text-gray-600 font-lato">
@@ -292,7 +292,7 @@ const PartnershipPage = () => {
                 <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
                   <CardContent className="p-6 text-center">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <benefit.icon size={32} style={{color: '#2F8140'}} />
+                      <benefit.icon size={32} style={{color: '#34D164'}} />
                     </div>
                     <h3 className="text-xl font-bold font-montserrat mb-3" style={{color: '#121E3C'}}>
                       {benefit.title}
@@ -347,7 +347,7 @@ const PartnershipPage = () => {
                       {/* Icon and Title */}
                       <div className="md:col-span-12 lg:col-span-3 text-center lg:text-left">
                         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto lg:mx-0 mb-4">
-                          <type.icon size={40} style={{color: '#2F8140'}} />
+                          <type.icon size={40} style={{color: '#34D164'}} />
                         </div>
                         <h3 className="text-2xl font-bold font-montserrat mb-4" style={{color: '#121E3C'}}>
                           {type.title}
@@ -412,7 +412,7 @@ const PartnershipPage = () => {
                 <div key={index} className="flex items-center space-x-6">
                   <div className="flex-shrink-0">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-2xl font-bold font-montserrat" style={{color: '#2F8140'}}>
+                      <span className="text-2xl font-bold font-montserrat" style={{color: '#34D164'}}>
                         {step.step}
                       </span>
                     </div>
@@ -512,7 +512,7 @@ const PartnershipPage = () => {
                 <CardContent className="space-y-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <Mail size={24} style={{color: '#2F8140'}} />
+                      <Mail size={24} style={{color: '#34D164'}} />
                     </div>
                     <div>
                       <h4 className="font-semibold font-montserrat mb-1">Email Us</h4>
@@ -523,7 +523,7 @@ const PartnershipPage = () => {
 
                   <div className="flex items-start space-x-4">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <Phone size={24} style={{color: '#2F8140'}} />
+                      <Phone size={24} style={{color: '#34D164'}} />
                     </div>
                     <div>
                       <h4 className="font-semibold font-montserrat mb-1">Call Us</h4>
@@ -534,7 +534,7 @@ const PartnershipPage = () => {
 
                   <div className="flex items-start space-x-4">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <MapPin size={24} style={{color: '#2F8140'}} />
+                      <MapPin size={24} style={{color: '#34D164'}} />
                     </div>
                     <div>
                       <h4 className="font-semibold font-montserrat mb-1">Visit Us</h4>
