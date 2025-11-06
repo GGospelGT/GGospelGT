@@ -20,6 +20,19 @@ module.exports = {
   				'gray': '#E55E55',
   				'white': '#FFFFFF'
   			},
+            // Flatten Tailwind's green palette so every shade equals the logo hex
+            green: {
+                50: '#2F8140',
+                100: '#2F8140',
+                200: '#2F8140',
+                300: '#2F8140',
+                400: '#2F8140',
+                500: '#2F8140',
+                600: '#2F8140',
+                700: '#2F8140',
+                800: '#2F8140',
+                900: '#2F8140'
+            },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
