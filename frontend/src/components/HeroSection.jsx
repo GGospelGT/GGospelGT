@@ -3,8 +3,8 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Search, MapPin, Plus, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { jobsAPI } from '../api/services';
-import { adminAPI } from '../api/wallet';
+import { tradespeopleAPI } from '../api/services';
+import apiClient from '../api/client';
 import { useToast } from '../hooks/use-toast';
 import useStates from '../hooks/useStates';
 
@@ -45,6 +45,7 @@ const FALLBACK_TRADE_CATEGORIES = [
 
 const HeroSection = () => {
   const [job, setJob] = useState('');
+  const [jobSearch, setJobSearch] = useState('');
   const [location, setLocation] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [showJobDropdown, setShowJobDropdown] = useState(false);
@@ -60,15 +61,14 @@ const HeroSection = () => {
     const fetchTradeCategories = async () => {
       try {
         setLoadingTrades(true);
-        const response = await adminAPI.getAllTrades();
-        
-        if (response && response.trades && Array.isArray(response.trades)) {
-          // API returns an array of trade name strings
-          setTradeCategories(response.trades);
-          console.log('✅ Loaded trade categories from API:', response.trades.length, 'categories');
-          console.log('📋 Categories:', response.trades.slice(0, 5), '...');
+        const { data } = await apiClient.get('/auth/trade-categories');
+
+        if (data && Array.isArray(data.categories)) {
+          setTradeCategories(data.categories);
+          console.log('✅ Loaded trade categories from API:', data.categories.length, 'categories');
+          console.log('📋 Categories:', data.categories.slice(0, 5), '...');
         } else {
-          console.log('⚠️ Invalid API response format:', response);
+          console.log('⚠️ Invalid API response format:', data);
           setTradeCategories(FALLBACK_TRADE_CATEGORIES);
         }
       } catch (error) {
@@ -84,18 +84,28 @@ const HeroSection = () => {
 
   // Filter trade categories based on search input
   const filteredTradeCategories = tradeCategories.filter(category =>
-    category.toLowerCase().includes(job.toLowerCase())
+    category.toLowerCase().includes(jobSearch.toLowerCase())
   );
 
   const handleJobSelect = (selectedJob) => {
     setJob(selectedJob);
     setShowJobDropdown(false);
+    setJobSearch('');
   };
 
   const handleJobInputChange = (e) => {
-    setJob(e.target.value);
+    setJobSearch(e.target.value);
     if (!showJobDropdown) {
       setShowJobDropdown(true);
+    }
+  };
+
+  const toggleJobDropdown = () => {
+    const next = !showJobDropdown;
+    setShowJobDropdown(next);
+    if (next) {
+      // Reset filter when opening to show full list
+      setJobSearch('');
     }
   };
 
@@ -128,9 +138,9 @@ const HeroSection = () => {
     setIsSearching(true);
     
     try {
-      // Search for existing jobs
-      const results = await jobsAPI.searchJobsText({
-        q: job,
+      // Search for tradespeople by trade and location
+      const results = await tradespeopleAPI.getTradespeople({
+        trade: job,
         location: location,
         limit: 10
       });
@@ -141,7 +151,7 @@ const HeroSection = () => {
       // In a real app, you'd navigate to a search results page
       toast({
         title: "Search completed!",
-        description: `Found ${results.pagination?.total || 0} matching jobs in ${location}.`,
+        description: `Found ${results.total || results?.data?.length || 0} tradespeople in ${location}.`,
       });
 
       // Here you would typically navigate to search results page
@@ -151,7 +161,7 @@ const HeroSection = () => {
       console.error('Search error:', error);
       toast({
         title: "Search failed",
-        description: "There was an error searching for jobs. Please try again.",
+        description: "There was an error searching for tradespeople. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -181,7 +191,7 @@ const HeroSection = () => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10" size={20} />
                   <button
                     type="button"
-                    onClick={() => setShowJobDropdown(!showJobDropdown)}
+                    onClick={toggleJobDropdown}
                     className="w-full h-12 pl-10 pr-10 text-left text-lg font-lato border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white hover:border-gray-400 transition-colors"
                   >
                     <span className={job ? 'text-gray-900' : 'text-gray-500'}>
@@ -200,7 +210,7 @@ const HeroSection = () => {
                       <div className="p-2 border-b border-gray-200">
                         <input
                           type="text"
-                          value={job}
+                          value={jobSearch}
                           onChange={handleJobInputChange}
                           placeholder="Search job categories..."
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
@@ -218,7 +228,7 @@ const HeroSection = () => {
                       {/* Filtered categories */}
                       {!loadingTrades && filteredTradeCategories.length === 0 && (
                         <div className="px-4 py-3 text-gray-500 text-center">
-                          No categories found matching "{job}"
+                          No categories found matching "{jobSearch}"
                         </div>
                       )}
                       
@@ -298,7 +308,7 @@ const HeroSection = () => {
               <Plus size={20} className="mr-2" />
               Post a Job Now
             </Button>
-            <span className="text-gray-500 font-lato">or use the search above to find existing jobs</span>
+            <span className="text-gray-500 font-lato">or use the search above to find local tradespeople</span>
           </div>
         </div>
       </div>

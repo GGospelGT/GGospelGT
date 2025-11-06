@@ -210,12 +210,12 @@ export const jobsAPI = {
 // Tradespeople API
 export const tradespeopleAPI = {
   createTradesperson: async (tradespersonData) => {
-    const response = await apiClient.post('/tradespeople', tradespersonData);
+    const response = await apiClient.post('/tradespeople/', tradespersonData);
     return response.data;
   },
 
   getTradespeople: async (params = {}) => {
-    const response = await apiClient.get('/tradespeople', { params });
+    const response = await apiClient.get('/tradespeople/', { params });
     return response.data;
   },
 
