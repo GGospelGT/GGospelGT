@@ -54,9 +54,9 @@ module.exports = {
 
         // Performance hints
         webpackConfig.performance = {
-          maxAssetSize: 512000,
-          maxEntrypointSize: 512000,
-          hints: 'warning',
+          maxAssetSize: 2097152,
+          maxEntrypointSize: 2097152,
+          hints: false,
         };
 
         // Tree shaking optimization
