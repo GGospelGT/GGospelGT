@@ -492,7 +492,7 @@ const BrowseJobsPage = () => {
               Please sign in to browse available jobs and submit quotes.
             </p>
             <Button 
-              onClick={() => window.location.reload()}
+              onClick={() => window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { mode: 'login' } }))}
               className="text-white font-lato"
               style={{backgroundColor: '#34D164'}}
             >

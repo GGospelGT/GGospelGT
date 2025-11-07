@@ -1,60 +1,96 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Logo from './Logo';
 
 const Footer = () => {
-  const navigate = useNavigate();
-  
+  // Centralized route mapping for labels
+  const routesByLabel = {
+    // Homeowners
+    'Post a job': '/post-job',
+    'Find tradespeople': '/browse-tradespeople',
+    'Trade Categories': '/trade-categories',
+    'How it works': '/how-it-works',
+    'Cost guides': '/blog',
+    'Reviews': '/reviews',
+    'Help & FAQs': '/help',
+
+    // Tradespeople
+    'Join for free': '/join-for-free',
+    'Tradesperson app': '/join-for-free', // Placeholder until app page exists
+    'Lead generation': '/join-for-free',  // Placeholder CTA
+    'Success stories': '/blog',
+    'Help centre': '/help-centre',
+    'Training courses': '/careers',
+
+    // Popular trades (category detail slugs)
+    'Builders': '/trade-categories/building',
+    'Electricians': '/trade-categories/electrical-repairs',
+    'Plumbers': '/trade-categories/plumbing',
+    'Gardeners': '/trade-categories', // Fallback (no dedicated gardeners slug)
+    'Painters & decorators': '/trade-categories/painting',
+    'Carpenters': '/trade-categories/carpentry',
+
+    // Company
+    'About us': '/about',
+    'Reviews Policy': '/reviews-policy',
+    'Careers': '/careers',
+    'Press': '/blog', // Fallback until press page exists
+    'Blog': '/blog',
+    'Contact us': '/contact',
+    'Partnerships': '/partnerships',
+  };
+
+  // Data-driven footer sections with destinations
   const footerSections = [
     {
       title: 'For homeowners',
       links: [
-        'Post a job',
-        'Find tradespeople',
-        'Trade Categories',
-        'How it works',
-        'Cost guides',
-        'Reviews',
-        'Help & FAQs'
-      ]
+        { label: 'Post a job', to: routesByLabel['Post a job'] },
+        { label: 'Find tradespeople', to: routesByLabel['Find tradespeople'] },
+        { label: 'Trade Categories', to: routesByLabel['Trade Categories'] },
+        { label: 'How it works', to: routesByLabel['How it works'] },
+        { label: 'Cost guides', to: routesByLabel['Cost guides'] },
+        { label: 'Reviews', to: routesByLabel['Reviews'] },
+        { label: 'Help & FAQs', to: routesByLabel['Help & FAQs'] },
+      ],
     },
     {
       title: 'For tradespeople',
       links: [
-        'Join for free',
-        'Tradesperson app',
-        'Lead generation',
-        'Success stories',
-        'Help centre',
-        'Training courses'
-      ]
+        { label: 'Join for free', to: routesByLabel['Join for free'] },
+        { label: 'Tradesperson app', to: routesByLabel['Tradesperson app'] },
+        { label: 'Lead generation', to: routesByLabel['Lead generation'] },
+        { label: 'Success stories', to: routesByLabel['Success stories'] },
+        { label: 'Help centre', to: routesByLabel['Help centre'] },
+        { label: 'Training courses', to: routesByLabel['Training courses'] },
+      ],
     },
     {
       title: 'Popular trades',
       links: [
-        'Builders',
-        'Electricians',
-        'Plumbers',
-        'Gardeners',
-        'Painters & decorators',
-        'Carpenters'
-      ]
+        { label: 'Builders', to: routesByLabel['Builders'] },
+        { label: 'Electricians', to: routesByLabel['Electricians'] },
+        { label: 'Plumbers', to: routesByLabel['Plumbers'] },
+        { label: 'Gardeners', to: routesByLabel['Gardeners'] },
+        { label: 'Painters & decorators', to: routesByLabel['Painters & decorators'] },
+        { label: 'Carpenters', to: routesByLabel['Carpenters'] },
+      ],
     },
     {
       title: 'Company',
       links: [
-        'About us',
-        'How it works',
-        'Reviews Policy',
-        'Careers',
-        'Press',
-        'Blog',
-        'Contact us',
-        'Partnerships'
-      ]
-    }
+        { label: 'About us', to: routesByLabel['About us'] },
+        { label: 'How it works', to: routesByLabel['How it works'] },
+        { label: 'Reviews Policy', to: routesByLabel['Reviews Policy'] },
+        { label: 'Careers', to: routesByLabel['Careers'] },
+        { label: 'Press', to: routesByLabel['Press'] },
+        { label: 'Blog', to: routesByLabel['Blog'] },
+        { label: 'Contact us', to: routesByLabel['Contact us'] },
+        { label: 'Partnerships', to: routesByLabel['Partnerships'] },
+      ],
+    },
   ];
 
   const socialLinks = [
@@ -118,40 +154,25 @@ const Footer = () => {
               <div key={index}>
                 <h3 className="font-semibold font-montserrat text-lg mb-4">{section.title}</h3>
                 <ul className="space-y-2">
-                  {section.links.map((link, linkIndex) => (
+                  {section.links.map(({ label, to, href }, linkIndex) => (
                     <li key={linkIndex}>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (link === 'About us') {
-                            navigate('/about');
-                          } else if (link === 'Reviews Policy') {
-                            navigate('/reviews-policy');
-                          } else if (link === 'How it works') {
-                            navigate('/how-it-works');
-                          } else if (link === 'Partnerships') {
-                            navigate('/partnerships');
-                          } else if (link === 'Trade Categories') {
-                            navigate('/trade-categories');
-                          } else if (link === 'Help & FAQs') {
-                            navigate('/help');
-                          } else if (link === 'Contact us') {
-                            navigate('/contact');
-                          } else if (link === 'Join for free') {
-                            navigate('/join-for-free');
-                          } else if (link === 'Help centre') {
-                            navigate('/help-centre');
-                          } else if (link === 'Blog') {
-                            navigate('/blog');
-                          } else if (link === 'Careers') {
-                            navigate('/careers');
-                          }
-                        }}
-                        className="text-gray-300 hover:text-white transition-colors text-sm font-lato cursor-pointer"
-                      >
-                        {link}
-                      </a>
+                      {to ? (
+                        <Link
+                          to={to}
+                          className="text-gray-300 hover:text-white transition-colors text-sm font-lato cursor-pointer"
+                        >
+                          {label}
+                        </Link>
+                      ) : (
+                        <a
+                          href={href || '#'}
+                          target={href ? '_blank' : '_self'}
+                          rel={href ? 'noopener noreferrer' : undefined}
+                          className="text-gray-300 hover:text-white transition-colors text-sm font-lato cursor-pointer"
+                        >
+                          {label}
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>

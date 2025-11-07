@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Menu, X, User, LogOut, Briefcase, Search, Star, Heart, ChevronDown, HelpCircle, MessageSquare, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +26,16 @@ const Header = () => {
     setAuthMode(mode);
     setAuthModalOpen(true);
   };
+  // Allow other components/pages to trigger the auth modal via a global event
+  useEffect(() => {
+    const handler = (e) => {
+      const mode = e?.detail?.mode || 'login';
+      setAuthMode(mode);
+      setAuthModalOpen(true);
+    };
+    window.addEventListener('open-auth-modal', handler);
+    return () => window.removeEventListener('open-auth-modal', handler);
+  }, []);
 
   const handleLogout = () => {
     logout();

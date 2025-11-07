@@ -366,11 +366,17 @@ const HelpCentrePage = () => {
                 }`}>
                   {option.availability}
                 </p>
-                <Button className={
-                  option.primary 
-                    ? 'bg-green-600 hover:bg-green-700 text-white' 
-                    : 'bg-white text-green-700 hover:bg-gray-100'
-                }>
+                <Button
+                  onClick={() => {
+                    if (option.title === 'Live Chat') {
+                      navigate('/contact');
+                    } else if (option.title === 'Email Support') {
+                      window.open('mailto:support@servicehub.ng');
+                    } else if (option.title === 'Phone Support') {
+                      window.open('tel:+2349012345678');
+                    }
+                  }}
+                  className={'bg-green-600 hover:bg-green-700 text-white'}>
                   {option.action}
                 </Button>
               </div>
