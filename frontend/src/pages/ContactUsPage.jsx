@@ -349,7 +349,7 @@ const ContactUsPage = () => {
                   <h3 className="text-xl font-semibold text-gray-900">Our Location</h3>
                 </div>
                 <div className="text-sm text-gray-600">
-                  <p className="mb-2">serviceHub Nigeria</p>
+                  <p className="mb-2">ServiceHub Nigeria</p>
                   <p className="mb-2">6, D Place Guest House</p>
                   <p className="mb-2">Off Omimi Link Road</p>
                   <p className="mb-2">Ekpan, Delta State</p>
