@@ -1209,46 +1209,57 @@ class Database:
 
     # Category operations
     async def get_categories_with_counts(self) -> List[dict]:
-        # If database is not connected, return static categories with zero counts
-        if not self.connected or self.database is None:
-            category_details = {
-                "Building & Construction": {
-                    "description": "From foundation to roofing, find experienced builders for your construction projects. Quality workmanship guaranteed.",
-                    "icon": "🏗️",
-                    "color": "from-orange-400 to-orange-600"
-                },
-                "Plumbing & Water Works": {
-                    "description": "Professional plumbers for installations, repairs, and water system maintenance. Available for emergency services.",
-                    "icon": "🔧",
-                    "color": "from-indigo-400 to-indigo-600"
-                },
-                "Electrical Installation": {
-                    "description": "Certified electricians for wiring, installations, and electrical repairs. Safe and reliable electrical services.",
-                    "icon": "⚡",
-                    "color": "from-yellow-400 to-yellow-600"
-                },
-                "Painting & Decorating": {
-                    "description": "Transform your space with professional painters and decorators. Interior and exterior painting services available.",
-                    "icon": "🎨",
-                    "color": "from-blue-400 to-blue-600"
-                },
-                "POP & Ceiling Works": {
-                    "description": "Expert ceiling installation and POP works. Modern designs and professional finishing for your interior spaces.",
-                    "icon": "🏠",
-                    "color": "from-purple-400 to-purple-600"
-                },
-                "Generator Installation & Repair": {
-                    "description": "Professional generator installation and maintenance services. Reliable power solutions for homes and businesses.",
-                    "icon": "🔌",
-                    "color": "from-red-400 to-red-600"
-                }
+        # Prepare friendly display metadata keyed by actual category names stored on users
+        # These names align with values in users.trade_categories
+        friendly_details = {
+            "Building": {
+                "title": "Building & Construction",
+                "description": "From foundation to roofing, find experienced builders for your construction projects. Quality workmanship guaranteed.",
+                "icon": "🏗️",
+                "color": "from-orange-400 to-orange-600"
+            },
+            "Plumbing": {
+                "title": "Plumbing & Water Works",
+                "description": "Professional plumbers for installations, repairs, and water system maintenance. Available for emergency services.",
+                "icon": "🔧",
+                "color": "from-indigo-400 to-indigo-600"
+            },
+            "Electrical Repairs": {
+                "title": "Electrical Installation",
+                "description": "Certified electricians for wiring, installations, and electrical repairs. Safe and reliable electrical services.",
+                "icon": "⚡",
+                "color": "from-yellow-400 to-yellow-600"
+            },
+            "Painting": {
+                "title": "Painting & Decorating",
+                "description": "Transform your space with professional painters and decorators. Interior and exterior painting services available.",
+                "icon": "🎨",
+                "color": "from-blue-400 to-blue-600"
+            },
+            "Plastering/POP": {
+                "title": "POP & Ceiling Works",
+                "description": "Expert ceiling installation and POP works. Modern designs and professional finishing for your interior spaces.",
+                "icon": "🏠",
+                "color": "from-purple-400 to-purple-600"
+            },
+            "Generator Services": {
+                "title": "Generator Installation & Repair",
+                "description": "Professional generator installation and maintenance services. Reliable power solutions for homes and businesses.",
+                "icon": "🔌",
+                "color": "from-red-400 to-red-600"
             }
+        }
+
+        # If database is not connected, return known categories with zero counts
+        if not self.connected or self.database is None:
             return [
                 {
-                    "title": name,
+                    "name": name,
+                    "title": meta.get("title", name),
                     "tradesperson_count": 0,
-                    **details
-                } for name, details in category_details.items()
+                    **{k: v for k, v in meta.items() if k in ("description", "icon", "color", "title")}
+                }
+                for name, meta in friendly_details.items()
             ]
 
         # Aggregate to count tradespeople by category from users collection
@@ -1263,51 +1274,28 @@ class Database:
         ]
         
         results = await self.database.users.aggregate(pipeline).to_list(None)
-        
-        # Define category details for Nigeria
-        category_details = {
-            "Building & Construction": {
-                "description": "From foundation to roofing, find experienced builders for your construction projects. Quality workmanship guaranteed.",
-                "icon": "🏗️",
-                "color": "from-orange-400 to-orange-600"
-            },
-            "Plumbing & Water Works": {
-                "description": "Professional plumbers for installations, repairs, and water system maintenance. Available for emergency services.",
-                "icon": "🔧",
-                "color": "from-indigo-400 to-indigo-600"
-            },
-            "Electrical Installation": {
-                "description": "Certified electricians for wiring, installations, and electrical repairs. Safe and reliable electrical services.",
-                "icon": "⚡",
-                "color": "from-yellow-400 to-yellow-600"
-            },
-            "Painting & Decorating": {
-                "description": "Transform your space with professional painters and decorators. Interior and exterior painting services available.",
-                "icon": "🎨",
-                "color": "from-blue-400 to-blue-600"
-            },
-            "POP & Ceiling Works": {
-                "description": "Expert ceiling installation and POP works. Modern designs and professional finishing for your interior spaces.",
-                "icon": "🏠",
-                "color": "from-purple-400 to-purple-600"
-            },
-            "Generator Installation & Repair": {
-                "description": "Professional generator installation and maintenance services. Reliable power solutions for homes and businesses.",
-                "icon": "🔌",
-                "color": "from-red-400 to-red-600"
-            }
-        }
-        
+
+        # Build categories including all found results, with friendly metadata when available
         categories = []
         for result in results:
-            category_name = result["_id"]
-            if category_name in category_details:
-                categories.append({
-                    "title": category_name,
-                    "tradesperson_count": result["count"],
-                    **category_details[category_name]
-                })
-        
+            category_name = result.get("_id")
+            count = result.get("count", 0)
+            meta = friendly_details.get(category_name, {})
+
+            # Ensure minimal fields are present even if metadata is missing
+            entry = {
+                "name": category_name,
+                "title": meta.get("title", category_name),
+                "tradesperson_count": count,
+            }
+
+            # Attach optional presentation fields if available
+            for key in ("description", "icon", "color"):
+                if key in meta:
+                    entry[key] = meta[key]
+
+            categories.append(entry)
+
         return categories
 
     async def get_featured_reviews(self, limit: int = 6) -> List[dict]:
