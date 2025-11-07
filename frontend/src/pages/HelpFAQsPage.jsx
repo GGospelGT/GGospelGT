@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Search, Phone, Mail, MessageCircle, HelpCircle, Users, Wallet, Briefcase, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -183,8 +183,8 @@ const HelpFAQsPage = () => {
       icon: Phone,
       title: "Phone Support",
       description: "Call us directly",
-      contact: "+234 (0) 123 456 7890",
-      action: "tel:+2341234567890"
+      contact: "+2348141831420",
+      action: "tel:+2348141831420"
     },
     {
       icon: MessageCircle,

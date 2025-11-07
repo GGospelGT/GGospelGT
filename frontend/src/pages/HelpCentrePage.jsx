@@ -157,7 +157,7 @@ const HelpCentrePage = () => {
     {
       icon: Phone,
       title: "Phone Support",
-      description: "+234 901 234 5678",
+  description: "+2348141831420",
       availability: "Mon-Fri, 9AM-5PM",
       action: "Call Now"
     }
@@ -372,9 +372,9 @@ const HelpCentrePage = () => {
                       navigate('/contact');
                     } else if (option.title === 'Email Support') {
                       window.open('mailto:support@servicehub.ng');
-                    } else if (option.title === 'Phone Support') {
-                      window.open('tel:+2349012345678');
-                    }
+} else if (option.title === 'Phone Support') {
+        window.open('tel:+2348141831420');
+}
                   }}
                   className={'bg-green-600 hover:bg-green-700 text-white'}>
                   {option.action}

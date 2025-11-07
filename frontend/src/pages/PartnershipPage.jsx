@@ -527,7 +527,7 @@ const PartnershipPage = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold font-montserrat mb-1">Call Us</h4>
-                      <p className="text-gray-600 font-lato">+234 (0) 800 SERVICE</p>
+                      <p className="text-gray-600 font-lato">+2348141831420</p>
                       <p className="text-sm text-gray-500 font-lato">Mon-Fri, 9AM-6PM WAT</p>
                     </div>
                   </div>

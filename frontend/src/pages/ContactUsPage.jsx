@@ -69,9 +69,9 @@ const ContactUsPage = () => {
       icon: Phone,
       title: "Phone Support",
       subtitle: "Call us directly",
-      contact: "+234 (0) 901 234 5678",
+      contact: "+2348141831420",
       description: "Available Monday to Friday, 8:00 AM - 6:00 PM (WAT)",
-      action: () => window.open('tel:+2349012345678')
+      action: () => window.open('tel:+2348141831420')
     },
     {
       icon: MessageCircle,
@@ -350,8 +350,9 @@ const ContactUsPage = () => {
                 </div>
                 <div className="text-sm text-gray-600">
                   <p className="mb-2">serviceHub Nigeria</p>
-                  <p className="mb-2">123 Business District</p>
-                  <p className="mb-2">Victoria Island, Lagos</p>
+                  <p className="mb-2">6, D Place Guest House</p>
+                  <p className="mb-2">Off Omimi Link Road</p>
+                  <p className="mb-2">Ekpan, Delta State</p>
                   <p className="mb-4">Nigeria</p>
                   <p className="text-xs text-gray-500">
                     We serve all 36 states and FCT across Nigeria
@@ -417,7 +418,7 @@ const ContactUsPage = () => {
               </p>
               <div className="flex items-center text-orange-700">
                 <Phone className="w-4 h-4 mr-2" />
-                <span className="font-medium">+234 (0) 901 234 5678</span>
+                <span className="font-medium">+2348141831420</span>
               </div>
               <p className="text-sm text-orange-600 mt-2">
                 Available Monday-Friday, 8 AM - 6 PM (WAT)

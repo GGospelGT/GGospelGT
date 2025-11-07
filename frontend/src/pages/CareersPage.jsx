@@ -613,9 +613,9 @@ const CareersPage = () => {
                 <Phone className="w-6 h-6 mr-3 text-green-400" />
                 <div className="text-left">
                   <div className="font-semibold">Call Us</div>
-                  <a href="tel:+234-800-SERVICE" className="text-green-400 hover:text-green-300">
-                    +234-800-SERVICE
-                  </a>
+                <a href="tel:+2348141831420" className="text-green-400 hover:text-green-300">
+                  +2348141831420
+                </a>
                 </div>
               </div>
             </div>

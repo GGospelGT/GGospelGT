@@ -447,7 +447,7 @@ const MyInterestsPage = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
         <div className="mb-8">
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold font-montserrat mb-2" style={{color: '#121E3C'}}>
                 My Interests
@@ -457,7 +457,7 @@ const MyInterestsPage = () => {
               </p>
             </div>
             
-            <div className="flex items-center space-x-3">
+            <div className="w-full md:w-auto max-w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <Button
                 onClick={handleManualRefresh}
                 variant="outline"
@@ -476,7 +476,7 @@ const MyInterestsPage = () => {
               </Button>
               
               {/* Wallet Balance Card */}
-              <Card className="min-w-[200px]">
+              <Card className="w-full sm:w-auto sm:min-w-[200px]">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -556,7 +556,7 @@ const MyInterestsPage = () => {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="font-montserrat">Your Job Interests</CardTitle>
-              <div className="flex items-center space-x-3">
+              <div className="w-full md:w-auto max-w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
                   Filter by status:
                 </label>
@@ -823,3 +823,7 @@ const MyInterestsPage = () => {
 };
 
 export default MyInterestsPage;
+
+
+
+
