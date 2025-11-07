@@ -20,18 +20,19 @@ module.exports = {
   				'gray': '#E55E55',
   				'white': '#FFFFFF'
   			},
-            // Flatten Tailwind's green palette so every shade equals the logo hex
+            // Tailwind green palette tuned around the brand hex (#34D164)
+            // 500 remains the brand color; other shades provide proper contrast
             green: {
-                50: '#34D164',
-                100: '#34D164',
-                200: '#34D164',
-                300: '#34D164',
-                400: '#34D164',
-                500: '#34D164',
-                600: '#34D164',
-                700: '#34D164',
-                800: '#34D164',
-                900: '#34D164'
+                50: '#EAFBF1',
+                100: '#D7F7E4',
+                200: '#B5F0CD',
+                300: '#8EE6B2',
+                400: '#61DA93',
+                500: '#34D164', // brand
+                600: '#2FBD59',
+                700: '#299E4D',
+                800: '#237F40',
+                900: '#1B6033'
             },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
