@@ -43,7 +43,7 @@ export const referralsAPI = {
 
   // Get verification document image URL
   getDocumentUrl(filename) {
-    return `${process.env.REACT_APP_BACKEND_URL}/api/referrals/verification-document/${filename}`;
+    return `${(process.env.REACT_APP_BACKEND_URL ? process.env.REACT_APP_BACKEND_URL + '/api' : (apiClient?.defaults?.baseURL || '/api'))}/referrals/verification-document/${filename}`;
   }
 };
 
@@ -89,6 +89,6 @@ export const adminReferralsAPI = {
 
   // Get verification document image URL (admin)
   getDocumentUrl(filename) {
-    return `${process.env.REACT_APP_BACKEND_URL}/api/admin/verifications/document/${filename}`;
+    return `${(process.env.REACT_APP_BACKEND_URL ? process.env.REACT_APP_BACKEND_URL + '/api' : (apiClient?.defaults?.baseURL || '/api'))}/admin/verifications/document/${filename}`;
   }
 };
