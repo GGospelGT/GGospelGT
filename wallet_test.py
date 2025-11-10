@@ -265,10 +265,10 @@ class WalletSystemTester:
             self.log_result("Valid Funding Request", False, 
                            f"Status: {response.status_code}, Response: {response.text}")
         
-        # Test minimum amount validation (below ₦1500)
+        # Test minimum amount validation (below ₦100)
         img_buffer.seek(0)
         files = {'proof_image': ('payment_proof.jpg', img_buffer, 'image/jpeg')}
-        data = {'amount_naira': 1000}  # Below minimum
+        data = {'amount_naira': 50}  # Below minimum
         
         response = self.session.post(
             f"{self.base_url}/wallet/fund",
@@ -278,7 +278,7 @@ class WalletSystemTester:
         )
         
         if response.status_code == 400:
-            self.log_result("Minimum Amount Validation", True, "Correctly rejected amount below ₦1500")
+            self.log_result("Minimum Amount Validation", True, "Correctly rejected amount below ₦100")
         else:
             self.log_result("Minimum Amount Validation", False, 
                            f"Expected 400, got {response.status_code}")
