@@ -6,7 +6,6 @@ import {
   ArrowLeft, 
   ArrowRight, 
   MapPin, 
-  Calendar, 
   DollarSign, 
   User, 
   Mail, 
@@ -83,7 +82,7 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
     town: '',
     zip_code: '',
     home_address: '',
-    timeline: '',
+    timeline: 'Flexible',
     jobLocation: null, // For coordinates
     
     // Step 3: Budget  
@@ -109,6 +108,9 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // Map centering control
+  const [mapCenterAddress, setMapCenterAddress] = useState('');
+  const [mapCenterZoom, setMapCenterZoom] = useState(10);
 
   // Trade category questions state
   const [tradeQuestions, setTradeQuestions] = useState([]);
@@ -151,6 +153,9 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
       setFormData(prev => ({ ...prev, state: initialState }));
       // Load LGAs for the initial state
       fetchLGAsForState(initialState);
+      // Center the map to the initial state
+      setMapCenterAddress(`${initialState}, Nigeria`);
+      setMapCenterZoom(10);
     }
   }, [initialState]);
 
@@ -199,8 +204,37 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
     if (field === 'state' && value) {
       fetchLGAsForState(value);
       setFormData(prev => ({ ...prev, lga: '' })); // Reset LGA when state changes
+      // Center map to selected state
+      setMapCenterAddress(`${value}, Nigeria`);
+      setMapCenterZoom(10);
+    }
+    // When LGA changes, narrow map to LGA within the state
+    if (field === 'lga' && value && formData.state) {
+      setMapCenterAddress(`${value}, ${formData.state}, Nigeria`);
+      setMapCenterZoom(12);
     }
   };
+
+  // Update map center when address fields change (debounced)
+  useEffect(() => {
+    const parts = [];
+    if (formData.home_address && formData.home_address.trim().length > 0) {
+      parts.push(formData.home_address.trim());
+    }
+    if (formData.town) parts.push(formData.town);
+    if (formData.lga) parts.push(formData.lga);
+    if (formData.state) parts.push(formData.state);
+    parts.push('Nigeria');
+    const addr = parts.filter(Boolean).join(', ');
+
+    if (!addr) return;
+    // Small debounce to avoid geocoding on every keystroke
+    const handle = setTimeout(() => {
+      setMapCenterAddress(addr);
+      setMapCenterZoom(15);
+    }, 350);
+    return () => clearTimeout(handle);
+  }, [formData.home_address, formData.town, formData.lga, formData.state]);
 
   // Fetch LGAs for selected state
   const fetchLGAsForState = async (state) => {
@@ -273,7 +307,7 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
         }
         break;
 
-      case 2: // Location & Timeline
+      case 2: // Location
         if (!formData.state.trim()) newErrors.state = 'State is required';
         if (!formData.lga.trim()) newErrors.lga = 'Local Government Area (LGA) is required';
         if (!formData.town.trim()) newErrors.town = 'Town/Area is required';
@@ -287,7 +321,6 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
         } else if (formData.home_address.trim().length < 10) {
           newErrors.home_address = 'Home address must be at least 10 characters';
         }
-        if (!formData.timeline.trim()) newErrors.timeline = 'Timeline is required';
         break;
 
       case 3: // Budget
@@ -350,24 +383,14 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
 
   const nextStep = () => {
     if (currentStep === 4) {
-      // If user is already authenticated, skip account creation and submit job
-      if (isUserAuthenticated()) {
-        handleJobSubmissionForAuthenticatedUser();
+      if (!isUserAuthenticated()) {
+        setShowAccountModal(true);
         return;
       }
-      // For non-authenticated users, show account/login choice modal
-      setShowAccountModal(true);
-      return;
     }
-    
+
     if (validateStep(currentStep)) {
       const nextStepNumber = Math.min(currentStep + 1, totalSteps);
-      // Safety check: prevent authenticated users from reaching step 5
-      if (isUserAuthenticated() && nextStepNumber === 5) {
-        console.warn('Authenticated user tried to reach step 5 - calling handleSubmit instead');
-        handleJobSubmissionForAuthenticatedUser();
-        return;
-      }
       setCurrentStep(nextStepNumber);
     }
   };
@@ -1308,10 +1331,10 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
           <div className="space-y-6">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold font-montserrat mb-2" style={{color: '#121E3C'}}>
-                Location & Timeline
+                Location
               </h2>
               <p className="text-gray-600 font-lato">
-                Where is the job located and when do you need it done?
+                Where is the job located?
               </p>
             </div>
 
@@ -1439,30 +1462,12 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
                 initialLocation={formData.jobLocation}
                 showCurrentLocation={true}
                 showSearch={true}
+                centerAddress={mapCenterAddress}
+                centerZoom={mapCenterZoom}
               />
             </div>
 
-            {/* Timeline */}
-            <div>
-              <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-                When do you need this done? *
-              </label>
-              <select
-                value={formData.timeline}
-                onChange={(e) => updateFormData('timeline', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato ${
-                  errors.timeline ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select timeline</option>
-                <option value="ASAP">As soon as possible</option>
-                <option value="This week">Within this week</option>
-                <option value="This month">Within this month</option>
-                <option value="Next month">Within next month</option>
-                <option value="Flexible">I'm flexible</option>
-              </select>
-              {errors.timeline && <p className="text-red-500 text-sm mt-1">{errors.timeline}</p>}
-            </div>
+            {/* Timeline removed from UI as requested */}
           </div>
         );
 
@@ -1949,10 +1954,8 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
             description: "You're now logged in. Let's post your job!",
           });
           
-          // Automatically submit the job after login
-          setTimeout(() => {
-            handleJobSubmissionForAuthenticatedUser();
-          }, 1000);
+          // After login, return to the preview step instead of auto-posting
+          setCurrentStep(4);
         }
       } catch (error) {
         console.error('Login failed:', error);

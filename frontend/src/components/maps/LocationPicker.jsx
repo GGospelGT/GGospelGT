@@ -8,7 +8,10 @@ const LocationPicker = ({
   height = '400px',
   placeholder = "Search for an address...",
   showCurrentLocation = true,
-  showSearch = true 
+  showSearch = true,
+  centerAddress,
+  centerZoom,
+  centerLatLng
 }) => {
   const mapRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -18,6 +21,7 @@ const LocationPicker = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(initialLocation);
+  const [googleObj, setGoogleObj] = useState(null);
 
   // Lagos, Nigeria as default center
   const defaultCenter = { lat: 6.5244, lng: 3.3792 };
@@ -61,6 +65,7 @@ const LocationPicker = ({
       });
 
       const google = await loader.load();
+      setGoogleObj(google);
       
       // Create map
       const mapInstance = new google.maps.Map(mapRef.current, {
@@ -190,6 +195,47 @@ const LocationPicker = ({
       setLoading(false);
     }
   };
+
+  // Programmatic centering by address (state, LGA, full address)
+  useEffect(() => {
+    const doGeocode = async (address) => {
+      try {
+        if (!address || !googleObj || !map || !marker) return;
+        const geocoder = new googleObj.maps.Geocoder();
+        const result = await geocoder.geocode({ address });
+        if (result.results && result.results.length > 0) {
+          const res = result.results[0];
+          const loc = res.geometry.location;
+          const location = { lat: loc.lat(), lng: loc.lng() };
+          map.setCenter(location);
+          map.setZoom(typeof centerZoom === 'number' ? centerZoom : 13);
+          marker.setPosition(location);
+          const formatted = res.formatted_address;
+          setSelectedLocation({ ...location, address: formatted });
+          if (onLocationSelect) {
+            onLocationSelect({ ...location, address: formatted });
+          }
+        }
+      } catch (err) {
+        console.error('Geocode failed for address:', address, err);
+      }
+    };
+    if (centerAddress) {
+      doGeocode(centerAddress);
+    }
+  }, [centerAddress, centerZoom, googleObj, map, marker, onLocationSelect]);
+
+  // Programmatic centering by coordinates (if provided)
+  useEffect(() => {
+    if (!centerLatLng || !map || !marker) return;
+    map.setCenter(centerLatLng);
+    map.setZoom(typeof centerZoom === 'number' ? centerZoom : 15);
+    marker.setPosition(centerLatLng);
+    setSelectedLocation(centerLatLng);
+    if (onLocationSelect) {
+      onLocationSelect(centerLatLng);
+    }
+  }, [centerLatLng, centerZoom, map, marker, onLocationSelect]);
 
   const reverseGeocode = async (google, location) => {
     try {
