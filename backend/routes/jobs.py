@@ -903,7 +903,8 @@ async def _notify_job_posted_successfully(homeowner: dict, job: dict):
             "job_category": job.get("category", ""),
             "job_budget": f"₦{job.get('budget_min', 0):,} - ₦{job.get('budget_max', 0):,}" if job.get('budget_min') and job.get('budget_max') else "Budget not specified",
             "post_date": "Today",
-            "manage_url": "https://servicehub.ng/my-jobs"
+            "manage_url": "https://servicehub.ng/my-jobs",
+            "job_id": job.get("id")
         }
         
         # Send notification

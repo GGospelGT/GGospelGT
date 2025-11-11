@@ -908,6 +908,9 @@ const MyJobsPage = () => {
                                     <Heart size={14} className="mr-1" />
                                     {job.interests_count || 0} interested
                                   </span>
+                                  <span className="flex items-center">
+                                    Job ID: {job.id}
+                                  </span>
                                 </div>
                               </div>
 

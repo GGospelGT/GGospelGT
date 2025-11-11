@@ -482,9 +482,10 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
         }
       }
 
+      const jobId = jobResponse.job_id || jobResponse.id;
       toast({
         title: "Job Submitted for Review!",
-        description: "Your job has been submitted and is pending admin approval. You'll receive a notification once it's reviewed and approved.",
+        description: `Your job has been submitted and is pending admin approval. Job ID: ${jobId}`,
       });
 
       if (onJobPosted) {
@@ -1006,9 +1007,10 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
         }
       }
 
+      const jobId = jobResponse.job_id || jobResponse.id;
       toast({
         title: "Account Created & Job Submitted!",
-        description: "Welcome to ServiceHub! Your job has been submitted for admin review. You'll receive a notification once it's approved and goes live.",
+        description: `Welcome to ServiceHub! Your job has been submitted for admin review. Job ID: ${jobId}`,
       });
 
       if (onJobPosted) {

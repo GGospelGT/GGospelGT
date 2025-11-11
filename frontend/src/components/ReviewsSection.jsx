@@ -76,8 +76,9 @@ const ReviewsSection = () => {
   // Enrich with tradesperson company/business name for display
   useEffect(() => {
     const fetchCompanies = async () => {
+      // Prefer explicit tradesperson_id, but fallback to reviewee_id (tradesperson)
       const idsToFetch = displayReviews
-        .map(r => r.tradesperson_id)
+        .map(r => r.tradesperson_id || r.reviewee_id)
         .filter(Boolean)
         .filter(id => !(id in companyByTpId));
 
@@ -109,13 +110,20 @@ const ReviewsSection = () => {
   }, [loading, displayReviews, companyByTpId]);
 
   const getCompanyDisplayName = (review) => {
+    // Use company fields in the review if present
     const fromReview = review.company_name || review.business_name || review.tradesperson_company;
     if (fromReview && typeof fromReview === 'string' && fromReview.trim()) {
       return fromReview.trim();
     }
-    const info = review.tradesperson_id ? companyByTpId[review.tradesperson_id] : undefined;
+    // Otherwise use fetched company info by tradesperson id (tradesperson_id or reviewee_id)
+    const id = review.tradesperson_id || review.reviewee_id;
+    const info = id ? companyByTpId[id] : undefined;
     if (info?.company && info.company.trim()) return info.company.trim();
+    // Fall back to person name if company missing
     if (info?.name && info.name.trim()) return info.name.trim();
+    // Last resort: use review-provided names if any
+    if (typeof review.tradesperson_name === 'string' && review.tradesperson_name.trim()) return review.tradesperson_name.trim();
+    if (typeof review.reviewee_name === 'string' && review.reviewee_name.trim()) return review.reviewee_name.trim();
     return 'Trusted Tradesperson';
   };
 
