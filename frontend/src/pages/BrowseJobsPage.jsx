@@ -831,9 +831,9 @@ const BrowseJobsPage = () => {
                               </span>
                               <span className="flex items-center">
                                 📍 {job.location}
-                                {job.distance_km && (
-                                  <span className="ml-1 text-blue-600 font-medium">
-                                    ({job.distance_km} km / {Math.round(job.distance_km * 0.621371)} mi away)
+                                {job.distance_km !== undefined && job.distance_km !== null && (
+                                  <span className="ml-2 text-blue-600 font-medium">
+                                    {Number(job.distance_km).toFixed(1)} km away
                                   </span>
                                 )}
                               </span>
