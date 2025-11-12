@@ -579,7 +579,14 @@ const BrowseJobsPage = () => {
                       type="checkbox"
                       id="useLocation"
                       checked={filters.useLocation}
-                      onChange={(e) => setFilters(prev => ({ ...prev, useLocation: e.target.checked }))}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFilters(prev => ({ ...prev, useLocation: checked }));
+                        // If enabled without a saved location, auto-fetch current GPS
+                        if (checked && !userLocation) {
+                          getCurrentLocation();
+                        }
+                      }}
                       className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                     />
                     <label htmlFor="useLocation" className="text-sm font-medium text-gray-700 font-lato">

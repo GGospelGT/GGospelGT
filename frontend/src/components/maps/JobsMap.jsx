@@ -221,6 +221,17 @@ const JobsMap = ({
     });
 
     setUserMarker(marker);
+
+    // Recenter the map to the user's location for immediate visual feedback.
+    // If there are no job markers yet, ensure a reasonable zoom.
+    try {
+      map.panTo(userLocation);
+      if (!jobs || jobs.length === 0) {
+        map.setZoom(13);
+      }
+    } catch (e) {
+      // no-op: pan/zoom may fail if map isn't fully ready, safe to ignore
+    }
   };
 
   const createJobMarkerIcon = (job, isSelected) => {
