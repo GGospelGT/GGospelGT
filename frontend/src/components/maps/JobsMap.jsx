@@ -68,7 +68,10 @@ const JobsMap = ({
       const loader = new Loader({
         apiKey: apiKey,
         version: 'weekly',
-        libraries: ['places', 'geometry', 'marker']
+        // IMPORTANT: Keep libraries consistent across the app to avoid
+        // "Loader must not be called again with different options" errors.
+        // LocationPicker uses ['places', 'geometry'], so we match that here.
+        libraries: ['places', 'geometry']
       });
 
       const google = await loader.load();

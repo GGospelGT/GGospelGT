@@ -272,6 +272,44 @@ class Database:
         return result.modified_count > 0
 
     # Job operations
+    async def generate_job_id(self, digits: int = 6) -> str:
+        """Generate a unique numeric job ID with fixed length.
+
+        Uses an atomic counter in the `counters` collection to avoid collisions
+        under concurrency. Wraps within the available range and skips any
+        currently-used IDs by probing forward until a free slot is found.
+        """
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot generate job ID")
+
+        max_value = (10 ** digits) - 1
+
+        # Atomically increment counter and get current sequence
+        counter = await self.database.counters.find_one_and_update(
+            {"_id": "jobs"},
+            {"$inc": {"seq": 1}},
+            upsert=True,
+            return_document=True
+        )
+
+        seq = int(counter.get("seq", 1))
+        # Constrain to range and avoid 0 by starting at 1
+        seq = (seq % (max_value + 1)) or 1
+        candidate = f"{seq:0{digits}d}"
+
+        # If wrap-around hits an existing ID, probe forward up to the range size
+        for _ in range(max_value):
+            exists = await self.database.jobs.find_one({"id": candidate})
+            if not exists:
+                return candidate
+            # Move to next sequence value in range
+            seq = (seq + 1) % (max_value + 1)
+            if seq == 0:
+                seq = 1
+            candidate = f"{seq:0{digits}d}"
+
+        raise RuntimeError("Unable to generate unique job ID")
+
     async def create_job(self, job_data: dict) -> dict:
         # Set expiration date (30 days from now)
         job_data['expires_at'] = datetime.utcnow() + timedelta(days=30)

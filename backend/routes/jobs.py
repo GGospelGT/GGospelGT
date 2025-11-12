@@ -95,7 +95,8 @@ async def create_job(
                 del job_dict[field]
         
         # Add default values
-        job_dict['id'] = str(uuid.uuid4())
+        # Use a 6-digit numeric ID instead of UUID
+        job_dict['id'] = await database.generate_job_id(digits=6)
         job_dict['status'] = 'pending_approval'  # Jobs need admin approval
         job_dict['quotes_count'] = 0
         job_dict['interests_count'] = 0  # Add interests count
