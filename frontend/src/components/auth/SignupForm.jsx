@@ -288,7 +288,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
               </div>
             </div>
 
-            {/* Location and Postcode */}
+            {/* Location and Zipcode */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
@@ -315,12 +315,12 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
 
               <div>
                 <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-                  Postcode *
+                  Zipcode *
                 </label>
                 <div className="relative">
                   <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                   <Input
-                    placeholder="Enter your postcode"
+                    placeholder="Enter your zipcode"
                     {...register('postcode')}
                     className={`pl-9 font-lato ${rhfErrors.postcode ? 'border-red-500' : ''}`}
                   />

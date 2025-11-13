@@ -2032,7 +2032,7 @@ const AdminDashboard = () => {
                                 </div>
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Sample Postcodes
+                                    Sample Zipcodes
                                   </label>
                                   <input
                                     type="text"
@@ -2086,7 +2086,7 @@ const AdminDashboard = () => {
                           editFields={[
                             { name: 'name', label: 'State Name', type: 'text', required: true },
                             { name: 'region', label: 'Region', type: 'text' },
-                            { name: 'postcode_samples', label: 'Sample Postcodes', type: 'text' }
+                            { name: 'postcode_samples', label: 'Sample Zipcodes', type: 'text' }
                           ]}
                           validationRules={{
                             name: { minLength: 2, maxLength: 50 }
@@ -4059,7 +4059,7 @@ const AdminDashboard = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Sample Postcodes
+                        Sample Zipcodes
                       </label>
                       <input
                         type="text"

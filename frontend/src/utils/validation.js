@@ -47,7 +47,7 @@ export const phoneSchema = z
   .refine((val) => isValidPhone(val, 'NG'), { message: 'Please enter a valid Nigerian phone number' });
 
 export const locationSchema = z.string().trim().min(1, 'State/Location is required');
-export const postcodeSchema = z.string().trim().min(1, 'Postcode is required');
+export const postcodeSchema = z.string().trim().min(1, 'Zipcode is required');
 
 // Composite schemas
 export const loginSchema = z.object({
