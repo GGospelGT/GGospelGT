@@ -46,6 +46,28 @@ export const authAPI = {
     const response = await apiClient.post('/auth/refresh', { refresh_token: refreshToken });
     return response.data;
   },
+
+  // Phone verification via OTP
+  sendPhoneOTP: async (phone = null) => {
+    const response = await apiClient.post('/auth/send-phone-otp', { phone });
+    return response.data;
+  },
+
+  verifyPhoneOTP: async (otpCode, phone = null) => {
+    const response = await apiClient.post('/auth/verify-phone-otp', { otp_code: otpCode, phone });
+    return response.data;
+  },
+
+  // Email verification via OTP
+  sendEmailOTP: async (email = null) => {
+    const response = await apiClient.post('/auth/send-email-otp', { email });
+    return response.data;
+  },
+
+  verifyEmailOTP: async (otpCode, email = null) => {
+    const response = await apiClient.post('/auth/verify-email-otp', { otp_code: otpCode, email });
+    return response.data;
+  },
 };
 
 // Statistics API

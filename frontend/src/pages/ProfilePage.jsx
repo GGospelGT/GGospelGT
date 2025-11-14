@@ -39,6 +39,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
 import ImageUpload from '../components/portfolio/ImageUpload';
 import PortfolioGallery from '../components/portfolio/PortfolioGallery';
+import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '../components/ui/input-otp';
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -46,6 +47,12 @@ const ProfilePage = () => {
   const [profileData, setProfileData] = useState(null);
   const [editData, setEditData] = useState({});
   const [activeTab, setActiveTab] = useState("profile"); // Added state for active tab
+
+  // Phone OTP states
+  const [otpMode, setOtpMode] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
   
   // Portfolio states
   const [portfolioItems, setPortfolioItems] = useState([]);
@@ -127,6 +134,39 @@ const ProfilePage = () => {
       }
     }
   }, [user, isAuthenticated, isTradesperson]);
+
+  const handleSendPhoneOTP = async () => {
+    try {
+      setOtpSending(true);
+      await authAPI.sendPhoneOTP();
+      toast({
+        title: 'OTP sent',
+        description: 'Check your phone for the verification code.',
+      });
+      setOtpMode(true);
+    } catch (error) {
+      const msg = error?.response?.data?.detail || error.message || 'Failed to send code';
+      toast({ title: 'Failed to send code', description: msg, variant: 'destructive' });
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleVerifyPhoneOTP = async () => {
+    try {
+      setOtpVerifying(true);
+      await authAPI.verifyPhoneOTP(otpCode);
+      toast({ title: 'Phone verified', description: 'Your phone number is now verified.' });
+      setOtpMode(false);
+      setOtpCode('');
+      setProfileData((prev) => ({ ...prev, phone_verified: true }));
+    } catch (error) {
+      const msg = error?.response?.data?.detail || error.message || 'Invalid or expired code';
+      toast({ title: 'Verification failed', description: msg, variant: 'destructive' });
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
 
   const loadPortfolio = async () => {
     try {
@@ -506,7 +546,12 @@ const ProfilePage = () => {
                             {profileData.phone_verified ? (
                               <Badge className="bg-green-100 text-green-800 text-xs">Verified</Badge>
                             ) : (
-                              <Badge className="bg-yellow-100 text-yellow-800 text-xs">Unverified</Badge>
+                              <>
+                                <Badge className="bg-yellow-100 text-yellow-800 text-xs">Unverified</Badge>
+                                <Button size="sm" variant="outline" onClick={handleSendPhoneOTP} disabled={otpSending}>
+                                  {otpSending ? 'Sending…' : 'Verify Phone'}
+                                </Button>
+                              </>
                             )}
                           </div>
                         )}
@@ -975,6 +1020,42 @@ const ProfilePage = () => {
                               <Badge className="bg-yellow-100 text-yellow-800 text-xs">Unverified</Badge>
                             )}
                           </div>
+                          {!profileData.phone_verified && (
+                            <div className="mt-3 space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Button size="sm" onClick={handleSendPhoneOTP} disabled={otpSending}>
+                                  {otpSending ? 'Sending…' : 'Send Code'}
+                                </Button>
+                                {otpMode && (
+                                  <Button size="sm" variant="ghost" onClick={handleSendPhoneOTP} disabled={otpSending}>
+                                    {otpSending ? 'Sending…' : 'Resend'}
+                                  </Button>
+                                )}
+                              </div>
+                              {otpMode && (
+                                <div className="flex items-center gap-3">
+                                  <InputOTP
+                                    maxLength={6}
+                                    value={otpCode}
+                                    onChange={(val) => setOtpCode(val)}
+                                  >
+                                    <InputOTPGroup>
+                                      <InputOTPSlot index={0} />
+                                      <InputOTPSlot index={1} />
+                                      <InputOTPSlot index={2} />
+                                      <InputOTPSeparator />
+                                      <InputOTPSlot index={3} />
+                                      <InputOTPSlot index={4} />
+                                      <InputOTPSlot index={5} />
+                                    </InputOTPGroup>
+                                  </InputOTP>
+                                  <Button size="sm" onClick={handleVerifyPhoneOTP} disabled={otpVerifying || otpCode.length !== 6}>
+                                    {otpVerifying ? 'Verifying…' : 'Verify'}
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          )}
                           {isTradesperson() && (
                             <div className="flex items-center space-x-2">
                               <Award size={14} />
@@ -984,6 +1065,17 @@ const ProfilePage = () => {
                               ) : (
                                 <Badge className="bg-yellow-100 text-yellow-800 text-xs">Unverified</Badge>
                               )}
+                            </div>
+                          )}
+                          {(!profileData.email_verified || !profileData.phone_verified || (isTradesperson() && !profileData.verified_tradesperson)) && (
+                            <div className="mt-4">
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => window.location.href = '/verify-account'}
+                              >
+                                Get Verified
+                              </Button>
                             </div>
                           )}
                         </div>

@@ -4,7 +4,7 @@ from ..models import JobCreate, JobUpdate, JobCloseRequest, Job, JobsResponse
 from ..models.base import JobStatus
 from ..models.auth import User
 from ..models.notifications import NotificationType
-from ..auth.dependencies import get_current_active_user, get_current_homeowner
+from ..auth.dependencies import get_current_active_user, get_current_homeowner, require_homeowner_contact_verified, require_tradesperson_verified
 from ..database import database
 from ..services.notifications import notification_service
 from datetime import datetime, timedelta
@@ -36,7 +36,7 @@ async def get_states_public():
 async def create_job(
     job_data: JobCreate,
     background_tasks: BackgroundTasks,
-    current_user: User = Depends(get_current_homeowner)
+    current_user: User = Depends(require_homeowner_contact_verified)
 ):
     """Create a new job posting"""
     try:
@@ -198,7 +198,7 @@ async def get_nearby_jobs(
 async def get_jobs_for_tradesperson(
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(50, ge=1, le=100, description="Number of items to return"),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_tradesperson_verified)
 ):
     """Get jobs filtered by tradesperson's skills and location preferences"""
     try:

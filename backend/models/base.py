@@ -477,6 +477,32 @@ class UserVerification(BaseModel):
     verified_at: Optional[datetime] = None
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
+# Tradespeople References Verification
+class WorkReferrer(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    phone: str
+    company_email: EmailStr
+    company_name: str = Field(..., min_length=2, max_length=200)
+    relationship: str = Field(..., min_length=2, max_length=100)
+
+class CharacterReferrer(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    phone: str
+    email: EmailStr
+    relationship: str = Field(..., min_length=2, max_length=100)
+
+class TradespersonVerification(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    work_referrer: WorkReferrer
+    character_referrer: CharacterReferrer
+    status: VerificationStatus = VerificationStatus.PENDING
+    admin_notes: Optional[str] = None
+    verified_by: Optional[str] = None
+    submitted_at: datetime = Field(default_factory=datetime.utcnow)
+    verified_at: Optional[datetime] = None
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
 class ReferralCode(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str

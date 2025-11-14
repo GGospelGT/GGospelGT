@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../api/wallet';
-import { adminReferralsAPI } from '../api/referrals';
+import { adminReferralsAPI, adminVerificationAPI } from '../api/referrals';
 import { useToast } from '../hooks/use-toast';
 import ContactManagementTab from './ContactManagementTab';
 import TradeCategoryQuestionsManager from '../components/admin/TradeCategoryQuestionsManager';
@@ -20,6 +20,7 @@ const AdminDashboard = () => {
   const [fundingRequests, setFundingRequests] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [verifications, setVerifications] = useState([]);
+  const [tradespeopleVerifications, setTradespeopleVerifications] = useState([]);
   const [users, setUsers] = useState([]);
   const [userStats, setUserStats] = useState(null);
   const [stats, setStats] = useState(null);
@@ -138,6 +139,9 @@ const AdminDashboard = () => {
       } else if (activeTab === 'verifications') {
         const data = await adminReferralsAPI.getPendingVerifications();
         setVerifications(data.verifications || []);
+      } else if (activeTab === 'tradespeople_verification') {
+        const data = await adminVerificationAPI.getPendingTradespeopleVerifications();
+        setTradespeopleVerifications(data.verifications || []);
       } else if (activeTab === 'users') {
         const data = await adminAPI.getAllUsers();
         setUsers(data.users || []);
@@ -1256,6 +1260,7 @@ const AdminDashboard = () => {
                   { id: 'fees', label: 'Job Access Fees', icon: '💳' },
                   { id: 'approvals', label: 'Job Approvals', icon: '✅' },
                   { id: 'verifications', label: 'ID Verifications', icon: '🆔' },
+                  { id: 'tradespeople_verification', label: 'Tradespeople Verification', icon: '🧑‍🔧' },
                   { id: 'users', label: 'User Management', icon: '👥' },
                   { id: 'admin-management', label: 'Admin Management', icon: '👨‍💼' },
                   { id: 'content-management', label: 'Content Management', icon: '📝' },
@@ -1895,6 +1900,95 @@ const AdminDashboard = () => {
                                 </button>
                                 <button
                                   onClick={() => setSelectedVerification(verification)}
+                                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Tradespeople Verification Tab */}
+              {activeTab === 'tradespeople_verification' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold">Tradespeople References Verification</h2>
+                    <button onClick={fetchData} className="text-blue-600 hover:text-blue-700">Refresh</button>
+                  </div>
+
+                  {loading ? (
+                    <div className="space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="bg-gray-50 p-4 rounded-lg animate-pulse">
+                          <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : tradespeopleVerifications.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">No pending tradespeople verifications</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {tradespeopleVerifications.map((v) => (
+                        <div key={v.id} className="bg-gray-50 p-6 rounded-lg">
+                          <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                              <h3 className="font-semibold text-gray-800 mb-2">
+                                {v.user_name} ({v.user_email})
+                              </h3>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <p><strong>Submitted:</strong> {formatDate(v.submitted_at)}</p>
+                                <div className="mt-3">
+                                  <h4 className="font-semibold">Work Referrer</h4>
+                                  <p>Name: {v.work_referrer?.name}</p>
+                                  <p>Phone: {v.work_referrer?.phone}</p>
+                                  <p>Company Email: {v.work_referrer?.company_email}</p>
+                                  <p>Company: {v.work_referrer?.company_name}</p>
+                                  <p>Relationship: {v.work_referrer?.relationship}</p>
+                                </div>
+                                <div className="mt-3">
+                                  <h4 className="font-semibold">Character Referrer</h4>
+                                  <p>Name: {v.character_referrer?.name}</p>
+                                  <p>Phone: {v.character_referrer?.phone}</p>
+                                  <p>Email: {v.character_referrer?.email}</p>
+                                  <p>Relationship: {v.character_referrer?.relationship}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await adminVerificationAPI.approveTradespeopleVerification(v.id);
+                                      toast({ title: 'Verification approved' });
+                                      fetchData();
+                                    } catch (e) {
+                                      toast({ title: 'Approve failed', variant: 'destructive' });
+                                    }
+                                  }}
+                                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    const notes = prompt('Enter rejection notes');
+                                    if (!notes) return;
+                                    try {
+                                      await adminVerificationAPI.rejectTradespeopleVerification(v.id, notes);
+                                      toast({ title: 'Verification rejected' });
+                                      fetchData();
+                                    } catch (e) {
+                                      toast({ title: 'Reject failed', variant: 'destructive' });
+                                    }
+                                  }}
                                   className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm"
                                 >
                                   Reject

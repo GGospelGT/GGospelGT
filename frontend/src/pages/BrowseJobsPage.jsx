@@ -535,6 +535,28 @@ const BrowseJobsPage = () => {
     );
   }
 
+  if (!user?.verified_tradesperson) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto text-center">
+            <h1 className="text-2xl font-bold font-montserrat mb-4" style={{color: '#121E3C'}}>
+              Verification Required
+            </h1>
+            <p className="text-gray-600 font-lato mb-6">
+              Verify your account to browse available jobs.
+            </p>
+            <Button onClick={() => navigate('/verify-account')} className="text-white font-lato" style={{ backgroundColor: '#34D164' }}>
+              Go to Verification
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
 
 
   return (

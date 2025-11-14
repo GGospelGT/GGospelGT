@@ -883,5 +883,24 @@ class NotificationService:
         if not success:
             raise Exception("SMS delivery failed")
 
+    async def send_custom_sms(self, phone: str, message: str, metadata: Dict[str, Any] = None) -> bool:
+        """Send a direct SMS without using a template (e.g., OTP messages)."""
+        # Ensure services are initialized
+        self._ensure_services_initialized()
+        try:
+            success = await self.sms_service.send_sms(
+                to=phone,
+                message=message,
+                metadata=metadata or {}
+            )
+            if success:
+                logger.info(f"📱 Custom SMS sent to {phone}")
+            else:
+                logger.error(f"❌ Failed to send custom SMS to {phone}")
+            return success
+        except Exception as e:
+            logger.error(f"Error sending custom SMS to {phone}: {e}")
+            return False
+
 # Global notification service instance
 notification_service = NotificationService()

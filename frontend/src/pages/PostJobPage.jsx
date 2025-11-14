@@ -4,8 +4,9 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import JobPostingForm from '../components/JobPostingForm';
 import { Card, CardContent } from '../components/ui/card';
-import { CheckCircle, ArrowRight, Users, Clock, Star } from 'lucide-react';
+import { CheckCircle, ArrowRight, Users, Clock, Star, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { useAuth } from '../contexts/AuthContext';
 
 const PostJobPage = () => {
   const [isJobPosted, setIsJobPosted] = useState(false);
@@ -14,6 +15,7 @@ const PostJobPage = () => {
   const location = useLocation();
   const initialCategory = location?.state?.initialCategory || null;
   const initialState = location?.state?.initialState || null;
+  const { user, isAuthenticated } = useAuth();
 
   const handleJobComplete = (jobData) => {
     setPostedJob(jobData);
@@ -37,6 +39,32 @@ const PostJobPage = () => {
       description: 'Read genuine reviews from other homeowners to make informed decisions.'
     }
   ];
+
+  // Gate: homeowners must verify email and phone
+  if (isAuthenticated() && user?.role === 'homeowner' && !(user?.email_verified && user?.phone_verified)) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-yellow-100">
+              <AlertCircle size={40} className="text-yellow-600" />
+            </div>
+            <h1 className="text-3xl font-bold font-montserrat mb-4" style={{color: '#121E3C'}}>
+              Verification Required
+            </h1>
+            <p className="text-lg text-gray-600 font-lato mb-8">
+              Please verify your email and phone to post a job.
+            </p>
+            <Button onClick={() => navigate('/verify-account')} className="text-white font-lato px-8" style={{backgroundColor: '#34D164'}}>
+              Go to Verification
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (isJobPosted) {
     return (

@@ -6,7 +6,7 @@ from models import (
 )
 from models.auth import User
 from models.notifications import NotificationType
-from ..auth.dependencies import get_current_tradesperson, get_current_homeowner, get_current_active_user
+from ..auth.dependencies import get_current_tradesperson, get_current_homeowner, get_current_active_user, require_tradesperson_verified
 from ..database import database
 from ..services.notifications import notification_service
 from datetime import datetime
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/interests", tags=["interests"])
 async def show_interest(
     interest_data: InterestCreate,
     background_tasks: BackgroundTasks,
-    current_user: User = Depends(get_current_tradesperson)
+    current_user: User = Depends(require_tradesperson_verified)
 ):
     """Tradesperson shows interest in a job"""
     try:

@@ -4,7 +4,9 @@ from ..models.auth import (
     UserLogin, LoginResponse, HomeownerRegistration, TradespersonRegistration,
     User, UserProfile, UserProfileUpdate, TradespersonProfileUpdate,
     PasswordResetRequest, PasswordReset, UserRole, UserStatus,
-    RefreshTokenRequest, RefreshTokenResponse
+    RefreshTokenRequest, RefreshTokenResponse,
+    SendPhoneOTPRequest, VerifyPhoneOTPRequest,
+    SendEmailOTPRequest, VerifyEmailOTPRequest,
 )
 from ..auth.security import (
     verify_password, get_password_hash, create_access_token, create_refresh_token,
@@ -25,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 # Import email service for password reset emails
 try:
-    from ..services.notifications import SendGridEmailService, MockEmailService
+    from ..services.notifications import SendGridEmailService, MockEmailService, notification_service
 except ImportError:
-    from services.notifications import SendGridEmailService, MockEmailService
+    from services.notifications import SendGridEmailService, MockEmailService, notification_service
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
@@ -798,6 +800,183 @@ async def verify_email(user_id: str):
     
     await database.verify_user_email(user_id)
     return {"message": "Email verified successfully"}
+
+# Phone verification via OTP
+@router.post("/send-phone-otp")
+async def send_phone_otp(payload: SendPhoneOTPRequest, current_user: dict = Depends(get_current_active_user)):
+    """Generate and send a phone verification OTP to the user's phone."""
+    try:
+        phone = payload.phone or current_user.get("phone")
+        if not phone:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No phone number on record")
+
+        if not validate_nigerian_phone(phone):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please enter a valid Nigerian phone number")
+        formatted_phone = format_nigerian_phone(phone)
+
+        # Generate 6-digit numeric OTP (valid for 10 minutes)
+        import random
+        otp_code = f"{random.randint(100000, 999999)}"
+        expires_at = datetime.utcnow() + timedelta(minutes=10)
+
+        # Store OTP
+        stored = await database.create_phone_verification_otp(
+            user_id=current_user["id"],
+            phone=formatted_phone,
+            otp_code=otp_code,
+            expires_at=expires_at,
+        )
+        if not stored:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to prepare verification code")
+
+        # Send SMS
+        message = f"Your serviceHub verification code is {otp_code}. It expires in 10 minutes."
+        sms_ok = await notification_service.send_custom_sms(
+            phone=formatted_phone,
+            message=message,
+            metadata={"purpose": "phone_verification", "user_id": current_user["id"]}
+        )
+        if not sms_ok:
+            # Still return success to avoid leaking info; user can request again
+            logger.error(f"Failed to send OTP SMS to {formatted_phone}")
+
+        return {"message": "Verification code sent"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error sending phone OTP: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send verification code")
+
+@router.post("/verify-phone-otp")
+async def verify_phone_otp(payload: VerifyPhoneOTPRequest, current_user: dict = Depends(get_current_active_user)):
+    """Verify phone using the submitted OTP and mark as verified."""
+    try:
+        phone = payload.phone or current_user.get("phone")
+        if not phone:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No phone number on record")
+
+        formatted_phone = phone
+        if validate_nigerian_phone(phone):
+            formatted_phone = format_nigerian_phone(phone)
+
+        otp = await database.get_active_phone_otp(
+            user_id=current_user["id"],
+            phone=formatted_phone,
+            otp_code=payload.otp_code,
+        )
+        if not otp:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired code")
+
+        # Mark OTP used and verify phone
+        await database.mark_phone_otp_used(otp["id"])
+        await database.verify_user_phone(current_user["id"])
+
+        return {"message": "Phone verified successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error verifying phone OTP: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to verify phone")
+
+# Email verification via OTP
+@router.post("/send-email-otp")
+async def send_email_otp(payload: SendEmailOTPRequest, current_user: dict = Depends(get_current_active_user)):
+    """Generate and send an email verification OTP to the user's registered email."""
+    try:
+        email = (payload.email or current_user.get("email") or "").strip().lower()
+        registered_email = (current_user.get("email") or "").strip().lower()
+        if not registered_email:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No email on record")
+        # Enforce that the email provided matches the registered email
+        if email and email != registered_email:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email must match your registered email")
+
+        # Generate 6-digit numeric OTP (valid for 10 minutes)
+        import random
+        otp_code = f"{random.randint(100000, 999999)}"
+        expires_at = datetime.utcnow() + timedelta(minutes=10)
+
+        # Store OTP
+        stored = await database.create_email_verification_otp(
+            user_id=current_user["id"],
+            email=registered_email,
+            otp_code=otp_code,
+            expires_at=expires_at,
+        )
+        if not stored:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to prepare verification code")
+
+        # Send Email via SendGrid or Mock
+        subject = "Your serviceHub Verification Code"
+        content = (
+            f"Hello {current_user.get('name')},\n\n"
+            f"Your verification code is {otp_code}. It expires in 10 minutes.\n\n"
+            f"If you didn't request this, you can ignore this email.\n\n"
+            f"serviceHub Team"
+        )
+
+        email_ok = False
+        try:
+            email_service = SendGridEmailService()
+            email_ok = await email_service.send_email(
+                to=registered_email,
+                subject=subject,
+                content=content,
+                metadata={"purpose": "email_verification", "user_id": current_user["id"]}
+            )
+        except Exception as e:
+            logger.warning(f"SendGrid unavailable, using mock email: {e}")
+            try:
+                mock_service = MockEmailService()
+                email_ok = await mock_service.send_email(
+                    to=registered_email,
+                    subject=subject,
+                    content=content,
+                    metadata={"purpose": "email_verification", "user_id": current_user["id"]}
+                )
+            except Exception as e2:
+                logger.error(f"Failed to send email OTP: {e2}")
+                email_ok = False
+
+        if not email_ok:
+            # Still return success to avoid leaking delivery failures
+            logger.error(f"Failed to send OTP email to {registered_email}")
+
+        return {"message": "Verification code sent"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error sending email OTP: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send verification code")
+
+@router.post("/verify-email-otp")
+async def verify_email_otp(payload: VerifyEmailOTPRequest, current_user: dict = Depends(get_current_active_user)):
+    """Verify email using the submitted OTP and mark as verified."""
+    try:
+        email = (payload.email or current_user.get("email") or "").strip().lower()
+        registered_email = (current_user.get("email") or "").strip().lower()
+        if not registered_email:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No email on record")
+        if email and email != registered_email:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email must match your registered email")
+
+        otp = await database.get_active_email_otp(
+            user_id=current_user["id"],
+            email=registered_email,
+            otp_code=payload.otp_code,
+        )
+        if not otp:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired code")
+
+        await database.mark_email_otp_used(otp["id"]) 
+        await database.verify_user_email(current_user["id"]) 
+
+        return {"message": "Email verified successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error verifying email OTP: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to verify email")
 
 # Password reset endpoints
 @router.post("/password-reset-request")

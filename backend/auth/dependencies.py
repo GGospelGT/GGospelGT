@@ -175,3 +175,18 @@ def create_admin_access_token(admin_id: str, username: str, role: str) -> str:
         "iat": datetime.utcnow(),
     }
     return jwt.encode(payload, ADMIN_JWT_SECRET, algorithm=ADMIN_JWT_ALGORITHM)
+
+# =============================
+# Verification status guards
+# =============================
+async def require_homeowner_contact_verified(current_user: User = Depends(get_current_homeowner)) -> User:
+    """Require homeowner with verified email and phone"""
+    if not (getattr(current_user, "email_verified", False) and getattr(current_user, "phone_verified", False)):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Homeowner must verify email and phone")
+    return current_user
+
+async def require_tradesperson_verified(current_user: User = Depends(get_current_tradesperson)) -> User:
+    """Require tradesperson fully verified (admin-approved)"""
+    if not getattr(current_user, "verified_tradesperson", False):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tradesperson must complete verification")
+    return current_user

@@ -167,3 +167,23 @@ class PasswordResetRequest(BaseModel):
 class PasswordReset(BaseModel):
     token: str
     new_password: str = Field(..., min_length=8)
+
+# Phone Verification Models
+class SendPhoneOTPRequest(BaseModel):
+    # If omitted, server uses the user's current phone on record
+    phone: Optional[str] = None
+
+class VerifyPhoneOTPRequest(BaseModel):
+    otp_code: str = Field(..., min_length=4, max_length=8)
+    # Optional override; typically verify against user's stored phone
+    phone: Optional[str] = None
+
+# Email Verification Models
+class SendEmailOTPRequest(BaseModel):
+    # If omitted, server uses the user's current email on record
+    email: Optional[EmailStr] = None
+
+class VerifyEmailOTPRequest(BaseModel):
+    otp_code: str = Field(..., min_length=4, max_length=8)
+    # Optional override; typically verify against user's stored email
+    email: Optional[EmailStr] = None

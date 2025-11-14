@@ -227,6 +227,11 @@ export const adminAPI = {
     return response.data;
   },
 
+  async deleteUser(userId) {
+    const response = await apiClient.delete(`/admin/users/${userId}`);
+    return response.data;
+  },
+
   // Location Management Methods
   async getAllStates() {
     const response = await apiClient.get('/admin/locations/states');
@@ -694,12 +699,7 @@ export const policiesAPI = {
     const response = await apiClient.get(`/jobs/policies/${policyType}`);
     return response.data;
   },
-
-  // User Management Methods (moved to adminAPI)
-  async deleteUser(userId) {
-    const response = await apiClient.delete(`/admin/users/${userId}`);
-    return response.data;
-  }
+  
 };
 
 // Public API for contacts (no authentication required)

@@ -271,6 +271,160 @@ class Database:
         )
         return result.modified_count > 0
 
+    # Phone verification OTP operations
+    async def create_phone_verification_otp(self, user_id: str, phone: str, otp_code: str, expires_at: datetime) -> bool:
+        """Store a phone verification OTP for a user and invalidate previous ones."""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot create phone verification OTP")
+
+        # Invalidate any existing active OTPs for this user and phone
+        try:
+            await self.database.phone_verification_otps.update_many(
+                {"user_id": user_id, "phone": phone, "used": False},
+                {"$set": {"used": True, "invalidated_at": datetime.utcnow()}}
+            )
+        except Exception as e:
+            logger.warning(f"Failed to invalidate previous phone OTPs for user {user_id}: {e}")
+
+        otp_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "phone": phone,
+            "otp_code": otp_code,
+            "created_at": datetime.utcnow(),
+            "expires_at": expires_at,
+            "used": False,
+            "invalidated_at": None,
+        }
+
+        try:
+            await self.database.phone_verification_otps.insert_one(otp_record)
+            return True
+        except Exception as e:
+            logger.error(f"Error creating phone verification OTP: {e}")
+            return False
+
+    async def get_active_phone_otp(self, user_id: str, phone: str, otp_code: str) -> Optional[dict]:
+        """Get an active (unused, unexpired) phone verification OTP for a user."""
+        if self.database is None:
+            return None
+
+        try:
+            otp = await self.database.phone_verification_otps.find_one({
+                "user_id": user_id,
+                "phone": phone,
+                "otp_code": otp_code,
+                "used": False,
+            })
+            if not otp:
+                return None
+            otp["_id"] = str(otp["_id"])
+            # Expiration check
+            if otp.get("expires_at") and otp["expires_at"] < datetime.utcnow():
+                return None
+            return otp
+        except Exception as e:
+            logger.error(f"Error retrieving phone verification OTP for user {user_id}: {e}")
+            return None
+
+    async def mark_phone_otp_used(self, otp_id: str) -> bool:
+        """Mark a phone verification OTP as used."""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot mark phone OTP as used")
+        try:
+            result = await self.database.phone_verification_otps.update_one(
+                {"id": otp_id},
+                {"$set": {"used": True, "used_at": datetime.utcnow()}}
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f"Error marking phone OTP used: {e}")
+            return False
+
+    async def verify_user_phone(self, user_id: str) -> bool:
+        """Mark user phone as verified."""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot verify user phone")
+        try:
+            result = await self.database.users.update_one(
+                {"id": user_id},
+                {"$set": {"phone_verified": True, "updated_at": datetime.utcnow()}}
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f"Error verifying user phone {user_id}: {e}")
+            return False
+
+    # Email verification OTP operations
+    async def create_email_verification_otp(self, user_id: str, email: str, otp_code: str, expires_at: datetime) -> bool:
+        """Store an email verification OTP for a user and invalidate previous ones."""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot create email verification OTP")
+
+        # Invalidate any existing active OTPs for this user and email
+        try:
+            await self.database.email_verification_otps.update_many(
+                {"user_id": user_id, "email": email, "used": False},
+                {"$set": {"used": True, "invalidated_at": datetime.utcnow()}}
+            )
+        except Exception as e:
+            logger.warning(f"Failed to invalidate previous email OTPs for user {user_id}: {e}")
+
+        otp_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "email": email,
+            "otp_code": otp_code,
+            "created_at": datetime.utcnow(),
+            "expires_at": expires_at,
+            "used": False,
+            "invalidated_at": None,
+        }
+
+        try:
+            await self.database.email_verification_otps.insert_one(otp_record)
+            return True
+        except Exception as e:
+            logger.error(f"Error creating email verification OTP: {e}")
+            return False
+
+    async def get_active_email_otp(self, user_id: str, email: str, otp_code: str) -> Optional[dict]:
+        """Get an active (unused, unexpired) email verification OTP for a user."""
+        if self.database is None:
+            return None
+
+        try:
+            otp = await self.database.email_verification_otps.find_one({
+                "user_id": user_id,
+                "email": email,
+                "otp_code": otp_code,
+                "used": False,
+            })
+            if not otp:
+                return None
+            otp["_id"] = str(otp["_id"])
+            # Expiration check
+            if otp.get("expires_at") and otp["expires_at"] < datetime.utcnow():
+                return None
+            return otp
+        except Exception as e:
+            logger.error(f"Error retrieving email verification OTP for user {user_id}: {e}")
+            return None
+
+    async def mark_email_otp_used(self, otp_id: str) -> bool:
+        """Mark an email verification OTP as used."""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot mark email OTP as used")
+        try:
+            result = await self.database.email_verification_otps.update_one(
+                {"id": otp_id},
+                {"$set": {"used": True, "used_at": datetime.utcnow()}}
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f"Error marking email OTP used: {e}")
+            return False
+
     # Job operations
     async def generate_job_id(self, digits: int = 6) -> str:
         """Generate a unique numeric job ID with fixed length.
@@ -2882,6 +3036,13 @@ class Database:
             raise RuntimeError("Database unavailable: referral codes collection not accessible")
         return self.database.referral_codes
 
+    @property
+    def tradespeople_verifications_collection(self):
+        """Access to tradespeople references verifications collection"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: tradespeople verifications collection not accessible")
+        return self.database.tradespeople_verifications
+
     async def generate_referral_code(self, user_id: str) -> str:
         """Generate unique referral code for user"""
         if self.database is None:
@@ -3223,6 +3384,85 @@ class Database:
         }).to_list(length=None)
         
         referral_coins = sum(t.get("amount_coins", 0) for t in referral_transactions)
+
+    # ==========================================
+    # TRADESPEOPLE REFERENCES VERIFICATION METHODS
+    # ==========================================
+    async def submit_tradesperson_references(self, user_id: str, work_referrer: Dict[str, Any], character_referrer: Dict[str, Any]) -> str:
+        """Submit tradesperson references for verification"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot submit tradesperson references")
+
+        record = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "work_referrer": work_referrer,
+            "character_referrer": character_referrer,
+            "status": "pending",
+            "submitted_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+
+        await self.tradespeople_verifications_collection.insert_one(record)
+        return record["id"]
+
+    async def get_pending_tradespeople_verifications(self, skip: int = 0, limit: int = 20) -> List[dict]:
+        """Get pending tradespeople references verifications for admin"""
+        cursor = self.tradespeople_verifications_collection.find({
+            "status": "pending"
+        }).sort("submitted_at", -1).skip(skip).limit(limit)
+
+        items: List[dict] = []
+        async for v in cursor:
+            v["_id"] = str(v.get("_id"))
+            user = await self.get_user_by_id(v.get("user_id"))
+            if user:
+                v["user_name"] = user.get("name")
+                v["user_email"] = user.get("email")
+                v["user_phone"] = user.get("phone")
+            items.append(v)
+        return items
+
+    async def approve_tradesperson_verification(self, verification_id: str, admin_id: str, admin_notes: str = "") -> bool:
+        """Approve tradesperson references and mark user verified_tradesperson"""
+        v = await self.tradespeople_verifications_collection.find_one({"id": verification_id})
+        if not v:
+            return False
+        result = await self.tradespeople_verifications_collection.update_one(
+            {"id": verification_id},
+            {"$set": {
+                "status": "verified",
+                "admin_notes": admin_notes,
+                "verified_by": admin_id,
+                "verified_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        if result.modified_count == 0:
+            return False
+        # Update user flags
+        await self.users_collection.update_one(
+            {"id": v.get("user_id")},
+            {"$set": {"verified_tradesperson": True, "is_verified": True, "updated_at": datetime.utcnow()}}
+        )
+        return True
+
+    async def reject_tradesperson_verification(self, verification_id: str, admin_id: str, admin_notes: str) -> bool:
+        """Reject tradesperson references"""
+        v = await self.tradespeople_verifications_collection.find_one({"id": verification_id})
+        if not v:
+            return False
+        result = await self.tradespeople_verifications_collection.update_one(
+            {"id": verification_id},
+            {"$set": {
+                "status": "rejected",
+                "admin_notes": admin_notes,
+                "verified_by": admin_id,
+                "verified_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }}
+        )
+        return result.modified_count > 0
         
         # Check if total wallet balance >= 5 coins (lowered minimum for flexibility)
         total_coins = wallet.get("balance_coins", 0)

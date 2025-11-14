@@ -6,7 +6,7 @@ import uuid
 from PIL import Image
 import io
 
-from ..auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user, get_current_tradesperson
 from ..database import database
 from ..models.base import (
     ReferralStats, DocumentUpload, VerificationSubmission,
@@ -116,6 +116,57 @@ async def submit_verification_documents(
         verification_id=verification_id,
         status="pending"
     )
+
+# Tradespeople references submission
+@router.post("/tradesperson-references")
+async def submit_tradesperson_references(
+    work_referrer_name: str = Form(...),
+    work_referrer_phone: str = Form(...),
+    work_referrer_company_email: str = Form(...),
+    work_referrer_company_name: str = Form(...),
+    work_referrer_relationship: str = Form(...),
+    character_referrer_name: str = Form(...),
+    character_referrer_phone: str = Form(...),
+    character_referrer_email: str = Form(...),
+    character_referrer_relationship: str = Form(...),
+    current_user = Depends(get_current_tradesperson)
+):
+    """Submit work and character referrers for tradesperson verification"""
+
+    # Basic validations
+    generic_domains = {"gmail.com","yahoo.com","outlook.com","hotmail.com","icloud.com","aol.com","yandex.com","protonmail.com","zoho.com","gmx.com","mail.com"}
+    try:
+        domain = work_referrer_company_email.strip().lower().split("@")[-1]
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid company email format")
+    if domain in generic_domains:
+        raise HTTPException(status_code=400, detail="Company email must be a work domain, not a generic provider")
+
+    work_referrer = {
+        "name": work_referrer_name.strip(),
+        "phone": work_referrer_phone.strip(),
+        "company_email": work_referrer_company_email.strip().lower(),
+        "company_name": work_referrer_company_name.strip(),
+        "relationship": work_referrer_relationship.strip(),
+    }
+    character_referrer = {
+        "name": character_referrer_name.strip(),
+        "phone": character_referrer_phone.strip(),
+        "email": character_referrer_email.strip().lower(),
+        "relationship": character_referrer_relationship.strip(),
+    }
+
+    verification_id = await database.submit_tradesperson_references(
+        user_id=current_user.id,
+        work_referrer=work_referrer,
+        character_referrer=character_referrer,
+    )
+
+    return {
+        "message": "References submitted successfully and pending admin review.",
+        "verification_id": verification_id,
+        "status": "pending"
+    }
 
 @router.get("/wallet-with-referrals", response_model=WalletResponseWithReferrals)
 async def get_wallet_with_referral_info(current_user = Depends(get_current_user)):

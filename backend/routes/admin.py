@@ -2027,6 +2027,34 @@ async def view_verification_document(filename: str, admin: dict = Depends(requir
     return FileResponse(file_path, media_type="image/jpeg")
 
 # ==========================================
+# TRADESPEOPLE REFERENCES VERIFICATION (ADMIN)
+# ==========================================
+
+@router.get("/tradespeople-verifications/pending")
+async def get_pending_tradespeople_verifications(skip: int = 0, limit: int = 20, admin: dict = Depends(require_permission(AdminPermission.VERIFY_USERS))):
+    """List pending tradespeople references verifications"""
+    items = await database.get_pending_tradespeople_verifications(skip=skip, limit=limit)
+    return {"verifications": items, "pagination": {"skip": skip, "limit": limit, "total": len(items)}}
+
+@router.post("/tradespeople-verifications/{verification_id}/approve")
+async def approve_tradespeople_verification(verification_id: str, admin_notes: str = Form(""), admin: dict = Depends(require_permission(AdminPermission.VERIFY_USERS))):
+    """Approve tradesperson references verification"""
+    ok = await database.approve_tradesperson_verification(verification_id, admin_id=admin["id"], admin_notes=admin_notes)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Verification not found or already processed")
+    return {"message": "Tradesperson verification approved", "verification_id": verification_id, "status": "verified"}
+
+@router.post("/tradespeople-verifications/{verification_id}/reject")
+async def reject_tradespeople_verification(verification_id: str, admin_notes: str = Form(...), admin: dict = Depends(require_permission(AdminPermission.VERIFY_USERS))):
+    """Reject tradesperson references verification"""
+    if not admin_notes.strip():
+        raise HTTPException(status_code=400, detail="Admin notes are required for rejection")
+    ok = await database.reject_tradesperson_verification(verification_id, admin_id=admin["id"], admin_notes=admin_notes)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Verification not found or already processed")
+    return {"message": "Tradesperson verification rejected", "verification_id": verification_id, "status": "rejected", "notes": admin_notes}
+
+# ==========================================
 # TRADE CATEGORY QUESTIONS MANAGEMENT
 # ==========================================
 

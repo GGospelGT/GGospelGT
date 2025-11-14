@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { referralsAPI } from '../api/referrals';
+import { referralsAPI, verificationAPI } from '../api/referrals';
+import { authAPI } from '../api/services';
 import { useToast } from '../hooks/use-toast';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -19,6 +20,26 @@ const VerifyAccountPage = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
+
+  // Email/Phone OTP states
+  const [emailInput, setEmailInput] = useState(user?.email || '');
+  const [emailOtpCode, setEmailOtpCode] = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailVerifying, setEmailVerifying] = useState(false);
+
+  const [phoneInput, setPhoneInput] = useState(user?.phone || '');
+  const [phoneOtpCode, setPhoneOtpCode] = useState('');
+  const [phoneSending, setPhoneSending] = useState(false);
+  const [phoneVerifying, setPhoneVerifying] = useState(false);
+
+  // Tradespeople references
+  const [workRef, setWorkRef] = useState({
+    name: '', phone: '', company_email: '', company_name: '', relationship: ''
+  });
+  const [charRef, setCharRef] = useState({
+    name: '', phone: '', email: '', relationship: ''
+  });
+  const [refsSubmitting, setRefsSubmitting] = useState(false);
 
   const documentTypes = [
     { value: 'national_id', label: 'Nigerian National ID Card', description: 'Government-issued national identification card' },
@@ -212,14 +233,124 @@ const VerifyAccountPage = () => {
           {/* Page Header */}
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Verify Your Account</h1>
-            <p className="text-gray-600">
-              Upload a government-issued ID to verify your identity and unlock all features
-            </p>
+            <p className="text-gray-600">Verify your email and phone, then submit your ID. Tradespeople add references.</p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Form */}
             <div className="lg:col-span-2">
+              {/* Contact Verification */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Contact Verification</h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Email */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input
+                      type="email"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="Enter your registered email"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <div className="flex items-center space-x-3">
+                      <button
+                        type="button"
+                        disabled={emailSending}
+                        onClick={async () => {
+                          try {
+                            setEmailSending(true);
+                            await authAPI.sendEmailOTP(emailInput);
+                            toast({ title: 'Code Sent', description: 'Check your email for the code.' });
+                          } catch (e) {
+                            toast({ title: 'Send Failed', description: 'Could not send email code', variant: 'destructive' });
+                          } finally { setEmailSending(false); }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                      >
+                        {emailSending ? 'Sending...' : 'Send Code'}
+                      </button>
+                      <input
+                        type="text"
+                        value={emailOtpCode}
+                        onChange={(e) => setEmailOtpCode(e.target.value)}
+                        placeholder="Enter code"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        disabled={emailVerifying || !emailOtpCode}
+                        onClick={async () => {
+                          try {
+                            setEmailVerifying(true);
+                            await authAPI.verifyEmailOTP(emailOtpCode, emailInput);
+                            toast({ title: 'Email Verified', description: 'Your email has been verified.' });
+                          } catch (e) {
+                            toast({ title: 'Verification Failed', description: 'Invalid or expired code', variant: 'destructive' });
+                          } finally { setEmailVerifying(false); }
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                      >
+                        {emailVerifying ? 'Verifying...' : 'Verify'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input
+                      type="tel"
+                      value={phoneInput}
+                      onChange={(e) => setPhoneInput(e.target.value)}
+                      placeholder="Enter your registered phone"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <div className="flex items-center space-x-3">
+                      <button
+                        type="button"
+                        disabled={phoneSending}
+                        onClick={async () => {
+                          try {
+                            setPhoneSending(true);
+                            await authAPI.sendPhoneOTP(phoneInput);
+                            toast({ title: 'Code Sent', description: 'SMS code sent to your phone.' });
+                          } catch (e) {
+                            toast({ title: 'Send Failed', description: 'Could not send SMS code', variant: 'destructive' });
+                          } finally { setPhoneSending(false); }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                      >
+                        {phoneSending ? 'Sending...' : 'Send Code'}
+                      </button>
+                      <input
+                        type="text"
+                        value={phoneOtpCode}
+                        onChange={(e) => setPhoneOtpCode(e.target.value)}
+                        placeholder="Enter code"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        disabled={phoneVerifying || !phoneOtpCode}
+                        onClick={async () => {
+                          try {
+                            setPhoneVerifying(true);
+                            await authAPI.verifyPhoneOTP(phoneOtpCode, phoneInput);
+                            toast({ title: 'Phone Verified', description: 'Your phone has been verified.' });
+                          } catch (e) {
+                            toast({ title: 'Verification Failed', description: 'Invalid or expired code', variant: 'destructive' });
+                          } finally { setPhoneVerifying(false); }
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                      >
+                        {phoneVerifying ? 'Verifying...' : 'Verify'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="bg-white p-8 rounded-lg shadow-sm border">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Document Type Selection */}
@@ -365,6 +496,63 @@ const VerifyAccountPage = () => {
                   </button>
                 </form>
               </div>
+
+              {/* Tradespeople References */}
+              {user?.role === 'tradesperson' && (
+                <div className="bg-white p-6 rounded-lg shadow-sm border mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Tradespeople References</h3>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-2">Work Referrer</h4>
+                      <div className="space-y-3">
+                        <input className="w-full px-3 py-2 border rounded-lg" placeholder="Referrer name" value={workRef.name} onChange={(e)=>setWorkRef({...workRef, name: e.target.value})} />
+                        <input className="w-full px-3 py-2 border rounded-lg" placeholder="Referrer phone" value={workRef.phone} onChange={(e)=>setWorkRef({...workRef, phone: e.target.value})} />
+                        <input className="w-full px-3 py-2 border rounded-lg" placeholder="Company email" value={workRef.company_email} onChange={(e)=>setWorkRef({...workRef, company_email: e.target.value})} />
+                        <input className="w-full px-3 py-2 border rounded-lg" placeholder="Company name" value={workRef.company_name} onChange={(e)=>setWorkRef({...workRef, company_name: e.target.value})} />
+                        <input className="w-full px-3 py-2 border rounded-lg" placeholder="Relationship" value={workRef.relationship} onChange={(e)=>setWorkRef({...workRef, relationship: e.target.value})} />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Character Referrer</h4>
+                      <div className="space-y-3">
+                        <input className="w-full px-3 py-2 border rounded-lg" placeholder="Referrer name" value={charRef.name} onChange={(e)=>setCharRef({...charRef, name: e.target.value})} />
+                        <input className="w-full px-3 py-2 border rounded-lg" placeholder="Referrer phone" value={charRef.phone} onChange={(e)=>setCharRef({...charRef, phone: e.target.value})} />
+                        <input className="w-full px-3 py-2 border rounded-lg" placeholder="Referrer email" value={charRef.email} onChange={(e)=>setCharRef({...charRef, email: e.target.value})} />
+                        <input className="w-full px-3 py-2 border rounded-lg" placeholder="Relationship" value={charRef.relationship} onChange={(e)=>setCharRef({...charRef, relationship: e.target.value})} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      disabled={refsSubmitting}
+                      onClick={async ()=>{
+                        try {
+                          setRefsSubmitting(true);
+                          await verificationAPI.submitTradespersonReferences({
+                            work_referrer_name: workRef.name,
+                            work_referrer_phone: workRef.phone,
+                            work_referrer_company_email: workRef.company_email,
+                            work_referrer_company_name: workRef.company_name,
+                            work_referrer_relationship: workRef.relationship,
+                            character_referrer_name: charRef.name,
+                            character_referrer_phone: charRef.phone,
+                            character_referrer_email: charRef.email,
+                            character_referrer_relationship: charRef.relationship,
+                          });
+                          toast({ title: 'References Submitted', description: 'Pending admin review.' });
+                        } catch (e) {
+                          const msg = e?.response?.data?.detail || 'Failed to submit references';
+                          toast({ title: 'Submission Failed', description: msg, variant: 'destructive' });
+                        } finally { setRefsSubmitting(false); }
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+                    >
+                      {refsSubmitting ? 'Submitting...' : 'Submit References'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Sidebar */}
