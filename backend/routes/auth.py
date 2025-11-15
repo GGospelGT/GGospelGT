@@ -840,13 +840,27 @@ async def send_phone_otp(payload: SendPhoneOTPRequest, current_user: dict = Depe
             # Still return success to avoid leaking info; user can request again
             logger.error(f"Failed to send OTP SMS to {formatted_phone}")
 
-        return {"message": "Verification code sent"}
+        resp = {"message": "Verification code sent"}
+        try:
+            dev_flag = os.environ.get('OTP_DEV_MODE', '0')
+            if dev_flag in ('1', 'true', 'True'):
+                resp["debug_code"] = otp_code
+        except Exception:
+            pass
+        return resp
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error sending phone OTP: {e}")
         # Degrade gracefully: allow user to proceed even if delivery fails
-        return {"message": "Verification code sent"}
+        resp = {"message": "Verification code sent"}
+        try:
+            dev_flag = os.environ.get('OTP_DEV_MODE', '0')
+            if dev_flag in ('1', 'true', 'True'):
+                resp["debug_code"] = otp_code
+        except Exception:
+            pass
+        return resp
 
 @router.post("/verify-phone-otp")
 async def verify_phone_otp(payload: VerifyPhoneOTPRequest, current_user: dict = Depends(get_current_active_user)):

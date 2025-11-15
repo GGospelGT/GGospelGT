@@ -262,8 +262,13 @@ const VerifyAccountPage = () => {
                         onClick={async () => {
                           try {
                             setEmailSending(true);
-                            await authAPI.sendEmailOTP(emailInput);
-                            toast({ title: 'Code Sent', description: 'Check your email for the code.' });
+                            const resp = await authAPI.sendEmailOTP(emailInput);
+                            if (resp?.debug_code) {
+                              setEmailOtpCode(resp.debug_code);
+                              toast({ title: 'Code Sent', description: `Dev code: ${resp.debug_code}` });
+                            } else {
+                              toast({ title: 'Code Sent', description: 'Check your email for the code.' });
+                            }
                           } catch (e) {
                             const msg = e?.response?.data?.detail || 'Could not send email code';
                             toast({ title: 'Send Failed', description: msg, variant: 'destructive' });
@@ -318,8 +323,13 @@ const VerifyAccountPage = () => {
                         onClick={async () => {
                           try {
                             setPhoneSending(true);
-                            await authAPI.sendPhoneOTP(phoneInput);
-                            toast({ title: 'Code Sent', description: 'SMS code sent to your phone.' });
+                            const resp = await authAPI.sendPhoneOTP(phoneInput);
+                            if (resp?.debug_code) {
+                              setPhoneOtpCode(resp.debug_code);
+                              toast({ title: 'Code Sent', description: `Dev code: ${resp.debug_code}` });
+                            } else {
+                              toast({ title: 'Code Sent', description: 'SMS code sent to your phone.' });
+                            }
                           } catch (e) {
                             const msg = e?.response?.data?.detail || 'Could not send SMS code';
                             toast({ title: 'Send Failed', description: msg, variant: 'destructive' });
