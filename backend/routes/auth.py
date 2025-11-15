@@ -803,10 +803,10 @@ async def verify_email(user_id: str):
 
 # Phone verification via OTP
 @router.post("/send-phone-otp")
-async def send_phone_otp(payload: SendPhoneOTPRequest, current_user: dict = Depends(get_current_active_user)):
+async def send_phone_otp(payload: SendPhoneOTPRequest, current_user: User = Depends(get_current_active_user)):
     """Generate and send a phone verification OTP to the user's phone."""
     try:
-        phone = payload.phone or current_user.get("phone")
+        phone = payload.phone or current_user.phone
         if not phone:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No phone number on record")
 
@@ -821,7 +821,7 @@ async def send_phone_otp(payload: SendPhoneOTPRequest, current_user: dict = Depe
 
         # Store OTP
         stored = await database.create_phone_verification_otp(
-            user_id=current_user["id"],
+            user_id=current_user.id,
             phone=formatted_phone,
             otp_code=otp_code,
             expires_at=expires_at,
@@ -834,7 +834,7 @@ async def send_phone_otp(payload: SendPhoneOTPRequest, current_user: dict = Depe
         sms_ok = await notification_service.send_custom_sms(
             phone=formatted_phone,
             message=message,
-            metadata={"purpose": "phone_verification", "user_id": current_user["id"]}
+            metadata={"purpose": "phone_verification", "user_id": current_user.id}
         )
         if not sms_ok:
             # Still return success to avoid leaking info; user can request again
@@ -843,8 +843,10 @@ async def send_phone_otp(payload: SendPhoneOTPRequest, current_user: dict = Depe
         resp = {"message": "Verification code sent"}
         try:
             dev_flag = os.environ.get('OTP_DEV_MODE', '0')
+            logger.info(f"OTP_DEV_MODE={dev_flag}")
             if dev_flag in ('1', 'true', 'True'):
                 resp["debug_code"] = otp_code
+                logger.info(f"OTP dev mode active; phone debug_code={otp_code}")
         except Exception:
             pass
         return resp
@@ -856,17 +858,19 @@ async def send_phone_otp(payload: SendPhoneOTPRequest, current_user: dict = Depe
         resp = {"message": "Verification code sent"}
         try:
             dev_flag = os.environ.get('OTP_DEV_MODE', '0')
+            logger.info(f"OTP_DEV_MODE={dev_flag}")
             if dev_flag in ('1', 'true', 'True'):
                 resp["debug_code"] = otp_code
+                logger.info(f"OTP dev mode active; phone debug_code={otp_code}")
         except Exception:
             pass
         return resp
 
 @router.post("/verify-phone-otp")
-async def verify_phone_otp(payload: VerifyPhoneOTPRequest, current_user: dict = Depends(get_current_active_user)):
+async def verify_phone_otp(payload: VerifyPhoneOTPRequest, current_user: User = Depends(get_current_active_user)):
     """Verify phone using the submitted OTP and mark as verified."""
     try:
-        phone = payload.phone or current_user.get("phone")
+        phone = payload.phone or current_user.phone
         if not phone:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No phone number on record")
 
@@ -875,7 +879,7 @@ async def verify_phone_otp(payload: VerifyPhoneOTPRequest, current_user: dict = 
             formatted_phone = format_nigerian_phone(phone)
 
         otp = await database.get_active_phone_otp(
-            user_id=current_user["id"],
+            user_id=current_user.id,
             phone=formatted_phone,
             otp_code=payload.otp_code,
         )
@@ -884,7 +888,7 @@ async def verify_phone_otp(payload: VerifyPhoneOTPRequest, current_user: dict = 
 
         # Mark OTP used and verify phone
         await database.mark_phone_otp_used(otp["id"])
-        await database.verify_user_phone(current_user["id"])
+        await database.verify_user_phone(current_user.id)
 
         return {"message": "Phone verified successfully"}
     except HTTPException:
@@ -895,11 +899,11 @@ async def verify_phone_otp(payload: VerifyPhoneOTPRequest, current_user: dict = 
 
 # Email verification via OTP
 @router.post("/send-email-otp")
-async def send_email_otp(payload: SendEmailOTPRequest, current_user: dict = Depends(get_current_active_user)):
+async def send_email_otp(payload: SendEmailOTPRequest, current_user: User = Depends(get_current_active_user)):
     """Generate and send an email verification OTP to the user's registered email."""
     try:
-        email = (payload.email or current_user.get("email") or "").strip().lower()
-        registered_email = (current_user.get("email") or "").strip().lower()
+        email = (payload.email or current_user.email or "").strip().lower()
+        registered_email = (current_user.email or "").strip().lower()
         if not registered_email:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No email on record")
         # Enforce that the email provided matches the registered email
@@ -913,7 +917,7 @@ async def send_email_otp(payload: SendEmailOTPRequest, current_user: dict = Depe
 
         # Store OTP
         stored = await database.create_email_verification_otp(
-            user_id=current_user["id"],
+            user_id=current_user.id,
             email=registered_email,
             otp_code=otp_code,
             expires_at=expires_at,
@@ -937,7 +941,7 @@ async def send_email_otp(payload: SendEmailOTPRequest, current_user: dict = Depe
                 to=registered_email,
                 subject=subject,
                 content=content,
-                metadata={"purpose": "email_verification", "user_id": current_user["id"]}
+                metadata={"purpose": "email_verification", "user_id": current_user.id}
             )
         except Exception as e:
             logger.warning(f"SendGrid unavailable, using mock email: {e}")
@@ -947,7 +951,7 @@ async def send_email_otp(payload: SendEmailOTPRequest, current_user: dict = Depe
                     to=registered_email,
                     subject=subject,
                     content=content,
-                    metadata={"purpose": "email_verification", "user_id": current_user["id"]}
+                    metadata={"purpose": "email_verification", "user_id": current_user.id}
                 )
             except Exception as e2:
                 logger.error(f"Failed to send email OTP: {e2}")
@@ -956,30 +960,46 @@ async def send_email_otp(payload: SendEmailOTPRequest, current_user: dict = Depe
             logger.info(f"Email OTP sent to {registered_email}")
 
         if not email_ok:
-            # Still return success to avoid leaking delivery failures
             logger.error(f"Failed to send OTP email to {registered_email}")
 
-        return {"message": "Verification code sent"}
+        resp = {"message": "Verification code sent"}
+        try:
+            dev_flag = os.environ.get('OTP_DEV_MODE', '0')
+            logger.info(f"OTP_DEV_MODE={dev_flag}")
+            if dev_flag in ('1', 'true', 'True'):
+                resp["debug_code"] = otp_code
+                logger.info(f"OTP dev mode active; email debug_code={otp_code}")
+        except Exception:
+            pass
+        return resp
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error sending email OTP: {e}")
-        # Degrade gracefully: allow user to proceed even if delivery fails
-        return {"message": "Verification code sent"}
+        resp = {"message": "Verification code sent"}
+        try:
+            dev_flag = os.environ.get('OTP_DEV_MODE', '0')
+            logger.info(f"OTP_DEV_MODE={dev_flag}")
+            if dev_flag in ('1', 'true', 'True'):
+                resp["debug_code"] = otp_code
+                logger.info(f"OTP dev mode active; email debug_code={otp_code}")
+        except Exception:
+            pass
+        return resp
 
 @router.post("/verify-email-otp")
-async def verify_email_otp(payload: VerifyEmailOTPRequest, current_user: dict = Depends(get_current_active_user)):
+async def verify_email_otp(payload: VerifyEmailOTPRequest, current_user: User = Depends(get_current_active_user)):
     """Verify email using the submitted OTP and mark as verified."""
     try:
-        email = (payload.email or current_user.get("email") or "").strip().lower()
-        registered_email = (current_user.get("email") or "").strip().lower()
+        email = (payload.email or current_user.email or "").strip().lower()
+        registered_email = (current_user.email or "").strip().lower()
         if not registered_email:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No email on record")
         if email and email != registered_email:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email must match your registered email")
 
         otp = await database.get_active_email_otp(
-            user_id=current_user["id"],
+            user_id=current_user.id,
             email=registered_email,
             otp_code=payload.otp_code,
         )
@@ -987,7 +1007,7 @@ async def verify_email_otp(payload: VerifyEmailOTPRequest, current_user: dict = 
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired code")
 
         await database.mark_email_otp_used(otp["id"]) 
-        await database.verify_user_email(current_user["id"]) 
+        await database.verify_user_email(current_user.id) 
 
         return {"message": "Email verified successfully"}
     except HTTPException:

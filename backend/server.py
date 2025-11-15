@@ -203,6 +203,10 @@ async def get_metrics():
         logger.error("Metrics retrieval failed", extra={"error": str(e)})
         raise HTTPException(status_code=500, detail="Metrics retrieval failed")
 
+@api_router.get("/api/debug/otp-dev")
+async def debug_otp_dev():
+    return {"OTP_DEV_MODE": os.getenv("OTP_DEV_MODE")}
+
 @api_router.get("/api/database-info")
 async def get_database_info():
     """Get database information for mobile access"""
