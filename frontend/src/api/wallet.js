@@ -43,6 +43,11 @@ export const walletAPI = {
   getPaymentProofUrl(filename) {
     return `${(process.env.REACT_APP_BACKEND_URL ? process.env.REACT_APP_BACKEND_URL + '/api' : (apiClient?.defaults?.baseURL || '/api'))}/wallet/payment-proof/${filename}`;
   }
+,
+  // Get payment proof as base64
+  getPaymentProofBase64Url(filename) {
+    return `${(process.env.REACT_APP_BACKEND_URL ? process.env.REACT_APP_BACKEND_URL + '/api' : (apiClient?.defaults?.baseURL || '/api'))}/wallet/payment-proof-base64/${filename}`;
+  }
 };
 
 export const adminAPI = {
@@ -200,6 +205,10 @@ export const adminAPI = {
   // Get payment proof image (admin)
   getPaymentProofUrl(filename) {
     return `${(process.env.REACT_APP_BACKEND_URL ? process.env.REACT_APP_BACKEND_URL + '/api' : (apiClient?.defaults?.baseURL || '/api'))}/admin/wallet/payment-proof/${filename}`;
+  },
+  // Get payment proof as base64 (admin)
+  getPaymentProofBase64Url(filename) {
+    return `${(process.env.REACT_APP_BACKEND_URL ? process.env.REACT_APP_BACKEND_URL + '/api' : (apiClient?.defaults?.baseURL || '/api'))}/admin/wallet/payment-proof-base64/${filename}`;
   },
 
   // User Management Methods

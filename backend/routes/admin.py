@@ -673,12 +673,35 @@ async def view_payment_proof(filename: str, admin: dict = Depends(require_permis
     import os
     
     base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
-    file_path = os.path.join(base_dir, "payment_proofs", filename)
-    
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Payment proof not found")
-    
-    return FileResponse(file_path, media_type="image/jpeg")
+    project_root_uploads = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+    candidates = [
+        os.path.join(base_dir, "payment_proofs", filename),
+        os.path.join(project_root_uploads, "payment_proofs", filename),
+        os.path.join(os.getcwd(), "uploads", "payment_proofs", filename),
+        os.path.join("/app", "uploads", "payment_proofs", filename),
+    ]
+    for fp in candidates:
+        if os.path.exists(fp):
+            return FileResponse(fp, media_type="image/jpeg")
+    raise HTTPException(status_code=404, detail="Payment proof not found")
+
+@router.get("/wallet/payment-proof-base64/{filename}")
+async def view_payment_proof_base64(filename: str, admin: dict = Depends(require_permission(AdminPermission.VIEW_PAYMENT_PROOFS))):
+    import os, base64
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    project_root_uploads = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+    candidates = [
+        os.path.join(base_dir, "payment_proofs", filename),
+        os.path.join(project_root_uploads, "payment_proofs", filename),
+        os.path.join(os.getcwd(), "uploads", "payment_proofs", filename),
+        os.path.join("/app", "uploads", "payment_proofs", filename),
+    ]
+    for fp in candidates:
+        if os.path.exists(fp):
+            with open(fp, "rb") as f:
+                data = f.read()
+            return {"image_base64": base64.b64encode(data).decode("utf-8")}
+    raise HTTPException(status_code=404, detail="Payment proof not found")
 
 # ==========================================
 # USER MANAGEMENT

@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import uuid
 from PIL import Image
+import base64
 import io
 
 from ..auth.dependencies import get_current_user, get_current_tradesperson
@@ -50,7 +51,8 @@ async def submit_verification_documents(
     document_type: DocumentType = Form(...),
     full_name: str = Form(...),
     document_number: str = Form(""),
-    document_image: UploadFile = File(...),
+    document_image: UploadFile = File(None),
+    document_image_base64: str = Form(None),
     current_user = Depends(get_current_user)
 ):
     """Submit documents for identity verification"""
@@ -67,26 +69,27 @@ async def submit_verification_documents(
         else:
             raise HTTPException(status_code=400, detail="Verification already submitted and pending review")
     
-    # Validate image file
-    if not document_image.content_type.startswith("image/"):
+    if not document_image and not document_image_base64:
+        raise HTTPException(status_code=400, detail="Document image is required")
+    if document_image and not document_image.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Only image files are allowed")
     
-    # Create uploads directory
-    upload_dir = "/app/uploads/verification_documents"
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    upload_dir = os.path.join(base_dir, "verification_documents")
     os.makedirs(upload_dir, exist_ok=True)
     
-    # Generate unique filename
-    file_extension = document_image.filename.split(".")[-1].lower()
-    filename = f"{current_user.id}_{document_type}_{uuid.uuid4().hex}.{file_extension}"
+    filename = f"{current_user.id}_{document_type}_{uuid.uuid4().hex}.jpg"
     file_path = os.path.join(upload_dir, filename)
     
     # Save and optimize image
     try:
-        # Read image data
-        image_data = await document_image.read()
-        
-        # Open and optimize image
-        image = Image.open(io.BytesIO(image_data))
+        if document_image_base64:
+            b64 = document_image_base64.split(",")[-1]
+            raw = base64.b64decode(b64)
+            image = Image.open(io.BytesIO(raw))
+        else:
+            image_data = await document_image.read()
+            image = Image.open(io.BytesIO(image_data))
         
         # Convert to RGB if necessary
         if image.mode in ("RGBA", "P"):
@@ -96,7 +99,6 @@ async def submit_verification_documents(
         if image.width > 1920 or image.height > 1920:
             image.thumbnail((1920, 1920), Image.Resampling.LANCZOS)
         
-        # Save optimized image
         image.save(file_path, "JPEG", quality=90, optimize=True)
         
     except Exception as e:
@@ -208,12 +210,17 @@ async def serve_verification_document(filename: str):
     from fastapi.responses import FileResponse
     import os
     base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
-    file_path = os.path.join(base_dir, "verification_documents", filename)
-    
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Document not found")
-    
-    return FileResponse(file_path, media_type="image/jpeg")
+    project_root_uploads = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+    candidates = [
+        os.path.join(base_dir, "verification_documents", filename),
+        os.path.join(project_root_uploads, "verification_documents", filename),
+        os.path.join(os.getcwd(), "uploads", "verification_documents", filename),
+        os.path.join("/app", "uploads", "verification_documents", filename),
+    ]
+    for fp in candidates:
+        if os.path.exists(fp):
+            return FileResponse(fp, media_type="image/jpeg")
+    raise HTTPException(status_code=404, detail="Document not found")
 
 @router.post("/process-signup-referral")
 async def process_signup_referral(

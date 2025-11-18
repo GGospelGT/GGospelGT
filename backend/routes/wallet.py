@@ -44,7 +44,8 @@ async def get_bank_details():
 @router.post("/fund")
 async def fund_wallet(
     amount_naira: int = Form(...),
-    proof_image: UploadFile = File(...),
+    proof_image: UploadFile = File(None),
+    proof_image_base64: str = Form(None),
     current_user: User = Depends(get_current_user)
 ):
     """Request wallet funding with payment proof"""
@@ -53,8 +54,9 @@ async def fund_wallet(
     if amount_naira < 100:
         raise HTTPException(status_code=400, detail="Minimum funding amount is ₦100")
     
-    # Validate image file
-    if not proof_image.content_type.startswith("image/"):
+    if not proof_image and not proof_image_base64:
+        raise HTTPException(status_code=400, detail="Payment proof image is required")
+    if proof_image and not proof_image.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Only image files are allowed")
     
     # Create uploads directory if it doesn't exist
@@ -62,18 +64,18 @@ async def fund_wallet(
     upload_dir = os.path.join(base_dir, "payment_proofs")
     os.makedirs(upload_dir, exist_ok=True)
     
-    # Generate unique filename
-    file_extension = proof_image.filename.split(".")[-1].lower()
-    filename = f"{current_user.id}_{uuid.uuid4().hex}.{file_extension}"
+    filename = f"{current_user.id}_{uuid.uuid4().hex}.jpg"
     file_path = os.path.join(upload_dir, filename)
     
     # Save and optimize image
     try:
-        # Read image data
-        image_data = await proof_image.read()
-        
-        # Open and optimize image
-        image = Image.open(io.BytesIO(image_data))
+        if proof_image_base64:
+            b64 = proof_image_base64.split(",")[-1]
+            raw = base64.b64decode(b64)
+            image = Image.open(io.BytesIO(raw))
+        else:
+            image_data = await proof_image.read()
+            image = Image.open(io.BytesIO(image_data))
         
         # Convert to RGB if necessary
         if image.mode in ("RGBA", "P"):
@@ -160,16 +162,36 @@ async def check_sufficient_balance(
         "shortfall_naira": max(0, (access_fee_coins - wallet["balance_coins"]) * 100)
     }
 
-# Serve payment proof images
 @router.get("/payment-proof/{filename}")
 async def serve_payment_proof(filename: str):
-    """Serve payment proof images"""
     from fastapi.responses import FileResponse
-    
     base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
-    file_path = os.path.join(base_dir, "payment_proofs", filename)
-    
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Image not found")
-    
-    return FileResponse(file_path, media_type="image/jpeg")
+    project_root_uploads = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+    candidates = [
+        os.path.join(base_dir, "payment_proofs", filename),
+        os.path.join(project_root_uploads, "payment_proofs", filename),
+        os.path.join(os.getcwd(), "uploads", "payment_proofs", filename),
+        os.path.join("/app", "uploads", "payment_proofs", filename),
+    ]
+    for fp in candidates:
+        if os.path.exists(fp):
+            return FileResponse(fp, media_type="image/jpeg")
+    raise HTTPException(status_code=404, detail="Image not found")
+
+@router.get("/payment-proof-base64/{filename}")
+async def serve_payment_proof_base64(filename: str):
+    project_root_uploads = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    candidates = [
+        os.path.join(base_dir, "payment_proofs", filename),
+        os.path.join(project_root_uploads, "payment_proofs", filename),
+        os.path.join(os.getcwd(), "uploads", "payment_proofs", filename),
+        os.path.join("/app", "uploads", "payment_proofs", filename),
+    ]
+    for fp in candidates:
+        if os.path.exists(fp):
+            with open(fp, "rb") as f:
+                data = f.read()
+            b64 = base64.b64encode(data).decode("utf-8")
+            return {"image_base64": b64}
+    raise HTTPException(status_code=404, detail="Image not found")

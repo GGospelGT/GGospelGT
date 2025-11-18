@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, status
 from fastapi.responses import FileResponse
 from typing import List, Optional
+import base64
 import os
 import uuid
 import shutil
@@ -66,27 +67,29 @@ async def upload_portfolio_image(
     title: str = Form(...),
     description: Optional[str] = Form(None),
     category: PortfolioItemCategory = Form(...),
-    file: UploadFile = File(...),
+    file: UploadFile = File(None),
+    image_base64: Optional[str] = Form(None),
     current_user: User = Depends(get_current_tradesperson)
 ):
     """Upload a new portfolio image"""
     try:
-        # Validate file
-        if not validate_image_file(file):
+        if not file and not image_base64:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Image is required")
+        if file and not validate_image_file(file):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid file. Allowed formats: {', '.join(ALLOWED_EXTENSIONS)}. Max size: {MAX_FILE_SIZE // (1024*1024)}MB"
             )
-        
-        # Read file content
-        file_content = await file.read()
-        
-        # Resize and optimize image
-        optimized_content = resize_image(file_content)
+        if image_base64:
+            b64 = image_base64.split(",")[-1]
+            raw = base64.b64decode(b64)
+            optimized_content = resize_image(raw)
+        else:
+            file_content = await file.read()
+            optimized_content = resize_image(file_content)
         
         # Generate unique filename
-        file_ext = Path(file.filename).suffix.lower()
-        unique_filename = f"{uuid.uuid4()}{file_ext}"
+        unique_filename = f"{uuid.uuid4()}.jpg"
         file_path = UPLOAD_DIR / unique_filename
         
         # Save file
