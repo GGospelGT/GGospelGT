@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminAPI } from '../api/wallet';
+import { adminAPI, walletAPI } from '../api/wallet';
 import { adminReferralsAPI, adminVerificationAPI } from '../api/referrals';
 import { useToast } from '../hooks/use-toast';
 import ContactManagementTab from './ContactManagementTab';
@@ -1353,10 +1353,10 @@ const AdminDashboard = () => {
                             <div>
                               <p className="text-sm text-gray-600 mb-2">Payment Proof:</p>
                               <img
-                                src={adminAPI.getPaymentProofUrl(request.proof_image)}
+                                src={walletAPI.getPaymentProofUrl(request.proof_image)}
                                 alt="Payment proof"
                                 className="h-32 w-auto rounded border cursor-pointer hover:shadow-lg transition-shadow"
-                                onClick={() => window.open(adminAPI.getPaymentProofUrl(request.proof_image), '_blank')}
+                                onClick={() => window.open(walletAPI.getPaymentProofUrl(request.proof_image), '_blank')}
                               />
                             </div>
                           )}
