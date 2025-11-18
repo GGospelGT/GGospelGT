@@ -672,7 +672,8 @@ async def view_payment_proof(filename: str, admin: dict = Depends(require_permis
     from fastapi.responses import FileResponse
     import os
     
-    file_path = f"/app/uploads/payment_proofs/{filename}"
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    file_path = os.path.join(base_dir, "payment_proofs", filename)
     
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Payment proof not found")
@@ -2019,7 +2020,8 @@ async def view_verification_document(filename: str, admin: dict = Depends(requir
     from fastapi.responses import FileResponse
     import os
     
-    file_path = f"/app/uploads/verification_documents/{filename}"
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    file_path = os.path.join(base_dir, "verification_documents", filename)
     
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Verification document not found")

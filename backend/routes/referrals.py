@@ -206,8 +206,9 @@ async def check_withdrawal_eligibility(current_user = Depends(get_current_user))
 async def serve_verification_document(filename: str):
     """Serve verification document images (admin only)"""
     from fastapi.responses import FileResponse
-    
-    file_path = f"/app/uploads/verification_documents/{filename}"
+    import os
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    file_path = os.path.join(base_dir, "verification_documents", filename)
     
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Document not found")

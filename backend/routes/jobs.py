@@ -1,10 +1,20 @@
 from fastapi import APIRouter, HTTPException, Query, Depends, BackgroundTasks
+from pydantic import BaseModel, Field
 from typing import Optional
 from ..models import JobCreate, JobUpdate, JobCloseRequest, Job, JobsResponse
 from ..models.base import JobStatus
-from ..models.auth import User
 from ..models.notifications import NotificationType
-from ..auth.dependencies import get_current_active_user, get_current_homeowner, require_homeowner_contact_verified, require_tradesperson_verified
+from ..auth.dependencies import get_current_homeowner, require_homeowner_contact_verified, require_tradesperson_verified
+from ..auth.security import (
+    get_password_hash,
+    validate_password_strength,
+    validate_nigerian_phone,
+    format_nigerian_phone,
+    create_access_token,
+    create_refresh_token,
+    verify_password,
+)
+from ..models.auth import User, UserRole, UserStatus
 from ..database import database
 from ..services.notifications import notification_service
 from datetime import datetime, timedelta
@@ -15,6 +25,10 @@ import os
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
+
+class PublicJobPostRequest(BaseModel):
+    job: JobCreate
+    password: str = Field(..., min_length=8)
 
 # Public endpoints for location data
 @router.get("/locations/states")
@@ -63,15 +77,15 @@ async def create_job(
         
         if not (static_valid or dynamic_valid):
             raise HTTPException(
-                status_code=400, 
-                detail=f"LGA '{job_data.lga}' does not belong to state '{job_data.state}'"
+                status_code=400,
+                detail=f"LGA '{job_data.lga}' does not belong to state '{job_data.state}'",
             )
         
         # Validate zip code format
         if not validate_zip_code(job_data.zip_code, job_data.state, job_data.lga):
             raise HTTPException(
                 status_code=400,
-                detail="Invalid zip code format. Nigerian zip codes must be 6 digits."
+                detail="Invalid zip code format. Nigerian zip codes must be 6 digits.",
             )
         
         # Auto-populate legacy fields for compatibility
@@ -780,13 +794,14 @@ async def notify_job_completion(job_id: str, job: dict, homeowner: User):
                 preferences = await database.get_user_notification_preferences(tradesperson_id)
                 
                 # Prepare notification template data
+                frontend_url = os.environ.get('FRONTEND_URL', 'https://servicehub.ng')
                 template_data = {
                     "tradesperson_name": tradesperson_info.get("name", "Tradesperson"),
                     "job_title": job.get("title", "Untitled Job"),
                     "job_location": job.get("location", ""),
                     "homeowner_name": homeowner.name,
                     "completion_date": datetime.utcnow().strftime("%B %d, %Y"),
-                    "interests_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.ng')}/my-interests"
+                    "interests_url": f"{frontend_url}/my-interests"
                 }
                 
                 # Send notification
@@ -805,76 +820,17 @@ async def notify_job_completion(job_id: str, job: dict, homeowner: User):
                 logger.info(f"✅ Job completion notification sent to tradesperson {tradesperson_id}")
                 
             except Exception as e:
-                logger.error(f"❌ Failed to send job completion notification to tradesperson {tradesperson_id}: {str(e)}")
-                continue
-        
-        logger.info(f"✅ Job completion notifications sent to all interested tradespeople for job {job_id}")
-        
-    except Exception as e:
-        logger.error(f"❌ Error in job completion notification: {str(e)}")
-
-async def notify_job_cancellation(job_id: str, job: dict, homeowner: User, reason: str, feedback: str):
-    """Background task to notify interested tradespeople about job cancellation"""
-    try:
-        logger.info(f"Job {job_id} cancelled by homeowner {homeowner.id} - Reason: {reason}")
-        
-        # Get all interested tradespeople for this job
-        interested_tradespeople = await database.get_interested_tradespeople_for_job(job_id)
-        
-        if not interested_tradespeople:
-            logger.info(f"No interested tradespeople found for cancelled job {job_id}")
-            return
-        
-        logger.info(f"Found {len(interested_tradespeople)} interested tradespeople for cancelled job {job_id}")
-        
-        # Iterate through each interested tradesperson and send notifications
-        for interest in interested_tradespeople:
-            try:
-                tradesperson_id = interest.get("tradesperson_id")
-                tradesperson_info = interest.get("tradesperson", {})
-                
-                if not tradesperson_id:
-                    logger.warning(f"Missing tradesperson_id in interest: {interest}")
-                    continue
-                
-                # Get tradesperson notification preferences
-                preferences = await database.get_user_notification_preferences(tradesperson_id)
-                
-                # Prepare notification template data
-                template_data = {
-                    "tradesperson_name": tradesperson_info.get("name", "Tradesperson"),
-                    "job_title": job.get("title", "Untitled Job"),
-                    "job_location": job.get("location", ""),
-                    "homeowner_name": homeowner.name,
-                    "cancellation_reason": reason,
-                    "cancellation_date": datetime.utcnow().strftime("%B %d, %Y"),
-                    "browse_jobs_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.ng')}/browse-jobs",
-                    "interests_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.ng')}/my-interests"
-                }
-                
-                # Send notification
-                notification = await notification_service.send_notification(
-                    user_id=tradesperson_id,
-                    notification_type=NotificationType.JOB_CANCELLED,
-                    template_data=template_data,
-                    user_preferences=preferences,
-                    recipient_email=tradesperson_info.get("email"),
-                    recipient_phone=tradesperson_info.get("phone")
+                logger.error(
+                    "Failed to send job completion notification to tradesperson %s: %s",
+                    tradesperson_id,
+                    str(e),
                 )
-                
-                # Save notification to database
-                await database.create_notification(notification)
-                
-                logger.info(f"✅ Job cancellation notification sent to tradesperson {tradesperson_id}")
-                
-            except Exception as e:
-                logger.error(f"❌ Failed to send job cancellation notification to tradesperson {tradesperson_id}: {str(e)}")
                 continue
         
-        logger.info(f"✅ Job cancellation notifications sent to all interested tradespeople for job {job_id}")
+        logger.info("Job completion notifications sent to all interested tradespeople for job %s", job_id)
         
     except Exception as e:
-        logger.error(f"❌ Error in job cancellation notification: {str(e)}")
+        logger.error("Error in job completion notification: %s", str(e))
 
 async def notify_interested_tradespeople_job_reopened(job_id: str, job: dict):
     """Background task to notify interested tradespeople about job reopening"""
@@ -896,16 +852,23 @@ async def _notify_job_posted_successfully(homeowner: dict, job: dict):
         # Get user preferences for notifications
         preferences = await database.get_user_notification_preferences(homeowner_id)
         
-        # Prepare notification template data
+        budget_min = job.get("budget_min", 0)
+        budget_max = job.get("budget_max", 0)
+        has_budget = job.get("budget_min") and job.get("budget_max")
+        job_budget = (
+            f"₦{budget_min:,} - ₦{budget_max:,}"
+            if has_budget
+            else "Budget not specified"
+        )
         template_data = {
             "homeowner_name": homeowner.get("name", "Homeowner"),
             "job_title": job.get("title", "Untitled Job"),
             "job_location": job.get("location", ""),
             "job_category": job.get("category", ""),
-            "job_budget": f"₦{job.get('budget_min', 0):,} - ₦{job.get('budget_max', 0):,}" if job.get('budget_min') and job.get('budget_max') else "Budget not specified",
+            "job_budget": job_budget,
             "post_date": "Today",
             "manage_url": "https://servicehub.ng/my-jobs",
-            "job_id": job.get("id")
+            "job_id": job.get("id"),
         }
         
         # Send notification
@@ -921,39 +884,29 @@ async def _notify_job_posted_successfully(homeowner: dict, job: dict):
         # Save notification to database
         await database.create_notification(notification)
         
-        logger.info(f"✅ Job posted notification sent to homeowner {homeowner_id} for job {job.get('id')}")
+        logger.info("Job posted notification sent to homeowner %s for job %s", homeowner_id, job.get("id"))
         
     except Exception as e:
-        logger.error(f"❌ Failed to send job posted notification for job {job.get('id')}: {str(e)}")
+        logger.error("Failed to send job posted notification for job %s: %s", job.get("id"), str(e))
 
 async def notify_job_cancellation(job_id: str, job: dict, homeowner: User, reason: str, feedback: str):
     """Background task to notify interested tradespeople about job cancellation"""
     try:
-        logger.info(f"Job {job_id} cancelled by homeowner {homeowner.id} - Reason: {reason}")
-        
-        # Get all interested tradespeople for this job
+        logger.info("Job %s cancelled by homeowner %s - Reason: %s", job_id, homeowner.id, reason)
         interested_tradespeople = await database.get_interested_tradespeople_for_job(job_id)
-        
         if not interested_tradespeople:
-            logger.info(f"No interested tradespeople found for cancelled job {job_id}")
+            logger.info("No interested tradespeople found for cancelled job %s", job_id)
             return
-        
-        logger.info(f"Found {len(interested_tradespeople)} interested tradespeople for cancelled job {job_id}")
-        
-        # Iterate through each interested tradesperson and send notifications
+        logger.info("Found %s interested tradespeople for cancelled job %s", len(interested_tradespeople), job_id)
         for interest in interested_tradespeople:
             try:
                 tradesperson_id = interest.get("tradesperson_id")
                 tradesperson_info = interest.get("tradesperson", {})
-                
                 if not tradesperson_id:
-                    logger.warning(f"Missing tradesperson_id in interest: {interest}")
+                    logger.warning("Missing tradesperson_id in interest: %s", interest)
                     continue
-                
-                # Get tradesperson notification preferences
                 preferences = await database.get_user_notification_preferences(tradesperson_id)
-                
-                # Prepare notification template data
+                frontend_url = os.environ.get("FRONTEND_URL", "https://servicehub.ng")
                 template_data = {
                     "tradesperson_name": tradesperson_info.get("name", "Tradesperson"),
                     "job_title": job.get("title", "Untitled Job"),
@@ -962,32 +915,29 @@ async def notify_job_cancellation(job_id: str, job: dict, homeowner: User, reaso
                     "cancellation_reason": reason,
                     "additional_feedback": feedback if feedback else "No additional feedback provided",
                     "cancellation_date": datetime.utcnow().strftime("%B %d, %Y"),
-                    "browse_jobs_url": "https://servicehub.ng/jobs"
+                    "browse_jobs_url": f"{frontend_url}/browse-jobs",
+                    "interests_url": f"{frontend_url}/my-interests",
                 }
-                
-                # Send notification
                 notification = await notification_service.send_notification(
                     user_id=tradesperson_id,
                     notification_type=NotificationType.JOB_CANCELLED,
                     template_data=template_data,
                     user_preferences=preferences,
                     recipient_email=tradesperson_info.get("email"),
-                    recipient_phone=tradesperson_info.get("phone")
+                    recipient_phone=tradesperson_info.get("phone"),
                 )
-                
-                # Save notification to database
                 await database.create_notification(notification)
-                
-                logger.info(f"✅ Job cancellation notification sent to tradesperson {tradesperson_id}")
-                
+                logger.info("Job cancellation notification sent to tradesperson %s", tradesperson_id)
             except Exception as e:
-                logger.error(f"❌ Failed to send job cancellation notification to tradesperson {tradesperson_id}: {str(e)}")
+                logger.error(
+                    "Failed to send job cancellation notification to tradesperson %s: %s",
+                    tradesperson_id,
+                    str(e),
+                )
                 continue
-        
-        logger.info(f"✅ Job cancellation notifications sent to all interested tradespeople for job {job_id}")
-        
+        logger.info("Job cancellation notifications sent to all interested tradespeople for job %s", job_id)
     except Exception as e:
-        logger.error(f"❌ Error in job cancellation notification: {str(e)}")
+        logger.error("Error in job cancellation notification: %s", str(e))
 
 @router.post("/create-sample-data")
 async def create_sample_data(current_user: User = Depends(get_current_homeowner)):
@@ -1001,14 +951,19 @@ async def create_sample_data(current_user: User = Depends(get_current_homeowner)
             {
                 "id": str(uuid.uuid4()),
                 "title": "Kitchen Plumbing Repair - COMPLETED",
-                "description": "Fixed leaky faucet and improved water pressure. Job completed successfully with excellent results.",
+                "description": (
+                    "Fixed leaky faucet and improved water pressure. "
+                    "Job completed successfully with excellent results."
+                ),
                 "category": "Plumbing",
                 "location": "Lagos",
                 "state": "Lagos",
-                "lga": "Lagos Island", 
+                "lga": "Lagos Island",
                 "town": "Victoria Island",
                 "zip_code": "101241",
-                "home_address": "15 Ahmadu Bello Way, Victoria Island, Lagos",
+                "home_address": (
+                    "15 Ahmadu Bello Way, Victoria Island, Lagos"
+                ),
                 "budget_min": 15000,
                 "budget_max": 25000,
                 "timeline": "Within 1 week",
@@ -1041,7 +996,7 @@ async def create_sample_data(current_user: User = Depends(get_current_homeowner)
                 "location": "Lagos",
                 "state": "Lagos",
                 "lga": "Lagos Island",
-                "town": "Victoria Island", 
+                "town": "Victoria Island",
                 "zip_code": "101241",
                 "home_address": "15 Ahmadu Bello Way, Victoria Island, Lagos",
                 "budget_min": 50000,
@@ -1059,7 +1014,7 @@ async def create_sample_data(current_user: User = Depends(get_current_homeowner)
                 "final_cost": 65000,
                 "hired_tradesperson": {
                     "id": "tradesperson-2-id",
-                    "name": "Mike Tiler", 
+                    "name": "Mike Tiler",
                     "rating": 4.8
                 },
                 "created_at": (datetime.utcnow() - timedelta(days=15)).isoformat(),
@@ -1073,7 +1028,7 @@ async def create_sample_data(current_user: User = Depends(get_current_homeowner)
                 "title": "Electrical Wiring Upgrade - ACTIVE",
                 "description": "Need to upgrade electrical wiring in living room for new appliances.",
                 "category": "Electrical",
-                "location": "Lagos", 
+                "location": "Lagos",
                 "state": "Lagos",
                 "lga": "Lagos Island",
                 "town": "Victoria Island",
@@ -1102,13 +1057,13 @@ async def create_sample_data(current_user: User = Depends(get_current_homeowner)
                 "description": "Painting exterior walls and fixing cracks. Work currently in progress.",
                 "category": "Painting",
                 "location": "Lagos",
-                "state": "Lagos", 
+                "state": "Lagos",
                 "lga": "Lagos Island",
                 "town": "Victoria Island",
                 "zip_code": "101241",
                 "home_address": "15 Ahmadu Bello Way, Victoria Island, Lagos",
                 "budget_min": 25000,
-                "budget_max": 40000, 
+                "budget_max": 40000,
                 "timeline": "Within 2 weeks",
                 "status": "in_progress",
                 "homeowner": {
@@ -1138,7 +1093,7 @@ async def create_sample_data(current_user: User = Depends(get_current_homeowner)
             "jobs_created": len(created_jobs),
             "completed_jobs": len([j for j in created_jobs if j['status'] == 'completed']),
             "active_jobs": len([j for j in created_jobs if j['status'] == 'active']),
-            "in_progress_jobs": len([j for j in created_jobs if j['status'] == 'in_progress'])
+            "in_progress_jobs": len([j for j in created_jobs if j['status'] == 'in_progress']),
         }
         
     except Exception as e:
@@ -1157,13 +1112,20 @@ async def _notify_job_posted_successfully_old(homeowner: dict, job: dict):
         # Get homeowner preferences
         preferences = await database.get_user_notification_preferences(homeowner_id)
         
-        # Prepare template data
+        budget_min = job.get("budget_min", 0)
+        budget_max = job.get("budget_max", 0)
+        has_budget = job.get("budget_min") and job.get("budget_max")
+        job_budget = (
+            f"₦{budget_min:,} - ₦{budget_max:,}"
+            if has_budget
+            else "Budget not specified"
+        )
         template_data = {
             "homeowner_name": homeowner.get("name", "Homeowner"),
             "job_title": job.get("title", "Untitled Job"),
             "job_location": job.get("location", ""),
             "job_category": job.get("category", ""),
-            "job_budget": f"₦{job.get('budget_min', 0):,} - ₦{job.get('budget_max', 0):,}" if job.get('budget_min') and job.get('budget_max') else "Budget not specified",
+            "job_budget": job_budget,
             "post_date": "Today",
             "manage_url": "https://servicehub.ng/my-jobs"
         }
@@ -1258,7 +1220,10 @@ async def get_job_question_answers(job_id: str):
 
 # Public Skills Questions Endpoint (no authentication required)
 @router.get("/skills-questions/{trade_category}")
-async def get_public_skills_questions(trade_category: str, limit: int = Query(7, ge=1, le=50, description="Number of questions to return")):
+async def get_public_skills_questions(
+    trade_category: str,
+    limit: int = Query(7, ge=1, le=50, description="Number of questions to return"),
+):
     """Get skills test questions for a specific trade category (public endpoint for registration)"""
     try:
         questions = await database.get_questions_for_trade(trade_category)
@@ -1287,4 +1252,160 @@ async def get_public_skills_questions(trade_category: str, limit: int = Query(7,
     except Exception as e:
         logger.error(f"Error getting public skills questions for {trade_category}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get skills questions: {str(e)}")
+
+@router.post("/register-and-post")
+async def register_and_post(payload: PublicJobPostRequest, background_tasks: BackgroundTasks):
+    try:
+        from ..models.nigerian_lgas import validate_lga_for_state, validate_zip_code
+
+        job_data = payload.job
+
+        static_valid = validate_lga_for_state(job_data.state, job_data.lga)
+        dynamic_valid = False
+        try:
+            custom_lgas_cursor = database.database.system_locations.find({
+                "state": job_data.state,
+                "type": "lga"
+            })
+            custom_lgas_docs = await custom_lgas_cursor.to_list(length=None)
+            custom_lgas = [lga["name"] for lga in custom_lgas_docs]
+            dynamic_valid = job_data.lga in custom_lgas
+        except Exception as e:
+            logger.warning(f"Error checking dynamic LGAs: {e}")
+
+        if not (static_valid or dynamic_valid):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"LGA '{job_data.lga}' does not belong to state "
+                    f"'{job_data.state}'"
+                ),
+            )
+
+        if not validate_zip_code(job_data.zip_code, job_data.state, job_data.lga):
+            raise HTTPException(status_code=400, detail="Invalid zip code format. Nigerian zip codes must be 6 digits.")
+
+        if not validate_password_strength(payload.password):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Password must be at least 8 characters long and contain "
+                    "uppercase, lowercase, numeric, and special characters"
+                ),
+            )
+
+        if not validate_nigerian_phone(job_data.homeowner_phone):
+            raise HTTPException(status_code=400, detail="Please enter a valid Nigerian phone number")
+
+        formatted_phone = format_nigerian_phone(job_data.homeowner_phone)
+
+        existing_user = None
+        try:
+            if getattr(database, "connected", False) and getattr(database, "database", None) is not None:
+                existing_user = await database.get_user_by_email(job_data.homeowner_email)
+        except Exception as e:
+            logger.warning(f"Skipping existing-user email check due to DB error: {e}")
+
+        created_user = None
+        if existing_user:
+            try:
+                if not verify_password(payload.password, existing_user.get("password_hash", "")):
+                    raise HTTPException(status_code=401, detail="Incorrect password for existing account")
+            except Exception:
+                raise HTTPException(status_code=401, detail="Incorrect password for existing account")
+            created_user = existing_user
+        else:
+            user_id = str(uuid.uuid4())
+            user_data = {
+                "id": user_id,
+                "name": job_data.homeowner_name,
+                "email": job_data.homeowner_email,
+                "phone": formatted_phone,
+                "password_hash": get_password_hash(payload.password),
+                "role": UserRole.HOMEOWNER,
+                "status": UserStatus.ACTIVE,
+                "location": job_data.state,
+                "postcode": job_data.zip_code,
+                "email_verified": False,
+                "phone_verified": False,
+                "is_verified": False,
+                "verification_submitted": False,
+                "total_referrals": 0,
+                "referral_coins_earned": 0,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+                "avatar_url": None,
+                "last_login": None,
+            }
+            if getattr(database, "connected", False) and getattr(database, "database", None) is not None:
+                created_user = await database.create_user(user_data)
+                try:
+                    await database.generate_referral_code(created_user["id"])
+                except Exception:
+                    pass
+            else:
+                raise HTTPException(status_code=503, detail="Service temporarily unavailable")
+
+        user_obj = User(**{k: v for k, v in created_user.items() if k != "password_hash"})
+
+        job_dict = job_data.dict()
+        job_dict["location"] = job_data.state
+        job_dict["postcode"] = job_data.zip_code
+        job_dict["homeowner"] = {
+            "id": user_obj.id,
+            "name": user_obj.name,
+            "email": user_obj.email,
+            "phone": user_obj.phone,
+        }
+        job_dict["homeowner_id"] = user_obj.id
+        for field in ["homeowner_name", "homeowner_email", "homeowner_phone"]:
+            if field in job_dict:
+                del job_dict[field]
+        job_dict["id"] = await database.generate_job_id(digits=6)
+        job_dict["status"] = "pending_approval"
+        job_dict["quotes_count"] = 0
+        job_dict["interests_count"] = 0
+        job_dict["access_fee_naira"] = 1000
+        job_dict["access_fee_coins"] = 10
+        job_dict["created_at"] = datetime.utcnow()
+        job_dict["updated_at"] = datetime.utcnow()
+        job_dict["expires_at"] = datetime.utcnow() + timedelta(days=30)
+
+        created_job = await database.create_job(job_dict)
+
+        background_tasks.add_task(
+            _notify_job_posted_successfully,
+            homeowner=user_obj.dict(),
+            job=created_job,
+        )
+
+        access_token_expires = timedelta(minutes=60 * 24)
+        access_token = create_access_token(
+            data={
+                "sub": user_obj.id,
+                "email": user_obj.email,
+                "role": UserRole.HOMEOWNER.value,
+                "name": user_obj.name,
+                "phone": user_obj.phone,
+                "status": user_obj.status.value if isinstance(user_obj.status, UserStatus) else user_obj.status,
+                "location": user_obj.location,
+                "postcode": user_obj.postcode,
+            },
+            expires_delta=access_token_expires,
+        )
+        refresh_token = create_refresh_token(data={"sub": user_obj.id, "email": user_obj.email})
+
+        return {
+            "job": created_job,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "expires_in": 60 * 60 * 24,
+            "user": user_obj.dict(),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to register and post job: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to register and post job")
 

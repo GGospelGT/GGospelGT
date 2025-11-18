@@ -37,6 +37,12 @@ router = APIRouter(prefix="/api/auth", tags=["authentication"])
 async def register_homeowner(registration_data: HomeownerRegistration):
     """Register a new homeowner account"""
     try:
+        allow = os.getenv("ALLOW_HOMEOWNER_STANDALONE_SIGNUP", "0")
+        if allow not in ("1", "true", "True"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Homeowner signup is only available when posting a job"
+            )
         # Check if user already exists (skip in degraded mode)
         existing_user = None
         try:

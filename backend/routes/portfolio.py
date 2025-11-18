@@ -16,7 +16,8 @@ from ..database import database
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 
 # Create uploads directory if it doesn't exist
-UPLOAD_DIR = Path("/app/uploads/portfolio")
+BASE_UPLOADS = Path(os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads")))
+UPLOAD_DIR = BASE_UPLOADS / "portfolio"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Allowed file extensions and max file size

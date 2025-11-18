@@ -58,7 +58,8 @@ async def fund_wallet(
         raise HTTPException(status_code=400, detail="Only image files are allowed")
     
     # Create uploads directory if it doesn't exist
-    upload_dir = "/app/uploads/payment_proofs"
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    upload_dir = os.path.join(base_dir, "payment_proofs")
     os.makedirs(upload_dir, exist_ok=True)
     
     # Generate unique filename
@@ -165,7 +166,8 @@ async def serve_payment_proof(filename: str):
     """Serve payment proof images"""
     from fastapi.responses import FileResponse
     
-    file_path = f"/app/uploads/payment_proofs/{filename}"
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    file_path = os.path.join(base_dir, "payment_proofs", filename)
     
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Image not found")
