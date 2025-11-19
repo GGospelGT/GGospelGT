@@ -69,6 +69,12 @@ const VerifyAccountPage = () => {
     return () => { isMounted = false; };
   }, [location.search]);
 
+  useEffect(() => {
+    if (isAuthenticated() && user?.role === 'homeowner') {
+      navigate('/profile', { replace: true });
+    }
+  }, [isAuthenticated, user]);
+
   const documentTypes = [
     { value: 'national_id', label: 'Nigerian National ID Card', description: 'Government-issued national identification card' },
     { value: 'voters_card', label: 'Permanent Voters Card (PVC)', description: 'INEC voter registration card' },
