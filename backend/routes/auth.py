@@ -1447,20 +1447,26 @@ async def request_email_verification(current_user: User = Depends(get_current_ac
 
 @router.get("/email-verification/confirm")
 async def confirm_email_verification(token: str):
-    """Confirm email verification via token link"""
     try:
-        payload = verify_email_verification_token(token)
-        user_id = payload.get("sub")
-        email = payload.get("email")
-        if not user_id or not email:
-            raise HTTPException(status_code=400, detail="Invalid token payload")
+        user_id = None
+        email = None
+        try:
+            payload = verify_email_verification_token(token)
+            user_id = payload.get("sub")
+            email = payload.get("email")
+        except HTTPException:
+            pass
         token_data = await database.get_email_verification_token(token)
-        if not token_data or token_data.get("user_id") != user_id:
+        if not token_data:
             raise HTTPException(status_code=400, detail="Invalid or expired verification token")
+        if not user_id:
+            user_id = token_data.get("user_id")
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Invalid token payload")
         user_data = await database.get_user_by_id(user_id)
         if not user_data:
             raise HTTPException(status_code=404, detail="User not found")
-        if user_data.get("email") != email:
+        if email and user_data.get("email") != email:
             raise HTTPException(status_code=400, detail="Token email does not match user email")
         await database.verify_user_email(user_id)
         await database.mark_email_verification_token_used(token)
