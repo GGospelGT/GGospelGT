@@ -1179,13 +1179,13 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
                               </div>
                               
                               {/* Navigation buttons */}
-                              <div className="flex justify-between items-center mt-6">
+                              <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-3">
                                 <Button
                                   type="button" 
                                   variant="outline"
                                   onClick={goToPreviousQuestion}
                                   disabled={currentQuestionIndex === 0}
-                                  className="flex items-center space-x-2"
+                                  className="flex items-center space-x-2 w-full sm:w-auto"
                                 >
                                   <ArrowLeft size={16} />
                                   <span>Previous</span>
@@ -1225,7 +1225,7 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
                                       
                                       nextStep();
                                     }}
-                                    className="flex items-center space-x-2 text-white"
+                                    className="flex items-center space-x-2 text-white w-full sm:w-auto"
                                     style={{backgroundColor: '#34D164'}}
                                   >
                                     <span>Continue to Next Step</span>
@@ -1235,7 +1235,7 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
                                   <Button
                                     type="button"
                                     onClick={goToNextQuestion}
-                                    className="flex items-center space-x-2 text-white"
+                                    className="flex items-center space-x-2 text-white w-full sm:w-auto"
                                     style={{backgroundColor: '#34D164'}}
                                   >
                                     <span>Next Question</span>
@@ -2067,13 +2067,13 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
               
               {/* Navigation Buttons - Hide when in one-by-one questions mode */}
               {!(currentStep === 1 && tradeQuestions.length > 0 && showQuestionsOneByOne && getVisibleQuestions().length > 0) && (
-                <div className="flex justify-between pt-8 border-t">
+                <div className="flex flex-col sm:flex-row justify-between pt-8 border-t gap-3">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={prevStep}
                     disabled={currentStep === 1}
-                    className="flex items-center font-lato"
+                    className="flex items-center font-lato w-full sm:w-auto"
                   >
                     <ArrowLeft size={16} className="mr-2" />
                     Previous
@@ -2084,7 +2084,7 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
                       type="button"
                       onClick={nextStep}
                       disabled={submitting}
-                      className="flex items-center text-white font-lato"
+                      className="flex items-center text-white font-lato w-full sm:w-auto"
                       style={{backgroundColor: '#34D164'}}
                     >
                       Next
@@ -2094,7 +2094,7 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
                     <Button
                       type="submit"
                       disabled={submitting}
-                      className="flex items-center text-white font-lato"
+                      className="flex items-center text-white font-lato w-full sm:w-auto"
                       style={{backgroundColor: '#34D164'}}
                     >
                       {submitting ? 'Submitting...' : (isUserAuthenticated() ? 'Post Job' : 'Create Account & Post Job')}

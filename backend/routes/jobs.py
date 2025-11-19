@@ -1436,8 +1436,8 @@ async def register_and_post(payload: PublicJobPostRequest, background_tasks: Bac
                         email_service = MockEmailService()
                     except Exception:
                         email_service = None
-                backend_url = os.environ.get("BACKEND_URL", os.environ.get("REACT_APP_BACKEND_URL", "http://127.0.0.1:8001"))
-                verify_link = f"{backend_url}/api/auth/email-verification/confirm?token={verification_token}"
+                frontend_url = os.environ.get('FRONTEND_URL', 'https://servicehub.ng')
+                verify_link = f"{frontend_url.rstrip('/')}/verify-account?token={verification_token}&next=/post-job"
                 if email_service:
                     await email_service.send_email(
                         to=user_obj.email,

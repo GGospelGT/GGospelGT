@@ -44,10 +44,14 @@ const VerifyAccountPage = () => {
     name: '', phone: '', email: '', relationship: ''
   });
   const [refsSubmitting, setRefsSubmitting] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [nextPath, setNextPath] = useState('/profile');
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get('token');
+    const next = params.get('next');
+    if (next) setNextPath(next.startsWith('/') ? next : '/profile');
     if (!token) return;
     let isMounted = true;
     (async () => {
@@ -55,9 +59,11 @@ const VerifyAccountPage = () => {
         const resp = await authAPI.confirmEmailVerification(token);
         if (isMounted) {
           toast({ title: 'Email Verified', description: resp?.message || 'Your email has been verified.' });
-          try {
-            await getCurrentUser();
-          } catch {}
+          try { await getCurrentUser(); } catch {}
+          setVerified(true);
+          setTimeout(() => {
+            navigate(nextPath, { replace: true });
+          }, 3000);
         }
       } catch (e) {
         const msg = e?.response?.data?.detail || 'Invalid or expired verification link';
@@ -70,10 +76,32 @@ const VerifyAccountPage = () => {
   }, [location.search]);
 
   useEffect(() => {
-    if (isAuthenticated() && user?.role === 'homeowner') {
+    const params = new URLSearchParams(location.search);
+    const hasToken = !!params.get('token');
+    if (!hasToken && isAuthenticated() && user?.role === 'homeowner') {
       navigate('/profile', { replace: true });
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, location.search]);
+
+  if (verified) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-sm border text-center">
+            <CheckCircle size={64} className="mx-auto mb-6 text-green-600" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Email Verified</h2>
+            <p className="text-gray-600 mb-6">You’re all set. Continue where you left off.</p>
+            <Button onClick={() => navigate(nextPath, { replace: true })} className="w-full text-white" style={{backgroundColor: '#34D164'}}>
+              Continue
+            </Button>
+            <p className="text-xs text-gray-500 mt-3">Redirecting in a few seconds…</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   const documentTypes = [
     { value: 'national_id', label: 'Nigerian National ID Card', description: 'Government-issued national identification card' },
