@@ -1678,33 +1678,31 @@ class Database:
 
     async def get_featured_reviews(self, limit: int = 6) -> List[dict]:
         """Get featured reviews for homepage"""
-        # Return empty list if database is not available
         if not self.connected or self.database is None:
             return []
-        # Get recent high-rated reviews that match the advanced review format
-        # Filter for reviews that have the advanced format fields
+        # Be lenient: show recent high-rated reviews regardless of legacy/advanced schema
         filters = {
-            'rating': {'$gte': 4},
-            'reviewer_id': {'$exists': True},
-            'reviewee_id': {'$exists': True},
-            'content': {'$exists': True},
-            'review_type': {'$exists': True}
+            'rating': {'$gte': 4}
         }
-        
         reviews = await self.get_reviews(limit=limit, filters=filters)
-        
-        # Enhance reviews with job location information
+
         for review in reviews:
             if '_id' in review:
                 review['_id'] = str(review['_id'])
-            
-            # Get job details for location
-            job_id = review.get("job_id")
+
+            # Normalize legacy fields
+            if 'content' not in review and 'comment' in review:
+                review['content'] = review['comment']
+            if 'review_type' not in review:
+                review['review_type'] = 'homeowner_to_tradesperson'
+
+            # Attach job location when available
+            job_id = review.get('job_id')
             if job_id:
                 job = await self.get_job_by_id(job_id)
                 if job:
-                    review["job_location"] = job.get("location", "")
-        
+                    review['job_location'] = job.get('location', '')
+
         return reviews
 
     # Portfolio Management Methods
