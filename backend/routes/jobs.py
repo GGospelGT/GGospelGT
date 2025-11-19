@@ -1439,15 +1439,37 @@ async def register_and_post(payload: PublicJobPostRequest, background_tasks: Bac
                 frontend_url = os.environ.get('FRONTEND_URL', 'https://servicehub.ng')
                 verify_link = f"{frontend_url.rstrip('/')}/verify-account?token={verification_token}&next=/post-job"
                 if email_service:
+                    html = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                      <meta charset=\"utf-8\">
+                      <style>
+                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                        .btn {{ display: inline-block; background-color: #34D164; color: #fff; padding: 12px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; }}
+                        .link {{ word-break: break-all; color: #2563eb; }}
+                      </style>
+                    </head>
+                    <body>
+                      <div class=\"container\">
+                        <h2>Verify your email to post your job</h2>
+                        <p>Hello {user_obj.name},</p>
+                        <p>Please verify your email to finish posting your job.</p>
+                        <p>
+                          <a class=\"btn\" href=\"{verify_link}\">Verify Email</a>
+                        </p>
+                        <p>If the button doesn’t work, copy and paste this link:</p>
+                        <p class=\"link\">{verify_link}</p>
+                        <p>This link expires in 24 hours.</p>
+                      </div>
+                    </body>
+                    </html>
+                    """
                     await email_service.send_email(
                         to=user_obj.email,
                         subject="Verify your email to post your job - serviceHub",
-                        content=(
-                            f"Hello {user_obj.name},\n\n"
-                            f"Please verify your email to finish posting your job. Click the link below:\n"
-                            f"{verify_link}\n\n"
-                            f"This link expires in 24 hours."
-                        ),
+                        content=html,
                         metadata={"purpose": "email_verification", "user_id": user_obj.id}
                     )
                 dev_payload = {}
