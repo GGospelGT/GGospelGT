@@ -139,11 +139,13 @@ const ProfilePage = () => {
     try {
       setOtpSending(true);
       setOtpMode(true);
-      await authAPI.sendPhoneOTP(profileData?.phone || null);
-      toast({
-        title: 'OTP sent',
-        description: 'Check your phone for the verification code.',
-      });
+      const resp = await authAPI.sendPhoneOTP(profileData?.phone || null);
+      if (resp?.debug_code) {
+        setOtpCode(resp.debug_code);
+        toast({ title: 'OTP sent', description: `Dev code: ${resp.debug_code}` });
+      } else {
+        toast({ title: 'OTP sent', description: 'Check your phone for the verification code.' });
+      }
     } catch (error) {
       const msg = error?.response?.data?.detail || error.message || 'Failed to send code';
       toast({ title: 'Failed to send code', description: msg, variant: 'destructive' });
@@ -557,26 +559,28 @@ const ProfilePage = () => {
                               )}
                             </div>
                             {!profileData.phone_verified && otpMode && (
-                              <div className="flex items-center gap-3">
-                                <InputOTP
-                                  maxLength={6}
-                                  value={otpCode}
-                                  onChange={(val) => setOtpCode(val)}
-                                >
-                                  <InputOTPGroup>
-                                    <InputOTPSlot index={0} />
-                                    <InputOTPSlot index={1} />
-                                    <InputOTPSlot index={2} />
-                                    <InputOTPSeparator />
-                                    <InputOTPSlot index={3} />
-                                    <InputOTPSlot index={4} />
-                                    <InputOTPSlot index={5} />
-                                  </InputOTPGroup>
-                                </InputOTP>
-                                <Button size="sm" onClick={handleVerifyPhoneOTP} disabled={otpVerifying || otpCode.length !== 6}>
+                              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+                                <div className="w-full sm:w-auto">
+                                  <InputOTP
+                                    maxLength={6}
+                                    value={otpCode}
+                                    onChange={(val) => setOtpCode(val)}
+                                  >
+                                    <InputOTPGroup>
+                                      <InputOTPSlot index={0} />
+                                      <InputOTPSlot index={1} />
+                                      <InputOTPSlot index={2} />
+                                      <InputOTPSeparator />
+                                      <InputOTPSlot index={3} />
+                                      <InputOTPSlot index={4} />
+                                      <InputOTPSlot index={5} />
+                                    </InputOTPGroup>
+                                  </InputOTP>
+                                </div>
+                                <Button size="sm" className="w-full sm:w-auto" onClick={handleVerifyPhoneOTP} disabled={otpVerifying || otpCode.length !== 6}>
                                   {otpVerifying ? 'Verifying…' : 'Verify'}
                                 </Button>
-                                <Button size="sm" variant="ghost" onClick={handleSendPhoneOTP} disabled={otpSending}>
+                                <Button size="sm" variant="ghost" className="w-full sm:w-auto" onClick={handleSendPhoneOTP} disabled={otpSending}>
                                   {otpSending ? 'Sending…' : 'Resend'}
                                 </Button>
                               </div>
@@ -1061,7 +1065,8 @@ const ProfilePage = () => {
                                 )}
                               </div>
                               {otpMode && (
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+                                  <div className="w-full sm:w-auto">
                                   <InputOTP
                                     maxLength={6}
                                     value={otpCode}
@@ -1077,7 +1082,8 @@ const ProfilePage = () => {
                                       <InputOTPSlot index={5} />
                                     </InputOTPGroup>
                                   </InputOTP>
-                                  <Button size="sm" onClick={handleVerifyPhoneOTP} disabled={otpVerifying || otpCode.length !== 6}>
+                                  </div>
+                                  <Button size="sm" className="w-full sm:w-auto" onClick={handleVerifyPhoneOTP} disabled={otpVerifying || otpCode.length !== 6}>
                                     {otpVerifying ? 'Verifying…' : 'Verify'}
                                   </Button>
                                 </div>
