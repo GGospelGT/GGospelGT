@@ -115,6 +115,8 @@ class TermiiSMSService:
         self.api_key = os.environ.get('TERMII_API_KEY')
         self.sender_id = os.environ.get('TERMII_SENDER_ID')
         self.base_url = os.environ.get('TERMII_BASE_URL', 'https://api.ng.termii.com')
+        self.force_channel = os.environ.get('TERMII_FORCE_CHANNEL', '').strip().lower() or None
+        self.dnd_sender_id = os.environ.get('TERMII_DND_SENDER_ID') or None
         
         if not self.api_key or not self.sender_id:
             logger.error("❌ Termii configuration missing: TERMII_API_KEY or TERMII_SENDER_ID")
@@ -131,7 +133,7 @@ class TermiiSMSService:
             def _send_with_channel(channel: str) -> bool:
                 payload = {
                     "to": formatted_phone,
-                    "from": self.sender_id,
+                    "from": (self.dnd_sender_id if channel == "dnd" and self.dnd_sender_id else self.sender_id),
                     "sms": message,
                     "type": "plain",
                     "api_key": self.api_key,
@@ -152,10 +154,12 @@ class TermiiSMSService:
                 logger.error(f"❌ Termii send failed (channel={channel}): status={resp.status_code}, body={data}")
                 return False
 
-            # Try DND route first (better deliverability on DND-enabled numbers), then fallback to generic
-            if _send_with_channel("dnd"):
+            # Choose first channel based on env override; default to dnd
+            first_channel = self.force_channel or "dnd"
+            second_channel = "generic" if first_channel != "generic" else "dnd"
+            if _send_with_channel(first_channel):
                 return True
-            return _send_with_channel("generic")
+            return _send_with_channel(second_channel)
 
         except Exception as e:
             logger.error(f"❌ SMS sending failed: {str(e)}")
@@ -170,7 +174,7 @@ class TermiiSMSService:
             def _send_with_channel(channel: str) -> Dict[str, Any]:
                 payload = {
                     "to": formatted_phone,
-                    "from": self.sender_id,
+                    "from": (self.dnd_sender_id if channel == "dnd" and self.dnd_sender_id else self.sender_id),
                     "sms": message,
                     "type": "plain",
                     "api_key": self.api_key,
@@ -188,13 +192,15 @@ class TermiiSMSService:
                 ok = resp.status_code == 200 and isinstance(data, dict) and data.get("code") == "ok"
                 return {"ok": ok, "status": resp.status_code, "channel": channel, "response": data}
 
-            first = _send_with_channel("dnd")
+            first_channel = self.force_channel or "dnd"
+            second_channel = "generic" if first_channel != "generic" else "dnd"
+            first = _send_with_channel(first_channel)
             if first.get("ok"):
-                logger.info(f"📱 SMS SENT: to={formatted_phone}, channel=dnd, message_id={first.get('response',{}).get('message_id')}")
+                logger.info(f"📱 SMS SENT: to={formatted_phone}, channel={first_channel}, message_id={first.get('response',{}).get('message_id')}")
                 return first
-            second = _send_with_channel("generic")
+            second = _send_with_channel(second_channel)
             if second.get("ok"):
-                logger.info(f"📱 SMS SENT: to={formatted_phone}, channel=generic, message_id={second.get('response',{}).get('message_id')}")
+                logger.info(f"📱 SMS SENT: to={formatted_phone}, channel={second_channel}, message_id={second.get('response',{}).get('message_id')}")
                 return second
             logger.error(f"❌ Termii send failed on both channels: first={first}, second={second}")
             return second if second else first
