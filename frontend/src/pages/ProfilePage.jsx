@@ -138,15 +138,16 @@ const ProfilePage = () => {
   const handleSendPhoneOTP = async () => {
     try {
       setOtpSending(true);
-      await authAPI.sendPhoneOTP();
+      setOtpMode(true);
+      await authAPI.sendPhoneOTP(profileData?.phone || null);
       toast({
         title: 'OTP sent',
         description: 'Check your phone for the verification code.',
       });
-      setOtpMode(true);
     } catch (error) {
       const msg = error?.response?.data?.detail || error.message || 'Failed to send code';
       toast({ title: 'Failed to send code', description: msg, variant: 'destructive' });
+      setOtpMode(true);
     } finally {
       setOtpSending(false);
     }
@@ -155,7 +156,7 @@ const ProfilePage = () => {
   const handleVerifyPhoneOTP = async () => {
     try {
       setOtpVerifying(true);
-      await authAPI.verifyPhoneOTP(otpCode);
+      await authAPI.verifyPhoneOTP(otpCode, profileData?.phone || null);
       toast({ title: 'Phone verified', description: 'Your phone number is now verified.' });
       setOtpMode(false);
       setOtpCode('');
@@ -541,17 +542,44 @@ const ProfilePage = () => {
                             placeholder="e.g., 08123456789"
                           />
                         ) : (
-                          <div className="flex items-center space-x-2">
-                            <p className="text-gray-700 font-lato py-2">{profileData.phone}</p>
-                            {profileData.phone_verified ? (
-                              <Badge className="bg-green-100 text-green-800 text-xs">Verified</Badge>
-                            ) : (
-                              <>
-                                <Badge className="bg-yellow-100 text-yellow-800 text-xs">Unverified</Badge>
-                                <Button size="sm" variant="outline" onClick={handleSendPhoneOTP} disabled={otpSending}>
-                                  {otpSending ? 'Sending…' : 'Verify Phone'}
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <p className="text-gray-700 font-lato py-2">{profileData.phone}</p>
+                              {profileData.phone_verified ? (
+                                <Badge className="bg-green-100 text-green-800 text-xs">Verified</Badge>
+                              ) : (
+                                <>
+                                  <Badge className="bg-yellow-100 text-yellow-800 text-xs">Unverified</Badge>
+                                  <Button size="sm" variant="outline" onClick={handleSendPhoneOTP} disabled={otpSending}>
+                                    {otpSending ? 'Sending…' : 'Verify Phone'}
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                            {!profileData.phone_verified && otpMode && (
+                              <div className="flex items-center gap-3">
+                                <InputOTP
+                                  maxLength={6}
+                                  value={otpCode}
+                                  onChange={(val) => setOtpCode(val)}
+                                >
+                                  <InputOTPGroup>
+                                    <InputOTPSlot index={0} />
+                                    <InputOTPSlot index={1} />
+                                    <InputOTPSlot index={2} />
+                                    <InputOTPSeparator />
+                                    <InputOTPSlot index={3} />
+                                    <InputOTPSlot index={4} />
+                                    <InputOTPSlot index={5} />
+                                  </InputOTPGroup>
+                                </InputOTP>
+                                <Button size="sm" onClick={handleVerifyPhoneOTP} disabled={otpVerifying || otpCode.length !== 6}>
+                                  {otpVerifying ? 'Verifying…' : 'Verify'}
                                 </Button>
-                              </>
+                                <Button size="sm" variant="ghost" onClick={handleSendPhoneOTP} disabled={otpSending}>
+                                  {otpSending ? 'Sending…' : 'Resend'}
+                                </Button>
+                              </div>
                             )}
                           </div>
                         )}
