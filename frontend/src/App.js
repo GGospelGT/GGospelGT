@@ -115,7 +115,7 @@ function App() {
               <Route path="/wallet" element={<ProtectedRoute><WalletPage /></ProtectedRoute>} />
               <Route path="/admin" element={<RoleGuard allowedRoles={["admin"]}><AdminDashboard /></RoleGuard>} />
               <Route path="/referrals" element={<ProtectedRoute><ReferralsPage /></ProtectedRoute>} />
-              <Route path="/verify-account" element={<ProtectedRoute><VerifyAccountPage /></ProtectedRoute>} />
+              <Route path="/verify-account" element={<VerifyAccountPage />} />
               <Route path="/about" element={<AboutUsPage />} />
               <Route path="/reviews-policy" element={<ReviewsPolicyPage />} />
               <Route path="/how-it-works" element={<HowItWorksPage />} />
