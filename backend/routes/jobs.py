@@ -1428,6 +1428,14 @@ async def register_and_post(payload: PublicJobPostRequest, background_tasks: Bac
                 await database.create_email_verification_token(
                     user_id=user_obj.id, token=verification_token, expires_at=expires_at
                 )
+                try:
+                    await database.create_pending_job(
+                        user_id=user_obj.id,
+                        job_data=job_data.dict(),
+                        expires_at=expires_at,
+                    )
+                except Exception:
+                    pass
                 email_service = None
                 try:
                     email_service = SendGridEmailService()
@@ -1475,7 +1483,7 @@ async def register_and_post(payload: PublicJobPostRequest, background_tasks: Bac
                 dev_payload = {}
                 try:
                     dev_flag = os.environ.get('OTP_DEV_MODE', '0')
-                    if dev_flag in ('1','true','True'):
+                    if dev_flag in ('1', 'true', 'True'):
                         dev_payload["debug_link"] = verify_link
                 except Exception:
                     pass

@@ -1527,7 +1527,42 @@ async def confirm_email_verification(token: str):
         except Exception:
             pass
         user_response = {k: v for k, v in user_data.items() if k != "password_hash"}
-        return {
+        auto_job = None
+        try:
+            pending = await database.get_pending_job_by_user_id(user_id)
+            if pending:
+                jd = dict(pending.get("job_data", {}))
+                job_dict = dict(jd)
+                state_val = jd.get("state")
+                zip_val = jd.get("zip_code")
+                if state_val is not None:
+                    job_dict["location"] = state_val
+                if zip_val is not None:
+                    job_dict["postcode"] = zip_val
+                job_dict["homeowner"] = {
+                    "id": user_data["id"],
+                    "name": user_data.get("name", ""),
+                    "email": user_data.get("email", ""),
+                    "phone": user_data.get("phone", ""),
+                }
+                job_dict["homeowner_id"] = user_data["id"]
+                for f in ["homeowner_name", "homeowner_email", "homeowner_phone"]:
+                    if f in job_dict:
+                        del job_dict[f]
+                job_dict["id"] = await database.generate_job_id(digits=6)
+                job_dict["status"] = "pending_approval"
+                job_dict["quotes_count"] = 0
+                job_dict["interests_count"] = 0
+                job_dict["access_fee_naira"] = 1000
+                job_dict["access_fee_coins"] = 10
+                job_dict["created_at"] = datetime.utcnow()
+                job_dict["updated_at"] = datetime.utcnow()
+                job_dict["expires_at"] = datetime.utcnow() + timedelta(days=30)
+                auto_job = await database.create_job(job_dict)
+                await database.mark_pending_job_used(pending["id"])
+        except Exception:
+            auto_job = None
+        resp = {
             "message": "Email verified successfully",
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -1535,6 +1570,10 @@ async def confirm_email_verification(token: str):
             "expires_in": 60 * 60 * 24,
             "user": user_response,
         }
+        if auto_job is not None:
+            resp["job"] = auto_job
+            resp["auto_posted"] = True
+        return resp
     except HTTPException:
         raise
     except Exception as e:

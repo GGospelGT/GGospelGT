@@ -123,6 +123,15 @@ class Database:
                     [("conversation_id", 1), ("sender_type", 1), ("status", 1)],
                     name="messages_conversation_sender_status"
                 )
+                await self.database.pending_jobs.create_index(
+                    [("user_id", 1), ("created_at", -1)],
+                    name="pending_jobs_user_createdAt"
+                )
+                await self.database.pending_jobs.create_index(
+                    [("expires_at", 1)],
+                    expireAfterSeconds=0,
+                    name="pending_jobs_expire"
+                )
                 logger.info("Database indexes ensured successfully")
             except Exception as e:
                 logger.error(f"Failed to ensure database indexes: {e}")
@@ -649,6 +658,48 @@ class Database:
             candidate = f"{seq:0{digits}d}"
 
         raise RuntimeError("Unable to generate unique job ID")
+
+    async def create_pending_job(self, user_id: str, job_data: dict, expires_at: datetime) -> dict:
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot create pending job")
+        await self.database.pending_jobs.update_many(
+            {"user_id": user_id, "used": False},
+            {"$set": {"used": True, "invalidated_at": datetime.utcnow()}}
+        )
+        pending = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "job_data": job_data,
+            "created_at": datetime.utcnow(),
+            "expires_at": expires_at,
+            "used": False,
+            "invalidated_at": None,
+        }
+        result = await self.database.pending_jobs.insert_one(pending)
+        pending["_id"] = str(result.inserted_id)
+        return pending
+
+    async def get_pending_job_by_user_id(self, user_id: str) -> Optional[dict]:
+        if self.database is None:
+            return None
+        now = datetime.utcnow()
+        doc = await self.database.pending_jobs.find_one(
+            {"user_id": user_id, "used": False, "expires_at": {"$gt": now}},
+            sort=[("created_at", -1)]
+        )
+        if not doc:
+            return None
+        doc["_id"] = str(doc["_id"])
+        return doc
+
+    async def mark_pending_job_used(self, pending_id: str) -> bool:
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot mark pending job used")
+        result = await self.database.pending_jobs.update_one(
+            {"id": pending_id},
+            {"$set": {"used": True, "used_at": datetime.utcnow()}}
+        )
+        return result.modified_count > 0
 
     async def create_job(self, job_data: dict) -> dict:
         # Set expiration date (30 days from now)
@@ -6759,6 +6810,7 @@ class Database:
                 cleaned[key] = value
         
         return cleaned
+
 
 # Create global database instance
 database = Database()

@@ -64,7 +64,17 @@ const VerifyAccountPage = () => {
               try { localStorage.setItem('refresh_token', resp.refresh_token); } catch {}
             }
           }
-          toast({ title: 'Email Verified', description: resp?.message || 'Your email has been verified.' });
+          if (resp?.auto_posted && resp?.job?.id) {
+            try {
+              setNextPath('/my-jobs');
+            } catch {}
+            toast({
+              title: 'Email Verified — Job Submitted',
+              description: `Your job has been submitted for admin review. Job ID: ${resp.job.id}`,
+            });
+          } else {
+            toast({ title: 'Email Verified', description: resp?.message || 'Your email has been verified.' });
+          }
           setVerified(true);
           setTimeout(() => {
             navigate(nextPath, { replace: true });
