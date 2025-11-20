@@ -421,11 +421,14 @@ const VerifyAccountPage = () => {
                         <option>Ordinary Partnership</option>
                         <option>Limited Liability Partnership (LLP)</option>
                       </select>
+                      {user?.business_type && (
+                        <p className="text-xs text-gray-500 mt-1">Pre-selected from your registration. Update only if incorrect.</p>
+                      )}
                     </div>
                     {(businessType === 'Self-Employed / Sole Trader') && (
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">ID document</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Valid ID (NIN, Voter’s Card, Driver’s Licence, Passport)</label>
                           <input type="file" accept="image/*,application/pdf" onChange={(e)=>setIdDocument(e.target.files[0])} />
                         </div>
                         <div>
@@ -441,11 +444,15 @@ const VerifyAccountPage = () => {
                           <input type="file" accept="image/*" multiple onChange={(e)=>handleWorkPhotosSelect(e.target.files)} />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Trade certificate (optional)</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Trade or apprenticeship certificate (optional)</label>
                           <input type="file" accept="image/*,application/pdf" onChange={(e)=>setTradeCertificate(e.target.files[0])} />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Work reference</label>
+                          <p className="text-xs text-gray-500">Use the references section below</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Character reference</label>
                           <p className="text-xs text-gray-500">Use the references section below</p>
                         </div>
                       </div>
@@ -479,7 +486,10 @@ const VerifyAccountPage = () => {
                         </div>
                         <div className="grid md:grid-cols-2 gap-3">
                           <input className="w-full px-3 py-2 border rounded-lg" placeholder="TIN (optional)" value={tin} onChange={(e)=>setTin(e.target.value)} />
-                          <input type="file" accept="image/*" onChange={(e)=>setBusinessLogo(e.target.files[0])} />
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Business logo or office/team photo (optional)</label>
+                            <input type="file" accept="image/*" onChange={(e)=>setBusinessLogo(e.target.files[0])} />
+                          </div>
                         </div>
                       </div>
                     )}
