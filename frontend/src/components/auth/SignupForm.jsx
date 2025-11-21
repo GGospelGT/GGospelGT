@@ -166,16 +166,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
     return (
       <TradespersonRegistration 
         onClose={onClose}
-        onComplete={(result) => {
-          toast({
-            title: "Registration Complete!",
-            description: "Welcome to ServiceHub! Your application is being reviewed.",
-          });
-          // Close the modal first
-          if (onClose) onClose();
-          // Redirect new tradespeople to Browse Jobs page
-          navigate('/browse-jobs');
-        }}
+        // Post-registration verification and redirect are handled internally
       />
     );
   }

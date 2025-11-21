@@ -154,7 +154,7 @@ const TradespersonRegistrationDemo = () => {
               {registrationType === 'multi-step' ? (
                 <TradespersonRegistration 
                   onClose={() => setShowRegistration(false)}
-                  onComplete={handleRegistrationComplete}
+                  // Post-registration verification and redirect are handled internally
                 />
               ) : (
                 <SignupForm 

@@ -137,6 +137,32 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
   const navigate = useNavigate();
   const { states: nigerianStates, lgas: stateLGAs, loading: statesLoading, loadLGAs } = useStates();
 
+  // Top-level redirect helper so effects and handlers can reuse it
+  const redirectToTradespersonDashboard = () => {
+    const fullName = `${formData.firstName} ${formData.lastName}`;
+    const walletSetupChoice = formData.walletSetup;
+
+    console.log('🚀 Redirecting to tradesperson dashboard (/browse-jobs)');
+    console.log('🔐 Final auth state before redirect:', {
+      isAuthenticated: isAuthenticated(),
+      isTradesperson: isTradesperson(),
+      user: user
+    });
+
+    navigate('/browse-jobs', {
+      state: {
+        welcomeMessage: `Welcome to ServiceHub, ${fullName}! Your registration is complete.`,
+        walletFunded: false,
+        walletSetupLater: walletSetupChoice === 'later',
+        showWalletReminder: walletSetupChoice === 'later',
+        newRegistration: true
+      },
+      replace: true
+    });
+
+    console.log('✅ Redirect to tradesperson dashboard completed');
+  };
+
   // Enforce verification: auto close modal and redirect only after both are verified
   useEffect(() => {
     if (emailVerified && phoneVerified) {
@@ -522,29 +548,6 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         } catch (locErr) {
           console.warn('⚠️ Failed to update profile location:', locErr?.response?.data || locErr?.message || locErr);
         }
-
-        // Wait for authentication context to update, then redirect
-        const redirectToTradespersonDashboard = () => {
-          console.log('🚀 Redirecting to tradesperson dashboard (/browse-jobs)');
-          console.log('🔐 Final auth state before redirect:', {
-            isAuthenticated: isAuthenticated(),
-            isTradesperson: isTradesperson(),
-            user: user
-          });
-          
-          navigate('/browse-jobs', { 
-            state: { 
-              welcomeMessage: `Welcome to ServiceHub, ${fullName}! Your registration is complete.`,
-              walletFunded: false,
-              walletSetupLater: walletSetupChoice === 'later',
-              showWalletReminder: walletSetupChoice === 'later',
-              newRegistration: true
-            },
-            replace: true
-          });
-          
-          console.log('✅ Redirect to tradesperson dashboard completed');
-        };
 
         // Show post-registration verification modal instead of immediate redirect
         setShowVerificationModal(true);
