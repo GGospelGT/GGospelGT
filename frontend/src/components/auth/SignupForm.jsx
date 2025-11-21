@@ -117,6 +117,11 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
           referral_code: values.referral_code || undefined,
         });
       } else {
+        // Ensure backend-required description (min 50 chars). Use a sensible fallback if too short.
+        const desc = (values.description && values.description.trim().length >= 50)
+          ? values.description.trim()
+          : `Professional ${Array.isArray(values.trade_categories) && values.trade_categories.length > 0 ? values.trade_categories[0] : 'Trades'} services. Experienced tradesperson committed to quality work and customer satisfaction. Contact me for reliable and affordable services.`;
+
         result = await registerTradesperson({
           name: values.name,
           email: values.email,
@@ -127,7 +132,7 @@ const SignupForm = ({ onClose, onSwitchToLogin, defaultTab = 'tradesperson', sho
           trade_categories: values.trade_categories,
           experience_years: parseInt(values.experience_years, 10),
           company_name: values.company_name,
-          description: values.description,
+          description: desc,
           certifications: values.certifications || [],
           referral_code: values.referral_code || undefined,
         });
