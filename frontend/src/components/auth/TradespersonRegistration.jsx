@@ -749,65 +749,11 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         />
         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
 
-        {/* Email OTP verification */}
-        <div className="mt-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              disabled={emailSending || !isAuthenticated() || !formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)}
-              onClick={async () => {
-                try {
-                  setEmailSending(true);
-                  await authAPI.sendEmailOTP(formData.email);
-                  toast({ title: 'Email code sent', description: 'Check your inbox for the OTP code.' });
-                } catch (err) {
-                  toast({ title: 'Failed to send email code', description: err?.response?.data?.detail || err?.message || 'Please try again.', variant: 'destructive' });
-                } finally {
-                  setEmailSending(false);
-                }
-              }}
-            >
-              {emailSending ? 'Sending…' : 'Send Code'}
-            </Button>
-            <Input
-              placeholder="Enter code"
-              value={emailOtpCode}
-              onChange={(e) => setEmailOtpCode(e.target.value)}
-              className="max-w-[180px]"
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              disabled={emailVerifying || !isAuthenticated() || !emailOtpCode || !formData.email}
-              onClick={async () => {
-                try {
-                  setEmailVerifying(true);
-                  await authAPI.verifyEmailOTP(emailOtpCode, formData.email);
-                  setEmailVerified(true);
-                  toast({ title: 'Email verified', description: 'Your email was verified successfully.' });
-                } catch (err) {
-                  setEmailVerified(false);
-                  toast({ title: 'Verification failed', description: err?.response?.data?.detail || err?.message || 'Invalid code. Please try again.', variant: 'destructive' });
-                } finally {
-                  setEmailVerifying(false);
-                }
-              }}
-            >
-              {emailVerifying ? 'Verifying…' : 'Verify'}
-            </Button>
-            {emailVerified && (
-              <div className="flex items-center text-green-600 text-sm">
-                <CheckCircle className="h-4 w-4 mr-1" /> Verified
-              </div>
-            )}
-          </div>
-          {!isAuthenticated() && (
-            <p className="text-xs text-gray-500">
-              You can send and verify codes after creating your account.
-            </p>
-          )}
+        {/* Email verification info (codes handled after registration) */}
+        <div className="mt-3">
+          <p className="text-xs text-gray-500">
+            Verification happens after registration. Codes will be sent automatically.
+          </p>
         </div>
       </div>
 
@@ -831,67 +777,11 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         </p>
         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
 
-        {/* Phone OTP verification */}
-        <div className="mt-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              disabled={phoneSending || !isAuthenticated() || !formData.phone || !validateNigerianPhone(formData.phone)}
-              onClick={async () => {
-                try {
-                  setPhoneSending(true);
-                  const formatted = formatNigerianPhone(formData.phone);
-                  await authAPI.sendPhoneOTP(formatted);
-                  toast({ title: 'SMS code sent', description: 'Check your phone for the OTP code.' });
-                } catch (err) {
-                  toast({ title: 'Failed to send SMS code', description: err?.response?.data?.detail || err?.message || 'Please try again.', variant: 'destructive' });
-                } finally {
-                  setPhoneSending(false);
-                }
-              }}
-            >
-              {phoneSending ? 'Sending…' : 'Send Code'}
-            </Button>
-            <Input
-              placeholder="Enter code"
-              value={phoneOtpCode}
-              onChange={(e) => setPhoneOtpCode(e.target.value)}
-              className="max-w-[180px]"
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              disabled={phoneVerifying || !isAuthenticated() || !phoneOtpCode || !formData.phone}
-              onClick={async () => {
-                try {
-                  setPhoneVerifying(true);
-                  const formatted = formatNigerianPhone(formData.phone);
-                  await authAPI.verifyPhoneOTP(phoneOtpCode, formatted);
-                  setPhoneVerified(true);
-                  toast({ title: 'Phone verified', description: 'Your phone number was verified successfully.' });
-                } catch (err) {
-                  setPhoneVerified(false);
-                  toast({ title: 'Verification failed', description: err?.response?.data?.detail || err?.message || 'Invalid code. Please try again.', variant: 'destructive' });
-                } finally {
-                  setPhoneVerifying(false);
-                }
-              }}
-            >
-              {phoneVerifying ? 'Verifying…' : 'Verify'}
-            </Button>
-            {phoneVerified && (
-              <div className="flex items-center text-green-600 text-sm">
-                <CheckCircle className="h-4 w-4 mr-1" /> Verified
-              </div>
-            )}
-          </div>
-          {!isAuthenticated() && (
-            <p className="text-xs text-gray-500">
-              You can send and verify codes after creating your account.
-            </p>
-          )}
+        {/* Phone verification info (codes handled after registration) */}
+        <div className="mt-3">
+          <p className="text-xs text-gray-500">
+            Verification happens after registration. Codes will be sent automatically.
+          </p>
         </div>
       </div>
 
