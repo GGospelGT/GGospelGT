@@ -133,7 +133,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
   const [phoneVerifying, setPhoneVerifying] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
 
-  const { registerTradesperson, user, isAuthenticated, isTradesperson } = useAuth();
+  const { registerTradesperson, user, isAuthenticated, isTradesperson, updateUser, getCurrentUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { states: nigerianStates, lgas: stateLGAs, loading: statesLoading, loadLGAs } = useStates();
@@ -440,10 +440,10 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
     try {
       const fullName = `${formData.firstName} ${formData.lastName}`;
 
-      // Ensure description meets minimum length requirement
-      const description = formData.profileDescription && formData.profileDescription.length >= 50 
-        ? formData.profileDescription 
-        : `Professional ${formData.selectedTrades[0]} services. Experienced tradesperson committed to quality work and customer satisfaction. Contact me for reliable and affordable services.`;
+      // Use the exact description entered by the user; fall back only if empty
+      const description = (formData.profileDescription && formData.profileDescription.trim().length > 0)
+        ? formData.profileDescription.trim()
+        : `Professional ${formData.selectedTrades?.[0] || 'Trades'} services. Experienced tradesperson committed to quality work and customer satisfaction. Contact me for reliable and affordable services.`;
 
       // Map experience years from string to number
       const experienceMapping = {
@@ -1371,6 +1371,17 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
                       setEmailVerifying(true);
                       await authAPI.verifyEmailOTP(emailOtpCode, formData.email);
                       setEmailVerified(true);
+                      // Immediately reflect verification in auth context
+                      try {
+                        if (updateUser) {
+                          updateUser({ ...(user || {}), email_verified: true });
+                        }
+                        if (typeof getCurrentUser === 'function') {
+                          await getCurrentUser();
+                        }
+                      } catch (ctxErr) {
+                        console.warn('⚠️ Failed to refresh user after email verification:', ctxErr);
+                      }
                       toast({ title: 'Email verified', description: 'Your email was verified successfully.' });
                     } catch (err) {
                       setEmailVerified(false);
@@ -1439,6 +1450,17 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
                       const formatted = formatNigerianPhone(formData.phone);
                       await authAPI.verifyPhoneOTP(phoneOtpCode, formatted);
                       setPhoneVerified(true);
+                      // Immediately reflect verification in auth context
+                      try {
+                        if (updateUser) {
+                          updateUser({ ...(user || {}), phone_verified: true });
+                        }
+                        if (typeof getCurrentUser === 'function') {
+                          await getCurrentUser();
+                        }
+                      } catch (ctxErr) {
+                        console.warn('⚠️ Failed to refresh user after phone verification:', ctxErr);
+                      }
                       toast({ title: 'Phone verified', description: 'Your phone number was verified successfully.' });
                     } catch (err) {
                       setPhoneVerified(false);

@@ -10,24 +10,43 @@ import {
   Copy,
   Wallet,
   CreditCard,
-  FileText
+  FileText,
+  Mail,
+  Phone
 } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 import { walletAPI } from '../../api/wallet';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../../api/services';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '../ui/input-otp';
 
 const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
   const [bankDetails, setBankDetails] = useState(null);
-  const [amount, setAmount] = useState('1000'); // Default minimum amount
+  const [amount, setAmount] = useState(''); // Start empty; user enters preferred amount
   const [proofFile, setProofFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingBankDetails, setLoadingBankDetails] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [step, setStep] = useState('payment'); // 'payment' or 'proof'
+
+  // Post-registration verification state
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [emailOtpCode, setEmailOtpCode] = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailVerifying, setEmailVerifying] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+
+  const [phoneOtpCode, setPhoneOtpCode] = useState('');
+  const [phoneSending, setPhoneSending] = useState(false);
+  const [phoneVerifying, setPhoneVerifying] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+
+  const [registeredFullName, setRegisteredFullName] = useState('');
   
   const { toast } = useToast();
-  const { registerTradesperson } = useAuth();
+  const { registerTradesperson, updateUser, getCurrentUser, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   // Load bank details on component mount
@@ -90,6 +109,38 @@ const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
     });
   };
 
+  // Nigerian phone helpers (consistent with TradespersonRegistration)
+  const validateNigerianPhone = (phone) => {
+    const cleanPhone = (phone || '').replace(/\D/g, '');
+    if (cleanPhone.startsWith('234') && cleanPhone.length === 13) return true;
+    if (cleanPhone.startsWith('0') && cleanPhone.length === 11) return true;
+    if ((cleanPhone.startsWith('7') || cleanPhone.startsWith('8') || cleanPhone.startsWith('9')) && cleanPhone.length === 10) return true;
+    return false;
+  };
+
+  const formatNigerianPhone = (phone) => {
+    const cleanPhone = (phone || '').replace(/\D/g, '');
+    if (cleanPhone.startsWith('234') && cleanPhone.length === 13) return `+${cleanPhone}`;
+    if (cleanPhone.startsWith('0') && cleanPhone.length === 11) return `+234${cleanPhone.substring(1)}`;
+    if ((cleanPhone.startsWith('7') || cleanPhone.startsWith('8') || cleanPhone.startsWith('9')) && cleanPhone.length === 10) return `+234${cleanPhone}`;
+    return phone;
+  };
+
+  // Enforce verification before redirecting
+  useEffect(() => {
+    if (emailVerified && phoneVerified) {
+      setShowVerificationModal(false);
+      const fullName = registeredFullName || `${formData.firstName} ${formData.lastName}`;
+      navigate('/browse-jobs', {
+        state: {
+          welcomeMessage: `Welcome to ServiceHub, ${fullName}! Your account has been created successfully.`,
+          walletFunded: true,
+          fundingAmount: amount
+        }
+      });
+    }
+  }, [emailVerified, phoneVerified, registeredFullName, amount, formData.firstName, formData.lastName, navigate]);
+
   // Handle registration completion with wallet funding
   const handleCompleteRegistration = async () => {
     if (!proofFile) {
@@ -101,16 +152,27 @@ const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
       return;
     }
 
+    // Validate amount input (must be a number and at least ₦100)
+    if (!amount || isNaN(Number(amount)) || Number(amount) < 100) {
+      toast({
+        title: "Enter a valid amount",
+        description: "Please enter an amount of at least ₦100.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       // First, complete the registration
       const fullName = `${formData.firstName} ${formData.lastName}`;
+      setRegisteredFullName(fullName);
       
-      // Ensure description meets minimum length requirement
-      const description = formData.profileDescription && formData.profileDescription.length >= 50 
-        ? formData.profileDescription 
-        : `Professional ${formData.selectedTrades[0]} services. Experienced tradesperson committed to quality work and customer satisfaction. Contact me for reliable and affordable services.`;
+      // Use the exact description entered by the user; fall back only if empty
+      const description = (formData.profileDescription && formData.profileDescription.trim().length > 0)
+        ? formData.profileDescription.trim()
+        : `Professional ${formData.selectedTrades?.[0] || 'Trades'} services. Experienced tradesperson committed to quality work and customer satisfaction. Contact me for reliable and affordable services.`;
 
       // Map experience years from string to number
       const experienceMapping = {
@@ -145,16 +207,26 @@ const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
             description: `Welcome to ServiceHub, ${fullName}! Your account has been created and payment proof submitted. You'll be notified once your payment is verified.`,
           });
 
-          // Redirect to tradespeople dashboard (Browse Jobs page)
-          setTimeout(() => {
-            navigate('/browse-jobs', { 
-              state: { 
-                welcomeMessage: `Welcome to ServiceHub, ${fullName}! Your account has been created and payment proof submitted.`,
-                walletFunded: true,
-                fundingAmount: amount
-              }
-            });
-          }, 2000);
+          // Trigger verification modal and send OTPs
+          try {
+            if (formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+              await authAPI.sendEmailOTP(formData.email);
+              toast({ title: 'Email verification code sent', description: 'Check your inbox to verify your email.' });
+            }
+          } catch (emailErr) {
+            console.warn('Failed to send email OTP:', emailErr?.response?.data || emailErr?.message || emailErr);
+          }
+          try {
+            if (formData.phone && validateNigerianPhone(formData.phone)) {
+              const formattedPhone = formatNigerianPhone(formData.phone);
+              await authAPI.sendPhoneOTP(formattedPhone);
+              toast({ title: 'SMS verification code sent', description: 'Check your phone to verify your number.' });
+            }
+          } catch (phoneErr) {
+            console.warn('Failed to send phone OTP:', phoneErr?.response?.data || phoneErr?.message || phoneErr);
+          }
+
+          setShowVerificationModal(true);
 
           // Also call the completion handler to close modal
           if (onRegistrationComplete) {
@@ -173,16 +245,26 @@ const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
             variant: "warning",
           });
 
-          // Still redirect to dashboard even if wallet funding failed
-          setTimeout(() => {
-            navigate('/browse-jobs', { 
-              state: { 
-                welcomeMessage: `Welcome to ServiceHub, ${fullName}! Your account has been created successfully.`,
-                walletFunded: false,
-                walletError: walletError.message
-              }
-            });
-          }, 2000);
+          // Send OTPs and show verification modal even if wallet funding failed
+          try {
+            if (formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+              await authAPI.sendEmailOTP(formData.email);
+              toast({ title: 'Email verification code sent', description: 'Check your inbox to verify your email.' });
+            }
+          } catch (emailErr) {
+            console.warn('Failed to send email OTP:', emailErr?.response?.data || emailErr?.message || emailErr);
+          }
+          try {
+            if (formData.phone && validateNigerianPhone(formData.phone)) {
+              const formattedPhone = formatNigerianPhone(formData.phone);
+              await authAPI.sendPhoneOTP(formattedPhone);
+              toast({ title: 'SMS verification code sent', description: 'Check your phone to verify your number.' });
+            }
+          } catch (phoneErr) {
+            console.warn('Failed to send phone OTP:', phoneErr?.response?.data || phoneErr?.message || phoneErr);
+          }
+
+          setShowVerificationModal(true);
 
           if (onRegistrationComplete) {
             onRegistrationComplete({
@@ -229,6 +311,184 @@ const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      {/* Post-registration verification modal */}
+      <Dialog
+        open={showVerificationModal}
+        onOpenChange={(open) => {
+          if (open) {
+            setShowVerificationModal(true);
+          } else if (emailVerified && phoneVerified) {
+            setShowVerificationModal(false);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Verify your contact details</DialogTitle>
+            <DialogDescription>
+              We sent codes to your email and phone. Please verify both to continue.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <Mail className="h-4 w-4" />
+                <span>{formData.email || 'No email provided'}</span>
+                {emailVerified && (
+                  <span className="flex items-center text-green-600">
+                    <CheckCircle className="h-4 w-4 mr-1" /> Verified
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={emailSending || !formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)}
+                  onClick={async () => {
+                    try {
+                      setEmailSending(true);
+                      await authAPI.sendEmailOTP(formData.email);
+                      toast({ title: 'Email code sent', description: 'Check your inbox for the OTP code.' });
+                    } catch (err) {
+                      toast({ title: 'Failed to send email code', description: err?.response?.data?.detail || err?.message || 'Please try again.', variant: 'destructive' });
+                    } finally {
+                      setEmailSending(false);
+                    }
+                  }}
+                >
+                  {emailSending ? 'Sending…' : 'Resend code'}
+                </Button>
+                <InputOTP maxLength={6} value={emailOtpCode} onChange={(val) => setEmailOtpCode(val)}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                  </InputOTPGroup>
+                  <InputOTPSeparator />
+                  <InputOTPGroup>
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  disabled={emailVerifying || !emailOtpCode || !formData.email}
+                  onClick={async () => {
+                    try {
+                      setEmailVerifying(true);
+                      await authAPI.verifyEmailOTP(emailOtpCode, formData.email);
+                      setEmailVerified(true);
+                      // Immediately reflect verification in auth context
+                      try {
+                        if (updateUser) {
+                          updateUser({ ...(user || {}), email_verified: true });
+                        }
+                        if (typeof getCurrentUser === 'function') {
+                          await getCurrentUser();
+                        }
+                      } catch (ctxErr) {
+                        console.warn('Failed to refresh user after email verification:', ctxErr);
+                      }
+                      toast({ title: 'Email verified', description: 'Your email was verified successfully.' });
+                    } catch (err) {
+                      setEmailVerified(false);
+                      toast({ title: 'Verification failed', description: err?.response?.data?.detail || err?.message || 'Invalid code. Please try again.', variant: 'destructive' });
+                    } finally {
+                      setEmailVerifying(false);
+                    }
+                  }}
+                >
+                  {emailVerifying ? 'Verifying…' : 'Verify'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <Phone className="h-4 w-4" />
+                <span>{formData.phone ? formatNigerianPhone(formData.phone) : 'No phone provided'}</span>
+                {phoneVerified && (
+                  <span className="flex items-center text-green-600">
+                    <CheckCircle className="h-4 w-4 mr-1" /> Verified
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={phoneSending || !formData.phone || !validateNigerianPhone(formData.phone)}
+                  onClick={async () => {
+                    try {
+                      setPhoneSending(true);
+                      const formatted = formatNigerianPhone(formData.phone);
+                      await authAPI.sendPhoneOTP(formatted);
+                      toast({ title: 'SMS code sent', description: 'Check your phone for the OTP code.' });
+                    } catch (err) {
+                      toast({ title: 'Failed to send SMS code', description: err?.response?.data?.detail || err?.message || 'Please try again.', variant: 'destructive' });
+                    } finally {
+                      setPhoneSending(false);
+                    }
+                  }}
+                >
+                  {phoneSending ? 'Sending…' : 'Resend code'}
+                </Button>
+                <InputOTP maxLength={6} value={phoneOtpCode} onChange={(val) => setPhoneOtpCode(val)}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                  </InputOTPGroup>
+                  <InputOTPSeparator />
+                  <InputOTPGroup>
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  disabled={phoneVerifying || !phoneOtpCode || !formData.phone}
+                  onClick={async () => {
+                    try {
+                      setPhoneVerifying(true);
+                      const formatted = formatNigerianPhone(formData.phone);
+                      await authAPI.verifyPhoneOTP(phoneOtpCode, formatted);
+                      setPhoneVerified(true);
+                      // Immediately reflect verification in auth context
+                      try {
+                        if (updateUser) {
+                          updateUser({ ...(user || {}), phone_verified: true });
+                        }
+                        if (typeof getCurrentUser === 'function') {
+                          await getCurrentUser();
+                        }
+                      } catch (ctxErr) {
+                        console.warn('Failed to refresh user after phone verification:', ctxErr);
+                      }
+                      toast({ title: 'Phone verified', description: 'Your phone number was verified successfully.' });
+                    } catch (err) {
+                      setPhoneVerified(false);
+                      toast({ title: 'Verification failed', description: err?.response?.data?.detail || err?.message || 'Invalid code. Please try again.', variant: 'destructive' });
+                    } finally {
+                      setPhoneVerifying(false);
+                    }
+                  }}
+                >
+                  {phoneVerifying ? 'Verifying…' : 'Verify'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className="mb-6">
         <Button
           variant="ghost"
