@@ -619,7 +619,7 @@ const ProfilePage = () => {
                             placeholder="e.g., 101001"
                           />
                         ) : (
-                          <p className="text-gray-700 font-lato py-2">{profileData.postcode}</p>
+                          <p className="text-gray-700 font-lato py-2">{profileData.postcode && profileData.postcode !== '000000' ? profileData.postcode : 'Not set'}</p>
                         )}
                       </div>
 

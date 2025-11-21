@@ -241,11 +241,9 @@ const BrowseJobsPage = () => {
       setPagination(response.data.pagination || null);
     } catch (error) {
       console.error('Failed to load jobs:', error);
-      toast({
-        title: "Failed to load jobs",
-        description: "There was an error loading available jobs. Please try again.",
-        variant: "destructive",
-      });
+      // Suppress noisy error toast to avoid disruptive red notifications.
+      // The page already provides gating/inline guidance (e.g., verification required).
+      // Intentionally not showing a toast here.
     } finally {
       setLoading(false);
     }

@@ -127,7 +127,7 @@ const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
         password: formData.password,
         phone: formData.phone,
         location: formData.state,
-        postcode: '000000',
+        postcode: formData.postcode || '000000',
         trade_categories: formData.selectedTrades,
         experience_years: experienceMapping[formData.experienceYears] || 1,
         company_name: formData.tradingName,

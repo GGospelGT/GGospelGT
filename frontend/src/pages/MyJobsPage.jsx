@@ -141,11 +141,8 @@ const MyJobsPage = () => {
         // Optionally redirect to login or homepage
         navigate('/');
       } else {
-        toast({
-          title: "Failed to load jobs",
-          description: "There was an error loading your jobs. Please try again.",
-          variant: "destructive",
-        });
+        // Suppress generic failure toast to avoid disruptive red notifications.
+        // Intentionally not showing a toast here.
       }
     } finally {
       setLoading(false);

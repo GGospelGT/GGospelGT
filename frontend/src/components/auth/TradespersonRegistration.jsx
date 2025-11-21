@@ -85,6 +85,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
     state: '',
     lga: '',
     town: '',
+    postcode: '',
     
     // Step 3: ID Check
     idType: '',
@@ -462,7 +463,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         password: formData.password,
         phone: formattedPhone,
         location: formData.state,
-        postcode: '000000', // Placeholder postcode
+        postcode: formData.postcode || '000000',
         trade_categories: formData.selectedTrades,
         experience_years: experienceMapping[formData.experienceYears] || 1,
         company_name: formData.tradingName,
@@ -613,6 +614,11 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
         if (!formData.tradingName.trim()) newErrors.tradingName = 'Trading name is required';
         if (!formData.state) newErrors.state = 'State is required';
         if (!formData.lga) newErrors.lga = 'LGA is required';
+        if (!formData.postcode) {
+          newErrors.postcode = 'Zipcode is required';
+        } else if (!/^\d{6}$/.test(formData.postcode)) {
+          newErrors.postcode = 'Zipcode must be 6 digits';
+        }
         break;
       case 3:
         if (!formData.idType) newErrors.idType = 'Please select an ID type';
@@ -1065,6 +1071,21 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           rows="3"
         />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Zipcode *
+        </label>
+        <Input
+          placeholder="e.g., 101001"
+          value={formData.postcode}
+          onChange={(e) => updateFormData('postcode', e.target.value)}
+          className={errors.postcode ? 'border-red-500' : ''}
+        />
+        {errors.postcode && (
+          <p className="text-red-500 text-sm mt-1">{errors.postcode}</p>
+        )}
+        <p className="text-xs text-gray-500 mt-1">Nigerian zip codes are 6 digits.</p>
       </div>
     </div>
   );
