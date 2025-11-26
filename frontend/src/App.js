@@ -41,6 +41,7 @@ import TermsPage from "./pages/TermsPage";
 import CookiePolicyPage from "./pages/CookiePolicyPage";
 import { Toaster } from "./components/ui/toaster";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import SessionTimeoutManager from "./components/auth/SessionTimeoutManager";
 import ErrorBoundary from "./components/ErrorBoundary";
 import OfflineIndicator from "./components/OfflineIndicator";
 import { setupGlobalErrorHandling } from "./utils/errorHandler";
@@ -91,6 +92,8 @@ function App() {
     <div className="App">
       <ErrorBoundary>
         <AuthProvider>
+          {/* Global session timeout manager for both regular users and admins */}
+          <SessionTimeoutManager />
           <BrowserRouter>
 
             <Routes>
