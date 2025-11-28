@@ -194,6 +194,12 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+// Exported util for computing distance (km)
+export function computeDistanceKm(lat1, lon1, lat2, lon2) {
+  if ([lat1, lon1, lat2, lon2].some(v => typeof v !== 'number')) return null;
+  return haversineKm(lat1, lon1, lat2, lon2);
+}
+
 // Infer the nearest Nigerian state from coordinates using STATE_CAPITAL_COORDS
 export function nearestStateFromCoordinates(lat, lng) {
   if (typeof lat !== 'number' || typeof lng !== 'number') return null;

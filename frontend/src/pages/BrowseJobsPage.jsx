@@ -29,7 +29,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import JobsMap from '../components/maps/JobsMap';
 import LocationSettingsModal from '../components/LocationSettingsModal';
 import { authAPI } from '../api/services';
-import { resolveCoordinatesFromLocationText, DEFAULT_TRAVEL_DISTANCE_KM, nearestStateFromCoordinates } from '../utils/locationCoordinates';
+import { resolveCoordinatesFromLocationText, DEFAULT_TRAVEL_DISTANCE_KM, nearestStateFromCoordinates, computeDistanceKm } from '../utils/locationCoordinates';
 
 // Nigerian Trade Categories
 const NIGERIAN_TRADE_CATEGORIES = [
@@ -245,7 +245,28 @@ const BrowseJobsPage = () => {
       }
 
       let jobsData = response.data.jobs || [];
-      if (filters.useLocation) {
+      if (filters.useLocation && userLocation && typeof userLocation.lat === 'number' && typeof userLocation.lng === 'number') {
+        // Compute fallback distances for jobs without distance_km using text location or coords
+        jobsData = jobsData.map((job) => {
+          let d = job?.distance_km;
+          if (d === undefined || d === null) {
+            // Try job coordinates first
+            if (typeof job?.latitude === 'number' && typeof job?.longitude === 'number') {
+              d = computeDistanceKm(userLocation.lat, userLocation.lng, job.latitude, job.longitude);
+            } else if (job?.location) {
+              const jc = resolveCoordinatesFromLocationText(job.location);
+              if (jc && typeof jc.latitude === 'number' && typeof jc.longitude === 'number') {
+                d = computeDistanceKm(userLocation.lat, userLocation.lng, jc.latitude, jc.longitude);
+              }
+            }
+          }
+          if (typeof d === 'number' && !Number.isNaN(d)) {
+            return { ...job, distance_km: Number(d.toFixed(2)) };
+          }
+          return job;
+        });
+
+        // Prioritize nearby jobs first
         jobsData = [...jobsData].sort((a, b) => {
           const da = (a && a.distance_km !== undefined && a.distance_km !== null) ? Number(a.distance_km) : Number.POSITIVE_INFINITY;
           const db = (b && b.distance_km !== undefined && b.distance_km !== null) ? Number(b.distance_km) : Number.POSITIVE_INFINITY;
