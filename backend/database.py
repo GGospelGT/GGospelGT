@@ -3034,85 +3034,108 @@ class Database:
                 job_filter["$or"] = category_regex_patterns
                 print(f"Skills filter applied: {tradesperson_categories}")
             
-            # 2. LOCATION FILTERING - Show jobs within tradesperson's travel distance
-            if (tradesperson.get("latitude") is not None and 
-                tradesperson.get("longitude") is not None):
-                
+            # 2. LOCATION AWARE, BUT NON-EXCLUSIVE: prioritize nearby, include unlocated
+            if (tradesperson.get("latitude") is not None and tradesperson.get("longitude") is not None):
                 max_distance = tradesperson.get("travel_distance_km", 25)  # Default 25km
-                print(f"Location filter applied: {max_distance}km radius")
-                
-                # Use location-based filtering with skills filtering
-                return await self.get_jobs_near_location_with_skills(
+                print(f"Location preference detected: prioritizing within {max_distance}km, including others if unlocated")
+
+                # Use blended nearby-with-skills which backfills unlocated jobs
+                blended = await self.get_jobs_near_location_with_skills(
                     latitude=tradesperson["latitude"],
                     longitude=tradesperson["longitude"],
                     max_distance_km=max_distance,
                     skill_categories=tradesperson_categories,
                     skip=skip,
-                    limit=limit
+                    limit=limit,
                 )
-            else:
-                # No location data, use skills-only filtering
-                print("Using skills-only filtering (no location data)")
-                cursor = self.database.jobs.find(job_filter).sort("created_at", -1).skip(skip).limit(limit)
-                jobs = await cursor.to_list(length=None)
-                
-                # Process and enrich jobs data
-                processed_jobs = []
-                for job in jobs:
-                    processed_job = await self._process_job_data(job)
-                    processed_jobs.append(processed_job)
-                
-                return processed_jobs
+                return blended
+
+            # 3. No location data: skills-only filtering
+            print("Using skills-only filtering (no location data)")
+            cursor = (
+                self.database.jobs
+                .find(job_filter)
+                .sort("created_at", -1)
+                .skip(skip)
+                .limit(limit)
+            )
+            jobs = await cursor.to_list(length=None)
+
+            processed_jobs = []
+            for job in jobs:
+                processed_job = await self._process_job_data(job)
+                processed_jobs.append(processed_job)
+
+            return processed_jobs
                 
         except Exception as e:
             print(f"Error in get_jobs_for_tradesperson: {str(e)}")
             # Fallback to general available jobs
             return await self.get_available_jobs(skip=skip, limit=limit)
 
-    async def get_jobs_near_location_with_skills(self, latitude: float, longitude: float, 
+    async def get_jobs_near_location_with_skills(self, latitude: float, longitude: float,
                                                max_distance_km: float, skill_categories: List[str],
                                                skip: int = 0, limit: int = 50) -> List[dict]:
-        """Get jobs near location that match tradesperson's skills"""
+        """Get jobs matching skills, prioritizing nearby ones but not excluding jobs without coordinates.
+
+        - Computes distance only for jobs that have `latitude` and `longitude`.
+        - Returns nearby jobs first (sorted by distance), then fills remaining slots with unlocated jobs.
+        - Always enforces `status: active`.
+        """
         try:
-            # Build skills filter
+            # Build skills filter (case-insensitive exact match on category)
             skills_filter = {}
             if skill_categories:
                 category_regex_patterns = [{"category": {"$regex": f"^{category}$", "$options": "i"}} for category in skill_categories]
                 skills_filter["$or"] = category_regex_patterns
-            
-            # Base filter for active jobs with location data
-            base_filter = {
-                "status": "active",
-                "latitude": {"$exists": True, "$ne": None},
-                "longitude": {"$exists": True, "$ne": None}
-            }
-            
-            # Combine skills and base filters
+
+            base_filter = {"status": "active"}
             combined_filter = {"$and": [base_filter, skills_filter]} if skills_filter else base_filter
-            
-            # Get jobs matching skills filter first
-            cursor = self.database.jobs.find(combined_filter).skip(skip).limit(limit * 2)  # Get extra to account for distance filtering
+
+            # Fetch more than needed to allow distance filtering and backfill
+            cursor = (
+                self.database.jobs
+                .find(combined_filter)
+                .sort("created_at", -1)
+                .skip(0)
+                .limit(max(limit * 3, limit))
+            )
             jobs = await cursor.to_list(length=None)
-            
-            # Calculate distances and filter by location
-            jobs_within_distance = []
+
+            nearby: list = []
+            unlocated: list = []
+
             for job in jobs:
                 job_lat = job.get("latitude")
                 job_lng = job.get("longitude")
-                
+
                 if job_lat is not None and job_lng is not None:
-                    distance = self.calculate_distance(latitude, longitude, job_lat, job_lng)
-                    if distance <= max_distance_km:
-                        job["_id"] = str(job["_id"])
+                    try:
+                        distance = self.calculate_distance(latitude, longitude, job_lat, job_lng)
+                    except Exception:
+                        # If distance calc fails, treat as unlocated
+                        unlocated.append(job)
+                        continue
+
+                    if distance <= float(max_distance_km):
+                        job["_id"] = str(job.get("_id")) if job.get("_id") else None
                         job["distance_km"] = round(distance, 2)
-                        jobs_within_distance.append(job)
-            
-            # Sort by distance (closest first) and limit results
-            jobs_within_distance.sort(key=lambda x: x.get("distance_km", float('inf')))
-            limited_jobs = jobs_within_distance[:limit]
-            
-            return limited_jobs
-            
+                        nearby.append(job)
+                else:
+                    # No coordinates — still include so tradespeople see available jobs
+                    unlocated.append(job)
+
+            # Sort nearby by distance asc; unlocated by recency (created_at desc from query)
+            nearby.sort(key=lambda x: x.get("distance_km", float("inf")))
+
+            # Merge: prioritize nearby, then backfill with unlocated
+            merged = nearby + unlocated
+
+            # Apply skip/limit to the merged list
+            sliced = merged[skip: skip + limit]
+
+            return sliced
+
         except Exception as e:
             logger.error(f"Error in get_jobs_near_location_with_skills: {e}")
             return []
