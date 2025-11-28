@@ -179,3 +179,35 @@ export function resolveCoordinatesFromLocationText(locationText) {
 }
 
 export const DEFAULT_TRAVEL_DISTANCE_KM = 25;
+
+// Haversine distance in kilometers between two lat/lng points
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const toRad = (v) => (v * Math.PI) / 180;
+  const R = 6371; // Earth radius in km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Infer the nearest Nigerian state from coordinates using STATE_CAPITAL_COORDS
+export function nearestStateFromCoordinates(lat, lng) {
+  if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+  let bestKey = null;
+  let bestDist = Infinity;
+  for (const [stateKey, coords] of Object.entries(STATE_CAPITAL_COORDS)) {
+    const d = haversineKm(lat, lng, coords.lat, coords.lng);
+    if (d < bestDist) {
+      bestDist = d;
+      bestKey = stateKey;
+    }
+  }
+  if (!bestKey) return null;
+  // Convert normalized key (e.g., "cross river") to Title Case for display
+  const toTitle = (s) => s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  return toTitle(bestKey);
+}

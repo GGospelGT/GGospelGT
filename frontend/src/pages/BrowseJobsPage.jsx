@@ -29,7 +29,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import JobsMap from '../components/maps/JobsMap';
 import LocationSettingsModal from '../components/LocationSettingsModal';
 import { authAPI } from '../api/services';
-import { resolveCoordinatesFromLocationText, DEFAULT_TRAVEL_DISTANCE_KM } from '../utils/locationCoordinates';
+import { resolveCoordinatesFromLocationText, DEFAULT_TRAVEL_DISTANCE_KM, nearestStateFromCoordinates } from '../utils/locationCoordinates';
 
 // Nigerian Trade Categories
 const NIGERIAN_TRADE_CATEGORIES = [
@@ -244,7 +244,15 @@ const BrowseJobsPage = () => {
         response = await jobsAPI.apiClient.get(`/jobs/for-tradesperson?limit=50&skip=${skip}`);
       }
 
-      setJobs(response.data.jobs || []);
+      let jobsData = response.data.jobs || [];
+      if (filters.useLocation) {
+        jobsData = [...jobsData].sort((a, b) => {
+          const da = (a && a.distance_km !== undefined && a.distance_km !== null) ? Number(a.distance_km) : Number.POSITIVE_INFINITY;
+          const db = (b && b.distance_km !== undefined && b.distance_km !== null) ? Number(b.distance_km) : Number.POSITIVE_INFINITY;
+          return da - db;
+        });
+      }
+      setJobs(jobsData);
       setPagination(response.data.pagination || null);
     } catch (error) {
       console.error('Failed to load jobs:', error);
@@ -275,14 +283,9 @@ const BrowseJobsPage = () => {
           lng: position.coords.longitude
         };
         
-        setUserLocation(location);
-        setFilters(prev => ({ ...prev, useLocation: true }));
-        setLocationLoading(false);
-        
-        toast({
-          title: "Location updated",
-          description: "Now showing jobs near your current location"
-        });
+        // Persist GPS location immediately so backend uses correct coordinates
+        updateLocationSettings(location.lat, location.lng, filters.maxDistance)
+          .finally(() => setLocationLoading(false));
       },
       (error) => {
         console.error('Error getting location:', error);
@@ -313,9 +316,13 @@ const BrowseJobsPage = () => {
         useLocation: true 
       }));
       
+      const stateName = nearestStateFromCoordinates(latitude, longitude);
+      const miles = Math.round(Number(travelDistance) * 0.621371);
       toast({
         title: "Location settings saved",
-        description: "Your location and travel preferences have been updated"
+        description: stateName
+          ? `Saved: ${stateName} • ${travelDistance}km (≈ ${miles}mi) radius`
+          : "Your location and travel preferences have been updated"
       });
       
       setShowLocationSettings(false);
@@ -661,30 +668,32 @@ const BrowseJobsPage = () => {
                         setFilters(prev => ({ ...prev, useLocation: checked }));
                         // Use saved profile location instead of auto-triggering GPS
                         if (checked) {
-                          if (user?.latitude && user?.longitude) {
-                            setUserLocation({ lat: user.latitude, lng: user.longitude });
-                            setFilters(prev => ({
-                              ...prev,
-                              maxDistance: user?.travel_distance_km || prev.maxDistance,
-                            }));
-                            toast({
-                              title: "Location filter enabled",
-                              description: "Using your saved profile location.",
-                            });
-                          } else if (user?.location) {
-                            const coords = resolveCoordinatesFromLocationText(user.location);
-                            if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number') {
-                              // Convert util output { latitude, longitude } to map-friendly { lat, lng }
-                              setUserLocation({ lat: coords.latitude, lng: coords.longitude });
-                              setFilters(prev => ({
-                                ...prev,
-                                maxDistance: user?.travel_distance_km || prev.maxDistance,
-                              }));
-                              toast({
-                                title: "Location filter enabled",
-                                description: `Using your profile location: ${user.location}.`,
-                              });
-                            } else {
+                      if (user?.latitude && user?.longitude) {
+                        setUserLocation({ lat: user.latitude, lng: user.longitude });
+                        setFilters(prev => ({
+                          ...prev,
+                          maxDistance: user?.travel_distance_km || prev.maxDistance,
+                        }));
+                        const stateName = nearestStateFromCoordinates(user.latitude, user.longitude);
+                        toast({
+                          title: "Location filter enabled",
+                          description: stateName ? `Using your saved location: ${stateName}.` : "Using your saved profile location.",
+                        });
+                      } else if (user?.location) {
+                        const coords = resolveCoordinatesFromLocationText(user.location);
+                        if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number') {
+                          // Convert util output { latitude, longitude } to map-friendly { lat, lng }
+                          setUserLocation({ lat: coords.latitude, lng: coords.longitude });
+                          setFilters(prev => ({
+                            ...prev,
+                            maxDistance: user?.travel_distance_km || prev.maxDistance,
+                          }));
+                          const stateName = nearestStateFromCoordinates(coords.latitude, coords.longitude);
+                          toast({
+                            title: "Location filter enabled",
+                            description: stateName ? `Using your profile location: ${stateName}.` : `Using your profile location: ${user.location}.`,
+                          });
+                        } else {
                               toast({
                                 title: "No saved coordinates",
                                 description: "Set your location in Settings or use GPS.",
