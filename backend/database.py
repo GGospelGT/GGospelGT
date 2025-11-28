@@ -3642,29 +3642,51 @@ class Database:
         return record["id"]
 
     async def get_pending_tradespeople_verifications(self, skip: int = 0, limit: int = 20) -> List[dict]:
-        """Get pending tradespeople verifications for admin, deduped by user_id (latest first)."""
+        """Get pending tradespeople verifications for admin, one per user, newest first.
+        Backfill references from the user's latest submission that contains them
+        so admins can see the details the tradesperson filled.
+        """
         # Fetch all pending verifications sorted by most recent submission
-        cursor = self.tradespeople_verifications_collection.find({
-            "status": "pending"
-        }).sort("submitted_at", -1)
+        cursor = self.tradespeople_verifications_collection.find({"status": "pending"}).sort("submitted_at", -1)
 
-        deduped: List[dict] = []
-        seen_users = set()
+        # Dedupe to newest pending per user
+        per_user: Dict[str, dict] = {}
         async for v in cursor:
             user_id = v.get("user_id")
-            if user_id in seen_users:
+            if not user_id or user_id in per_user:
                 continue
-            seen_users.add(user_id)
             v["_id"] = str(v.get("_id"))
             user = await self.get_user_by_id(user_id)
             if user:
                 v["user_name"] = user.get("name")
                 v["user_email"] = user.get("email")
                 v["user_phone"] = user.get("phone")
-            deduped.append(v)
+            per_user[user_id] = v
 
-        # Apply pagination on the deduped list to keep API contract
-        return deduped[skip: skip + limit]
+        # Backfill references if missing
+        merged: List[dict] = []
+        for user_id, v in per_user.items():
+            needs_work = not bool(v.get("work_referrer"))
+            needs_char = not bool(v.get("character_referrer"))
+            if needs_work or needs_char:
+                try:
+                    ref_docs = await self.tradespeople_verifications_collection.find({
+                        "user_id": user_id,
+                        "work_referrer": {"$exists": True},
+                        "character_referrer": {"$exists": True},
+                    }).sort("submitted_at", -1).limit(1).to_list(length=1)
+                    if ref_docs:
+                        refs_doc = ref_docs[0]
+                        if needs_work:
+                            v.setdefault("work_referrer", refs_doc.get("work_referrer"))
+                        if needs_char:
+                            v.setdefault("character_referrer", refs_doc.get("character_referrer"))
+                except Exception as e:
+                    logger.warning(f"Failed to backfill references for user {user_id}: {e}")
+            merged.append(v)
+
+        # Apply pagination on the merged list to keep API contract
+        return merged[skip: skip + limit]
 
     async def has_tradesperson_references(self, user_id: str) -> bool:
         if self.database is None:
