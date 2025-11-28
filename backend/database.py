@@ -3134,7 +3134,13 @@ class Database:
             # Apply skip/limit to the merged list
             sliced = merged[skip: skip + limit]
 
-            return sliced
+            # Ensure all returned jobs are serializable and consistently processed
+            processed: List[dict] = []
+            for job in sliced:
+                processed_job = await self._process_job_data(job)
+                processed.append(processed_job)
+
+            return processed
 
         except Exception as e:
             logger.error(f"Error in get_jobs_near_location_with_skills: {e}")
