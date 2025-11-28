@@ -55,6 +55,7 @@ python-multipart==0.0.6
 pytz==2025.2
 requests==2.31.0
 requests-oauthlib==2.0.0
+redis==5.0.1
 rich==14.1.0
 rsa==4.9.1
 s3transfer==0.13.1

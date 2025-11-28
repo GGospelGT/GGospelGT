@@ -1,12 +1,15 @@
 import os
 import json
 import time
+import logging
+from urllib.parse import urlparse
 
 try:
     import redis.asyncio as redis
 except Exception:
     redis = None
 
+logger = logging.getLogger(__name__)
 
 class Cache:
     def __init__(self):
@@ -15,6 +18,7 @@ class Cache:
         self._client = None
         self._client_initialized = False
         self._local = {}
+        self._logged_init = False
 
     async def _ensure_client(self):
         if self._client_initialized:
@@ -29,6 +33,26 @@ class Cache:
                 )
             except Exception:
                 self._client = None
+
+        # One-time startup log to indicate cache backend
+        if not self._logged_init:
+            if not self.enabled:
+                logger.info("Caching disabled (CACHE_ENABLED=false). Using direct DB access.")
+            elif self._client is not None:
+                host_info = None
+                try:
+                    parsed = urlparse(self.redis_url or "")
+                    if parsed.hostname:
+                        host_info = f"{parsed.hostname}:{parsed.port or ''}".rstrip(":")
+                except Exception:
+                    host_info = None
+                if host_info:
+                    logger.info(f"Caching enabled: Redis client active (host={host_info}).")
+                else:
+                    logger.info("Caching enabled: Redis client active.")
+            else:
+                logger.info("Caching enabled: using in-memory cache (Redis unavailable).")
+            self._logged_init = True
 
     async def get(self, key: str):
         if not self.enabled:
