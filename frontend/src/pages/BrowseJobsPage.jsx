@@ -197,8 +197,9 @@ const BrowseJobsPage = () => {
       }));
     } else if (user?.location) {
       const coords = resolveCoordinatesFromLocationText(user.location);
-      if (coords) {
-        setUserLocation(coords);
+      if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number') {
+        // Convert util output { latitude, longitude } to map-friendly { lat, lng }
+        setUserLocation({ lat: coords.latitude, lng: coords.longitude });
         setFilters(prev => ({
           ...prev,
           maxDistance: user?.travel_distance_km || DEFAULT_TRAVEL_DISTANCE_KM,
@@ -213,7 +214,12 @@ const BrowseJobsPage = () => {
       setLoading(true);
       let response;
 
-      if (filters.useLocation && userLocation) {
+      if (
+        filters.useLocation &&
+        userLocation &&
+        typeof userLocation.lat === 'number' &&
+        typeof userLocation.lng === 'number'
+      ) {
         // Use location-based job fetching
         const params = new URLSearchParams({
           latitude: userLocation.lat.toString(),
@@ -628,8 +634,9 @@ const BrowseJobsPage = () => {
                             });
                           } else if (user?.location) {
                             const coords = resolveCoordinatesFromLocationText(user.location);
-                            if (coords) {
-                              setUserLocation(coords);
+                            if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number') {
+                              // Convert util output { latitude, longitude } to map-friendly { lat, lng }
+                              setUserLocation({ lat: coords.latitude, lng: coords.longitude });
                               setFilters(prev => ({
                                 ...prev,
                                 maxDistance: user?.travel_distance_km || prev.maxDistance,
