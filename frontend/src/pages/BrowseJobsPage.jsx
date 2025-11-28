@@ -538,27 +538,6 @@ const BrowseJobsPage = () => {
     );
   }
 
-  if (!user?.verified_tradesperson) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-md mx-auto text-center">
-            <h1 className="text-2xl font-bold font-montserrat mb-4" style={{color: '#121E3C'}}>
-              Verification Required
-            </h1>
-            <p className="text-gray-600 font-lato mb-6">
-              Verify your account to browse available jobs.
-            </p>
-            <Button onClick={() => navigate('/verify-account')} className="text-white font-lato" style={{ backgroundColor: '#34D164' }}>
-              Go to Verification
-            </Button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
 
 
@@ -576,6 +555,23 @@ const BrowseJobsPage = () => {
             <p className="text-lg text-gray-600 font-lato">
               Browse jobs that match your skills and show your interest to homeowners.
             </p>
+
+            {/* Verification Notice: browsing allowed, interest requires verification */}
+            {!user?.verified_tradesperson && (
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-yellow-900 font-montserrat">Verification Pending</p>
+                    <p className="text-yellow-800 text-sm font-lato">
+                      You can browse jobs, but you must verify your business to show interest.
+                    </p>
+                  </div>
+                  <Button onClick={() => navigate('/verify-account')} className="text-white font-lato" style={{ backgroundColor: '#34D164' }}>
+                    Go to Verification
+                  </Button>
+                </div>
+              </div>
+            )}
             
             {/* Search and Filters */}
             <div className="mt-6 space-y-4">
@@ -929,17 +925,25 @@ const BrowseJobsPage = () => {
 
                           {/* Show Interest Button */}
                           <div className="flex justify-end">
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation(); // Prevent card click
-                                handleShowInterest(job);
-                              }}
-                              disabled={showingInterest === job.id}
-                              className="text-white font-lato"
-                              style={{backgroundColor: '#34D164'}}
-                            >
-                              {showingInterest === job.id ? 'Showing Interest...' : 'Show Interest'}
-                            </Button>
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent card click
+                              handleShowInterest(job);
+                            }}
+                            disabled={!user?.verified_tradesperson ||
+                                      showingInterest === job.id ||
+                                      (userInterests && userInterests.includes(job.id))}
+                            className="text-white font-lato"
+                            style={{backgroundColor: '#34D164'}}
+                          >
+                            {!user?.verified_tradesperson
+                              ? 'Verify to Show Interest'
+                              : showingInterest === job.id
+                                ? 'Showing Interest...'
+                                : (userInterests && userInterests.includes(job.id))
+                                  ? 'Already Interested'
+                                  : 'Show Interest'}
+                          </Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -1096,12 +1100,18 @@ const BrowseJobsPage = () => {
                         console.error('Show interest failed, keeping modal open:', error);
                       }
                     }}
-                    disabled={loadingStates.showInterest[selectedJobDetails.id] || 
+                    disabled={!user?.verified_tradesperson ||
+                             loadingStates.showInterest[selectedJobDetails.id] || 
                              (userInterests && userInterests.includes(selectedJobDetails.id))}
                     className="text-white font-lato"
                     style={{backgroundColor: '#34D164'}}
                   >
-                    {loadingStates.showInterest[selectedJobDetails.id] ? (
+                    {!user?.verified_tradesperson ? (
+                      <>
+                        <Heart size={16} className="mr-2" />
+                        Verify to Show Interest
+                      </>
+                    ) : loadingStates.showInterest[selectedJobDetails.id] ? (
                       <>
                         <Clock size={16} className="mr-2 animate-spin" />
                         Processing...
