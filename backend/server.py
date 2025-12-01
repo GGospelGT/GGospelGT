@@ -136,7 +136,10 @@ async def health_check():
 @api_router.get("/api/health/detailed")
 async def detailed_health_check():
     """Comprehensive health check with system metrics."""
-    from .utils.health_monitor import health_monitor
+    try:
+        from .utils.health_monitor import health_monitor
+    except ImportError:
+        from utils.health_monitor import health_monitor
     try:
         health_data = await health_monitor.get_system_health()
         return health_data
@@ -147,7 +150,10 @@ async def detailed_health_check():
 @api_router.get("/api/health/database")
 async def database_health_check():
     """Database-specific health check."""
-    from .utils.health_monitor import health_monitor
+    try:
+        from .utils.health_monitor import health_monitor
+    except ImportError:
+        from utils.health_monitor import health_monitor
     try:
         db_health = await health_monitor.get_database_health()
         return db_health
@@ -158,7 +164,10 @@ async def database_health_check():
 @api_router.get("/api/health/history")
 async def health_history():
     """Get recent health check history."""
-    from .utils.health_monitor import health_monitor
+    try:
+        from .utils.health_monitor import health_monitor
+    except ImportError:
+        from utils.health_monitor import health_monitor
     try:
         history = health_monitor.get_health_history()
         return {"history": history, "count": len(history)}
@@ -169,7 +178,10 @@ async def health_history():
 @api_router.get("/api/metrics")
 async def get_metrics():
     """Get system metrics in Prometheus-compatible format."""
-    from utils.health_monitor import health_monitor
+    try:
+        from .utils.health_monitor import health_monitor
+    except ImportError:
+        from utils.health_monitor import health_monitor
     try:
         health_data = await health_monitor.get_system_health()
         

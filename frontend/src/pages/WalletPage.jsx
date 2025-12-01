@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import WalletBalance from '../components/wallet/WalletBalance';
 import FundWalletModal from '../components/wallet/FundWalletModal';
 import WalletTransactions from '../components/wallet/WalletTransactions';
@@ -8,6 +9,7 @@ import Footer from '../components/Footer';
 
 const WalletPage = () => {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [showFundModal, setShowFundModal] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -124,7 +126,11 @@ const WalletPage = () => {
                 <p className="text-sm text-blue-700 mb-4">
                   Having trouble with wallet funding or transactions?
                 </p>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                <button
+                  onClick={() => navigate('/contact')}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                  aria-label="Contact Support"
+                >
                   Contact Support
                 </button>
               </div>
