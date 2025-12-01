@@ -13,6 +13,7 @@ import AdminDataTable from '../components/admin/AdminDataTable';
 import BulkActionsBar from '../components/admin/BulkActionsBar';
 import ConfirmDeleteModal from '../components/admin/ConfirmDeleteModal';
 import InlineEditForm from '../components/admin/InlineEditForm';
+import PaymentProofImage from '../components/common/PaymentProofImage';
 
 const AdminDashboard = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(adminAPI.isLoggedIn());
@@ -1392,11 +1393,11 @@ const AdminDashboard = () => {
                           {request.proof_image && (
                             <div>
                               <p className="text-sm text-gray-600 mb-2">Payment Proof:</p>
-                              <img
-                                src={walletAPI.getPaymentProofUrl(request.proof_image)}
-                                alt="Payment proof"
+                              <PaymentProofImage
+                                filename={request.proof_image}
+                                isAdmin={true}
                                 className="h-32 w-auto rounded border cursor-pointer hover:shadow-lg transition-shadow"
-                                onClick={() => window.open(walletAPI.getPaymentProofUrl(request.proof_image), '_blank')}
+                                alt="Payment proof"
                               />
                             </div>
                           )}

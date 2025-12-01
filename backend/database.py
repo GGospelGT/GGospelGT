@@ -2597,6 +2597,16 @@ class Database:
         """Access to wallet transactions collection"""
         return self.database.wallet_transactions
 
+    async def get_wallet_transaction_by_proof_image(self, proof_filename: str) -> Optional[dict]:
+        """Lookup a wallet transaction by its proof image filename"""
+        try:
+            txn = await self.wallet_transactions_collection.find_one({"proof_image": proof_filename})
+            if txn:
+                txn["_id"] = str(txn.get("_id")) if txn.get("_id") else None
+            return txn
+        except Exception:
+            return None
+
     async def create_wallet(self, user_id: str) -> dict:
         """Create a new wallet for user"""
         wallet_data = {
@@ -3034,114 +3044,85 @@ class Database:
                 job_filter["$or"] = category_regex_patterns
                 print(f"Skills filter applied: {tradesperson_categories}")
             
-            # 2. LOCATION AWARE, BUT NON-EXCLUSIVE: prioritize nearby, include unlocated
-            if (tradesperson.get("latitude") is not None and tradesperson.get("longitude") is not None):
+            # 2. LOCATION FILTERING - Show jobs within tradesperson's travel distance
+            if (tradesperson.get("latitude") is not None and 
+                tradesperson.get("longitude") is not None):
+                
                 max_distance = tradesperson.get("travel_distance_km", 25)  # Default 25km
-                print(f"Location preference detected: prioritizing within {max_distance}km, including others if unlocated")
-
-                # Use blended nearby-with-skills which backfills unlocated jobs
-                blended = await self.get_jobs_near_location_with_skills(
+                print(f"Location filter applied: {max_distance}km radius")
+                
+                # Use location-based filtering with skills filtering
+                return await self.get_jobs_near_location_with_skills(
                     latitude=tradesperson["latitude"],
                     longitude=tradesperson["longitude"],
                     max_distance_km=max_distance,
                     skill_categories=tradesperson_categories,
                     skip=skip,
-                    limit=limit,
+                    limit=limit
                 )
-                return blended
-
-            # 3. No location data: skills-only filtering
-            print("Using skills-only filtering (no location data)")
-            cursor = (
-                self.database.jobs
-                .find(job_filter)
-                .sort("created_at", -1)
-                .skip(skip)
-                .limit(limit)
-            )
-            jobs = await cursor.to_list(length=None)
-
-            processed_jobs = []
-            for job in jobs:
-                processed_job = await self._process_job_data(job)
-                processed_jobs.append(processed_job)
-
-            return processed_jobs
+            else:
+                # No location data, use skills-only filtering
+                print("Using skills-only filtering (no location data)")
+                cursor = self.database.jobs.find(job_filter).sort("created_at", -1).skip(skip).limit(limit)
+                jobs = await cursor.to_list(length=None)
+                
+                # Process and enrich jobs data
+                processed_jobs = []
+                for job in jobs:
+                    processed_job = await self._process_job_data(job)
+                    processed_jobs.append(processed_job)
+                
+                return processed_jobs
                 
         except Exception as e:
             print(f"Error in get_jobs_for_tradesperson: {str(e)}")
             # Fallback to general available jobs
             return await self.get_available_jobs(skip=skip, limit=limit)
 
-    async def get_jobs_near_location_with_skills(self, latitude: float, longitude: float,
+    async def get_jobs_near_location_with_skills(self, latitude: float, longitude: float, 
                                                max_distance_km: float, skill_categories: List[str],
                                                skip: int = 0, limit: int = 50) -> List[dict]:
-        """Get jobs matching skills, prioritizing nearby ones but not excluding jobs without coordinates.
-
-        - Computes distance only for jobs that have `latitude` and `longitude`.
-        - Returns nearby jobs first (sorted by distance), then fills remaining slots with unlocated jobs.
-        - Always enforces `status: active`.
-        """
+        """Get jobs near location that match tradesperson's skills"""
         try:
-            # Build skills filter (case-insensitive exact match on category)
+            # Build skills filter
             skills_filter = {}
             if skill_categories:
                 category_regex_patterns = [{"category": {"$regex": f"^{category}$", "$options": "i"}} for category in skill_categories]
                 skills_filter["$or"] = category_regex_patterns
-
-            base_filter = {"status": "active"}
+            
+            # Base filter for active jobs with location data
+            base_filter = {
+                "status": "active",
+                "latitude": {"$exists": True, "$ne": None},
+                "longitude": {"$exists": True, "$ne": None}
+            }
+            
+            # Combine skills and base filters
             combined_filter = {"$and": [base_filter, skills_filter]} if skills_filter else base_filter
-
-            # Fetch more than needed to allow distance filtering and backfill
-            cursor = (
-                self.database.jobs
-                .find(combined_filter)
-                .sort("created_at", -1)
-                .skip(0)
-                .limit(max(limit * 3, limit))
-            )
+            
+            # Get jobs matching skills filter first
+            cursor = self.database.jobs.find(combined_filter).skip(skip).limit(limit * 2)  # Get extra to account for distance filtering
             jobs = await cursor.to_list(length=None)
-
-            nearby: list = []
-            unlocated: list = []
-
+            
+            # Calculate distances and filter by location
+            jobs_within_distance = []
             for job in jobs:
                 job_lat = job.get("latitude")
                 job_lng = job.get("longitude")
-
+                
                 if job_lat is not None and job_lng is not None:
-                    try:
-                        distance = self.calculate_distance(latitude, longitude, job_lat, job_lng)
-                    except Exception:
-                        # If distance calc fails, treat as unlocated
-                        unlocated.append(job)
-                        continue
-
-                    if distance <= float(max_distance_km):
-                        job["_id"] = str(job.get("_id")) if job.get("_id") else None
+                    distance = self.calculate_distance(latitude, longitude, job_lat, job_lng)
+                    if distance <= max_distance_km:
+                        job["_id"] = str(job["_id"])
                         job["distance_km"] = round(distance, 2)
-                        nearby.append(job)
-                else:
-                    # No coordinates — still include so tradespeople see available jobs
-                    unlocated.append(job)
-
-            # Sort nearby by distance asc; unlocated by recency (created_at desc from query)
-            nearby.sort(key=lambda x: x.get("distance_km", float("inf")))
-
-            # Merge: prioritize nearby, then backfill with unlocated
-            merged = nearby + unlocated
-
-            # Apply skip/limit to the merged list
-            sliced = merged[skip: skip + limit]
-
-            # Ensure all returned jobs are serializable and consistently processed
-            processed: List[dict] = []
-            for job in sliced:
-                processed_job = await self._process_job_data(job)
-                processed.append(processed_job)
-
-            return processed
-
+                        jobs_within_distance.append(job)
+            
+            # Sort by distance (closest first) and limit results
+            jobs_within_distance.sort(key=lambda x: x.get("distance_km", float('inf')))
+            limited_jobs = jobs_within_distance[:limit]
+            
+            return limited_jobs
+            
         except Exception as e:
             logger.error(f"Error in get_jobs_near_location_with_skills: {e}")
             return []
@@ -3418,7 +3399,7 @@ class Database:
         
         return True
 
-    async def submit_verification_documents(self, user_id: str, document_type: str, document_url: str, full_name: str, document_number: str = None) -> str:
+    async def submit_verification_documents(self, user_id: str, document_type: str, document_url: str, full_name: str, document_number: str = None, document_image_base64: str = None) -> str:
         """Submit verification documents"""
         if self.database is None:
             raise RuntimeError("Database unavailable: cannot submit verification documents")
@@ -3427,6 +3408,7 @@ class Database:
             "user_id": user_id,
             "document_type": document_type,
             "document_url": document_url,
+            "document_image_base64": document_image_base64,
             "full_name": full_name,
             "document_number": document_number,
             "status": "pending",
@@ -3443,6 +3425,13 @@ class Database:
         )
         
         return verification_data["id"]
+
+    async def get_verification_by_document_filename(self, filename: str) -> Optional[dict]:
+        """Find a verification record by its document file name"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot query verifications")
+        doc = await self.user_verifications_collection.find_one({"document_url": filename})
+        return doc
 
     async def verify_user_documents(self, verification_id: str, admin_id: str, approved: bool, admin_notes: str = "") -> bool:
         """Admin approves or rejects user verification"""
@@ -3671,51 +3660,21 @@ class Database:
         return record["id"]
 
     async def get_pending_tradespeople_verifications(self, skip: int = 0, limit: int = 20) -> List[dict]:
-        """Get pending tradespeople verifications for admin, one per user, newest first.
-        Backfill references from the user's latest submission that contains them
-        so admins can see the details the tradesperson filled.
-        """
-        # Fetch all pending verifications sorted by most recent submission
-        cursor = self.tradespeople_verifications_collection.find({"status": "pending"}).sort("submitted_at", -1)
+        """Get pending tradespeople references verifications for admin"""
+        cursor = self.tradespeople_verifications_collection.find({
+            "status": "pending"
+        }).sort("submitted_at", -1).skip(skip).limit(limit)
 
-        # Dedupe to newest pending per user
-        per_user: Dict[str, dict] = {}
+        items: List[dict] = []
         async for v in cursor:
-            user_id = v.get("user_id")
-            if not user_id or user_id in per_user:
-                continue
             v["_id"] = str(v.get("_id"))
-            user = await self.get_user_by_id(user_id)
+            user = await self.get_user_by_id(v.get("user_id"))
             if user:
                 v["user_name"] = user.get("name")
                 v["user_email"] = user.get("email")
                 v["user_phone"] = user.get("phone")
-            per_user[user_id] = v
-
-        # Backfill references if missing
-        merged: List[dict] = []
-        for user_id, v in per_user.items():
-            needs_work = not bool(v.get("work_referrer"))
-            needs_char = not bool(v.get("character_referrer"))
-            if needs_work or needs_char:
-                try:
-                    ref_docs = await self.tradespeople_verifications_collection.find({
-                        "user_id": user_id,
-                        "work_referrer": {"$exists": True},
-                        "character_referrer": {"$exists": True},
-                    }).sort("submitted_at", -1).limit(1).to_list(length=1)
-                    if ref_docs:
-                        refs_doc = ref_docs[0]
-                        if needs_work:
-                            v.setdefault("work_referrer", refs_doc.get("work_referrer"))
-                        if needs_char:
-                            v.setdefault("character_referrer", refs_doc.get("character_referrer"))
-                except Exception as e:
-                    logger.warning(f"Failed to backfill references for user {user_id}: {e}")
-            merged.append(v)
-
-        # Apply pagination on the merged list to keep API contract
-        return merged[skip: skip + limit]
+            items.append(v)
+        return items
 
     async def has_tradesperson_references(self, user_id: str) -> bool:
         if self.database is None:
@@ -3744,22 +3703,40 @@ class Database:
             "tin": payload.get("tin"),
             "designated_partners": payload.get("designated_partners"),
             "documents": payload.get("documents", {}),
+            "documents_base64": payload.get("documents_base64", []),
             "work_photos": payload.get("work_photos", []),
+            "work_photos_base64": payload.get("work_photos_base64", []),
             "partner_id_documents": payload.get("partner_id_documents", []),
+            "partner_id_documents_base64": payload.get("partner_id_documents_base64", []),
             "status": "pending",
             "submitted_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
         }
         await self.tradespeople_verifications_collection.insert_one(record)
-        # Supersede any older pending entries for the same user
-        await self.tradespeople_verifications_collection.update_many(
-            {"user_id": record.get("user_id"), "status": "pending", "id": {"$ne": record["id"]}},
-            {"$set": {"status": "superseded", "superseded_by": record["id"], "updated_at": datetime.utcnow()}}
-        )
         return record["id"]
 
+    async def get_tradespeople_file_base64(self, filename: str) -> Optional[dict]:
+        """Return stored base64 for a tradespeople verification file by filename.
+        Searches documents_base64, work_photos_base64, partner_id_documents_base64.
+        """
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot query tradespeople verifications")
+        cursor = self.tradespeople_verifications_collection.find({
+            "status": {"$in": ["pending", "verified"]}
+        }).sort("submitted_at", -1)
+        async for v in cursor:
+            for key in ("documents_base64", "work_photos_base64", "partner_id_documents_base64"):
+                items = v.get(key) or []
+                for item in items:
+                    try:
+                        if item and item.get("filename") == filename and item.get("base64"):
+                            return item
+                    except Exception:
+                        continue
+        return None
+
     async def approve_tradesperson_verification(self, verification_id: str, admin_id: str, admin_notes: str = "") -> bool:
-        """Approve tradesperson verification and mark user verified_tradesperson. Supersede other pending entries."""
+        """Approve tradesperson references and mark user verified_tradesperson"""
         v = await self.tradespeople_verifications_collection.find_one({"id": verification_id})
         if not v:
             return False
@@ -3780,15 +3757,10 @@ class Database:
             {"id": v.get("user_id")},
             {"$set": {"verified_tradesperson": True, "is_verified": True, "updated_at": datetime.utcnow()}}
         )
-        # Cascade: supersede any other pending verifications for the same user
-        await self.tradespeople_verifications_collection.update_many(
-            {"user_id": v.get("user_id"), "status": "pending", "id": {"$ne": verification_id}},
-            {"$set": {"status": "superseded", "superseded_by": verification_id, "updated_at": datetime.utcnow()}}
-        )
         return True
 
     async def reject_tradesperson_verification(self, verification_id: str, admin_id: str, admin_notes: str) -> bool:
-        """Reject tradesperson verification and supersede other pending entries for the same user."""
+        """Reject tradesperson references"""
         v = await self.tradespeople_verifications_collection.find_one({"id": verification_id})
         if not v:
             return False
@@ -3802,11 +3774,6 @@ class Database:
                 "updated_at": datetime.utcnow()
             }}
         )
-        if result.modified_count > 0:
-            await self.tradespeople_verifications_collection.update_many(
-                {"user_id": v.get("user_id"), "status": "pending", "id": {"$ne": verification_id}},
-                {"$set": {"status": "superseded", "superseded_by": verification_id, "updated_at": datetime.utcnow()}}
-            )
         return result.modified_count > 0
         
         # Check if total wallet balance >= 5 coins (lowered minimum for flexibility)

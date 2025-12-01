@@ -102,8 +102,6 @@ annotated-types==0.7.0
 anyio==4.10.0
 bcrypt==4.3.0
 black==25.1.0
-boto3==1.40.23
-botocore==1.40.23
 certifi==2025.8.3
 cffi==1.17.1
 charset-normalizer==3.4.3
@@ -156,7 +154,6 @@ requests==2.32.5
 requests-oauthlib==2.0.0
 rich==14.1.0
 rsa==4.9.1
-s3transfer==0.13.1
 s5cmd==0.2.0
 sendgrid==6.12.4
 shellingham==1.5.4

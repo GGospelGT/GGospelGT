@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { walletAPI } from '../../api/wallet';
 import { useToast } from '../../hooks/use-toast';
+import PaymentProofImage from '../common/PaymentProofImage';
 
 const WalletTransactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -156,11 +157,10 @@ const WalletTransactions = () => {
               {transaction.proof_image && (
                 <div className="mt-3 pt-3 border-t border-gray-100">
                   <p className="text-xs text-gray-500 mb-2">Payment Proof:</p>
-                  <img
-                    src={walletAPI.getPaymentProofUrl(transaction.proof_image)}
-                    alt="Payment proof"
+                  <PaymentProofImage
+                    filename={transaction.proof_image}
                     className="h-20 w-auto rounded border cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => window.open(walletAPI.getPaymentProofUrl(transaction.proof_image), '_blank')}
+                    alt="Payment proof"
                   />
                 </div>
               )}

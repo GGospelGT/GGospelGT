@@ -1609,17 +1609,10 @@ async def submit_tradesperson_verification(
     designated_partners: str = Form(None),
     current_user=Depends(get_current_tradesperson)
 ):
-    # Resolve a consistent uploads directory across environments
-    # Priority: explicit env var → project root uploads → CWD uploads
-    env_uploads = os.environ.get("UPLOADS_DIR")
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    project_uploads = os.path.join(project_root, "uploads")
-    cwd_uploads = os.path.join(os.getcwd(), "uploads")
-
-    base_dir = env_uploads or (project_uploads if os.path.isdir(project_uploads) else cwd_uploads)
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
     upload_dir = os.path.join(base_dir, "tradespeople_verifications")
     os.makedirs(upload_dir, exist_ok=True)
-    async def _save_file(f: UploadFile) -> Optional[str]:
+    async def _save_file(f: UploadFile):
         if not f:
             return None
         if not f.content_type:
@@ -1629,40 +1622,96 @@ async def submit_tradesperson_verification(
         data = await f.read()
         with open(fp, "wb") as out:
             out.write(data)
-        return fn
+        try:
+            import base64
+            b64 = base64.b64encode(data).decode("utf-8")
+        except Exception:
+            b64 = None
+        return {"filename": fn, "base64": b64, "content_type": f.content_type or "application/octet-stream"}
     docs: Dict[str, Any] = {}
+    documents_base64: List[Dict[str, Any]] = []
     if id_document:
-        docs["id_document"] = await _save_file(id_document)
+        saved = await _save_file(id_document)
+        if saved:
+            docs["id_document"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if id_selfie:
-        docs["id_selfie"] = await _save_file(id_selfie)
+        saved = await _save_file(id_selfie)
+        if saved:
+            docs["id_selfie"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if trade_certificate:
-        docs["trade_certificate"] = await _save_file(trade_certificate)
+        saved = await _save_file(trade_certificate)
+        if saved:
+            docs["trade_certificate"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if cac_certificate:
-        docs["cac_certificate"] = await _save_file(cac_certificate)
+        saved = await _save_file(cac_certificate)
+        if saved:
+            docs["cac_certificate"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if cac_status_report:
-        docs["cac_status_report"] = await _save_file(cac_status_report)
+        saved = await _save_file(cac_status_report)
+        if saved:
+            docs["cac_status_report"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if director_id_document:
-        docs["director_id_document"] = await _save_file(director_id_document)
+        saved = await _save_file(director_id_document)
+        if saved:
+            docs["director_id_document"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if business_logo:
-        docs["business_logo"] = await _save_file(business_logo)
+        saved = await _save_file(business_logo)
+        if saved:
+            docs["business_logo"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if bn_certificate:
-        docs["bn_certificate"] = await _save_file(bn_certificate)
+        saved = await _save_file(bn_certificate)
+        if saved:
+            docs["bn_certificate"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if partnership_agreement:
-        docs["partnership_agreement"] = await _save_file(partnership_agreement)
+        saved = await _save_file(partnership_agreement)
+        if saved:
+            docs["partnership_agreement"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if llp_certificate:
-        docs["llp_certificate"] = await _save_file(llp_certificate)
+        saved = await _save_file(llp_certificate)
+        if saved:
+            docs["llp_certificate"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     if llp_agreement:
-        docs["llp_agreement"] = await _save_file(llp_agreement)
+        saved = await _save_file(llp_agreement)
+        if saved:
+            docs["llp_agreement"] = saved["filename"]
+            if saved.get("base64"):
+                documents_base64.append(saved)
     work_files: List[str] = []
+    work_photos_base64: List[Dict[str, Any]] = []
     for wf in work_photos or []:
-        fn = await _save_file(wf)
-        if fn:
-            work_files.append(fn)
+        saved = await _save_file(wf)
+        if saved:
+            work_files.append(saved["filename"])
+            if saved.get("base64"):
+                work_photos_base64.append(saved)
     partner_files: List[str] = []
+    partner_id_documents_base64: List[Dict[str, Any]] = []
     for pf in partner_id_documents or []:
-        fn = await _save_file(pf)
-        if fn:
-            partner_files.append(fn)
+        saved = await _save_file(pf)
+        if saved:
+            partner_files.append(saved["filename"])
+            if saved.get("base64"):
+                partner_id_documents_base64.append(saved)
     payload = {
         "user_id": current_user.id,
         "business_type": (business_type or "").strip(),
@@ -1675,8 +1724,11 @@ async def submit_tradesperson_verification(
         "tin": tin,
         "designated_partners": designated_partners,
         "documents": docs,
+        "documents_base64": documents_base64,
         "work_photos": work_files,
+        "work_photos_base64": work_photos_base64,
         "partner_id_documents": partner_files,
+        "partner_id_documents_base64": partner_id_documents_base64,
     }
     bt = payload["business_type"].lower()
     if bt.startswith("self") or bt.startswith("sole"):

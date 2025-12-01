@@ -69,6 +69,7 @@ async def fund_wallet(
     
     # Save and optimize image
     try:
+        optimized_bytes = None
         if proof_image_base64:
             b64 = proof_image_base64.split(",")[-1]
             raw = base64.b64decode(b64)
@@ -87,6 +88,13 @@ async def fund_wallet(
         
         # Save optimized image
         image.save(file_path, "JPEG", quality=85, optimize=True)
+
+        # Read optimized bytes for DB storage as base64
+        try:
+            with open(file_path, "rb") as f:
+                optimized_bytes = f.read()
+        except Exception:
+            optimized_bytes = None
         
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid image file")
@@ -108,6 +116,17 @@ async def fund_wallet(
         "description": f"Wallet funding request - ₦{amount_naira:,} ({amount_coins} coins)",
         "proof_image": filename
     }
+
+    # Store base64 alongside transaction to avoid disk dependency
+    try:
+        if optimized_bytes is not None:
+            transaction_data["proof_image_base64"] = base64.b64encode(optimized_bytes).decode("utf-8")
+        elif proof_image_base64:
+            # Fallback to original provided base64 if optimized bytes couldn't be read
+            transaction_data["proof_image_base64"] = proof_image_base64.split(",")[-1]
+    except Exception:
+        # Silently ignore base64 storage failures; file path remains available
+        pass
     
     transaction = await database.create_wallet_transaction(transaction_data)
     
@@ -180,6 +199,14 @@ async def serve_payment_proof(filename: str):
 
 @router.get("/payment-proof-base64/{filename}")
 async def serve_payment_proof_base64(filename: str):
+    # Prefer DB-stored base64 if available
+    try:
+        txn = await database.get_wallet_transaction_by_proof_image(filename)
+        if txn and txn.get("proof_image_base64"):
+            return {"image_base64": txn["proof_image_base64"]}
+    except Exception:
+        pass
+
     project_root_uploads = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
     base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
     candidates = [

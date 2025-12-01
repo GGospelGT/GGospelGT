@@ -405,6 +405,7 @@ class WalletTransaction(BaseModel):
     description: str
     reference: Optional[str] = None  # Payment reference/proof
     proof_image: Optional[str] = None  # Payment proof screenshot
+    proof_image_base64: Optional[str] = None  # Stored base64-encoded proof image
     admin_notes: Optional[str] = None
     processed_by: Optional[str] = None  # Admin who processed
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -468,6 +469,7 @@ class UserVerification(BaseModel):
     user_id: str
     document_type: DocumentType
     document_url: str             # Path to uploaded document image
+    document_image_base64: Optional[str] = None  # Base64 of uploaded document image
     full_name: str                # Full name as shown on document
     document_number: Optional[str] = None  # ID number, license number, etc.
     status: VerificationStatus = VerificationStatus.PENDING

@@ -716,6 +716,13 @@ async def view_payment_proof(filename: str, admin: dict = Depends(require_permis
 @router.get("/wallet/payment-proof-base64/{filename}")
 async def view_payment_proof_base64(filename: str, admin: dict = Depends(require_permission(AdminPermission.VIEW_PAYMENT_PROOFS))):
     import os, base64
+    # Prefer DB-stored base64 if available
+    try:
+        txn = await database.get_wallet_transaction_by_proof_image(filename)
+        if txn and txn.get("proof_image_base64"):
+            return {"image_base64": txn["proof_image_base64"]}
+    except Exception:
+        pass
     base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
     project_root_uploads = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
     candidates = [
@@ -2079,6 +2086,32 @@ async def view_verification_document(filename: str, admin: dict = Depends(requir
     
     return FileResponse(file_path, media_type="image/jpeg")
 
+@router.get("/verifications/document-base64/{filename}")
+async def view_verification_document_base64(filename: str, admin: dict = Depends(require_permission(AdminPermission.VERIFY_USERS))):
+    """Return base64 for verification document, preferring DB-stored base64"""
+    import os, base64
+    # Prefer DB base64
+    try:
+        doc = await database.get_verification_by_document_filename(filename)
+        if doc and doc.get("document_image_base64"):
+            return {"image_base64": doc["document_image_base64"]}
+    except Exception:
+        pass
+    # Fallback to disk
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    candidates = [
+        os.path.join(base_dir, "verification_documents", filename),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "verification_documents", filename),
+        os.path.join(os.getcwd(), "uploads", "verification_documents", filename),
+        os.path.join("/app", "uploads", "verification_documents", filename),
+    ]
+    for fp in candidates:
+        if os.path.exists(fp):
+            with open(fp, "rb") as f:
+                data = f.read()
+            return {"image_base64": base64.b64encode(data).decode("utf-8")}
+    raise HTTPException(status_code=404, detail="Verification document not found")
+
 @router.get("/tradespeople-verifications/document/{filename}")
 async def view_tradespeople_verification_file(filename: str, admin: dict = Depends(require_permission(AdminPermission.VERIFY_USERS))):
     """Serve tradespeople verification files (images or PDFs) for admin review"""
@@ -2114,6 +2147,49 @@ async def view_tradespeople_verification_file(filename: str, admin: dict = Depen
                 media_type = "application/pdf"
             return FileResponse(fp, media_type=media_type)
 
+    raise HTTPException(status_code=404, detail="Tradespeople verification file not found")
+
+@router.get("/tradespeople-verifications/document-base64/{filename}")
+async def view_tradespeople_verification_file_base64(filename: str, admin: dict = Depends(require_permission(AdminPermission.VERIFY_USERS))):
+    """Return base64 for tradespeople verification file, preferring DB-stored base64.
+    Falls back to reading the file from disk if not stored in DB.
+    """
+    import os, base64
+    # Prefer DB base64
+    try:
+        item = await database.get_tradespeople_file_base64(filename)
+        if item and item.get("base64"):
+            ct = item.get("content_type") or "application/octet-stream"
+            data_url = f"data:{ct};base64,{item['base64']}"
+            return {"filename": filename, "content_type": ct, "image_base64": item["base64"], "data_url": data_url}
+    except Exception:
+        pass
+    # Fallback to disk
+    base_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.getcwd(), "uploads"))
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    project_uploads = os.path.join(project_root, "uploads")
+    backend_uploads = os.path.join(project_root, "backend", "uploads")
+    candidates = [
+        os.path.join(base_dir, "tradespeople_verifications", filename),
+        os.path.join(project_uploads, "tradespeople_verifications", filename),
+        os.path.join(backend_uploads, "tradespeople_verifications", filename),
+        os.path.join(os.getcwd(), "uploads", "tradespeople_verifications", filename),
+        os.path.join("/app", "uploads", "tradespeople_verifications", filename),
+    ]
+    for fp in candidates:
+        if os.path.exists(fp):
+            ext = os.path.splitext(fp)[1].lower()
+            media_type = "application/octet-stream"
+            if ext in (".jpg", ".jpeg"):
+                media_type = "image/jpeg"
+            elif ext == ".png":
+                media_type = "image/png"
+            elif ext == ".pdf":
+                media_type = "application/pdf"
+            with open(fp, "rb") as f:
+                data = f.read()
+            b64 = base64.b64encode(data).decode("utf-8")
+            return {"filename": filename, "content_type": media_type, "image_base64": b64, "data_url": f"data:{media_type};base64,{b64}"}
     raise HTTPException(status_code=404, detail="Tradespeople verification file not found")
 
 # ==========================================
