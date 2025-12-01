@@ -127,7 +127,7 @@ const WalletPage = () => {
                   Having trouble with wallet funding or transactions?
                 </p>
                 <button
-                  onClick={() => navigate('/contact')}
+                  onClick={() => navigate('/help')}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
                   aria-label="Contact Support"
                 >
