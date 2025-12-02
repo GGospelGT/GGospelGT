@@ -3082,47 +3082,65 @@ class Database:
     async def get_jobs_near_location_with_skills(self, latitude: float, longitude: float, 
                                                max_distance_km: float, skill_categories: List[str],
                                                skip: int = 0, limit: int = 50) -> List[dict]:
-        """Get jobs near location that match tradesperson's skills"""
+        """Get jobs near location matching skills, including jobs without coordinates.
+
+        - Prioritize jobs within `max_distance_km` when coordinates exist.
+        - Include active, skill-matching jobs without coordinates as fallback.
+        - Sort by distance first, then by recency for no-coordinate jobs.
+        - Apply pagination on the combined list using `skip` and `limit`.
+        """
         try:
-            # Build skills filter
+            # Build skills filter (case-insensitive exact match)
             skills_filter = {}
             if skill_categories:
                 category_regex_patterns = [{"category": {"$regex": f"^{category}$", "$options": "i"}} for category in skill_categories]
                 skills_filter["$or"] = category_regex_patterns
-            
-            # Base filter for active jobs with location data
-            base_filter = {
-                "status": "active",
-                "latitude": {"$exists": True, "$ne": None},
-                "longitude": {"$exists": True, "$ne": None}
-            }
-            
-            # Combine skills and base filters
+
+            # Base filter: active jobs only (do NOT require coordinates)
+            base_filter = {"status": "active"}
+
+            # Combine filters
             combined_filter = {"$and": [base_filter, skills_filter]} if skills_filter else base_filter
-            
-            # Get jobs matching skills filter first
-            cursor = self.database.jobs.find(combined_filter).skip(skip).limit(limit * 2)  # Get extra to account for distance filtering
-            jobs = await cursor.to_list(length=None)
-            
-            # Calculate distances and filter by location
-            jobs_within_distance = []
-            for job in jobs:
-                job_lat = job.get("latitude")
-                job_lng = job.get("longitude")
-                
-                if job_lat is not None and job_lng is not None:
-                    distance = self.calculate_distance(latitude, longitude, job_lat, job_lng)
-                    if distance <= max_distance_km:
-                        job["_id"] = str(job["_id"])
-                        job["distance_km"] = round(distance, 2)
+
+            # Fetch extra to allow distance filtering and fallback composition
+            fetch_limit = max(limit * 3 + skip, limit)
+            cursor = (
+                self.database.jobs
+                .find(combined_filter)
+                .sort("created_at", -1)
+                .skip(0)
+                .limit(fetch_limit)
+            )
+            raw_jobs = await cursor.to_list(length=None)
+
+            jobs_within_distance: List[Dict[str, Any]] = []
+            jobs_without_coords: List[Dict[str, Any]] = []
+
+            for job in raw_jobs:
+                jlat = job.get("latitude")
+                jlng = job.get("longitude")
+                if jlat is not None and jlng is not None:
+                    try:
+                        dist = self.calculate_distance(latitude, longitude, jlat, jlng)
+                    except Exception:
+                        dist = None
+                    if dist is not None and dist <= float(max_distance_km):
+                        job["_id"] = str(job.get("_id")) if job.get("_id") else None
+                        job["distance_km"] = round(dist, 2)
                         jobs_within_distance.append(job)
-            
-            # Sort by distance (closest first) and limit results
-            jobs_within_distance.sort(key=lambda x: x.get("distance_km", float('inf')))
-            limited_jobs = jobs_within_distance[:limit]
-            
-            return limited_jobs
-            
+                else:
+                    job["_id"] = str(job.get("_id")) if job.get("_id") else None
+                    job["distance_km"] = None
+                    jobs_without_coords.append(job)
+
+            # Sort: closest first, then most recent for no-coordinate jobs
+            jobs_within_distance.sort(key=lambda x: x.get("distance_km", float("inf")))
+            jobs_without_coords.sort(key=lambda x: x.get("created_at", datetime.min), reverse=True)
+
+            combined = jobs_within_distance + jobs_without_coords
+            sliced = combined[skip: skip + limit]
+            return sliced
+
         except Exception as e:
             logger.error(f"Error in get_jobs_near_location_with_skills: {e}")
             return []
@@ -3139,9 +3157,9 @@ class Database:
     ) -> List[dict]:
         """Search active, non-expired jobs with optional text/category filters and optional location radius.
 
-        - When latitude/longitude are provided, filter by distance (default 25km if not provided).
-        - Adds a "distance_km" field when location filtering is applied and sorts by closest first.
-        - Otherwise sorts by most recent (created_at desc).
+        - With location provided: prioritize jobs within radius when coordinates exist,
+          then include matching jobs without coordinates; paginate the combined list.
+        - Without location: sort by most recent (created_at desc).
         """
         try:
             # Base filter: public active jobs that haven't expired
@@ -3165,45 +3183,41 @@ class Database:
             if category:
                 category_filter = {"category": {"$regex": f"^{category}$", "$options": "i"}}
 
-            # Location fields presence when doing distance filtering
-            location_presence_filter: Dict[str, Any] = {}
-            use_location = (
-                user_latitude is not None and user_longitude is not None
-            )
-            if use_location:
-                location_presence_filter = {
-                    "latitude": {"$exists": True, "$ne": None},
-                    "longitude": {"$exists": True, "$ne": None},
-                }
+            use_location = (user_latitude is not None and user_longitude is not None)
 
-            # Combine filters
-            filters: Dict[str, Any]
+            # Combine filters (do NOT require coordinate presence)
             combined_filters: List[Dict[str, Any]] = [base_filter]
             if text_filter:
                 combined_filters.append(text_filter)
             if category_filter:
                 combined_filters.append(category_filter)
-            if location_presence_filter:
-                combined_filters.append(location_presence_filter)
 
-            if len(combined_filters) > 1:
-                filters = {"$and": combined_filters}
-            else:
-                filters = base_filter
+            filters: Dict[str, Any] = {"$and": combined_filters} if len(combined_filters) > 1 else base_filter
 
-            # When using distance filtering, fetch more records first, then compute distance
+            # Location-aware search
             if use_location:
                 radius_km = max_distance_km if (isinstance(max_distance_km, (int, float)) and max_distance_km is not None) else 25
-                # Fetch extra to allow distance filtering and pagination
+                # Fetch extra to allow distance filtering and composition
                 fetch_limit = max(limit * 3 + skip, limit)
-                cursor = self.database.jobs.find(filters).skip(0).limit(fetch_limit)
+                cursor = (
+                    self.database.jobs
+                    .find(filters)
+                    .sort("created_at", -1)
+                    .skip(0)
+                    .limit(fetch_limit)
+                )
                 raw_jobs = await cursor.to_list(length=None)
 
                 jobs_within_distance: List[Dict[str, Any]] = []
+                jobs_without_coords: List[Dict[str, Any]] = []
+
                 for job in raw_jobs:
                     jlat = job.get("latitude")
                     jlng = job.get("longitude")
                     if jlat is None or jlng is None:
+                        job["_id"] = str(job.get("_id")) if job.get("_id") else None
+                        job["distance_km"] = None
+                        jobs_without_coords.append(job)
                         continue
                     try:
                         dist = self.calculate_distance(user_latitude, user_longitude, jlat, jlng)
@@ -3215,9 +3229,12 @@ class Database:
                         job["distance_km"] = round(dist, 2)
                         jobs_within_distance.append(job)
 
-                # Sort by closest first and apply skip/limit
+                # Sort and paginate combined results
                 jobs_within_distance.sort(key=lambda x: x.get("distance_km", float("inf")))
-                sliced = jobs_within_distance[skip: skip + limit]
+                jobs_without_coords.sort(key=lambda x: x.get("created_at", datetime.min), reverse=True)
+
+                combined = jobs_within_distance + jobs_without_coords
+                sliced = combined[skip: skip + limit]
                 return sliced
 
             # No location filtering: regular query sorted by recency
