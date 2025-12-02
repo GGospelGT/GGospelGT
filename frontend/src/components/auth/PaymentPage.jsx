@@ -143,6 +143,16 @@ const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
 
   // Handle registration completion with wallet funding
   const handleCompleteRegistration = async () => {
+    // Hybrid gating: if contact details not verified, re-open modal and stop
+    if (!emailVerified || !phoneVerified) {
+      setShowVerificationModal(true);
+      toast({
+        title: 'Verify your contact details',
+        description: 'Please verify both email and phone to continue.',
+      });
+      return;
+    }
+
     if (!proofFile) {
       toast({
         title: "Payment Proof Required",
@@ -315,13 +325,7 @@ const PaymentPage = ({ formData, onBack, onRegistrationComplete }) => {
       {/* Post-registration verification modal */}
       <Dialog
         open={showVerificationModal}
-        onOpenChange={(open) => {
-          if (open) {
-            setShowVerificationModal(true);
-          } else if (emailVerified && phoneVerified) {
-            setShowVerificationModal(false);
-          }
-        }}
+        onOpenChange={(open) => setShowVerificationModal(open)}
       >
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>

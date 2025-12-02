@@ -1303,13 +1303,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
       {/* Post-registration verification modal */}
       <Dialog
         open={showVerificationModal}
-        onOpenChange={(open) => {
-          if (open) {
-            setShowVerificationModal(true);
-          } else if (emailVerified && phoneVerified) {
-            setShowVerificationModal(false);
-          }
-        }}
+        onOpenChange={(open) => setShowVerificationModal(open)}
       >
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
@@ -1543,6 +1537,15 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
                 <button
                   onClick={() => {
                     console.log('🔵 FUND NOW BUTTON CLICKED (DIRECT)');
+                    // Hybrid gating: reopen verification modal if not verified
+                    if (!emailVerified || !phoneVerified) {
+                      setShowVerificationModal(true);
+                      toast({
+                        title: 'Verify your contact details',
+                        description: 'Please verify both email and phone to continue.',
+                      });
+                      return;
+                    }
                     updateFormData('walletSetup', 'fund_now');
                     setShowPaymentPage(true);
                   }}
@@ -1556,6 +1559,15 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
                 <button
                   onClick={() => {
                     console.log('🔘 SET UP WALLET LATER BUTTON CLICKED (DIRECT)');
+                    // Hybrid gating: reopen verification modal if not verified
+                    if (!emailVerified || !phoneVerified) {
+                      setShowVerificationModal(true);
+                      toast({
+                        title: 'Verify your contact details',
+                        description: 'Please verify both email and phone to continue.',
+                      });
+                      return;
+                    }
                     updateFormData('walletSetup', 'later');
                     // Pass explicit override to avoid async state race
                     handleFinalSubmit('later');
