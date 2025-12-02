@@ -29,6 +29,9 @@ const TradeCategoryQuestionsManager = () => {
   const [loading, setLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null);
+  // Client-side pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
   const [formData, setFormData] = useState({
     trade_category: '',
     question_text: '',
@@ -71,13 +74,11 @@ const TradeCategoryQuestionsManager = () => {
       const response = await adminAPI.getAllTrades();
       
       if (response && response.trades && Array.isArray(response.trades)) {
-        // Extract just the names from the trade objects
         const categoryNames = response.trades.map(trade => trade.name || trade);
         setTradeCategories(categoryNames);
         console.log('✅ Trade Questions Manager: Loaded trade categories:', categoryNames.length, 'categories');
       } else {
         console.log('⚠️ Trade Questions Manager: Invalid API response, using real categories from your system');
-        // Canonical fallback categories (28 approved trades)
         setTradeCategories([
           'Building',
           'Concrete Works',
@@ -111,7 +112,6 @@ const TradeCategoryQuestionsManager = () => {
       }
     } catch (error) {
       console.error('❌ Trade Questions Manager: Error fetching trade categories:', error);
-      // Canonical fallback categories (28 approved trades)
       setTradeCategories([
         'Building',
         'Concrete Works',
@@ -152,6 +152,7 @@ const TradeCategoryQuestionsManager = () => {
       setLoading(true);
       const response = await tradeCategoryQuestionsAPI.getAllTradeQuestions(selectedCategory);
       setQuestions(response.questions || []);
+      setCurrentPage(1);
     } catch (error) {
       console.error('Failed to load questions:', error);
       toast({
@@ -184,7 +185,6 @@ const TradeCategoryQuestionsManager = () => {
         return;
       }
 
-      // Prepare options for multiple choice questions
       let options = [];
       if (formData.question_type.includes('multiple_choice')) {
         options = formData.options
@@ -314,7 +314,6 @@ const TradeCategoryQuestionsManager = () => {
       min_value: question.min_value,
       max_value: question.max_value,
       is_active: question.is_active,
-      // Populate conditional logic data
       conditional_logic: {
         enabled: question.conditional_logic?.enabled || false,
         logic_operator: question.conditional_logic?.logic_operator || 'AND',
@@ -336,7 +335,6 @@ const TradeCategoryQuestionsManager = () => {
       min_value: null,
       max_value: null,
       is_active: true,
-      // Reset conditional logic
       conditional_logic: {
         enabled: false,
         logic_operator: 'AND',
@@ -347,10 +345,9 @@ const TradeCategoryQuestionsManager = () => {
     setEditingQuestion(null);
   };
 
-  // Helper functions for managing multiple conditional logic rules
   const addConditionalLogicRule = () => {
     const newRule = {
-      id: Date.now().toString(), // Simple ID generation
+      id: Date.now().toString(),
       parent_question_id: '',
       trigger_condition: 'equals',
       trigger_value: '',
@@ -422,6 +419,18 @@ const TradeCategoryQuestionsManager = () => {
     }
   };
 
+  // Reset page when filters or page size change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, pageSize]);
+
+  // Derived pagination values
+  const totalQuestions = questions.length;
+  const totalPages = Math.max(1, Math.ceil(totalQuestions / pageSize));
+  const startIdx = (currentPage - 1) * pageSize;
+  const endIdx = Math.min(startIdx + pageSize, totalQuestions);
+  const paginatedQuestions = questions.slice(startIdx, endIdx);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -481,7 +490,7 @@ const TradeCategoryQuestionsManager = () => {
                   value={formData.trade_category}
                   onChange={(e) => setFormData(prev => ({ ...prev, trade_category: e.target.value }))}
                   className="w-full px-3 py-2 border rounded-md"
-                  disabled={editingQuestion || loadingCategories} // Can't change category when editing
+                  disabled={editingQuestion || loadingCategories}
                 >
                   <option value="">
                     {loadingCategories ? 'Loading categories...' : 'Select Category'}
@@ -515,7 +524,6 @@ const TradeCategoryQuestionsManager = () => {
               />
             </div>
 
-            {/* Options for multiple choice questions */}
             {formData.question_type.includes('multiple_choice') && (
               <div>
                 <label className="block text-sm font-medium mb-2">Answer Options</label>
@@ -550,7 +558,6 @@ const TradeCategoryQuestionsManager = () => {
               </div>
             )}
 
-            {/* Number input constraints */}
             {formData.question_type === 'number_input' && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -610,7 +617,7 @@ const TradeCategoryQuestionsManager = () => {
               </label>
             </div>
 
-            {/* Enhanced Conditional Logic Section */}
+            {/* Conditional Logic */}
             <div className="border rounded-lg p-4 bg-gray-50">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-lg font-medium text-gray-900">Conditional Logic</h4>
@@ -629,7 +636,6 @@ const TradeCategoryQuestionsManager = () => {
 
               {formData.conditional_logic.enabled && (
                 <div className="space-y-6">
-                  {/* Logic Operator Selection */}
                   {formData.conditional_logic.rules && formData.conditional_logic.rules.length > 1 && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                       <label className="block text-sm font-medium text-blue-800 mb-2">
@@ -672,7 +678,6 @@ const TradeCategoryQuestionsManager = () => {
                     </div>
                   )}
 
-                  {/* Conditional Logic Rules */}
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h5 className="text-md font-medium text-gray-800">Conditional Rules</h5>
@@ -712,7 +717,6 @@ const TradeCategoryQuestionsManager = () => {
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            {/* Parent Question Selection */}
                             <div>
                               <label className="block text-sm font-medium mb-2">Parent Question</label>
                               <select
@@ -731,7 +735,6 @@ const TradeCategoryQuestionsManager = () => {
                               </select>
                             </div>
 
-                            {/* Trigger Condition */}
                             <div>
                               <label className="block text-sm font-medium mb-2">Condition</label>
                               <select
@@ -751,7 +754,6 @@ const TradeCategoryQuestionsManager = () => {
                             </div>
                           </div>
 
-                          {/* Dynamic Trigger Value Input */}
                           {(() => {
                             const parentQuestion = questions.find(q => q.id === rule.parent_question_id);
                             
@@ -765,7 +767,6 @@ const TradeCategoryQuestionsManager = () => {
                               );
                             }
 
-                            // For multiple choice questions
                             if (parentQuestion.question_type.includes('multiple_choice')) {
                               return (
                                 <div className="mb-4">
@@ -793,7 +794,6 @@ const TradeCategoryQuestionsManager = () => {
                               );
                             }
 
-                            // For Yes/No questions
                             if (parentQuestion.question_type === 'yes_no') {
                               return (
                                 <div className="mb-4">
@@ -811,7 +811,6 @@ const TradeCategoryQuestionsManager = () => {
                               );
                             }
 
-                            // For text input, number input, and text area
                             return (
                               <div className="mb-4">
                                 <label className="block text-sm font-medium mb-2">
@@ -833,7 +832,6 @@ const TradeCategoryQuestionsManager = () => {
                             );
                           })()}
 
-                          {/* Follow-up Questions */}
                           <div>
                             <label className="block text-sm font-medium mb-2">
                               Questions to show when this rule matches
@@ -865,7 +863,6 @@ const TradeCategoryQuestionsManager = () => {
                     )}
                   </div>
 
-                  {/* Help Section */}
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                     <h6 className="text-sm font-medium text-green-800 mb-2">💡 Multiple Conditional Logic Tips:</h6>
                     <ul className="text-sm text-green-700 space-y-1">
@@ -917,7 +914,27 @@ const TradeCategoryQuestionsManager = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {questions.map((question, index) => (
+              {/* Top pagination controls */}
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Showing <span className="font-medium">{totalQuestions === 0 ? 0 : startIdx + 1}</span>
+                  –<span className="font-medium">{endIdx}</span> of <span className="font-medium">{totalQuestions}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600">Page size</label>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => setPageSize(Number(e.target.value))}
+                    className="px-2 py-1 border rounded-md text-sm"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={15}>15</option>
+                  </select>
+                </div>
+              </div>
+
+              {paginatedQuestions.map((question) => (
                 <div key={question.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -1008,6 +1025,27 @@ const TradeCategoryQuestionsManager = () => {
                   </div>
                 </div>
               ))}
+
+              {/* Bottom pagination controls */}
+              <div className="flex items-center justify-between pt-2">
+                <div className="text-sm text-gray-600">Page {currentPage} of {totalPages}</div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                  >
+                    Prev
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
