@@ -134,8 +134,15 @@ async def submit_tradesperson_references(
     current_user = Depends(get_current_tradesperson)
 ):
     """Submit work and character referrers for tradesperson verification"""
-
     # Basic validations
+    import re
+    def is_valid_phone(phone: str) -> bool:
+        try:
+            p = (phone or "").strip()
+            # Accept E.164 for Nigeria (+234XXXXXXXXXX) or local 11-digit (0XXXXXXXXXX)
+            return bool(re.fullmatch(r"\+234\d{10}", p) or re.fullmatch(r"0\d{10}", p))
+        except Exception:
+            return False
     generic_domains = {"gmail.com","yahoo.com","outlook.com","hotmail.com","icloud.com","aol.com","yandex.com","protonmail.com","zoho.com","gmx.com","mail.com"}
     try:
         domain = work_referrer_company_email.strip().lower().split("@")[-1]
@@ -143,6 +150,12 @@ async def submit_tradesperson_references(
         raise HTTPException(status_code=400, detail="Invalid company email format")
     if domain in generic_domains:
         raise HTTPException(status_code=400, detail="Company email must be a work domain, not a generic provider")
+
+    # Validate phone numbers
+    if not is_valid_phone(work_referrer_phone.strip()):
+        raise HTTPException(status_code=400, detail="Invalid work referee phone. Use +234XXXXXXXXXX or 0XXXXXXXXXX")
+    if not is_valid_phone(character_referrer_phone.strip()):
+        raise HTTPException(status_code=400, detail="Invalid character referee phone. Use +234XXXXXXXXXX or 0XXXXXXXXXX")
 
     work_referrer = {
         "name": work_referrer_name.strip(),

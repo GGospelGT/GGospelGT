@@ -213,12 +213,27 @@ const VerifyAccountPage = () => {
   const validateReferences = () => {
     const errs = {};
     if (!workRef.name?.trim()) errs.work_referrer_name = 'Work referee name is required';
-    if (!workRef.phone?.trim()) errs.work_referrer_phone = 'Work referee phone is required';
+    const isValidPhone = (p) => {
+      try {
+        const phone = (p || '').trim();
+        // Accept Nigerian formats: +234XXXXXXXXXX or 0XXXXXXXXXX
+        return (/^\+234\d{10}$/.test(phone) || /^0\d{10}$/.test(phone));
+      } catch { return false; }
+    };
+    if (!workRef.phone?.trim()) {
+      errs.work_referrer_phone = 'Work referee phone is required';
+    } else if (!isValidPhone(workRef.phone)) {
+      errs.work_referrer_phone = 'Enter a valid phone (+234XXXXXXXXXX or 0XXXXXXXXXX)';
+    }
     if (!workRef.company_email?.trim()) errs.work_referrer_company_email = 'Company email is required';
     if (!workRef.company_name?.trim()) errs.work_referrer_company_name = 'Company name is required';
     if (!workRef.relationship?.trim()) errs.work_referrer_relationship = 'Relationship is required';
     if (!charRef.name?.trim()) errs.character_referrer_name = 'Character referee name is required';
-    if (!charRef.phone?.trim()) errs.character_referrer_phone = 'Character referee phone is required';
+    if (!charRef.phone?.trim()) {
+      errs.character_referrer_phone = 'Character referee phone is required';
+    } else if (!isValidPhone(charRef.phone)) {
+      errs.character_referrer_phone = 'Enter a valid phone (+234XXXXXXXXXX or 0XXXXXXXXXX)';
+    }
     if (!charRef.email?.trim()) errs.character_referrer_email = 'Character referee email is required';
     if (!charRef.relationship?.trim()) errs.character_referrer_relationship = 'Relationship is required';
     return errs;

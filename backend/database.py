@@ -3665,10 +3665,34 @@ class Database:
     # TRADESPEOPLE REFERENCES VERIFICATION METHODS
     # ==========================================
     async def submit_tradesperson_references(self, user_id: str, work_referrer: Dict[str, Any], character_referrer: Dict[str, Any]) -> str:
-        """Submit tradesperson references for verification"""
+        """Submit tradesperson references for verification.
+        Ensures there is only ONE pending verification record per user by upserting.
+        If a pending record already exists, merge the references into that record and
+        return its ID instead of creating a duplicate.
+        """
         if self.database is None:
             raise RuntimeError("Database unavailable: cannot submit tradesperson references")
 
+        # Try to find an existing pending verification for this user
+        existing = await self.tradespeople_verifications_collection.find_one({
+            "user_id": user_id,
+            "status": "pending",
+        })
+
+        if existing:
+            # Merge references into the existing record
+            v_id = existing.get("id") or str(existing.get("_id"))
+            await self.tradespeople_verifications_collection.update_one(
+                {"id": v_id} if existing.get("id") else {"_id": existing.get("_id")},
+                {"$set": {
+                    "work_referrer": work_referrer,
+                    "character_referrer": character_referrer,
+                    "updated_at": datetime.utcnow(),
+                }}
+            )
+            return v_id
+
+        # Otherwise create a new pending record for this user
         record = {
             "id": str(uuid.uuid4()),
             "user_id": user_id,
@@ -3676,27 +3700,90 @@ class Database:
             "character_referrer": character_referrer,
             "status": "pending",
             "submitted_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "updated_at": datetime.utcnow(),
         }
-
         await self.tradespeople_verifications_collection.insert_one(record)
         return record["id"]
 
     async def get_pending_tradespeople_verifications(self, skip: int = 0, limit: int = 20) -> List[dict]:
-        """Get pending tradespeople references verifications for admin"""
+        """Get pending tradespeople references verifications for admin.
+        Returns a single merged record per user to avoid duplicate approve/reject entries.
+        """
         cursor = self.tradespeople_verifications_collection.find({
             "status": "pending"
-        }).sort("submitted_at", -1).skip(skip).limit(limit)
+        }).sort("submitted_at", -1)
 
-        items: List[dict] = []
+        grouped: Dict[str, dict] = {}
         async for v in cursor:
-            v["_id"] = str(v.get("_id"))
-            user = await self.get_user_by_id(v.get("user_id"))
+            uid = v.get("user_id")
+            if not uid:
+                continue
+            # Normalize _id to string for consistency
+            try:
+                v["_id"] = str(v.get("_id"))
+            except Exception:
+                pass
+
+            if uid not in grouped:
+                grouped[uid] = v.copy()
+            else:
+                # Merge fields from duplicate pending records
+                current = grouped[uid]
+                # Choose latest id by updated_at/submitted_at for the action target
+                def ts(doc):
+                    return doc.get("updated_at") or doc.get("submitted_at") or datetime.utcnow()
+                if ts(v) >= ts(current):
+                    current["id"] = v.get("id", current.get("id"))
+                # Merge simple fields if missing
+                for key in [
+                    "business_type","residential_address","company_address",
+                    "director_name","company_bank_name","company_account_number",
+                    "company_account_name","tin","designated_partners",
+                ]:
+                    if not current.get(key) and v.get(key):
+                        current[key] = v.get(key)
+                # Merge documents dict
+                docs_a = current.get("documents") or {}
+                docs_b = v.get("documents") or {}
+                current["documents"] = {**docs_a, **docs_b}
+                # Merge lists
+                def merge_list(a, b):
+                    a = a or []
+                    b = b or []
+                    seen = set()
+                    out = []
+                    for x in list(a) + list(b):
+                        if x is None:
+                            continue
+                        key = x if isinstance(x, str) else str(x)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        out.append(x)
+                    return out
+                current["work_photos"] = merge_list(current.get("work_photos"), v.get("work_photos"))
+                current["partner_id_documents"] = merge_list(current.get("partner_id_documents"), v.get("partner_id_documents"))
+                # References: prefer latest non-empty
+                if v.get("work_referrer"):
+                    current["work_referrer"] = v.get("work_referrer")
+                if v.get("character_referrer"):
+                    current["character_referrer"] = v.get("character_referrer")
+                # Update timestamps
+                current["updated_at"] = max(ts(current), ts(v))
+                grouped[uid] = current
+
+        # Attach user metadata
+        items: List[dict] = []
+        for uid, v in grouped.items():
+            user = await self.get_user_by_id(uid)
             if user:
                 v["user_name"] = user.get("name")
                 v["user_email"] = user.get("email")
                 v["user_phone"] = user.get("phone")
             items.append(v)
+
+        # Pagination slice
+        items = items[skip: skip + limit]
         return items
 
     async def has_tradesperson_references(self, user_id: str) -> bool:
@@ -3713,9 +3800,76 @@ class Database:
     async def submit_tradesperson_full_verification(self, payload: Dict[str, Any]) -> str:
         if self.database is None:
             raise RuntimeError("Database unavailable: cannot submit tradesperson verification")
+
+        user_id = payload.get("user_id")
+        # If a pending verification already exists for this user, merge into it to avoid duplicates
+        existing = await self.tradespeople_verifications_collection.find_one({
+            "user_id": user_id,
+            "status": "pending",
+        })
+
+        if existing:
+            v_id = existing.get("id") or str(existing.get("_id"))
+            # Merge documents dict
+            merged_docs = {
+                **(existing.get("documents") or {}),
+                **(payload.get("documents") or {}),
+            }
+            # Merge photo/document filename arrays with de-duplication
+            def merge_list(a, b):
+                a = a or []
+                b = b or []
+                seen = set()
+                out = []
+                for x in list(a) + list(b):
+                    if x is None:
+                        continue
+                    key = x if isinstance(x, str) else str(x)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    out.append(x)
+                return out
+
+            merged_work_photos = merge_list(existing.get("work_photos"), payload.get("work_photos"))
+            merged_partner_ids = merge_list(existing.get("partner_id_documents"), payload.get("partner_id_documents"))
+
+            update_fields = {
+                "business_type": payload.get("business_type") or existing.get("business_type"),
+                "residential_address": payload.get("residential_address") or existing.get("residential_address"),
+                "company_address": payload.get("company_address") or existing.get("company_address"),
+                "director_name": payload.get("director_name") or existing.get("director_name"),
+                "company_bank_name": payload.get("company_bank_name") or existing.get("company_bank_name"),
+                "company_account_number": payload.get("company_account_number") or existing.get("company_account_number"),
+                "company_account_name": payload.get("company_account_name") or existing.get("company_account_name"),
+                "tin": payload.get("tin") or existing.get("tin"),
+                "designated_partners": payload.get("designated_partners") or existing.get("designated_partners"),
+                "documents": merged_docs,
+                "documents_base64": payload.get("documents_base64") or existing.get("documents_base64") or [],
+                "work_photos": merged_work_photos,
+                "work_photos_base64": payload.get("work_photos_base64") or existing.get("work_photos_base64") or [],
+                "partner_id_documents": merged_partner_ids,
+                "partner_id_documents_base64": payload.get("partner_id_documents_base64") or existing.get("partner_id_documents_base64") or [],
+                "updated_at": datetime.utcnow(),
+            }
+            await self.tradespeople_verifications_collection.update_one(
+                {"id": v_id} if existing.get("id") else {"_id": existing.get("_id")},
+                {"$set": update_fields}
+            )
+            # Mark on user profile that verification documents were submitted
+            try:
+                await self.users_collection.update_one(
+                    {"id": user_id},
+                    {"$set": {"verification_submitted": True, "updated_at": datetime.utcnow()}}
+                )
+            except Exception:
+                pass
+            return v_id
+
+        # Create a new pending record if none exists
         record = {
             "id": str(uuid.uuid4()),
-            "user_id": payload.get("user_id"),
+            "user_id": user_id,
             "business_type": payload.get("business_type"),
             "residential_address": payload.get("residential_address"),
             "company_address": payload.get("company_address"),
@@ -3739,7 +3893,7 @@ class Database:
         # Mark on user profile that verification documents were submitted
         try:
             await self.users_collection.update_one(
-                {"id": payload.get("user_id")},
+                {"id": user_id},
                 {"$set": {"verification_submitted": True, "updated_at": datetime.utcnow()}}
             )
         except Exception:
@@ -3791,10 +3945,18 @@ class Database:
         }
 
     async def approve_tradesperson_verification(self, verification_id: str, admin_id: str, admin_notes: str = "") -> bool:
-        """Approve tradesperson references and mark user verified_tradesperson"""
+        """Approve tradesperson verification and mark the user verified.
+        Also ensures any other pending verification records for the same user
+        are updated to prevent contradictory states in the UI.
+        """
+        # Find the target verification
         v = await self.tradespeople_verifications_collection.find_one({"id": verification_id})
         if not v:
             return False
+
+        user_id = v.get("user_id")
+
+        # Update the chosen record
         result = await self.tradespeople_verifications_collection.update_one(
             {"id": verification_id},
             {"$set": {
@@ -3802,23 +3964,46 @@ class Database:
                 "admin_notes": admin_notes,
                 "verified_by": admin_id,
                 "verified_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
+                "updated_at": datetime.utcnow(),
             }}
         )
         if result.modified_count == 0:
             return False
+
+        # Mark any other pending records for this user as verified to avoid duplicates
+        try:
+            await self.tradespeople_verifications_collection.update_many(
+                {"user_id": user_id, "status": "pending", "id": {"$ne": verification_id}},
+                {"$set": {
+                    "status": "verified",
+                    "admin_notes": admin_notes,
+                    "verified_by": admin_id,
+                    "verified_at": datetime.utcnow(),
+                    "updated_at": datetime.utcnow(),
+                }}
+            )
+        except Exception:
+            # Non-fatal if there were no duplicates or update failed
+            pass
+
         # Update user flags
         await self.users_collection.update_one(
-            {"id": v.get("user_id")},
+            {"id": user_id},
             {"$set": {"verified_tradesperson": True, "is_verified": True, "updated_at": datetime.utcnow()}}
         )
         return True
 
     async def reject_tradesperson_verification(self, verification_id: str, admin_id: str, admin_notes: str) -> bool:
-        """Reject tradesperson references"""
+        """Reject tradesperson verification.
+        Also updates any other pending records for the same user to rejected
+        so the user's state remains consistent.
+        """
         v = await self.tradespeople_verifications_collection.find_one({"id": verification_id})
         if not v:
             return False
+
+        user_id = v.get("user_id")
+
         result = await self.tradespeople_verifications_collection.update_one(
             {"id": verification_id},
             {"$set": {
@@ -3826,15 +4011,31 @@ class Database:
                 "admin_notes": admin_notes,
                 "verified_by": admin_id,
                 "verified_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
+                "updated_at": datetime.utcnow(),
             }}
         )
         if result.modified_count == 0:
             return False
+
+        # Mark any other pending records for this user as rejected
+        try:
+            await self.tradespeople_verifications_collection.update_many(
+                {"user_id": user_id, "status": "pending", "id": {"$ne": verification_id}},
+                {"$set": {
+                    "status": "rejected",
+                    "admin_notes": admin_notes,
+                    "verified_by": admin_id,
+                    "verified_at": datetime.utcnow(),
+                    "updated_at": datetime.utcnow(),
+                }}
+            )
+        except Exception:
+            pass
+
         # Ensure user is not marked verified when business verification is rejected
         try:
             await self.users_collection.update_one(
-                {"id": v.get("user_id")},
+                {"id": user_id},
                 {"$set": {"verified_tradesperson": False, "is_verified": False, "updated_at": datetime.utcnow()}}
             )
         except Exception:
