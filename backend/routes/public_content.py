@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import os
 import uuid
+from pydantic import BaseModel, EmailStr
 
 from ..database import database
 from ..models.content import ContentType, ContentStatus
@@ -608,3 +609,33 @@ async def _send_application_notification(application: dict, job_posting: dict):
     except Exception as e:
         logger.error(f"❌ Error sending application notification: {str(e)}")
         # Don't raise exception to avoid failing the application submission
+
+# Newsletter Subscription API
+
+class NewsletterSubscribeRequest(BaseModel):
+    email: EmailStr
+    source: Optional[str] = None
+
+@router.post("/newsletter/subscribe")
+async def subscribe_newsletter(payload: NewsletterSubscribeRequest, request: Request):
+    """Subscribe an email to the newsletter"""
+    try:
+        # Check if already subscribed
+        existing = await database.get_newsletter_subscriber_by_email(payload.email)
+        if existing and existing.get("subscribed"):
+            return {"message": "Already subscribed", "status": "ok"}
+
+        # Create subscription record
+        record = await database.create_newsletter_subscription(
+            email=payload.email,
+            source=payload.source or "website",
+            ip_address=request.client.host if request else None,
+            user_agent=request.headers.get("user-agent") if request else None
+        )
+
+        return {"message": "Subscribed successfully", "status": "ok", "subscription": {"id": record.get("id"), "email": record.get("email")}}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error subscribing to newsletter: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to subscribe to newsletter")

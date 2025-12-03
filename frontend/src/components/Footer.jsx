@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
+import { useToast } from '../hooks/use-toast';
 
 const Footer = () => {
   // Centralized route mapping for labels
@@ -116,6 +117,36 @@ const Footer = () => {
     }
   ];
 
+  const { toast } = useToast();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (!newsletterEmail) {
+      toast({ title: 'Email required', description: 'Please enter your email address.', variant: 'destructive' });
+      return;
+    }
+    setIsSubscribing(true);
+    try {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/public/content/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail, source: 'footer' })
+      });
+      if (!res.ok) throw new Error('Subscription failed');
+      const data = await res.json();
+      toast({ title: 'Subscribed!', description: 'You will now receive our newsletter.', variant: 'default' });
+      setSubscribed(true);
+      setNewsletterEmail('');
+      setTimeout(() => setSubscribed(false), 3000);
+    } catch (err) {
+      toast({ title: 'Subscription failed', description: 'Please try again later.', variant: 'destructive' });
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   return (
     <footer style={{background: '#121E3C'}} className="text-white">
       <div className="container mx-auto px-4 py-12">
@@ -193,9 +224,16 @@ const Footer = () => {
                   placeholder="Enter your email"
                   className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none font-lato"
                   style={{borderColor: '#34D164', focusBorderColor: '#34D164'}}
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                 />
-                <Button className="text-white px-6 font-lato" style={{backgroundColor: '#34D164'}}>
-                  Subscribe
+                <Button
+                  className="text-white px-6 font-lato"
+                  style={{backgroundColor: '#34D164'}}
+                  onClick={handleSubscribe}
+                  disabled={isSubscribing}
+                >
+                  {isSubscribing ? 'Subscribing…' : subscribed ? 'Subscribed ✓' : 'Subscribe'}
                 </Button>
               </div>
             </div>

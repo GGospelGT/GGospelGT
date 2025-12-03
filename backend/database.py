@@ -132,6 +132,17 @@ class Database:
                     expireAfterSeconds=0,
                     name="pending_jobs_expire"
                 )
+
+                # Newsletter subscribers: unique email index
+                try:
+                    await self.database.newsletter_subscribers.create_index(
+                        [("email", 1)],
+                        name="newsletter_unique_email",
+                        unique=True,
+                        partialFilterExpression={"email": {"$type": "string"}}
+                    )
+                except Exception as idx_err:
+                    logger.warning(f"Failed to ensure newsletter_subscribers index: {idx_err}")
                 logger.info("Database indexes ensured successfully")
             except Exception as e:
                 logger.error(f"Failed to ensure database indexes: {e}")
@@ -156,6 +167,47 @@ class Database:
         if self.database is None:
             raise RuntimeError("Database unavailable: users collection not accessible")
         return self.database.users
+
+    # Newsletter subscription operations
+    async def get_newsletter_subscriber_by_email(self, email: str) -> Optional[dict]:
+        """Get newsletter subscriber by email"""
+        try:
+            if self.database is None:
+                return None
+            doc = await self.database.newsletter_subscribers.find_one({"email": email})
+            if doc:
+                doc["_id"] = str(doc["_id"])
+            return doc
+        except Exception as e:
+            logger.error(f"Error fetching newsletter subscriber by email: {e}")
+            return None
+
+    async def create_newsletter_subscription(self, email: str, source: Optional[str] = None, ip_address: Optional[str] = None, user_agent: Optional[str] = None) -> Dict[str, Any]:
+        """Create a newsletter subscription record"""
+        if self.database is None:
+            raise RuntimeError("Database unavailable: cannot create newsletter subscription")
+        record = {
+            "id": str(uuid.uuid4()),
+            "email": email,
+            "source": source or "website",
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+            "subscribed": True,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        try:
+            await self.database.newsletter_subscribers.insert_one(record)
+            return record
+        except Exception as e:
+            # Handle duplicate key error gracefully
+            msg = str(e)
+            if "E11000" in msg or "duplicate key" in msg.lower():
+                logger.info("Newsletter subscriber already exists; returning existing record")
+                existing = await self.get_newsletter_subscriber_by_email(email)
+                return existing or record
+            logger.error(f"Error creating newsletter subscription: {e}")
+            raise
 
     # User authentication operations
     async def create_user(self, user_data: dict) -> dict:

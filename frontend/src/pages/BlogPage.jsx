@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useToast } from '../hooks/use-toast';
 
 const BlogPage = () => {
   const navigate = useNavigate();
@@ -21,6 +22,10 @@ const BlogPage = () => {
     search: '',
     tag: ''
   });
+  const { toast } = useToast();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
   // Blog API
   const blogAPI = {
@@ -161,6 +166,31 @@ const BlogPage = () => {
     const wordsPerMinute = 200;
     const wordCount = content.split(' ').length;
     return Math.ceil(wordCount / wordsPerMinute);
+  };
+
+  const handleNewsletterSubscribe = async () => {
+    if (!newsletterEmail) {
+      toast({ title: 'Email required', description: 'Please enter your email address.', variant: 'destructive' });
+      return;
+    }
+    setNewsletterLoading(true);
+    try {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/public/content/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail, source: 'blog_sidebar' })
+      });
+      if (!res.ok) throw new Error('Subscription failed');
+      await res.json();
+      toast({ title: 'Subscribed!', description: 'You will now receive our newsletter.' });
+      setNewsletterSubscribed(true);
+      setNewsletterEmail('');
+      setTimeout(() => setNewsletterSubscribed(false), 3000);
+    } catch (err) {
+      toast({ title: 'Subscription failed', description: 'Please try again later.', variant: 'destructive' });
+    } finally {
+      setNewsletterLoading(false);
+    }
   };
 
   const handleShare = async (post, platform) => {
@@ -555,9 +585,15 @@ const BlogPage = () => {
                       type="email"
                       placeholder="Your email address"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
                     />
-                    <button className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                      Subscribe
+                    <button
+                      onClick={handleNewsletterSubscribe}
+                      disabled={newsletterLoading}
+                      className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-70 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      {newsletterLoading ? 'Subscribing…' : newsletterSubscribed ? 'Subscribed ✓' : 'Subscribe'}
                     </button>
                   </div>
                 </div>
