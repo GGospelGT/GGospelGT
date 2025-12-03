@@ -551,7 +551,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
           console.warn('⚠️ Failed to update profile location:', locErr?.response?.data || locErr?.message || locErr);
         }
 
-        // Show post-registration verification modal instead of immediate redirect
+        // Post-registration flow: always show verification modal; redirect happens after both verifications
         setShowVerificationModal(true);
       } else {
         // Ensure error is a string, not an object
@@ -1559,15 +1559,6 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
                 <button
                   onClick={() => {
                     console.log('🔘 SET UP WALLET LATER BUTTON CLICKED (DIRECT)');
-                    // Hybrid gating: reopen verification modal if not verified
-                    if (!emailVerified || !phoneVerified) {
-                      setShowVerificationModal(true);
-                      toast({
-                        title: 'Verify your contact details',
-                        description: 'Please verify both email and phone to continue.',
-                      });
-                      return;
-                    }
                     updateFormData('walletSetup', 'later');
                     // Pass explicit override to avoid async state race
                     handleFinalSubmit('later');
