@@ -16,11 +16,8 @@ const getBackendUrl = () => {
     url = 'http://localhost:8001';
   }
 
-  // Force correct port if an outdated config points to 8000
-  if (isLocalhost && url && url.includes('localhost:8000')) {
-    console.warn('⚠️ Detected localhost:8000 in backend URL, overriding to localhost:8001');
-    url = 'http://localhost:8001';
-  }
+  // Respect explicit env/runtime config; do not force port overrides.
+  // If needed, backend port can be controlled via REACT_APP_BACKEND_URL.
 
   return url;
 };
