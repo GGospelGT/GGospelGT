@@ -105,7 +105,7 @@ const ContactUsPage = () => {
     {
       icon: Twitter,
       name: "Twitter",
-      url: "#",
+      url: "https://x.com/myservicehub",
       color: "text-blue-400 hover:text-blue-500"
     }
   ];

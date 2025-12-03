@@ -1,4 +1,4 @@
-﻿// Mock data for MyBuilder clone
+// Mock data for MyBuilder clone
 
 export const stats = [
   {
@@ -228,7 +228,7 @@ export const socialLinks = [
   },
   { 
     platform: 'Twitter', 
-    href: '#' 
+    href: 'https://x.com/myservicehub' 
   }
 ];
 
