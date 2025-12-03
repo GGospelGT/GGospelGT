@@ -40,6 +40,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import CookiePolicyPage from "./pages/CookiePolicyPage";
 import { Toaster } from "./components/ui/toaster";
+import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import SessionTimeoutManager from "./components/auth/SessionTimeoutManager";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -95,6 +96,8 @@ function App() {
           {/* Global session timeout manager for both regular users and admins */}
           <SessionTimeoutManager />
           <BrowserRouter>
+            {/* Ensure page scroll resets on navigation (e.g., footer links) */}
+            <ScrollToTop smooth={true} />
 
             <Routes>
               <Route path="/" element={<HomePage />} />
