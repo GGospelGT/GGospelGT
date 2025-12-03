@@ -222,7 +222,7 @@ const LocationPicker = ({
     if (centerAddress) {
       doGeocode(centerAddress);
     }
-  }, [centerAddress, centerZoom, googleObj, map, marker, onLocationSelect]);
+  }, [centerAddress, centerZoom, googleObj, map, marker]);
 
   // Programmatic centering by coordinates (if provided)
   useEffect(() => {
@@ -234,7 +234,7 @@ const LocationPicker = ({
     if (onLocationSelect) {
       onLocationSelect(centerLatLng);
     }
-  }, [centerLatLng, centerZoom, map, marker, onLocationSelect]);
+  }, [centerLatLng, centerZoom, map, marker]);
 
   const reverseGeocode = async (google, location) => {
     try {
