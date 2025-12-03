@@ -275,7 +275,11 @@ const HelpCentrePage = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-8 py-3">
+            <Button
+              variant="outline"
+              className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-8 py-3"
+              onClick={() => navigate('/blog')}
+            >
               View All Articles
             </Button>
           </div>
