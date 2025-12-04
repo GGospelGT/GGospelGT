@@ -172,7 +172,7 @@ const HeroSection = () => {
                   <button
                     type="button"
                     onClick={toggleJobDropdown}
-                    className="w-full min-w-0 min-h-[3rem] h-auto py-2 pl-10 pr-10 text-left md:text-lg text-base font-lato border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white hover:border-gray-400 transition-colors flex items-center"
+                    className="w-full min-w-0 min-h-[3.25rem] h-auto py-3 pl-10 pr-10 text-left md:text-lg text-sm font-lato border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white hover:border-gray-400 transition-colors flex items-center"
                   >
                     <span className={`block truncate min-w-0 leading-normal ${job ? 'text-gray-900' : 'text-gray-500'}`}>
                       {job || 'What job do you need doing?'}
@@ -234,7 +234,7 @@ const HeroSection = () => {
                   <button
                     type="button"
                     onClick={() => setShowLocationDropdown(!showLocationDropdown)}
-                    className="w-full min-w-0 min-h-[3rem] h-auto py-2 pl-10 pr-10 text-left md:text-lg text-base font-lato border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white hover:border-gray-400 transition-colors flex items-center"
+                    className="w-full min-w-0 min-h-[3.25rem] h-auto py-3 pl-10 pr-10 text-left md:text-lg text-sm font-lato border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white hover:border-gray-400 transition-colors flex items-center"
                   >
                     <span className={`block truncate min-w-0 leading-normal ${location ? 'text-gray-900' : 'text-gray-500'}`}>
                       {location || 'Where are you based?'}
