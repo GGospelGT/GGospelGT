@@ -75,31 +75,36 @@ const HelpCentrePage = () => {
       title: "How to create a winning tradesperson profile",
       category: "Getting Started",
       readTime: "5 min read",
-      views: "2.1k views"
+      views: "2.1k views",
+      slug: 'winning-tradesperson-profile'
     },
     {
       title: "Understanding ServiceHub's payment system",
       category: "Payments & Earnings",
       readTime: "3 min read", 
-      views: "1.8k views"
+      views: "1.8k views",
+      slug: 'servicehub-payment-system'
     },
     {
       title: "How to get more job requests",
       category: "Job Management",
       readTime: "7 min read",
-      views: "1.5k views"
+      views: "1.5k views",
+      slug: 'get-more-job-requests'
     },
     {
       title: "Verification process and requirements",
       category: "Account Management",
       readTime: "4 min read",
-      views: "1.3k views"
+      views: "1.3k views",
+      slug: 'verification-process'
     },
     {
       title: "Handling difficult customers professionally",
       category: "Safety & Policies",
       readTime: "6 min read",
-      views: "1.1k views"
+      views: "1.1k views",
+      slug: 'handling-difficult-customers'
     }
   ];
 
@@ -256,7 +261,11 @@ const HelpCentrePage = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {popularArticles.map((article, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer group">
+              <div
+                key={index}
+                className="bg-white rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer group"
+                onClick={() => navigate(`/blog/${article.slug}`)}
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">

@@ -27,6 +27,129 @@ const BlogPage = () => {
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
+  // Fallback sample posts shown when backend has no content
+  const FALLBACK_POSTS = [
+    {
+      id: 'fallback-1',
+      title: 'How to create a winning tradesperson profile',
+      slug: 'winning-tradesperson-profile',
+      content: `
+        <p>A strong profile significantly increases your chances of getting hired.
+        Focus on a clear headline, high-quality photos of past work, and a concise
+        description of your skills and services. List certifications and years of
+        experience, and ask past customers for short testimonials.</p>
+        <ul>
+          <li>Use a professional photo and brand colors consistently.</li>
+          <li>Describe 3–5 signature services you offer.</li>
+          <li>Add before/after project images to build trust.</li>
+        </ul>
+      `,
+      excerpt: 'Boost your chances of getting hired with a standout profile.',
+      featured_image: '',
+      gallery_images: [],
+      category: 'getting_started',
+      tags: ['profile', 'getting-started', 'trust'],
+      is_featured: true,
+      is_sticky: false,
+      view_count: 0,
+      like_count: 0,
+      share_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: 'fallback-2',
+      title: "Understanding ServiceHub's payment system",
+      slug: 'servicehub-payment-system',
+      content: `
+        <p>Payments for completed jobs are released to your ServiceHub wallet
+        after homeowner approval. You can withdraw to your bank account within
+        1–2 business days. Keep job records updated to avoid delays.</p>
+        <p>For faster withdrawals, verify your identity and bank details in the
+        Account settings page.</p>
+      `,
+      excerpt: 'How payments work, when funds arrive, and how to withdraw.',
+      featured_image: '',
+      gallery_images: [],
+      category: 'payments_earnings',
+      tags: ['payments', 'wallet', 'withdrawals'],
+      is_featured: false,
+      is_sticky: false,
+      view_count: 0,
+      like_count: 0,
+      share_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: 'fallback-3',
+      title: 'Verification process and requirements',
+      slug: 'verification-process',
+      content: `
+        <p>To get verified, upload a valid ID, provide trade experience or
+        certifications, and complete a short skills assessment. Verification
+        typically takes 2–3 business days.</p>
+        <p>Verified tradespeople appear higher in search and get more job requests.</p>
+      `,
+      excerpt: 'Steps to become a verified tradesperson on ServiceHub.',
+      featured_image: '',
+      gallery_images: [],
+      category: 'account_management',
+      tags: ['verification', 'trust', 'profile'],
+      is_featured: false,
+      is_sticky: false,
+      view_count: 0,
+      like_count: 0,
+      share_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: 'fallback-4',
+      title: 'How to get more job requests',
+      slug: 'get-more-job-requests',
+      content: `
+        <p>Respond quickly to new job requests, keep your calendar updated, and
+        maintain a high rating by delivering quality work. Add clear pricing and
+        photos of completed jobs to attract more customers.</p>
+      `,
+      excerpt: 'Practical tips that increase your visibility and conversions.',
+      featured_image: '',
+      gallery_images: [],
+      category: 'job_management',
+      tags: ['requests', 'visibility', 'pricing'],
+      is_featured: false,
+      is_sticky: false,
+      view_count: 0,
+      like_count: 0,
+      share_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: 'fallback-5',
+      title: 'Handling difficult customers professionally',
+      slug: 'handling-difficult-customers',
+      content: `
+        <p>Stay calm, document everything, and offer clear next steps. Use
+        ServiceHub messaging and contracts to keep communication professional
+        and expectations aligned.</p>
+      `,
+      excerpt: 'De-escalation and communication tips to protect your reputation.',
+      featured_image: '',
+      gallery_images: [],
+      category: 'safety_policies',
+      tags: ['customers', 'communication', 'policy'],
+      is_featured: false,
+      is_sticky: false,
+      view_count: 0,
+      like_count: 0,
+      share_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  ];
+
   // Blog API
   const blogAPI = {
     getPosts: async (params = {}) => {
@@ -120,16 +243,40 @@ const BlogPage = () => {
 
       // Get featured posts
       const featured = await blogAPI.getFeaturedPosts();
-      setFeaturedPosts(featured);
+      if (featured && featured.length > 0) {
+        setFeaturedPosts(featured);
+      } else {
+        // Fallback to local featured posts
+        setFeaturedPosts(FALLBACK_POSTS.filter(p => p.is_featured));
+      }
 
       // Get regular posts
       const allPosts = await blogAPI.getPosts(filters);
-      const regular = allPosts.filter(post => !post.is_featured);
+      let regular = allPosts.filter(post => !post.is_featured);
+
+      // If backend returns no posts, use fallback content and apply filters
+      if (!regular || regular.length === 0) {
+        regular = FALLBACK_POSTS.filter(p => !p.is_featured);
+        if (filters.category) {
+          regular = regular.filter(p => p.category === filters.category);
+        }
+        if (filters.search) {
+          const q = filters.search.toLowerCase();
+          regular = regular.filter(p =>
+            p.title.toLowerCase().includes(q) ||
+            (p.excerpt || '').toLowerCase().includes(q) ||
+            (p.content || '').toLowerCase().includes(q)
+          );
+        }
+      }
       setPosts(regular);
       
       // Get categories
       const categoryData = await blogAPI.getCategories();
-      const uniqueCategories = categoryData.map(cat => cat.category);
+      let uniqueCategories = (categoryData || []).map(cat => cat.category);
+      if (!uniqueCategories || uniqueCategories.length === 0) {
+        uniqueCategories = Array.from(new Set(FALLBACK_POSTS.map(p => p.category)));
+      }
       setCategories(uniqueCategories);
       
     } catch (error) {
@@ -146,6 +293,12 @@ const BlogPage = () => {
       if (post) {
         setSelectedPost(post);
         // View count is automatically incremented by the API
+      } else {
+        // Fallback: find local sample post by slug
+        const local = FALLBACK_POSTS.find(p => p.slug === postSlug);
+        if (local) {
+          setSelectedPost(local);
+        }
       }
     } catch (error) {
       console.error('Error loading blog post:', error);
