@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Phone, Mail, MapPin, Clock, Send, MessageCircle, HelpCircle, Facebook, Instagram, Youtube, Twitter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -7,10 +7,12 @@ import Footer from '../components/Footer';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { contactSchema, formatPhoneE164 } from '../utils/validation';
+import ValidationBanner from '../components/ValidationBanner';
 
 const ContactUsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [globalErrorMessage, setGlobalErrorMessage] = useState('');
 
   // React Hook Form setup with Zod schema
   const form = useForm({
@@ -28,7 +30,35 @@ const ContactUsPage = () => {
 
   const { register, handleSubmit, formState: { errors, isSubmitting, isValid }, reset } = form;
 
+  // Build a friendly summary message for the banner
+  const summarizeErrors = (errObj) => {
+    const order = ['name', 'email', 'message', 'phone', 'subject', 'userType'];
+    const labels = {
+      name: 'Full Name',
+      email: 'Email Address',
+      message: 'Message',
+      phone: 'Phone',
+      subject: 'Subject',
+      userType: 'User Type',
+    };
+    const missing = order.filter((key) => errObj[key]).map((key) => labels[key]);
+    if (missing.length === 0) return '';
+    return `Please complete or correct: ${missing.join(', ')}`;
+  };
+
+  const scrollToFirstError = (errObj) => {
+    const order = ['name', 'email', 'message', 'phone', 'subject', 'userType'];
+    const first = order.find((key) => errObj[key]);
+    if (!first) return;
+    const el = document.getElementById(first);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.focus({ preventScroll: true });
+    }
+  };
+
   const onSubmit = async (data) => {
+    setGlobalErrorMessage('');
     try {
       // Normalize phone to E.164 if provided
       const payload = {
@@ -54,6 +84,12 @@ const ContactUsPage = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const onInvalid = (errObj) => {
+    const message = summarizeErrors(errObj);
+    setGlobalErrorMessage(message || 'Some fields need attention.');
+    scrollToFirstError(errObj);
   };
 
   const contactMethods = [
@@ -151,7 +187,10 @@ const ContactUsPage = () => {
               <div className="bg-white rounded-lg shadow-sm border p-8">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-6">Send us a Message</h2>
                 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* Global validation banner */}
+                <ValidationBanner message={globalErrorMessage} onJump={() => scrollToFirstError(errors)} />
+
+                <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -161,8 +200,8 @@ const ContactUsPage = () => {
                         type="text"
                         id="name"
                         {...register('name')}
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        aria-invalid={errors.name ? 'true' : 'false'}
+                        className={`w-full px-4 py-3 rounded-lg focus:ring-2 focus:border-transparent ${errors.name ? 'border border-red-400 focus:ring-red-500' : 'border border-gray-300 focus:ring-green-500'}`}
                         placeholder="Enter your full name"
                       />
                       {errors.name && (
@@ -178,8 +217,8 @@ const ContactUsPage = () => {
                         type="email"
                         id="email"
                         {...register('email')}
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        aria-invalid={errors.email ? 'true' : 'false'}
+                        className={`w-full px-4 py-3 rounded-lg focus:ring-2 focus:border-transparent ${errors.email ? 'border border-red-400 focus:ring-red-500' : 'border border-gray-300 focus:ring-green-500'}`}
                         placeholder="Enter your email address"
                       />
                       {errors.email && (
@@ -254,9 +293,9 @@ const ContactUsPage = () => {
                     <textarea
                       id="message"
                       {...register('message')}
-                      required
+                      aria-invalid={errors.message ? 'true' : 'false'}
                       rows={6}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-vertical"
+                      className={`w-full px-4 py-3 rounded-lg focus:ring-2 focus:border-transparent resize-vertical ${errors.message ? 'border border-red-400 focus:ring-red-500' : 'border border-gray-300 focus:ring-green-500'}`}
                       placeholder="Tell us how we can help you..."
                     />
                     {errors.message && (
@@ -266,7 +305,7 @@ const ContactUsPage = () => {
 
                   <button
                     type="submit"
-                    disabled={!isValid || isSubmitting}
+                    disabled={isSubmitting}
                     className={`w-full flex items-center justify-center px-6 py-3 rounded-lg font-medium text-white transition-colors ${
                       isSubmitting 
                         ? 'bg-gray-400 cursor-not-allowed' 
