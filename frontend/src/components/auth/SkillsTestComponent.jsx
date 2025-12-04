@@ -551,7 +551,7 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
           <span>Previous</span>
         </Button>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-wrap">
           <Button
             type="button"
             variant="outline"
@@ -560,7 +560,7 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
                 handleSubmitTest();
               }
             }}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 whitespace-nowrap md:text-sm text-xs leading-tight h-auto"
           >
             <Flag size={16} />
             <span>Submit Combined Test</span>
