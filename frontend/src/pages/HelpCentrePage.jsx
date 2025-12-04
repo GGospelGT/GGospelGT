@@ -24,6 +24,25 @@ const HelpCentrePage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedFAQ, setExpandedFAQ] = useState(null);
+  
+  const handleSearch = () => {
+    const q = (searchQuery || '').trim();
+    if (!q) return;
+    // Expand the first matching FAQ if available
+    const firstMatchIndex = faqs.findIndex(
+      (faq) =>
+        faq.question.toLowerCase().includes(q.toLowerCase()) ||
+        faq.answer.toLowerCase().includes(q.toLowerCase())
+    );
+    if (firstMatchIndex !== -1) {
+      setExpandedFAQ(firstMatchIndex);
+    }
+    // Smooth scroll to FAQ section to show results
+    const el = document.getElementById('faq-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const helpCategories = [
     {
@@ -197,8 +216,19 @@ const HelpCentrePage = () => {
                 className="flex-1 px-4 py-4 text-gray-900 focus:outline-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
+                aria-label="Search help content"
               />
-              <Button className="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-none">
+              <Button
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-none"
+                onClick={handleSearch}
+                aria-label="Submit search"
+              >
                 Search
               </Button>
             </div>
@@ -206,9 +236,33 @@ const HelpCentrePage = () => {
 
           <div className="mt-8 text-green-200">
             <span>Popular searches: </span>
-            <button className="underline hover:text-white mx-2">Getting started</button>
-            <button className="underline hover:text-white mx-2">Payments</button>
-            <button className="underline hover:text-white mx-2">Verification</button>
+            <button
+              className="underline hover:text-white mx-2"
+              onClick={() => {
+                setSearchQuery('Getting started');
+                handleSearch();
+              }}
+            >
+              Getting started
+            </button>
+            <button
+              className="underline hover:text-white mx-2"
+              onClick={() => {
+                setSearchQuery('Payments');
+                handleSearch();
+              }}
+            >
+              Payments
+            </button>
+            <button
+              className="underline hover:text-white mx-2"
+              onClick={() => {
+                setSearchQuery('Verification');
+                handleSearch();
+              }}
+            >
+              Verification
+            </button>
           </div>
         </div>
       </div>
@@ -296,7 +350,7 @@ const HelpCentrePage = () => {
       </div>
 
       {/* FAQ Section */}
-      <div className="py-20 bg-white">
+      <div className="py-20 bg-white" id="faq-section">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
