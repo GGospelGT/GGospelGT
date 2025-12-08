@@ -150,12 +150,12 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="py-16 lg:py-24" style={{background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
+    <section className="py-10 lg:py-16" style={{background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl lg:text-6xl font-bold font-montserrat mb-6" style={{color: '#121E3C'}}>
+          <h1 className="text-4xl lg:text-6xl font-bold font-montserrat leading-tight mb-6" style={{color: '#121E3C'}}>
             The reliable way to hire a{' '}
-            <span style={{color: '#34D164'}}>tradesperson</span>
+            <span style={{color: '#34D164'}}>tradeperson</span>
           </h1>
           <p className="text-xl text-gray-600 font-lato mb-8 max-w-2xl mx-auto">
             Post your job for free and connect with vetted, local tradespeople across Nigeria. 
