@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Star, MapPin } from 'lucide-react';
 import { reviewsAPI, tradespeopleAPI } from '../api/services';
@@ -72,6 +72,30 @@ const ReviewsSection = () => {
     : (reviews?.reviews || defaultReviews);
 
   const displayReviews = loading ? defaultReviews : rawReviews.map(transformReview);
+
+  // Slider refs and helpers (snap to exact card)
+  const sliderRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const scrollToIndex = (idx) => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const total = el.children.length;
+    const targetIndex = Math.max(0, Math.min(idx, total - 1));
+    const targetEl = el.children[targetIndex];
+    if (targetEl && typeof targetEl.scrollIntoView === 'function') {
+      targetEl.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      setCurrentIndex(targetIndex);
+    }
+  };
+
+  const handleScroll = () => {
+    const el = sliderRef.current;
+    if (!el) return;
+    // With full-width cards, index ≈ scrollLeft / containerWidth
+    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    setCurrentIndex(idx);
+  };
 
   // Enrich with tradesperson company/business name for display
   useEffect(() => {
@@ -168,71 +192,90 @@ const ReviewsSection = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {loading ? (
-              // Loading skeleton
-              Array.from({ length: 4 }).map((_, index) => (
-                <Card key={index} className="bg-white">
+          {/* Slider container */}
+          <div className="relative">
+            <div
+              ref={sliderRef}
+              className="flex overflow-x-auto gap-4 snap-x snap-mandatory px-1"
+              style={{ scrollBehavior: 'smooth' }}
+              onScroll={handleScroll}
+            >
+              {(loading ? Array.from({ length: 4 }) : displayReviews.slice(0, 8)).map((item, index) => (
+                <Card
+                  key={item?.id || index}
+                  className="bg-white hover:shadow-lg transition-shadow duration-300 flex-shrink-0 snap-start min-w-full"
+                >
                   <CardContent className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse mr-3"></div>
-                      <div>
-                        <div className="h-4 bg-gray-200 rounded animate-pulse mb-2 w-24"></div>
-                        <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
-                      </div>
-                    </div>
-                    <div className="flex items-center mb-2">
-                      <div className="flex mr-2">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <div key={i} className="w-4 h-4 bg-gray-200 rounded animate-pulse mr-1"></div>
-                        ))}
-                      </div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
-                    </div>
-                    <div className="h-4 bg-gray-200 rounded animate-pulse mb-2 w-32"></div>
-                    <div className="space-y-1">
-                      <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              displayReviews.slice(0, 4).map((review, index) => (
-                <Card key={review.id || index} className="bg-white hover:shadow-lg transition-shadow duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                        {getInitials(getCompanyDisplayName(review))}
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">{getCompanyDisplayName(review)}</h4>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <MapPin size={12} className="mr-1" />
-                          {review.location}
+                    {loading ? (
+                      <>
+                        <div className="flex items-center mb-4">
+                          <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse mr-3"></div>
+                          <div>
+                            <div className="h-4 bg-gray-200 rounded animate-pulse mb-2 w-24"></div>
+                            <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center mb-2">
-                      <div className="flex mr-2">
-                        {renderStars(review.rating)}
-                      </div>
-                      <span className="text-sm text-gray-500">{formatDate(review.created_at)}</span>
-                    </div>
-
-                    <p className="text-sm font-medium text-gray-700 mb-2">
-                      {review.title}
-                    </p>
-
-                    <p className="text-sm text-gray-600 line-clamp-4">
-                      "{review.comment}"
-                    </p>
+                        <div className="flex items-center mb-2">
+                          <div className="flex mr-2">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <div key={i} className="w-4 h-4 bg-gray-200 rounded animate-pulse mr-1"></div>
+                            ))}
+                          </div>
+                          <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
+                        </div>
+                        <div className="h-4 bg-gray-200 rounded animate-pulse mb-2 w-32"></div>
+                        <div className="space-y-1">
+                          <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center mb-4">
+                          <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                            {getInitials(getCompanyDisplayName(item))}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{getCompanyDisplayName(item)}</h4>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <MapPin size={12} className="mr-1" />
+                              {item.location}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center mb-2">
+                          <div className="flex mr-2">{renderStars(item.rating)}</div>
+                          <span className="text-sm text-gray-500">{formatDate(item.created_at)}</span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-700 mb-2">{item.title}</p>
+                        <p className="text-sm text-gray-600 line-clamp-4">"{item.comment}"</p>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
-              ))
-            )}
+              ))}
+            </div>
+
+            {/* Navigation buttons */}
+            <div className="flex justify-center mt-6 gap-3">
+              <button
+                type="button"
+                onClick={() => scrollToIndex(currentIndex - 1)}
+                className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                aria-label="Previous reviews"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToIndex(currentIndex + 1)}
+                className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                aria-label="Next reviews"
+              >
+                ›
+              </button>
+            </div>
           </div>
 
           <div className="text-center mt-12">

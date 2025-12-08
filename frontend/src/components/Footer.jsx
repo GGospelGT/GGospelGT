@@ -249,9 +249,21 @@ const Footer = () => {
                 <Link to="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link>
               </div>
               <div className="flex items-center space-x-4 text-sm text-gray-300 font-lato">
-  <span className="flex items-center gap-2"><span className="inline-block w-3 h-3 bg-[#34D164] rounded-full"></span> Nigeria</span>
-  <span>Made in Nigeria</span>
-</div>
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="w-5 h-3 rounded-sm ring-1 ring-white/20"
+                    viewBox="0 0 60 40"
+                    role="img"
+                    aria-label="Nigeria flag"
+                  >
+                    <rect width="60" height="40" fill="#ffffff" />
+                    <rect width="20" height="40" fill="#008753" />
+                    <rect x="40" width="20" height="40" fill="#008753" />
+                  </svg>
+                  <span>Nigeria</span>
+                </span>
+                <span>Made in Nigeria</span>
+              </div>
             </div>
           </div>
         </div>
