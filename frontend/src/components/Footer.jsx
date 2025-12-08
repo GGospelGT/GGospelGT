@@ -213,22 +213,22 @@ const Footer = () => {
 
           {/* Newsletter Signup */}
           <div className="border-t border-gray-700 pt-8 mb-8">
-            <div className="max-w-md">
+            <div className="max-w-md w-full">
               <h3 className="font-semibold font-montserrat text-lg mb-2">Stay updated</h3>
               <p className="text-gray-300 text-sm font-lato mb-4">
                 Get the latest home improvement tips and exclusive offers.
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full">
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none font-lato"
-                  style={{borderColor: '#34D164', focusBorderColor: '#34D164'}}
+                  className="flex-1 min-w-0 w-full sm:w-auto px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none font-lato"
+                  style={{borderColor: '#34D164'}}
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                 />
                 <Button
-                  className="text-white px-6 font-lato"
+                  className="text-white px-6 font-lato shrink-0 w-full sm:w-auto"
                   style={{backgroundColor: '#34D164'}}
                   onClick={handleSubscribe}
                   disabled={isSubscribing}
