@@ -180,12 +180,12 @@ const HeroSection = () => {
           {/* Desktop + larger screens: full-width (edge-to-edge) image */}
           <div className="hidden md:block mb-8">
             <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen">
-              <div className="relative h-[28rem] lg:h-[36rem] overflow-hidden shadow-xl">
+              <div className="relative overflow-hidden shadow-xl">
                 <img
                   src={HERO_IMAGE_SRC}
                   alt="Skilled tradesperson at work"
                   loading="lazy"
-                  className="w-full h-full object-cover object-center"
+                  className="block w-full h-auto object-contain"
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#121E3C]/30 via-transparent to-transparent" aria-hidden="true"></div>
