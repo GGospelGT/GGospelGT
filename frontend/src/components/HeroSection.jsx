@@ -162,18 +162,34 @@ const HeroSection = () => {
             The reliable way to hire a{' '}
             <span style={{color: '#34D164'}}>tradeperson</span>
           </h1>
-          {/* Image directly under headline (as requested) */}
-          <div className="w-full flex justify-center mb-8">
+          {/* Image under headline: mobile uses contained width, desktop goes full-bleed */}
+          {/* Mobile (kept as-is) */}
+          <div className="w-full flex justify-center mb-8 md:hidden">
             <div className="relative w-full max-w-2xl rounded-2xl overflow-hidden shadow-xl ring-1 ring-black/5">
               <img
                 src={HERO_IMAGE_SRC}
                 alt="Skilled tradesperson at work"
                 loading="lazy"
-                className="w-full h-64 sm:h-80 md:h-[28rem] object-cover object-left md:object-center"
+                className="w-full h-64 sm:h-80 object-cover object-center"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
-              {/* Brand-tinted overlay for cohesive blend */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#121E3C]/30 via-transparent to-transparent" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          {/* Desktop + larger screens: full-width (edge-to-edge) image */}
+          <div className="hidden md:block mb-8">
+            <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen">
+              <div className="relative h-[28rem] lg:h-[36rem] overflow-hidden shadow-xl">
+                <img
+                  src={HERO_IMAGE_SRC}
+                  alt="Skilled tradesperson at work"
+                  loading="lazy"
+                  className="w-full h-full object-cover object-center"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#121E3C]/30 via-transparent to-transparent" aria-hidden="true"></div>
+              </div>
             </div>
           </div>
           <p className="text-xl text-gray-600 font-lato mb-8 max-w-2xl mx-auto">

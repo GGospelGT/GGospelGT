@@ -87,15 +87,16 @@ const AppSection = () => {
             </div>
 
             <div className="relative">
-              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-3xl p-4 sm:p-6 md:p-8 text-center">
+              {/* Curved container with minimal padding; image shows full height without cropping */}
+              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-3xl overflow-hidden text-center shadow-xl p-1 sm:p-2">
                 <img
                   src={COMING_SOON_IMAGE_SRC}
                   alt="ServiceHub app coming soon teaser"
                   loading="lazy"
-                  className="w-full max-w-lg mx-auto h-64 sm:h-80 md:h-[28rem] object-contain rounded-2xl shadow-xl"
+                  className="block w-full max-w-[520px] sm:max-w-[560px] md:max-w-[580px] mx-auto h-auto object-contain"
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
-                <p className="text-gray-600 mt-6 text-sm">
+                <p className="text-gray-600 mt-3 text-sm">
                   Available for iOS and Android
                 </p>
               </div>

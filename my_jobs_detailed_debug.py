@@ -46,9 +46,11 @@ class DetailedMyJobsDebugger:
         print("🔐 AUTHENTICATING USER")
         print("=" * 50)
         
+        email = os.getenv("SERVICEHUB_TEST_HOMEOWNER_EMAIL", "test_homeowner@example.com")
+        password = os.getenv("SERVICEHUB_TEST_HOMEOWNER_PASSWORD", "TestPassword123!")
         login_data = {
-            "email": "servicehub9ja@gmail.com",
-            "password": "Password123!"
+            "email": email,
+            "password": password
         }
         
         response = self.make_request("POST", "/auth/login", json=login_data)

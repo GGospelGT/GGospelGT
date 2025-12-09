@@ -12,7 +12,7 @@ Test the authentication and authorization for job-related endpoints to verify th
    - Test with tradesperson user authentication (should work or be restricted)
 
 2. **Test with sample users**:
-   - Login as servicehub9ja@gmail.com (homeowner user)
+   - Login with homeowner test credentials (from environment)
    - Login as any tradesperson user
    - Test the /api/jobs/my-jobs endpoint for each
 
@@ -106,8 +106,10 @@ class JobsAuthTester:
         else:
             self.log_result("Service health check", False, f"Status: {response.status_code}")
     
-    def authenticate_homeowner(self, email: str = "servicehub9ja@gmail.com", password: str = "Password123!"):
+    def authenticate_homeowner(self, email: str = None, password: str = None):
         """Authenticate as homeowner user"""
+        email = email or os.getenv("SERVICEHUB_TEST_HOMEOWNER_EMAIL", "test_homeowner@example.com")
+        password = password or os.getenv("SERVICEHUB_TEST_HOMEOWNER_PASSWORD", "TestPassword123!")
         print(f"\n=== Authenticating Homeowner: {email} ===")
         
         login_data = {

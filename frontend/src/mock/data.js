@@ -228,7 +228,7 @@ export const socialLinks = [
   },
   { 
     platform: 'Twitter', 
-    href: 'https://x.com/myservicehub' 
+    href: 'https://x.com/myservice_hub' 
   }
 ];
 

@@ -5814,7 +5814,7 @@ class Database:
                 {
                     "contact_type": "social_twitter",
                     "label": "Twitter",
-                    "value": "https://twitter.com/servicehubng",
+            "value": "https://x.com/myservice_hub",
                     "is_active": True,
                     "display_order": 4,
                     "notes": "Official Twitter account"

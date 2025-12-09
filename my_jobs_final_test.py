@@ -7,9 +7,14 @@ This test confirms the root cause and provides a complete analysis of the issue.
 
 import requests
 import json
+import os
 from datetime import datetime
 
 BACKEND_URL = "https://trademe-platform.preview.emergentagent.com/api"
+
+# Test credentials from environment
+TEST_HOMEOWNER_EMAIL = os.getenv("SERVICEHUB_TEST_HOMEOWNER_EMAIL", "test_homeowner@example.com")
+TEST_HOMEOWNER_PASSWORD = os.getenv("SERVICEHUB_TEST_HOMEOWNER_PASSWORD", "TestPassword123!")
 
 class MyJobsFinalTester:
     def __init__(self):
@@ -51,12 +56,12 @@ class MyJobsFinalTester:
         return self.session.request(method, url, **kwargs)
     
     def test_authentication_flow(self):
-        """Test authentication with servicehub9ja@gmail.com"""
+        """Test authentication with environment-provided credentials"""
         print("\n=== AUTHENTICATION FLOW TEST ===")
         
         login_data = {
-            "email": "servicehub9ja@gmail.com",
-            "password": "Password123!"
+            "email": TEST_HOMEOWNER_EMAIL,
+            "password": TEST_HOMEOWNER_PASSWORD
         }
         
         response = self.make_request("POST", "/auth/login", json=login_data)
@@ -101,7 +106,7 @@ class MyJobsFinalTester:
                 
                 # Verify user data consistency
                 if (data.get('id') == self.user_data.get('id') and 
-                    data.get('email') == 'servicehub9ja@gmail.com'):
+                    data.get('email') == TEST_HOMEOWNER_EMAIL):
                     self.log_result("Token validation", True, "User data consistent")
                     
                     # Update user data with complete info

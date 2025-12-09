@@ -49,7 +49,7 @@ const PrivacyPage = () => {
               <li>Legal Name: ServiceHub Limited</li>
               <li>RC: 8905084</li>
               <li>Registered Address: 6, D Place Guest House, Off Omimi Link Road, Ekpan, Delta State, Nigeria</li>
-              <li>Email: <a href="mailto:privacy@myservicehub.co" className="text-green-600 hover:text-green-700">privacy@myservicehub.co</a> (or servicehub9ja@gmail.com until updated)</li>
+        <li>Email: <a href="mailto:privacy@myservicehub.co" className="text-green-600 hover:text-green-700">privacy@myservicehub.co</a></li>
             </ul>
             <p>
               We process personal data in accordance with applicable data protection laws, including the Nigeria Data Protection Act (NDPA),

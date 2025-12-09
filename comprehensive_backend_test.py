@@ -71,10 +71,12 @@ class EnhancedServiceHubTester:
         """Test the complete authentication flow with real credentials"""
         print("\n=== Testing Critical Authentication Flow ===")
         
-        # Test login with the specific credentials from review request
+        # Test login using environment-provided test credentials
+        email = os.getenv("SERVICEHUB_TEST_EMAIL", "test_homeowner@example.com")
+        password = os.getenv("SERVICEHUB_TEST_PASSWORD", "TestPassword123!")
         login_data = {
-            "email": "servicehub9ja@gmail.com",
-            "password": "Password123!"
+            "email": email,
+            "password": password
         }
         
         response = self.make_request("POST", "/auth/login", json=login_data)

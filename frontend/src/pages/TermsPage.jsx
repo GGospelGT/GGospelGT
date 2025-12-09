@@ -171,7 +171,7 @@ const TermsPage = () => {
           <SectionBar>12. COMPLAINTS &amp; DISPUTE RESOLUTION</SectionBar>
           <div className="text-gray-700 space-y-3 mb-6">
             <ol className="list-decimal list-inside space-y-2">
-              <li><span className="font-semibold">Contact</span>: <a href="mailto:servicehub9ja@gmail.com" className="text-green-600 hover:text-green-700">servicehub9ja@gmail.com</a>. We aim to resolve complaints amicably and promptly.</li>
+              <li><span className="font-semibold">Contact</span>: <a href="mailto:privacy@myservicehub.co" className="text-green-600 hover:text-green-700">privacy@myservicehub.co</a>. We aim to resolve complaints amicably and promptly.</li>
               <li><span className="font-semibold">Mediation/Arbitration</span>: If unresolved within 14 days, disputes may be referred to mediation, and thereafter binding arbitration at the Lagos Multi-Door Courthouse (LMDC) under the Arbitration and Mediation Act 2023.</li>
             </ol>
           </div>

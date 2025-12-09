@@ -7,7 +7,7 @@ SERVICEHUB COMPREHENSIVE BACKEND TESTING
 Perform comprehensive backend testing for the ServiceHub application. Test all major API endpoints including:
 
 1. **Authentication System**:
-   - Login endpoint with real user credentials (servicehub9ja@gmail.com / Password123!)
+   - Login endpoint with test credentials provided via environment variables
    - Registration endpoints for both homeowners and tradespeople
    - JWT token validation
    - Protected endpoints access
@@ -192,9 +192,11 @@ class ServiceHubBackendTester:
         print("\n=== Testing Authentication System ===")
         
         # Test login with real credentials
+        email = os.getenv("SERVICEHUB_TEST_EMAIL", "test_homeowner@example.com")
+        password = os.getenv("SERVICEHUB_TEST_PASSWORD", "TestPassword123!")
         login_data = {
-            "email": "servicehub9ja@gmail.com",
-            "password": "Password123!"
+            "email": email,
+            "password": password
         }
         
         response = self.make_request("POST", "/auth/login", json=login_data)

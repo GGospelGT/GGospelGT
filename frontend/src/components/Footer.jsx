@@ -110,7 +110,7 @@ const Footer = () => {
     },
     { 
       icon: Twitter, 
-      href: 'https://x.com/myservicehub',
+      href: 'https://x.com/myservice_hub',
       label: 'Follow us on Twitter'
     }
   ];

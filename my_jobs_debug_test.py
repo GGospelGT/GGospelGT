@@ -10,7 +10,7 @@ but the API seems to work when tested directly.
 **Test the complete flow:**
 
 1. **Authentication Flow Test**:
-   - Test login with servicehub9ja@gmail.com / Password123!
+   - Test login with homeowner test credentials (from environment)
    - Verify the token is valid and not expired
    - Test the /api/auth/me endpoint to verify user role and authentication
 
@@ -46,6 +46,10 @@ import uuid
 
 # Get backend URL from environment
 BACKEND_URL = "https://trademe-platform.preview.emergentagent.com/api"
+
+# Test credentials from environment
+TEST_HOMEOWNER_EMAIL = os.getenv("SERVICEHUB_TEST_HOMEOWNER_EMAIL", "test_homeowner@example.com")
+TEST_HOMEOWNER_PASSWORD = os.getenv("SERVICEHUB_TEST_HOMEOWNER_PASSWORD", "TestPassword123!")
 
 class MyJobsDebugTester:
     def __init__(self):
@@ -114,11 +118,11 @@ class MyJobsDebugTester:
         """Test authentication flow with the specific user credentials"""
         print("\n=== Testing Authentication Flow ===")
         
-        # Test 1: Login with servicehub9ja@gmail.com / Password123!
+        # Test 1: Login with environment-provided test credentials
         print(f"\n--- Test 1: Login with Specific Credentials ---")
         login_data = {
-            "email": "servicehub9ja@gmail.com",
-            "password": "Password123!"
+            "email": TEST_HOMEOWNER_EMAIL,
+            "password": TEST_HOMEOWNER_PASSWORD
         }
         
         response = self.make_request("POST", "/auth/login", json=login_data)
@@ -173,7 +177,7 @@ class MyJobsDebugTester:
                     data = response.json()
                     
                     # Verify user data consistency
-                    if data.get('id') == self.user_id and data.get('email') == 'servicehub9ja@gmail.com':
+                    if data.get('id') == self.user_id and data.get('email') == TEST_HOMEOWNER_EMAIL:
                         self.log_result("Token validation", True, f"User data consistent: {data.get('name')}")
                         
                         # Update user data with complete info
