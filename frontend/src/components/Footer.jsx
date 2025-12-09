@@ -14,7 +14,6 @@ const Footer = () => {
     'Trade Categories': '/trade-categories',
     'How it works': '/how-it-works',
     'Cost guides': '/blog',
-    'Reviews': '/reviews',
     'Help & FAQs': '/help',
 
     // Tradespeople
@@ -53,7 +52,6 @@ const Footer = () => {
         { label: 'Trade Categories', to: routesByLabel['Trade Categories'] },
         { label: 'How it works', to: routesByLabel['How it works'] },
         { label: 'Cost guides', to: routesByLabel['Cost guides'] },
-        { label: 'Reviews', to: routesByLabel['Reviews'] },
         { label: 'Help & FAQs', to: routesByLabel['Help & FAQs'] },
       ],
     },

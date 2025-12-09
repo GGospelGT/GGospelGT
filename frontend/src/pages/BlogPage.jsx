@@ -502,7 +502,7 @@ const BlogPage = () => {
               
               <div className="p-6 md:p-8">
                 {/* Title */}
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-tight text-gray-900 mb-4">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight leading-tight text-gray-900 mb-4">
                   {selectedPost.title}
                 </h1>
 
@@ -527,7 +527,7 @@ const BlogPage = () => {
                 
                 {/* Excerpt */}
                 {selectedPost.excerpt && (
-                  <div className="text-lg sm:text-xl text-gray-600 mb-8 pb-8 border-b border-gray-200">
+                  <div className="text-base sm:text-lg text-gray-600 mb-6 pb-6 border-b border-gray-200">
                     {selectedPost.excerpt}
                   </div>
                 )}
