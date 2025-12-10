@@ -31,14 +31,14 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section className="py-16" style={{ background: '#121E3C' }}>
+    <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold font-montserrat mb-4 text-white">
+            <h2 className="text-3xl lg:text-4xl font-bold font-montserrat mb-4 text-[#121E3C]">
               How to hire the right tradesperson
             </h2>
-            <p className="text-xl text-gray-200 font-lato max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 font-lato max-w-2xl mx-auto">
               Finding reliable tradespeople has never been easier. Follow these simple steps to get your job done.
             </p>
           </div>
@@ -56,10 +56,10 @@ const HowItWorks = () => {
                       <IconComponent size={24} className="text-white" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-semibold font-montserrat mb-3 text-white">
+                  <h3 className="text-xl font-semibold font-montserrat mb-3 text-[#121E3C]">
                     {step.title}
                   </h3>
-                  <p className="text-gray-300 font-lato">
+                  <p className="text-gray-600 font-lato">
                     {step.description}
                   </p>
                 </div>
