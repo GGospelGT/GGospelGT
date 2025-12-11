@@ -4586,13 +4586,18 @@ class Database:
                     # Continue with deletion even if some collections fail
             
             # Finally delete the user account
-            result = await self.users_collection.delete_one({"id": user_id})
-            
+            # Additionally purge any duplicate user records with the same email to fully release the address
+            email = user.get("email")
+            if email:
+                result = await self.users_collection.delete_many({"email": email})
+            else:
+                result = await self.users_collection.delete_one({"id": user_id})
+
             if result.deleted_count > 0:
-                logger.info(f"Successfully deleted user account: {user.get('email', 'Unknown')} (ID: {user_id})")
+                logger.info(f"Successfully deleted user account(s) for {email or user_id}: count={result.deleted_count}")
                 return True
             else:
-                logger.error(f"Failed to delete user account: {user_id}")
+                logger.error(f"Failed to delete user account: {user_id} (email={email})")
                 return False
                 
         except Exception as e:
