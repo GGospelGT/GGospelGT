@@ -987,25 +987,12 @@ async def notify_matching_tradespeople_new_job(job: dict):
                         miles = round(km * 0.621, 1)
                     except Exception:
                         miles = None
-                # Determine effective channel: prefer EMAIL, fallback to SMS if email missing
+                # Determine available contact methods (do not override preferences here)
                 recipient_email = tp.get("email")
                 recipient_phone = tp.get("phone")
-                try:
-                    preferred_channel = getattr(preferences, NotificationType.NEW_MATCHING_JOB.value, NotificationChannel.EMAIL)
-                except Exception:
-                    preferred_channel = NotificationChannel.EMAIL
-                if recipient_email:
-                    effective_channel = NotificationChannel.EMAIL
-                elif recipient_phone:
-                    effective_channel = NotificationChannel.SMS
-                else:
+                if not recipient_email and not recipient_phone:
                     logger.info("Skipping tradesperson %s: no contact info for NEW_MATCHING_JOB", tp_id)
                     continue
-                # Create transient preferences override for this send
-                try:
-                    effective_preferences: NotificationPreferences = preferences.copy(update={"new_matching_job": effective_channel})
-                except Exception:
-                    effective_preferences = preferences
                 template_data = {
                     "Name": name,
                     "trade_title": job.get("title", "Job"),
@@ -1022,7 +1009,7 @@ async def notify_matching_tradespeople_new_job(job: dict):
                     user_id=tp_id,
                     notification_type=NotificationType.NEW_MATCHING_JOB,
                     template_data=template_data,
-                    user_preferences=effective_preferences,
+                    user_preferences=preferences,
                     recipient_email=recipient_email,
                     recipient_phone=recipient_phone
                 )
