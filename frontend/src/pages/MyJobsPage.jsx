@@ -62,7 +62,7 @@ const MyJobsPage = () => {
   const REVIEW_PENDING_MS = 1500; // brief pending duration before marking completed
 
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   // Helper function to get job status display text
@@ -547,6 +547,23 @@ const MyJobsPage = () => {
     }
   };
 
+  // Show a lightweight loading state while auth context resolves user
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto">
+            <div className="h-6 bg-gray-200 rounded mb-4 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -566,7 +583,8 @@ const MyJobsPage = () => {
     );
   }
 
-  if (user?.role !== 'homeowner') {
+  // Only gate once user data is available
+  if (!authLoading && user?.role !== 'homeowner') {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />

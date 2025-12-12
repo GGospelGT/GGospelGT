@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Menu, X, User, LogOut, Briefcase, Search, Star, Heart, ChevronDown, HelpCircle, MessageSquare, CheckCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import AuthModal from './auth/AuthModal';
@@ -20,7 +20,13 @@ const Header = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAuthenticated, isHomeowner, isTradesperson, logout } = useAuth();
+
+  // When on the Post Job page, ensure signup defaults to Homeowner
+  const isPostJobPage = location?.pathname?.startsWith('/post-job');
+  const authDefaultTab = isPostJobPage ? 'homeowner' : 'tradesperson';
+  const authShowOnlyTradesperson = isPostJobPage ? false : true;
 
   const handleAuthClick = (mode) => {
     setAuthMode(mode);
@@ -269,7 +275,7 @@ const Header = () => {
                   className="font-lato text-white hover:opacity-90" 
                   style={{backgroundColor: '#34D164'}}
                 >
-                  Join serviceHub
+                  {isPostJobPage ? 'Create homeowner account' : 'Join serviceHub'}
                 </Button>
               </>
             )}
@@ -315,7 +321,7 @@ const Header = () => {
                   </a>
                   <a onClick={() => navigate("/trade-categories")} className="text-gray-700 font-lato transition-colors hover:text-[#34D164] cursor-pointer">Find trades</a>
                   {/* Only show "Join as tradesperson" if user is not already a tradesperson */}
-                  {!isAuthenticated() || !isTradesperson() ? (
+                  {!isPostJobPage && (!isAuthenticated() || !isTradesperson()) ? (
                     <a 
                       href="#" 
                       onClick={(e) => {
@@ -601,7 +607,7 @@ const Header = () => {
                       className="font-lato text-white justify-start" 
                       style={{backgroundColor: '#34D164'}}
                     >
-                      Join serviceHub
+                      {isPostJobPage ? 'Create homeowner account' : 'Join serviceHub'}
                     </Button>
                   </>
                 )}
@@ -616,8 +622,8 @@ const Header = () => {
         isOpen={authModalOpen} 
         onClose={() => setAuthModalOpen(false)}
         defaultMode={authMode}
-        defaultTab="tradesperson"
-        showOnlyTradesperson={true}
+        defaultTab={authDefaultTab}
+        showOnlyTradesperson={authShowOnlyTradesperson}
       />
     </header>
   );

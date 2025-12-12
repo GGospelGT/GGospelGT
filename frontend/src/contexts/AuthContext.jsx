@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }) => {
       console.log('✅ Current user data received:', userData);
       console.log('👤 User name:', userData?.name);
       setUser(userData);
+      try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
     } catch (error) {
       console.error('❌ Failed to get current user:', error);
       // Token might be expired or invalid
@@ -43,6 +44,7 @@ export const AuthProvider = ({ children }) => {
           try {
             const userData = await authAPI.getCurrentUser();
             setUser(userData);
+            try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
           } catch (e) {
             console.error('❌ Failed to get user after refresh:', e);
             logout();
@@ -109,6 +111,7 @@ export const AuthProvider = ({ children }) => {
         setRefreshToken(response.refresh_token);
       }
       setUser(response.user);
+      try { localStorage.setItem('user', JSON.stringify(response.user)); } catch {}
       
       console.log('✅ Login successful for user:', response.user.name);
       return { success: true, user: response.user };
@@ -184,6 +187,7 @@ export const AuthProvider = ({ children }) => {
           setRefreshToken(userData.refresh_token);
         }
         setUser(userData.user || userData);
+        try { localStorage.setItem('user', JSON.stringify(userData.user || userData)); } catch {}
         console.log('🎉 User automatically logged in after registration');
       }
       
@@ -201,6 +205,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const updatedUser = await authAPI.updateProfile(profileData);
       setUser(updatedUser);
+      try { localStorage.setItem('user', JSON.stringify(updatedUser)); } catch {}
       return { success: true, user: updatedUser };
     } catch (error) {
       console.error('Profile update failed:', error);
@@ -213,17 +218,20 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = (userData) => {
     setUser(userData);
+    try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
   };
 
   const loginWithToken = (token, userData) => {
     localStorage.setItem('token', token);
     setToken(token);
     setUser(userData);
+    try { localStorage.setItem('user', JSON.stringify(userData)); } catch {}
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
     setToken(null);
     setRefreshToken(null);
     setUser(null);

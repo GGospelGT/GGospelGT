@@ -987,20 +987,20 @@ async def notify_matching_tradespeople_new_job(job: dict):
                         miles = round(km * 0.621, 1)
                     except Exception:
                         miles = None
-                # Determine effective channel and handle missing contact details
+                # Determine effective channel: prefer EMAIL, fallback to SMS if email missing
                 recipient_email = tp.get("email")
                 recipient_phone = tp.get("phone")
                 try:
                     preferred_channel = getattr(preferences, NotificationType.NEW_MATCHING_JOB.value, NotificationChannel.EMAIL)
                 except Exception:
                     preferred_channel = NotificationChannel.EMAIL
-                effective_channel = preferred_channel
-                # Fallback: if SMS/BOTH but no phone, use EMAIL
-                if preferred_channel in [NotificationChannel.SMS, NotificationChannel.BOTH] and not recipient_phone:
+                if recipient_email:
                     effective_channel = NotificationChannel.EMAIL
-                # Fallback: if EMAIL but no email and phone exists, use SMS
-                if preferred_channel == NotificationChannel.EMAIL and not recipient_email and recipient_phone:
+                elif recipient_phone:
                     effective_channel = NotificationChannel.SMS
+                else:
+                    logger.info("Skipping tradesperson %s: no contact info for NEW_MATCHING_JOB", tp_id)
+                    continue
                 # Create transient preferences override for this send
                 try:
                     effective_preferences: NotificationPreferences = preferences.copy(update={"new_matching_job": effective_channel})
