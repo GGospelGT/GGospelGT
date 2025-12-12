@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from ..models import JobCreate, JobUpdate, JobCloseRequest, Job, JobsResponse
 from ..models.base import JobStatus
-from ..models.notifications import NotificationType, NotificationChannel, NotificationPreferences
+from ..models.notifications import NotificationType, NotificationChannel, NotificationPreferences, Notification, NotificationStatus
 from ..auth.dependencies import (
     get_current_homeowner,
     get_current_tradesperson,
@@ -1061,11 +1061,60 @@ async def notify_matching_tradespeople_new_job(job: dict):
                     recipient_phone=recipient_phone
                 )
                 await database.create_notification(notification)
+                logger.info(f"✅ Successfully sent NEW_MATCHING_JOB notification to tradesperson {tp_id} (email: {recipient_email}, phone: {recipient_phone}) for job {job.get('id')}")
             except Exception as e:
-                logger.error("Failed to send matching job notification to %s: %s", tp.get("id"), str(e))
+                import traceback
+                error_details = {
+                    "tradesperson_id": tp.get("id"),
+                    "tradesperson_name": name,
+                    "tradesperson_email": recipient_email,
+                    "tradesperson_phone": recipient_phone,
+                    "job_id": job.get("id"),
+                    "job_title": job.get("title"),
+                    "preference_channel": getattr(preferences, "new_matching_job", "unknown") if 'preferences' in locals() else "unknown",
+                    "error": str(e),
+                    "error_type": type(e).__name__
+                }
+                logger.error(
+                    "❌ FAILED to send matching job notification to tradesperson %s (email: %s, phone: %s) for job %s. "
+                    "Preference channel: %s. Error: %s",
+                    tp.get("id"),
+                    recipient_email,
+                    recipient_phone,
+                    job.get("id"),
+                    error_details["preference_channel"],
+                    str(e)
+                )
+                logger.error(f"Full error details: {error_details}")
+                logger.error(f"Error traceback:\n{traceback.format_exc()}")
+                # Store failed notification record for tracking
+                try:
+                    failed_notification = Notification(
+                        id=str(uuid.uuid4()),
+                        user_id=tp_id,
+                        type=NotificationType.NEW_MATCHING_JOB,
+                        channel=getattr(preferences, "new_matching_job", NotificationChannel.EMAIL) if 'preferences' in locals() else NotificationChannel.EMAIL,
+                        recipient_email=recipient_email,
+                        recipient_phone=recipient_phone,
+                        subject=f"New Job: {job.get('title', 'Job')}",
+                        content=f"Failed to send: {str(e)}",
+                        status=NotificationStatus.FAILED,
+                        metadata={"error": str(e), "error_type": type(e).__name__, "job_id": job.get("id"), **template_data}
+                    )
+                    await database.create_notification(failed_notification)
+                except Exception as save_err:
+                    logger.error(f"Failed to save failed notification record: {str(save_err)}")
                 continue
     except Exception as e:
-        logger.error("Error notifying matching tradespeople: %s", str(e))
+        import traceback
+        logger.error(
+            "❌ CRITICAL ERROR in notify_matching_tradespeople_new_job for job %s: %s",
+            job.get("id", "unknown"),
+            str(e)
+        )
+        logger.error(f"Error traceback:\n{traceback.format_exc()}")
+        # Re-raise to ensure the error is visible in logs and monitoring
+        raise
 
 @router.post("/create-sample-data")
 async def create_sample_data(current_user: User = Depends(get_current_homeowner)):

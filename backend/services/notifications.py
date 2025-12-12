@@ -928,37 +928,94 @@ class NotificationService:
         )
 
         email_failed = False
+        email_error = None
+        sms_failed = False
+        sms_error = None
 
         try:
             # Send based on channel preference
             if channel in [NotificationChannel.EMAIL, NotificationChannel.BOTH]:
-                try:
-                    await self._send_email_notification(notification, template_data)
-                except Exception as e:
+                if not recipient_email:
+                    error_msg = f"❌ Email notification requested but no recipient email provided for user {user_id}, notification type {notification_type.value}"
+                    logger.error(error_msg)
                     email_failed = True
-                    logger.error(f"❌ Email delivery failed, considering SMS fallback: {str(e)}")
+                    email_error = ValueError(error_msg)
+                else:
+                    try:
+                        await self._send_email_notification(notification, template_data)
+                        logger.info(f"✅ Email sent successfully for notification {notification.id} to {recipient_email}")
+                    except Exception as e:
+                        email_failed = True
+                        email_error = e
+                        error_details = f"❌ Email delivery failed for notification {notification.id} (type: {notification_type.value}, user: {user_id}, email: {recipient_email}): {str(e)}"
+                        logger.error(error_details)
+                        # Log full exception traceback for debugging
+                        import traceback
+                        logger.error(f"Email error traceback:\n{traceback.format_exc()}")
 
             if channel in [NotificationChannel.SMS, NotificationChannel.BOTH]:
-                await self._send_sms_notification(notification, template_data)
+                if not recipient_phone:
+                    error_msg = f"❌ SMS notification requested but no recipient phone provided for user {user_id}, notification type {notification_type.value}"
+                    logger.error(error_msg)
+                    sms_failed = True
+                    sms_error = ValueError(error_msg)
+                else:
+                    try:
+                        await self._send_sms_notification(notification, template_data)
+                        logger.info(f"✅ SMS sent successfully for notification {notification.id} to {recipient_phone}")
+                    except Exception as e:
+                        sms_failed = True
+                        sms_error = e
+                        error_details = f"❌ SMS delivery failed for notification {notification.id} (type: {notification_type.value}, user: {user_id}, phone: {recipient_phone}): {str(e)}"
+                        logger.error(error_details)
+                        # Log full exception traceback for debugging
+                        import traceback
+                        logger.error(f"SMS error traceback:\n{traceback.format_exc()}")
 
-            # If preferred channel was EMAIL and it failed, attempt SMS fallback
-            if channel == NotificationChannel.EMAIL and email_failed and recipient_phone:
-                try:
-                    # Switch channel for fallback delivery
-                    notification.channel = NotificationChannel.SMS
-                    await self._send_sms_notification(notification, template_data)
-                    logger.info(f"🔁 Fallback SMS sent for notification: {notification.id}")
-                except Exception as sms_err:
-                    logger.error(f"❌ SMS fallback failed: {str(sms_err)}")
+            # Determine final status based on channel preference and results
+            if channel == NotificationChannel.EMAIL:
+                if email_failed:
+                    notification.status = NotificationStatus.FAILED
+                    # Raise error to surface it instead of silently failing
+                    raise Exception(f"Email notification failed (preferred channel: EMAIL): {str(email_error)}") from email_error
+                else:
+                    notification.status = NotificationStatus.SENT
+            elif channel == NotificationChannel.SMS:
+                if sms_failed:
+                    notification.status = NotificationStatus.FAILED
+                    # Raise error to surface it instead of silently failing
+                    raise Exception(f"SMS notification failed (preferred channel: SMS): {str(sms_error)}") from sms_error
+                else:
+                    notification.status = NotificationStatus.SENT
+            elif channel == NotificationChannel.BOTH:
+                if email_failed and sms_failed:
+                    notification.status = NotificationStatus.FAILED
+                    # Raise error to surface it
+                    raise Exception(f"Both email and SMS notifications failed. Email error: {str(email_error)}, SMS error: {str(sms_error)}")
+                elif email_failed:
+                    notification.status = NotificationStatus.SENT  # SMS succeeded
+                    logger.warning(f"⚠️ Email failed but SMS succeeded for notification {notification.id}")
+                elif sms_failed:
+                    notification.status = NotificationStatus.SENT  # Email succeeded
+                    logger.warning(f"⚠️ SMS failed but email succeeded for notification {notification.id}")
+                else:
+                    notification.status = NotificationStatus.SENT
 
-            notification.status = NotificationStatus.SENT
-            notification.sent_at = datetime.now(timezone.utc)
-
-            logger.info(f"✅ Notification processed: {notification.id}")
+            if notification.status == NotificationStatus.SENT:
+                notification.sent_at = datetime.now(timezone.utc)
+                logger.info(f"✅ Notification processed successfully: {notification.id} (channel: {channel.value})")
+            else:
+                logger.error(f"❌ Notification failed: {notification.id} (channel: {channel.value})")
 
         except Exception as e:
             notification.status = NotificationStatus.FAILED
-            logger.error(f"❌ Notification processing failed: {notification.id} - {str(e)}")
+            error_msg = f"❌ Notification processing failed: {notification.id} (type: {notification_type.value}, user: {user_id}, channel: {channel.value}) - {str(e)}"
+            logger.error(error_msg)
+            # Log full exception traceback
+            import traceback
+            logger.error(f"Notification error traceback:\n{traceback.format_exc()}")
+            # Re-raise to surface the error
+            raise
 
         return notification
     
