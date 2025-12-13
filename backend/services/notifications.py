@@ -803,13 +803,14 @@ serviceHub Team
 <html>
 <head>
     <style>
-        .container { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        body { margin: 0; padding: 0; }
+        .container { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 8px 20px 20px; }
+        .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
         .logo img { height: 40px; }
         .logo span { font-size: 24px; font-weight: bold; color: #000; }
-        .button { display: inline-block; padding: 10px 20px; background-color: #003366; color: #fff; text-decoration: none; border-radius: 4px; margin: 20px 0; }
-        .steps { margin: 20px 0; padding-left: 20px; }
-        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+        .button { display: inline-block; padding: 10px 20px; background-color: #003366; color: #fff; text-decoration: none; border-radius: 4px; margin: 16px 0; }
+        .steps { margin: 16px 0; padding-left: 20px; }
+        .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
         .footer a { color: #666; text-decoration: none; }
     </style>
 </head>
