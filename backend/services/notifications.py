@@ -869,10 +869,19 @@ serviceHub Team
         <p>{Location} & {miles}</p>
         <a href="{see_more_url}" class="button">See more details</a>
         <h3 style="font-weight:700; color:#0a1b3d;">Next steps</h3>
-        <ol class="steps">
-            <li style="font-weight:700;">Send a message for free to the customer to express interest in this job.</li>
-            <li style="font-weight:700;">You'll only pay if a customer shares their contact details with you.</li>
-            <li style="font-weight:700;">Contact the customer as soon as you get the contact details for the best chance of getting hired.</li>
+        <ol class="steps" style="list-style:none; padding-left:0; margin-left:0;">
+            <li>
+                <span style="font-weight:800; font-size:22px; color:#000; display:inline-block; width:24px; margin-right:8px;">1</span>
+                <span style="font-weight:700;">Send a message for free to the customer to express interest in this job.</span>
+            </li>
+            <li>
+                <span style="font-weight:800; font-size:22px; color:#000; display:inline-block; width:24px; margin-right:8px;">2</span>
+                <span style="font-weight:700;">You'll only pay if a customer shares their contact details with you.</span>
+            </li>
+            <li>
+                <span style="font-weight:800; font-size:22px; color:#000; display:inline-block; width:24px; margin-right:8px;">3</span>
+                <span style="font-weight:700;">Contact the customer as soon as you get the contact details for the best chance of getting hired.</span>
+            </li>
         </ol>
         <p>Do not share this email with others to prevent Unauthorised access to your account</p>
         <p>Please don't reply to this email — we won't get your response. Need help? Visit our <a href="{support_url}">Support centre</a></p>
