@@ -91,6 +91,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
     // Step 3: ID Check
     idType: '',
     idDocument: null,
+    idDocumentFile: null,
     
     // Step 4: Skills Test Results
     skillsTestPassed: false,
@@ -366,6 +367,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
       setTimeout(() => {
         setUploadProgress(100);
         updateFormData('idDocument', fileInfo);
+        updateFormData('idDocumentFile', file);
         setIsUploading(false);
         toast({
           title: "Document uploaded successfully!",
@@ -390,6 +392,7 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
       URL.revokeObjectURL(formData.idDocument.url);
     }
     updateFormData('idDocument', null);
+    updateFormData('idDocumentFile', null);
     setUploadProgress(0);
   };
 
@@ -478,6 +481,20 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
       const result = await registerTradesperson(registrationData);
 
       if (result.success) {
+        try {
+          if (formData.idDocumentFile && formData.idType) {
+            const typeMap = {
+              passport: 'passport',
+              nin: 'national_id',
+              drivers_licence: 'drivers_license',
+            };
+            const docType = typeMap[formData.idType] || 'passport';
+            const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+            const { referralsAPI } = await import('../../api/referrals');
+            await referralsAPI.submitVerificationDocuments(docType, fullName, '', formData.idDocumentFile);
+          }
+        } catch (e) {
+        }
         const walletSetupChoice = walletSetupOverride ?? formData.walletSetup;
         const fullName = `${formData.firstName} ${formData.lastName}`;
         
