@@ -412,8 +412,12 @@ export const adminAPI = {
 
   // Get job statistics for admin
   getJobStatistics: async () => {
-    const response = await apiClient.get('/admin/jobs/statistics');
-    return response.data;
+    // Use unified stats endpoint and normalize shape for frontend
+    const response = await apiClient.get('/admin/jobs/stats');
+    const data = response.data || {};
+    // Normalize to { statistics: {...} } so AdminDashboard can read approved_today
+    const normalized = data.job_stats || data.statistics || data;
+    return { statistics: normalized };
   },
 
   // Edit job details and access fees

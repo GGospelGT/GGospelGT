@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { adminAPI, walletAPI } from '../api/wallet';
 import { adminReferralsAPI, adminVerificationAPI } from '../api/referrals';
 import { getTradespeopleVerificationFileBase64 } from '../api/tradespeopleVerificationBase64';
@@ -19,6 +19,7 @@ import { Dialog, DialogContent } from '../components/ui/dialog';
 const AdminDashboard = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(adminAPI.isLoggedIn());
   const [activeTab, setActiveTab] = useState('funding');
+  const fundingTabRef = useRef(null);
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [fundingRequests, setFundingRequests] = useState([]);
   const [jobs, setJobs] = useState([]);
@@ -355,6 +356,8 @@ const AdminDashboard = () => {
         title: "Funding Confirmed",
         description: "Coins have been added to user's wallet"
       });
+      setActiveTab('funding');
+      fundingTabRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       fetchData();
     } catch (error) {
       toast({
@@ -381,6 +384,8 @@ const AdminDashboard = () => {
         title: "Funding Rejected",
         description: "User will be notified of the rejection"
       });
+      setActiveTab('funding');
+      fundingTabRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       fetchData();
     } catch (error) {
       toast({
@@ -1340,7 +1345,7 @@ const AdminDashboard = () => {
             <div className="p-6">
               {/* Funding Requests Tab */}
               {activeTab === 'funding' && (
-                <div className="space-y-6">
+                <div className="space-y-6" ref={fundingTabRef} tabIndex={-1}>
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold">Pending Funding Requests</h2>
                     <button
