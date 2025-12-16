@@ -1615,13 +1615,23 @@ async def update_notification_status(
 async def resend_notification(notification_id: str):
     """Resend a failed or cancelled notification"""
     
+    logger.info(f"Resend request received for notification_id: {notification_id}")
+    
     success = await database.resend_notification(notification_id)
     
     if not success:
-        raise HTTPException(
-            status_code=400, 
-            detail="Cannot resend notification. It may not exist or may not be in a resendable state."
-        )
+        # Check if notification exists to provide better error message
+        notification = await database.get_notification_by_id(notification_id)
+        if not notification:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Notification {notification_id} not found"
+            )
+        else:
+            raise HTTPException(
+                status_code=400, 
+                detail="Cannot resend notification. It may be missing required data (user, type, or recipient contact info)."
+            )
     
     return {
         "message": "Notification resent",

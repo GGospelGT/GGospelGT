@@ -969,7 +969,8 @@ const AdminDashboard = () => {
   const handleResendNotification = async (notificationId) => {
     try {
       setIsProcessing(true);
-      await adminAPI.resendNotification(notificationId);
+      console.log('Attempting to resend notification with ID:', notificationId);
+      await adminAPI.resendNotification(String(notificationId));
       
       toast({
         title: "Success",
@@ -980,9 +981,10 @@ const AdminDashboard = () => {
       handleNotificationDataLoad();
     } catch (error) {
       console.error('Failed to resend notification:', error);
+      const errorMessage = error.response?.data?.detail || error.message || "Failed to resend notification";
       toast({
         title: "Error",
-        description: "Failed to resend notification",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -3756,8 +3758,16 @@ const AdminDashboard = () => {
                               icon: ({ className }) => <span className={className}>🔄</span>,
                               onClick: (notification) => {
                                 const notificationId = notification.id || notification._id;
-                                if (!notificationId) return;
-                                handleResendNotification(notificationId);
+                                console.log('Resend clicked - notification:', notification, 'ID:', notificationId);
+                                if (!notificationId) {
+                                  toast({
+                                    title: 'Error',
+                                    description: 'Notification ID not found',
+                                    variant: 'destructive'
+                                  });
+                                  return;
+                                }
+                                handleResendNotification(String(notificationId));
                               },
                               title: 'Resend',
                               className: 'text-blue-600 hover:text-blue-900'
@@ -3767,12 +3777,20 @@ const AdminDashboard = () => {
                               icon: ({ className }) => <span className={className}>✏️</span>,
                               onClick: (notification) => {
                                 const notificationId = notification.id || notification._id;
-                                if (!notificationId) return;
+                                console.log('Update status clicked - notification:', notification, 'ID:', notificationId);
+                                if (!notificationId) {
+                                  toast({
+                                    title: 'Error',
+                                    description: 'Notification ID not found',
+                                    variant: 'destructive'
+                                  });
+                                  return;
+                                }
                                 setStatusEditModal({
                                   open: true,
                                   notification,
                                   status: (notification.status || '').toLowerCase(),
-                                  notes: ''
+                                  notes: notification.admin_notes || ''
                                 });
                               },
                               title: 'Update Status',
@@ -4096,6 +4114,7 @@ const AdminDashboard = () => {
                       return;
                     }
                   const notificationId = statusEditModal.notification?.id || statusEditModal.notification?._id;
+                  console.log('Updating status - notification:', statusEditModal.notification, 'ID:', notificationId);
                   if (!notificationId) {
                     toast({
                       title: 'Error',
@@ -4104,7 +4123,7 @@ const AdminDashboard = () => {
                     });
                     return;
                   }
-                  handleUpdateNotificationStatus(notificationId, normalized, statusEditModal.notes);
+                  handleUpdateNotificationStatus(String(notificationId), normalized, statusEditModal.notes);
                     setStatusEditModal({ open: false, notification: null, status: '', notes: '' });
                   }}
                 >

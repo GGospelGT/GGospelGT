@@ -6165,19 +6165,37 @@ class Database:
             doc = None
             try:
                 doc = await self.notifications_collection.find_one({"_id": ObjectId(notification_id)})
-            except Exception:
-                doc = await self.notifications_collection.find_one({"_id": notification_id})
+            except Exception as e:
+                logger.warning(f"Could not parse notification_id as ObjectId: {notification_id}, error: {e}")
+                try:
+                    doc = await self.notifications_collection.find_one({"_id": notification_id})
+                except Exception as e2:
+                    logger.error(f"Could not find notification with ID: {notification_id}, error: {e2}")
+                    return False
             if not doc:
+                logger.error(f"Notification not found: {notification_id}")
                 return False
 
             user_id = doc.get("user_id")
+            if not user_id:
+                logger.error(f"Notification {notification_id} has no user_id; cannot resend")
+                return False
+                
             user = await self.get_user_by_id(user_id)
+            if not user:
+                logger.error(f"User not found for notification {notification_id}, user_id: {user_id}")
+                return False
+                
             prefs = await self.get_user_notification_preferences(user_id)
 
             # Prepare resend parameters
             metadata = doc.get("metadata", {})
             recipient_email = doc.get("recipient_email") or (user.get("email") if user else None)
             recipient_phone = doc.get("recipient_phone") or (user.get("phone") if user else None)
+            
+            if not recipient_email and not recipient_phone:
+                logger.error(f"Notification {notification_id} has no recipient email or phone; cannot resend")
+                return False
             
             # Coerce type to enum
             nt = doc.get("type")
