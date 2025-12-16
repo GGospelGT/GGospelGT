@@ -238,6 +238,7 @@ const AdminDataTable = ({
                       <div className="flex items-center space-x-2">
                         {allowView && (
                           <button
+                            type="button"
                             onClick={() => onView?.(item)}
                             className="text-blue-600 hover:text-blue-900"
                             title="View details"
@@ -248,6 +249,7 @@ const AdminDataTable = ({
                         
                         {allowInlineEdit && (
                           <button
+                            type="button"
                             onClick={() => setEditingItem(item)}
                             className="text-indigo-600 hover:text-indigo-900"
                             title="Edit"
@@ -259,6 +261,7 @@ const AdminDataTable = ({
                         {customActions.map((action) => (
                           <button
                             key={action.id}
+                            type="button"
                             onClick={() => action.onClick(item)}
                             className={action.className || "text-gray-600 hover:text-gray-900"}
                             title={action.title}
@@ -269,6 +272,7 @@ const AdminDataTable = ({
                         
                         {allowDelete && (
                           <button
+                            type="button"
                             onClick={() => setDeleteModal({ isOpen: true, item })}
                             className="text-red-600 hover:text-red-900"
                             title="Delete"

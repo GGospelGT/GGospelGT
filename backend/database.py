@@ -44,9 +44,19 @@ class Database:
         }
 
     async def connect_to_mongo(self):
-        # Try different environment variable names for MongoDB URL
-        mongo_url = os.environ.get('MONGO_URL') or os.environ.get('MONGODB_URL')
-        db_name = os.environ.get('DB_NAME') or os.environ.get('DATABASE_NAME') or 'servicehub'
+        mongo_url = (
+            os.environ.get('MONGO_URL')
+            or os.environ.get('MONGODB_URL')
+            or os.environ.get('MONGODB_URI')
+            or os.environ.get('MONGODB_CONNECTION_STRING')
+        )
+        db_name = (
+            os.environ.get('DB_NAME')
+            or os.environ.get('DATABASE_NAME')
+            or os.environ.get('MONGO_DB')
+            or os.environ.get('MONGODB_DB')
+            or 'servicehub'
+        )
         
         if not mongo_url:
             raise ValueError("MongoDB URL not found. Please set MONGO_URL or MONGODB_URL environment variable.")
