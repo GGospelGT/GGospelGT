@@ -1624,7 +1624,7 @@ async def resend_notification(notification_id: str):
         )
     
     return {
-        "message": "Notification queued for resending",
+        "message": "Notification resent",
         "notification_id": notification_id
     }
 

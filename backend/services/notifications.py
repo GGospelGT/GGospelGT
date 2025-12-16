@@ -924,7 +924,10 @@ serviceHub Team
         """
         import re
         try:
-            subject = template.subject_template.format(**data)
+            class _SafeDict(dict):
+                def __missing__(self, key):
+                    return ""
+            subject = template.subject_template.format_map(_SafeDict(data))
 
             content_template = template.content_template
 
@@ -939,7 +942,7 @@ serviceHub Team
 
             content_template = re.sub(r"(<style[^>]*>)(.*?)(</style>)", _escape_style, content_template, flags=re.DOTALL|re.IGNORECASE)
 
-            content = content_template.format(**data)
+            content = content_template.format_map(_SafeDict(data))
             return subject, content
         except KeyError as e:
             logger.error(f"❌ Template rendering failed - missing variable: {e}")
