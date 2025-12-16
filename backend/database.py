@@ -6137,15 +6137,18 @@ class Database:
         try:
             from bson import ObjectId
             try:
-                query = {"_id": ObjectId(notification_id), "status": {"$in": ["failed", "cancelled"]}}
+                query = {"_id": ObjectId(notification_id)}
             except Exception:
-                query = {"_id": notification_id, "status": {"$in": ["failed", "cancelled"]}}
+                query = {"_id": notification_id}
             result = await self.notifications_collection.update_one(
                 query,
                 {"$set": {"status": "pending", "updated_at": datetime.utcnow()}, "$inc": {"resend_count": 1}}
             )
             
-            return result.modified_count > 0
+            try:
+                return bool(getattr(result, "matched_count", 0) > 0)
+            except Exception:
+                return bool(getattr(result, "modified_count", 0) > 0)
         except Exception as e:
             logger.error(f"Error resending notification: {str(e)}")
             return False
