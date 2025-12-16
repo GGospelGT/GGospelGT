@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { adminAPI, walletAPI } from '../api/wallet';
 import { adminReferralsAPI, adminVerificationAPI } from '../api/referrals';
@@ -4075,7 +4076,7 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {statusEditModal.open && (
+        {statusEditModal.open && createPortal(
           <div 
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-40"
             onClick={(e) => {
@@ -4149,7 +4150,8 @@ const AdminDashboard = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
                   {/* Users Table */}
