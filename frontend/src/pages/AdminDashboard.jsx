@@ -111,6 +111,11 @@ const AdminDashboard = () => {
   const [statusEditModal, setStatusEditModal] = useState({ open: false, notification: null, status: '', notes: '' });
   const [editingTemplate, setEditingTemplate] = useState(null);
   
+  // Debug modal state changes
+  useEffect(() => {
+    console.log('statusEditModal state changed:', statusEditModal);
+  }, [statusEditModal]);
+  
   // Job Approval Management state
   const [pendingJobs, setPendingJobs] = useState([]);
   const [approvalStats, setApprovalStats] = useState({});
@@ -3786,12 +3791,15 @@ const AdminDashboard = () => {
                                   });
                                   return;
                                 }
-                                setStatusEditModal({
+                                const newModalState = {
                                   open: true,
                                   notification,
                                   status: (notification.status || '').toLowerCase(),
                                   notes: notification.admin_notes || ''
-                                });
+                                };
+                                console.log('Setting statusEditModal to:', newModalState);
+                                setStatusEditModal(newModalState);
+                                console.log('Modal state should be updated');
                               },
                               title: 'Update Status',
                               className: 'text-green-600 hover:text-green-900'
@@ -4068,8 +4076,18 @@ const AdminDashboard = () => {
         )}
 
         {statusEditModal.open && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <div 
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-40"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setStatusEditModal({ open: false, notification: null, status: '', notes: '' });
+              }
+            }}
+          >
+            <div 
+              className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative z-[10000]"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-lg font-semibold mb-4">Update Notification Status</h3>
               <div className="space-y-4">
                 <div>
