@@ -3740,8 +3740,13 @@ const AdminDashboard = () => {
                           ]}
                           entityName="notification"
                           entityNamePlural="notifications"
+                          // Use either `id` or Mongo `_id` consistently
                           onView={(notification) => setSelectedNotification(notification)}
-                          onDelete={(notification) => handleDeleteNotification(notification.id)}
+                          onDelete={(notification) => {
+                            const notificationId = notification.id || notification._id;
+                            if (!notificationId) return;
+                            handleDeleteNotification(notificationId);
+                          }}
                           allowInlineEdit={false}
                           allowDelete={true}
                           allowView={true}
@@ -3749,7 +3754,11 @@ const AdminDashboard = () => {
                             {
                               id: 'resend',
                               icon: ({ className }) => <span className={className}>🔄</span>,
-                              onClick: (notification) => handleResendNotification(notification.id),
+                              onClick: (notification) => {
+                                const notificationId = notification.id || notification._id;
+                                if (!notificationId) return;
+                                handleResendNotification(notificationId);
+                              },
                               title: 'Resend',
                               className: 'text-blue-600 hover:text-blue-900'
                             },
@@ -3757,7 +3766,14 @@ const AdminDashboard = () => {
                               id: 'update_status',
                               icon: ({ className }) => <span className={className}>✏️</span>,
                               onClick: (notification) => {
-                                setStatusEditModal({ open: true, notification, status: (notification.status || '').toLowerCase(), notes: '' });
+                                const notificationId = notification.id || notification._id;
+                                if (!notificationId) return;
+                                setStatusEditModal({
+                                  open: true,
+                                  notification,
+                                  status: (notification.status || '').toLowerCase(),
+                                  notes: ''
+                                });
                               },
                               title: 'Update Status',
                               className: 'text-green-600 hover:text-green-900'
@@ -4079,7 +4095,16 @@ const AdminDashboard = () => {
                       toast({ title: 'Invalid status', description: `Allowed: ${allowed.join(', ')}`, variant: 'destructive' });
                       return;
                     }
-                    handleUpdateNotificationStatus(statusEditModal.notification.id, normalized, statusEditModal.notes);
+                  const notificationId = statusEditModal.notification?.id || statusEditModal.notification?._id;
+                  if (!notificationId) {
+                    toast({
+                      title: 'Error',
+                      description: 'Could not determine notification ID to update.',
+                      variant: 'destructive'
+                    });
+                    return;
+                  }
+                  handleUpdateNotificationStatus(notificationId, normalized, statusEditModal.notes);
                     setStatusEditModal({ open: false, notification: null, status: '', notes: '' });
                   }}
                 >
