@@ -166,6 +166,12 @@ const TradespersonRegistration = ({ onClose, onComplete }) => {
     console.log('✅ Redirect to tradesperson dashboard completed');
   };
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { window.scrollTo(0, 0); }
+    }
+  }, [currentStep]);
+
   // Enforce verification: auto close modal and redirect only after both are verified
   useEffect(() => {
     if (emailVerified && phoneVerified) {
