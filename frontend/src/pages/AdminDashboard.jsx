@@ -108,6 +108,7 @@ const AdminDashboard = () => {
   const [activeNotificationTab, setActiveNotificationTab] = useState('notifications');
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [selectedNotificationUser, setSelectedNotificationUser] = useState(null);
+  const [statusEditModal, setStatusEditModal] = useState({ open: false, notification: null, status: '', notes: '' });
   const [editingTemplate, setEditingTemplate] = useState(null);
   
   // Job Approval Management state
@@ -972,7 +973,7 @@ const AdminDashboard = () => {
       
       toast({
         title: "Success",
-        description: "Notification queued for resending"
+        description: "Notification resent"
       });
       
       // Refresh notifications
@@ -3756,16 +3757,7 @@ const AdminDashboard = () => {
                               id: 'update_status',
                               icon: ({ className }) => <span className={className}>✏️</span>,
                               onClick: (notification) => {
-                                const input = prompt('Enter new status (pending, sent, delivered, failed, cancelled):', notification.status);
-                                const newStatus = (input || '').toLowerCase().trim();
-                                const allowed = ['pending', 'sent', 'delivered', 'failed', 'cancelled'];
-                                if (!newStatus) return;
-                                if (!allowed.includes(newStatus)) {
-                                  toast({ title: 'Invalid status', description: `Allowed: ${allowed.join(', ')}`, variant: 'destructive' });
-                                  return;
-                                }
-                                const adminNotes = prompt('Admin notes (optional):') || '';
-                                handleUpdateNotificationStatus(notification.id, newStatus, adminNotes);
+                                setStatusEditModal({ open: true, notification, status: (notification.status || '').toLowerCase(), notes: '' });
                               },
                               title: 'Update Status',
                               className: 'text-green-600 hover:text-green-900'
@@ -4037,9 +4029,66 @@ const AdminDashboard = () => {
                       <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
                         <h3 className="text-sm font-medium text-orange-800">Homeowners</h3>
                         <p className="text-2xl font-bold text-orange-600">{userStats.homeowners}</p>
-                      </div>
-                    </div>
-                  )}
+            </div>
+          </div>
+        )}
+
+        {statusEditModal.open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+              <h3 className="text-lg font-semibold mb-4">Update Notification Status</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    value={statusEditModal.status}
+                    onChange={(e) => setStatusEditModal((m) => ({ ...m, status: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="sent">Sent</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="failed">Failed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Admin Notes</label>
+                  <textarea
+                    value={statusEditModal.notes}
+                    onChange={(e) => setStatusEditModal((m) => ({ ...m, notes: e.target.value }))}
+                    placeholder="Optional notes"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+                  onClick={() => setStatusEditModal({ open: false, notification: null, status: '', notes: '' })}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm"
+                  onClick={() => {
+                    const allowed = ['pending', 'sent', 'delivered', 'failed', 'cancelled'];
+                    const normalized = (statusEditModal.status || '').toLowerCase().trim();
+                    if (!allowed.includes(normalized)) {
+                      toast({ title: 'Invalid status', description: `Allowed: ${allowed.join(', ')}`, variant: 'destructive' });
+                      return;
+                    }
+                    handleUpdateNotificationStatus(statusEditModal.notification.id, normalized, statusEditModal.notes);
+                    setStatusEditModal({ open: false, notification: null, status: '', notes: '' });
+                  }}
+                >
+                  Update
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
                   {/* Users Table */}
                   {loading ? (

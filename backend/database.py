@@ -6133,22 +6133,80 @@ class Database:
             return False
     
     async def resend_notification(self, notification_id: str) -> bool:
-        """Queue notification for resending"""
+        """Resend a notification immediately and update its record"""
         try:
             from bson import ObjectId
-            try:
-                query = {"_id": ObjectId(notification_id)}
-            except Exception:
-                query = {"_id": notification_id}
-            result = await self.notifications_collection.update_one(
-                query,
-                {"$set": {"status": "pending", "updated_at": datetime.utcnow()}, "$inc": {"resend_count": 1}}
-            )
+            from models.notifications import NotificationType
+            from services.notifications import notification_service
             
+            # Fetch original notification document
+            doc = None
             try:
-                return bool(getattr(result, "matched_count", 0) > 0)
+                doc = await self.notifications_collection.find_one({"_id": ObjectId(notification_id)})
             except Exception:
-                return bool(getattr(result, "modified_count", 0) > 0)
+                doc = await self.notifications_collection.find_one({"_id": notification_id})
+            if not doc:
+                return False
+
+            user_id = doc.get("user_id")
+            user = await self.get_user_by_id(user_id)
+            prefs = await self.get_user_notification_preferences(user_id)
+
+            # Prepare resend parameters
+            metadata = doc.get("metadata", {})
+            recipient_email = doc.get("recipient_email") or (user.get("email") if user else None)
+            recipient_phone = doc.get("recipient_phone") or (user.get("phone") if user else None)
+            
+            # Coerce type to enum
+            nt = doc.get("type")
+            try:
+                notification_type = NotificationType(nt) if nt else None
+            except Exception:
+                # If stored as enum object/value already
+                notification_type = nt
+            if not notification_type:
+                logger.error(f"Notification {notification_id} has no type; cannot resend")
+                return False
+
+            # Perform send
+            try:
+                notification = await notification_service.send_notification(
+                    user_id=user_id,
+                    notification_type=notification_type,
+                    template_data=metadata,
+                    user_preferences=prefs,
+                    recipient_email=recipient_email,
+                    recipient_phone=recipient_phone
+                )
+                # Update original record with latest content/status/timestamps and increment resend_count
+                await self.notifications_collection.update_one(
+                    {"_id": doc["_id"]},
+                    {
+                        "$set": {
+                            "status": getattr(notification.status, "value", notification.status),
+                            "subject": notification.subject,
+                            "content": notification.content,
+                            "updated_at": datetime.utcnow(),
+                            "sent_at": notification.sent_at,
+                        },
+                        "$inc": {"resend_count": 1}
+                    }
+                )
+                return True
+            except Exception as send_error:
+                logger.error(f"Error during resend delivery for {notification_id}: {str(send_error)}")
+                await self.notifications_collection.update_one(
+                    {"_id": doc["_id"]},
+                    {
+                        "$set": {
+                            "status": "failed",
+                            "updated_at": datetime.utcnow(),
+                            "admin_notes": f"Resend failed: {str(send_error)}"
+                        },
+                        "$inc": {"resend_count": 1}
+                    }
+                )
+                return False
         except Exception as e:
             logger.error(f"Error resending notification: {str(e)}")
             return False
