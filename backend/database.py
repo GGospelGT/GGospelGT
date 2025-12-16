@@ -6170,9 +6170,14 @@ class Database:
         try:
             from bson import ObjectId
             from bson.errors import InvalidId
-            from models.notifications import NotificationType
-            from services.notifications import notification_service
-            
+            # Lazy import with package-safe fallback
+            try:
+                from .models.notifications import NotificationType
+                from .services.notifications import notification_service
+            except ImportError:
+                from models.notifications import NotificationType
+                from services.notifications import notification_service
+
             # Fetch original notification document
             # Notifications use UUID strings as _id, not ObjectIds
             doc = None
@@ -6218,7 +6223,6 @@ class Database:
             prefs = await self.get_user_notification_preferences(user_id)
             if not prefs:
                 logger.warning(f"No preferences found for user {user_id}, creating defaults")
-                from models.notifications import NotificationPreferences
                 prefs = NotificationPreferences(
                     id=str(uuid.uuid4()),
                     user_id=user_id
