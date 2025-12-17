@@ -1559,9 +1559,10 @@ async def get_all_notifications(
         limit=limit
     )
     
-    # Get stats
     total_count = await database.get_notifications_count(filters)
-    stats = await database.get_notification_stats()
+    filtered_counts = await database.get_notification_status_counts(filters)
+    base_stats = await database.get_notification_stats()
+    stats = {**base_stats, **filtered_counts}
     
     return {
         "notifications": notifications,

@@ -6084,6 +6084,23 @@ class Database:
         """Get count of notifications matching filters"""
         query = filters or {}
         return await self.notifications_collection.count_documents(query)
+
+    async def get_notification_status_counts(self, filters: dict = None) -> Dict[str, int]:
+        query = filters or {}
+        pipeline = [{"$match": query}, {"$group": {"_id": "$status", "count": {"$sum": 1}}}]
+        status_counts: Dict[str, int] = {}
+        async for doc in self.notifications_collection.aggregate(pipeline):
+            status_counts[doc.get("_id")] = int(doc.get("count", 0))
+        total = await self.notifications_collection.count_documents(query)
+        sent_total = status_counts.get("sent", 0) + status_counts.get("delivered", 0)
+        failed_total = status_counts.get("failed", 0)
+        pending_total = status_counts.get("pending", 0)
+        return {
+            "total_notifications": int(total),
+            "sent_count": int(sent_total),
+            "failed_count": int(failed_total),
+            "pending_count": int(pending_total),
+        }
     
     async def get_notification_by_id(self, notification_id: str) -> Optional[dict]:
         """Get detailed notification by ID"""
