@@ -5504,17 +5504,224 @@ class Database:
                 {
                     "policy_type": "privacy_policy",
                     "title": "Privacy Policy",
-                    "content": "ServiceHub Privacy Policy. Effective 1 January 2026. This policy explains how ServiceHub collects, uses and protects personal data under NDPA/NDPR.",
+                    "content": """
+Privacy Policy
+
+This Privacy Policy explains how ServiceHub Limited ("ServiceHub", "we", "us", "our") collects, uses, shares, and protects personal data when you use our platforms and services. It is divided into two parts: Part A (Privacy Policy for Service Providers / Tradespeople) and Part B (Privacy Policy for Customers). If you use ServiceHub as both a Service Provider and a Customer, both parts apply to you.
+
+1. DATA CONTROLLER DETAILS
+ServiceHub Limited is the data controller responsible for personal data processed in connection with our services.
+- Legal Name: ServiceHub Limited
+- RC: 8905084
+- Registered Address: 6, D Place Guest House, Off Omimi Link Road, Ekpan, Delta State, Nigeria
+- Email: privacy@myservicehub.co
+We process personal data in accordance with applicable data protection laws, including the Nigeria Data Protection Act (NDPA), the Nigeria Data Protection Regulation (NDPR), and other relevant regulations.
+
+2. SCOPE OF THIS POLICY
+This Policy applies to all users of the ServiceHub platform, including:
+- Service Providers / Tradespeople who list, promote, or provide services via ServiceHub
+- Customers (homeowners, tenants, landlords, businesses, or individuals) who request, book, or manage services via ServiceHub
+It covers data collected through our website(s), mobile applications, communication channels (including email, calls, SMS, social media, chat), and any other digital tools or services we operate (the "Platform").
+
+PART A: PRIVACY POLICY FOR SERVICE PROVIDERS / TRADESPEOPLE
+
+A1. INTRODUCTION
+This section applies to artisans, professionals, independent contractors, and companies who create a ServiceHub account or otherwise use ServiceHub to receive leads, connect with Customers, or promote their services. It explains what personal data we collect about you, how we use it, who we share it with, how long we keep it, and the rights you have.
+
+A2. HOW WE COLLECT PERSONAL INFORMATION
+1) Directly from you:
+- When you register for an account or update your profile
+- When you subscribe to plans, pay fees, or update billing details
+- When you communicate with us via email, phone, chat, or support
+- When you upload documents, portfolio items, or respond to Customer requests
+2) Automatically when you use the Platform:
+- Through cookies and similar technologies
+- Through logs of access, device information, and in‑app activity
+3) From third parties (where lawful):
+- Identity verification and KYC providers
+- Payment processors and financial partners
+- Advertising and analytics providers
+- Publicly available sources (e.g., corporate registries, professional listings)
+- Customers who submit reviews, complaints, or references about your services
+In some cases, we are legally or contractually required to collect certain information. If you do not provide it, we may not be able to open or maintain your account.
+
+A3. WHAT WE COLLECT
+1) Identification and Contact Information: full name; business name and trading name; date of birth (where required); phone number; email address; business/correspondence address.
+2) Account and Profile Details: username; password; profile photo or logo; service categories, skills, qualifications; coverage areas and availability; portfolio images and descriptions.
+3) Verification and Compliance Data: government‑issued ID; CAC or business registration documents; tax or regulatory identifiers; professional licences, certifications, insurance; references/guarantor details.
+4) Financial and Transaction Data: bank account details for payouts (if applicable); records of payments made to ServiceHub (subscriptions, access/lead fees); invoices and transaction history.
+5) Communications and Behavioural Data: messages exchanged with Customers via the Platform; emails, support tickets, dispute correspondence; response times, acceptance rates, completion records.
+6) Technical and Usage Data: IP address; device type; operating system; browser type; login timestamps; app/website interactions; features used; activity logs used for security, analytics, and service optimisation.
+
+A4. HOW WE USE YOUR PERSONAL INFORMATION AND LEGAL BASIS
+- Identification, Verification & Authentication – to create your account, verify your identity, confirm eligibility, and secure access. Legal basis: performance of contract; legitimate interests (security, fraud prevention); legal obligation.
+- Operating Our Services – to display your profile, provide you with leads, enquiries, and contact details of Customers who shortlist or hire you; to manage subscriptions, invoices, and payments. Legal basis: performance of contract.
+- Improving Our Platform and Services – to monitor performance, run analytics, develop new features, and improve user experience; to understand how trades and leads perform to refine our matching systems. Legal basis: legitimate interests.
+- Preventing Fraud and Ensuring Safety – to detect and prevent fake profiles, fee avoidance, abuse, and unsafe conduct; to enforce our Terms of Use and policies. Legal basis: legitimate interests; legal obligation.
+- Communications – to send administrative messages (security alerts, policy updates, billing notices); to respond to your enquiries and support requests; to request feedback and conduct surveys. Legal basis: performance of contract; legitimate interests.
+- Marketing – to send you relevant updates, offers, and educational content about using ServiceHub effectively; to create basic segments (e.g., by trade, location) to keep communications relevant; you can opt out at any time. Legal basis: legitimate interests; consent where required.
+- Business Operations and Corporate Transactions – internal reporting, audits, risk management; in connection with any merger, acquisition, or restructuring under appropriate safeguards. Legal basis: legitimate interests.
+- Legal & Regulatory Compliance – to comply with applicable laws, tax requirements, and regulatory requests; to cooperate with authorities and handle legal claims. Legal basis: legal obligation.
+
+A5. ANONYMISED AND AGGREGATED DATA
+We may anonymise or aggregate your personal data so that it can no longer be used to identify you. We may use such data for analytics, industry insights, service optimisation, and business reporting.
+
+A6. HOW AND WHEN WE SHARE YOUR PERSONAL INFORMATION
+We may share your personal data with:
+- Customers – when you are shortlisted or hired, we share your name, business name, profile, and contact details so they can reach you.
+- Other Users / Public – public elements of your profile (e.g., name, business name, services, coverage area, reviews, portfolio) may appear on the Platform and in search engine results.
+- Service Providers and Processors – technology providers (hosting, storage, CRM), payment processors and billing partners, communication tools (SMS, email, in‑app messaging), analytics and marketing platforms. These parties act on our instructions and are bound by confidentiality and data protection obligations.
+- Advertising Partners – limited, pseudonymised data (e.g., hashed email) to measure or deliver relevant advertising. These partners process data under their own privacy terms.
+- Professional Advisers – lawyers, auditors, consultants where reasonably necessary.
+- Regulators, Law Enforcement, and Legal Requests – where required by law or necessary to protect rights, safety, or prevent fraud.
+- Corporate Transactions – in the event of a merger, acquisition, or asset transfer, subject to safeguards.
+We do not sell your personal data.
+
+A7. INTERNATIONAL DATA TRANSFERS
+Some of our service providers or systems may be located outside Nigeria. Where your data is transferred internationally, we take reasonable steps to ensure an adequate level of protection, including contractual safeguards and security measures, in line with applicable data protection laws.
+
+A8. INFORMATION SECURITY AND STORAGE
+We implement technical and organisational measures designed to protect your data against unauthorised access, loss, misuse, or disclosure. We retain your personal data for as long as: your account is active; necessary to fulfil the purposes described in this Policy; required by law (e.g., tax, accounting, regulatory); needed to resolve disputes, enforce our terms, or prevent fraud. Certain limited records (e.g., blocked or banned accounts) may be retained to protect the integrity of the Platform.
+
+A9. YOUR RIGHTS AS A SERVICE PROVIDER
+Subject to applicable law, you may have the right to request access; request correction; request deletion where legally permissible; object to or restrict certain processing (including direct marketing); request data portability where applicable; withdraw consent where processing is based on consent. You can exercise these rights by contacting privacy@myservicehub.co. We may request additional information to verify your identity. If dissatisfied, you may lodge a complaint with the Nigeria Data Protection Commission (NDPC).
+
+PART B: PRIVACY POLICY FOR CUSTOMERS
+
+B1. INTRODUCTION
+This section applies to individuals and organisations who use ServiceHub to request, book, or manage services, including homeowners, tenants, landlords, property managers, and businesses. It explains how we collect and use your personal information when you interact with Service Providers via our Platform.
+
+B2. HOW WE COLLECT PERSONAL INFORMATION
+1) Direct interactions – when you create an account or submit a job request; communicate with Service Providers through the Platform; contact us via email, chat, or phone; submit reviews, ratings, or feedback.
+2) Automated means – through cookies and similar technologies when you browse or use our Platform; via logs of device and usage information.
+3) Third parties – analytics and marketing platforms; Service Providers who update us on job status or outcomes.
+
+B3. WHAT WE COLLECT
+- Identification and Contact Information – name, phone number, email address.
+- Account and Usage Details – login details and preferences; records of jobs posted, viewed, or managed via the Platform.
+- Job and Property Details – type of work requested; job description, budget range, timing; approximate or full job location (as provided by you).
+- Media and Content – photos or videos you upload relating to the requested work or reviews.
+- Communications – messages with Service Providers and support; call notes or summaries where applicable.
+- Technical and Analytics Data – IP address; device and browser information; pages visited; actions taken; referral sources.
+
+B4. HOW WE USE YOUR PERSONAL INFORMATION AND LEGAL BASIS
+- Offering and Operating Our Services – create/manage your account; allow you to post jobs; connect you with suitable Service Providers and manage bookings. Legal basis: performance of contract.
+- Communication – send confirmations, alerts, updates about your jobs and account; respond to enquiries, support requests, disputes. Legal basis: performance of contract; legitimate interests.
+- Customising Your Experience – show relevant Service Providers based on your needs and location; improve search results and recommendations. Legal basis: legitimate interests.
+- Marketing – send information about ServiceHub features, tips, and promotions (where permitted); tailor messages based on Platform use. You may opt out at any time. Legal basis: legitimate interests; consent where required.
+- Reviews and Platform Integrity – enable you to leave feedback; publish reviews to help other users; detect and manage misuse or fake content. Legal basis: legitimate interests.
+- Fraud Prevention, Security and Legal Compliance – protect users from scams, abuse, and unauthorised activity; enforce our Terms of Use; comply with legal obligations. Legal basis: legitimate interests; legal obligations.
+
+B5. ANONYMISED AND AGGREGATED DATA
+We may anonymise or aggregate Customer data and use it for analytics, service improvement, and business reporting, without identifying you.
+
+B6. HOW AND WHEN WE SHARE YOUR PERSONAL INFORMATION
+We may share your information with Service Providers (when you shortlist, invite, or hire, we share your name, contact details, and relevant job information), technical/operational providers (hosting, communications, analytics, payments), advertising/analytics partners (limited data), regulators and law enforcement (where required), and in corporate transactions under safeguards. We do not sell your personal data.
+
+B7. INTERNATIONAL DATA TRANSFERS
+Where data is transferred or stored outside Nigeria, we take steps to ensure it is protected with appropriate safeguards, in line with applicable laws.
+
+B8. INFORMATION SECURITY, RETENTION AND YOUR RIGHTS
+We use reasonable security measures to protect your data. We retain personal data only as long as necessary to provide services, meet legal and regulatory requirements, resolve disputes, and enforce agreements. As a Customer, you may request access, correction, deletion (where lawful), object/restrict certain processing (including direct marketing), withdraw consent where applicable. Contact privacy@myservicehub.co to exercise rights. You may complain to NDPC.
+
+9. CHANGES TO THIS PRIVACY POLICY
+We may update this Privacy Policy from time to time. When we make material changes, we will notify you via the Platform, email, or other appropriate means. Your continued use of ServiceHub after the effective date of any update constitutes your acceptance of the revised Policy.
+
+See also: Cookie Policy and Contact page on our website.
+""",
                 },
                 {
                     "policy_type": "terms_of_service",
-                    "title": "Terms of Service",
-                    "content": "ServiceHub Terms and Conditions. Effective 1 January 2026. These terms govern platform use by customers and service providers.",
+                    "title": "Terms and Conditions",
+                    "content": """
+Terms and Conditions
+Effective Date: 1 January 2026 | Version: 1.0
+
+1. INTRODUCTION & LEGAL FRAMEWORK
+Welcome to ServiceHub Limited also known as myservicehub ("ServiceHub", "we", "our", "us"). These Terms govern use of the ServiceHub online marketplace and mobile/web services that connect Customers (homeowners and businesses) with verified Service Providers (artisans, professionals, and companies) across Nigeria. By accessing or using the ServiceHub Platform, you agree to be bound by these Terms. If you do not agree, do not use the Platform. Governing Laws & Standards include CAMA, NDPA/NDPR, VAT Act, FIRS regulations, CAC rules, and other applicable Nigerian laws and regulations.
+
+2. KEY DEFINITIONS
+Agreement; Customer; Service Provider; ServiceHub Platform; Job; Lead; Shortlist/Shortlisted; Lead Access Fee; Account Credit; Service Agreement; Content; Feedback; VAT.
+
+3. ACCOUNTS, ELIGIBILITY & VERIFICATION
+Creating an account requires accurate information. Keep details current. We may request documents to verify identity, trade competence, addresses, tax status and compliance. Non-compliance may lead to suspension. Nigeria-only service scope. Data & Compliance Checks for onboarding, fraud prevention, dispute handling, and legal/regulatory compliance.
+
+4. PLATFORM USE, SECURITY & ACCEPTABLE CONDUCT
+Use the Platform lawfully. Do not upload illegal, abusive, defamatory, or misleading Content. Protect your credentials; notify suspected compromise immediately. Prohibited: reverse‑engineering; scraping; automated harvesting; multiple accounts without consent; fee avoidance; using data to train AI models; building competing services with Platform data. Availability may be affected by maintenance/security.
+
+5. INTELLECTUAL PROPERTY & BRANDING
+ServiceHub owns or licenses Platform IP. Limited licence to access/use per these Terms. While active, you may reference “ServiceHub Verified” badges. Upon termination, remove ServiceHub branding within 28 days. You grant ServiceHub a non‑exclusive, royalty‑free licence to host/display/use your profile Materials to operate/improve the Platform, advertise services, analytics and safety. Goodwill remains yours.
+
+6. DATA PROTECTION & PRIVACY (NDPA/NDPR)
+ServiceHub and each user act as independent data controllers for their own processing. We process data under NDPA and NDPR. See the ServiceHub Privacy Policy for rights of access/rectification/erasure/objection, security, breach notification. If you receive personal data via the Platform, use it only for agreed service purposes, keep it secure, do not share beyond necessity, assist with data‑subject requests, and notify ServiceHub promptly of any breach.
+
+PART A — SERVICE PROVIDER TERMS & CONDITIONS
+A1. Eligibility & Conduct: legitimate business/sole trader in Nigeria; licences/insurances; honour commitments; only offer services you are qualified to perform; meet quality standards and our Reviews Policy.
+A2. Leads, Shortlisting & Contact Details: when Shortlisted, ServiceHub shares Customer contact details.
+A3. Lead Access Fees (No Commission Model): non‑refundable fee per Shortlisting, exclusive of VAT; varies by trade, value, location.
+A4. Payment & Invoicing: invoices issued for accrued fees; due upon issue; you authorise card auto‑debit; late payments may attract interest; overdue accounts may be suspended.
+A5. Anti‑Circumvention: do not exchange contact details or direct Customers off‑platform to avoid fees; breach may result in suspension/termination and recovery of losses.
+A6. Service Agreements & Liability: ServiceHub is not a party. You are responsible for tax, compliance, warranty obligations and safety.
+A7. Feedback & Reviews: Customers may leave Feedback once work begins or payment occurs; you may respond; no fake/paid/misleading reviews; we may remove fraudulent/policy‑breaching Feedback.
+A8. Account Credit: non‑cash, non‑transferable credit may be issued; auto‑applies to Lead Access Fees.
+
+PART B — CUSTOMER TERMS & CONDITIONS
+B1. Posting Jobs: describe needs accurately; no offensive content or external contact details in postings.
+B2. Reviewing Providers: check profiles, qualifications, insurance and Feedback; ServiceHub does not guarantee availability, quality, timing or legality.
+B3. Service Agreements: agreements are solely between you and the Service Provider; verify identity, licences, scope, pricing and warranties before hiring.
+B4. Feedback: post honest, respectful Feedback after work starts or payment; no defamatory, abusive, discriminatory, or doxxing content; we may remove policy‑breaching Feedback.
+
+7. DISCOVERY & RANKING TRANSPARENCY
+We rank profiles using relevance, proximity, Customer Feedback, recent activity/responsiveness and limited randomisation. Fees do not buy better rank.
+
+8. CONTENT RULES & MODERATION
+Users are responsible for their Content. We may monitor, remove or alter Content that breaches these Terms, law, or our policies.
+
+9. PAYMENTS, TAXES & RECORDS
+Service Providers must maintain accurate tax/VAT records and comply with FIRS obligations. Keep your own copies of invoices and records.
+
+10. LIABILITY & INDEMNITIES
+Platform Liability (ServiceHub) limited as permitted by law; ServiceHub is not liable for indirect/consequential losses or disputes between Customers and Providers; the Platform is provided “as is”. Provider Indemnity: Service Providers indemnify ServiceHub against third‑party claims arising from their services, Content, misrepresentations, or legal non‑compliance.
+
+11. SUSPENSION, TERMINATION & CHANGES
+We may suspend/terminate accounts for breach, fraud, legal/security risks, serious negative Feedback trends, or non‑payment. We typically provide notice except where urgent action is required. You may stop using the Platform; Providers remain liable for accrued fees and issued invoices. We may update these Terms; continued use after effective date constitutes acceptance.
+
+12. COMPLAINTS & DISPUTE RESOLUTION
+Contact: privacy@myservicehub.co. If unresolved within 14 days, disputes may be referred to mediation, and thereafter binding arbitration at the Lagos Multi‑Door Courthouse (LMDC) under the Arbitration and Mediation Act 2023.
+
+13. GENERAL TERMS
+Force Majeure; Assignment; Entire Agreement; No Third‑Party Rights; Severability & Waiver; Notices via electronic communications.
+
+14. GOVERNING LAW & JURISDICTION
+Governed by the laws of the Federal Republic of Nigeria. Subject to clause 12, courts of competent jurisdiction in Nigeria have jurisdiction.
+
+15. APPROVAL
+Approved by the Board of Directors — SERVICEHUB LIMITED (RC 8905084)
+""",
                 },
                 {
                     "policy_type": "cookie_policy",
                     "title": "Cookie Policy",
-                    "content": "ServiceHub Cookie Policy describing types of cookies used and how to manage preferences.",
+                    "content": """
+Cookie Policy
+
+This Cookie Policy explains what cookies are, how we use them, and how you can manage your cookie preferences on ServiceHub.
+
+What Are Cookies?
+Cookies are small text files stored on your device to remember information about your visit and help websites function properly.
+
+Types of Cookies We Use
+- Strictly Necessary – required for essential features like authentication.
+- Functional – remember preferences and improve your experience.
+- Analytics – help us understand usage to improve the platform.
+- Marketing – used to show relevant content and promotions.
+
+Managing Cookies
+You can manage cookies through your browser settings. Disabling certain cookies may affect site functionality. For privacy details, see our Privacy Policy.
+
+Updates
+We may update this Cookie Policy to reflect changes in technology or regulations. If you have questions, contact us via the Contact page.
+""",
                 },
             ]
 
