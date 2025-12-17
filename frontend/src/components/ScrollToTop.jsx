@@ -9,12 +9,24 @@ export default function ScrollToTop({ smooth = true }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
-      const behavior = smooth ? 'smooth' : 'auto';
-      window.scrollTo({ top: 0, left: 0, behavior });
-    } catch {
-      // Fallback for older browsers
-      window.scrollTo(0, 0);
-    }
+      window.history.scrollRestoration = 'manual';
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const behavior = smooth ? 'smooth' : 'auto';
+    const scroll = () => {
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior });
+      } catch {
+        window.scrollTo(0, 0);
+      }
+    };
+    requestAnimationFrame(() => {
+      scroll();
+      requestAnimationFrame(scroll);
+    });
   }, [location.pathname, location.search, location.hash]);
 
   return null;
