@@ -1119,6 +1119,14 @@ async def activate_scheduled_policies():
         "activated_count": activated_count
     }
 
+@router.post("/policies/initialize-defaults")
+async def initialize_default_policies(admin: dict = Depends(require_permission(AdminPermission.MANAGE_POLICIES))):
+    created_count = await database.initialize_default_policies(admin["id"])
+    return {
+        "message": f"Initialized {created_count} default policies",
+        "created_count": created_count
+    }
+
 # ==========================================
 # USER MANAGEMENT
 # ==========================================

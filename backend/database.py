@@ -5479,11 +5479,10 @@ class Database:
     
     # Policy Management Methods
     async def get_all_policies(self):
-        """Get all current active policies"""
+        """Get all policies relevant for admin management"""
         try:
-            # Use $or instead of $in as there seems to be an issue with $in operator
             policies = await self.database.policies.find(
-                {"$or": [{"status": "active"}, {"status": "scheduled"}]}
+                {"$or": [{"status": "active"}, {"status": "scheduled"}, {"status": "draft"}]}
             ).sort("policy_type", 1).to_list(length=None)
             
             # Convert ObjectIds to strings for JSON serialization
@@ -5495,6 +5494,57 @@ class Database:
         except Exception as e:
             print(f"Error getting policies: {e}")
             return []
+
+    async def initialize_default_policies(self, created_by: str) -> int:
+        """Initialize default core policies if missing"""
+        try:
+            created_count = 0
+            now_iso = datetime.now().isoformat()
+            defaults = [
+                {
+                    "policy_type": "privacy_policy",
+                    "title": "Privacy Policy",
+                    "content": "ServiceHub Privacy Policy. Effective 1 January 2026. This policy explains how ServiceHub collects, uses and protects personal data under NDPA/NDPR.",
+                },
+                {
+                    "policy_type": "terms_of_service",
+                    "title": "Terms of Service",
+                    "content": "ServiceHub Terms and Conditions. Effective 1 January 2026. These terms govern platform use by customers and service providers.",
+                },
+                {
+                    "policy_type": "cookie_policy",
+                    "title": "Cookie Policy",
+                    "content": "ServiceHub Cookie Policy describing types of cookies used and how to manage preferences.",
+                },
+            ]
+
+            for item in defaults:
+                existing = await self.database.policies.find_one({
+                    "policy_type": item["policy_type"],
+                    "status": "active",
+                })
+                if existing:
+                    continue
+                doc = {
+                    "id": str(uuid.uuid4()),
+                    "policy_type": item["policy_type"],
+                    "title": item["title"],
+                    "content": item["content"],
+                    "status": "active",
+                    "version": 1,
+                    "effective_date": now_iso,
+                    "created_at": now_iso,
+                    "updated_at": now_iso,
+                    "created_by": created_by,
+                    "notes": "Initialized default policy",
+                }
+                res = await self.database.policies.insert_one(doc)
+                if res.inserted_id:
+                    created_count += 1
+            return created_count
+        except Exception as e:
+            print(f"Error initializing default policies: {e}")
+            return 0
     
     async def get_policy_by_type(self, policy_type: str):
         """Get current active policy by type"""

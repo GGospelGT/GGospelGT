@@ -3117,12 +3117,28 @@ const AdminDashboard = () => {
                   {/* Add New Policy Button */}
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Manage Policies</h3>
-                    <button
-                      onClick={() => setShowAddPolicy(true)}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
-                    >
-                      Add New Policy
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setShowAddPolicy(true)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
+                      >
+                        Add New Policy
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await adminAPI.initializeDefaultPolicies();
+                            toast({ title: `Initialized ${res.created_count || 0} default policies` });
+                            fetchData();
+                          } catch (error) {
+                            toast({ title: 'Failed to initialize default policies', variant: 'destructive' });
+                          }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+                      >
+                        Initialize Defaults
+                      </button>
+                    </div>
                   </div>
 
                   {/* Add Policy Form */}
@@ -3386,7 +3402,7 @@ const AdminDashboard = () => {
                       
                       {policies.length === 0 && (
                         <div className="text-center py-8 text-gray-500">
-                          No policies found. Click "Add New Policy" to create your first policy.
+                          No policies found. Use "Initialize Defaults" to import core policies or click "Add New Policy".
                         </div>
                       )}
                     </div>

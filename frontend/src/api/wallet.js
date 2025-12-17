@@ -660,6 +660,11 @@ export const adminAPI = {
     return response.data;
   },
 
+  async initializeDefaultPolicies() {
+    const response = await apiClient.post('/admin/policies/initialize-defaults');
+    return response.data;
+  },
+
   // Contact Management Methods
   async getAllContacts() {
     const response = await apiClient.get('/admin/contacts');
