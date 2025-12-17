@@ -79,6 +79,7 @@ const AdminDashboard = () => {
   const [showAddPolicy, setShowAddPolicy] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState(null);
   const [showPolicyHistory, setShowPolicyHistory] = useState(false);
+  const [showPolicyContent, setShowPolicyContent] = useState(false);
   
   // Contact Management state
   const [contacts, setContacts] = useState([]);
@@ -3285,7 +3286,13 @@ const AdminDashboard = () => {
                             <tr key={policy.id || index} className="hover:bg-gray-50">
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div>
-                                  <div className="text-sm font-medium text-gray-900">
+                                  <div
+                                    className="text-sm font-medium text-gray-900 cursor-pointer"
+                                    onClick={() => {
+                                      setSelectedPolicy(policy);
+                                      setShowPolicyContent(true);
+                                    }}
+                                  >
                                     {policy.title}
                                   </div>
                                   <div className="text-sm text-gray-500 capitalize">
@@ -3326,6 +3333,15 @@ const AdminDashboard = () => {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div className="flex space-x-2">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedPolicy(policy);
+                                      setShowPolicyContent(true);
+                                    }}
+                                    className="text-green-600 hover:text-green-900"
+                                  >
+                                    View
+                                  </button>
                                   <button
                                     onClick={() => {
                                       setSelectedPolicy(policy);
@@ -3567,6 +3583,55 @@ const AdminDashboard = () => {
                               </div>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {showPolicyContent && selectedPolicy && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                      <div className="bg-white p-6 rounded-lg max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="text-lg font-semibold">{selectedPolicy.title}</h4>
+                          <button
+                            onClick={() => {
+                              setShowPolicyContent(false);
+                              setSelectedPolicy(null);
+                            }}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <div className="text-sm text-gray-600 mb-3">
+                          <div className="flex flex-wrap gap-4">
+                            <span className="capitalize">{(selectedPolicy.policy_type || '').replaceAll('_', ' ')}</span>
+                            <span>v{selectedPolicy.version}</span>
+                            <span>{selectedPolicy.status}</span>
+                            <span>Created: {new Date(selectedPolicy.created_at).toLocaleDateString()}</span>
+                            {selectedPolicy.effective_date && (
+                              <span>Effective: {new Date(selectedPolicy.effective_date).toLocaleDateString()}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded text-sm font-mono whitespace-pre-wrap max-h-[60vh] overflow-y-auto">
+                          {selectedPolicy.content}
+                        </div>
+                        <div className="flex justify-end space-x-2 mt-4">
+                          <button
+                            onClick={() => {
+                              setEditingPolicy({
+                                id: selectedPolicy.id,
+                                title: selectedPolicy.title,
+                                content: selectedPolicy.content,
+                                notes: selectedPolicy.notes || ''
+                              });
+                              setShowPolicyContent(false);
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
+                          >
+                            Edit
+                          </button>
                         </div>
                       </div>
                     </div>
