@@ -4,8 +4,8 @@ import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
 import { policiesAPI } from '../api/wallet';
 
-const SectionBar = ({ children }) => (
-  <div className="rounded-md bg-green-600 text-white px-4 py-2 font-semibold mb-3">{children}</div>
+const SectionBar = ({ children, id }) => (
+  <div id={id} className="rounded-md bg-green-600 text-white px-4 py-2 font-semibold mb-3">{children}</div>
 );
 
 const SubSectionBar = ({ children, id }) => (
@@ -78,7 +78,7 @@ const PrivacyPage = () => {
         out.push(
           (isSubHeading(line)
             ? <SubSectionBar key={`sh-${i}`} id={id}>{line}</SubSectionBar>
-            : <SectionBar key={`h-${i}`}>{line}</SectionBar>)
+            : <SectionBar key={`h-${i}`} id={id}>{line}</SectionBar>)
         );
         i++;
         continue;
