@@ -167,7 +167,7 @@ const PrivacyPage = () => {
             </div>
           ) : (
             <div>
-              <div className="flex items-center gap-4 mb-4">
+              <div className="flex flex-col items-start gap-2 mb-4">
                 <a href="#privacy-tradespeople" className="text-green-600 hover:text-green-700 underline">privacy policy for service providers / tradespeople</a>
                 <a href="#privacy-customers" className="text-green-600 hover:text-green-700 underline">privacy policy for customers</a>
               </div>

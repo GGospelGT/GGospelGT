@@ -159,7 +159,7 @@ const TermsPage = () => {
             </div>
           ) : (
             <div>
-              <div className="flex items-center gap-4 mb-4">
+              <div className="flex flex-col items-start gap-2 mb-4">
                 <a href="#terms-service-provider" className="text-green-600 hover:text-green-700 underline">service provider terms & conditions</a>
                 <a href="#terms-customer" className="text-green-600 hover:text-green-700 underline">customer terms & conditions</a>
               </div>
