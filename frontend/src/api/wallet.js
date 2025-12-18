@@ -232,7 +232,11 @@ export const adminAPI = {
     formData.append('status', status);
     formData.append('admin_notes', adminNotes);
     
-    const response = await apiClient.put(`/admin/users/${userId}/status`, formData);
+    const response = await apiClient.put(`/admin/users/${userId}/status`, formData, {
+      headers: {
+        'Content-Type': undefined
+      }
+    });
     return response.data;
   },
 

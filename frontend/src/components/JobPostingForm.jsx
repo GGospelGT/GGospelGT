@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import ValidationBanner from './ValidationBanner';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -69,7 +69,6 @@ const FALLBACK_TRADE_CATEGORIES = [
 
 const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const formTopRef = useRef(null);
   const [tradeCategories, setTradeCategories] = useState(FALLBACK_TRADE_CATEGORIES);
   const [loadingTrades, setLoadingTrades] = useState(true);
   const [formData, setFormData] = useState({
@@ -277,9 +276,6 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
         
         if (!formData.category) newErrors.category = 'Please select a category';
 
-        if (!formData.description.trim()) newErrors.description = 'Description is required';
-        else if (formData.description.trim().length < 50) newErrors.description = 'Description must be at least 50 characters';
-
         // If category is selected, validate admin questions instead of description
         if (formData.category) {
           const visibleQuestions = getVisibleQuestions();
@@ -466,9 +462,10 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
     setSubmitting(true);
 
     try {
+      // Create job data without description since it's been removed from the form
       const jobData = {
         title: formData.title,
-        description: formData.description,
+        // description field completely removed - no auto-generation
         category: formData.category,
         state: formData.state,
         lga: formData.lga,
@@ -540,14 +537,6 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
       setSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    if (formTopRef.current && typeof formTopRef.current.scrollIntoView === 'function') {
-      formTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
-    }
-  }, [currentStep]);
 
   // Load questions when trade category changes
   const loadTradeQuestions = async (category) => {
@@ -990,9 +979,10 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
 
     try {
       // Build job payload
+      // Create job data without description since it's been removed from the form
       const jobData = {
         title: formData.title,
-        description: formData.description,
+        // description field completely removed - no auto-generation
         category: formData.category,
         state: formData.state,
         lga: formData.lga,
@@ -1378,22 +1368,7 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium font-lato mb-2" style={{color: '#121E3C'}}>
-                Description *
-              </label>
-              <textarea
-                rows={5}
-                id="field-description"
-                placeholder="Describe the work, materials, scope, and any important notes"
-                value={formData.description}
-                onChange={(e) => updateFormData('description', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-lato resize-none ${
-                  errors.description ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-            </div>
+            {/* Job Description field removed as requested */}
           </div>
         );
 
@@ -2115,7 +2090,7 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
 
   return (
     <>
-      <div className="max-w-2xl mx-auto p-6" ref={formTopRef}>
+      <div className="max-w-2xl mx-auto p-6">
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">

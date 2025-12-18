@@ -4524,18 +4524,22 @@ class Database:
     
     async def update_user_status(self, user_id: str, status: str, admin_notes: str = ""):
         """Update user status with admin notes"""
-        
         update_data = {
             "status": status,
-            "updated_at": datetime.now(),
+            "updated_at": datetime.utcnow(),
             "admin_notes": admin_notes
         }
-        
-        result = await self.users_collection.update_one(
-            {"id": user_id},
-            {"$set": update_data}
-        )
-        
+
+        # Be resilient to different identifiers: try id, user_id, or public_id
+        filter_query = {
+            "$or": [
+                {"id": user_id},
+                {"user_id": user_id},
+                {"public_id": user_id}
+            ]
+        }
+
+        result = await self.users_collection.update_one(filter_query, {"$set": update_data})
         return result.modified_count > 0
     
     async def _get_average_job_budget(self, homeowner_id: str):
