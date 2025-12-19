@@ -295,14 +295,23 @@ const MyInterestsPage = () => {
     });
   };
 
+  const normalizeStatus = (status) => {
+    if (!status) return 'pending';
+    const s = String(status).toLowerCase().trim().replace(/[^a-z]+/g, '_');
+    if (s.includes('paid') && s.includes('access')) return 'paid_access';
+    if (s.includes('contact') && s.includes('shared')) return 'contact_shared';
+    if (s === 'interested' || s === 'pending') return 'interested';
+    return s;
+  };
+
   const filterInterests = (interests, tab) => {
     switch (tab) {
       case 'pending':
-        return interests.filter(interest => ['pending', 'interested'].includes(interest.status));
+        return interests.filter(interest => ['pending', 'interested'].includes(normalizeStatus(interest.status)));
       case 'contact_shared':
-        return interests.filter(interest => interest.status === 'contact_shared');
+        return interests.filter(interest => normalizeStatus(interest.status) === 'contact_shared');
       case 'paid':
-        return interests.filter(interest => interest.status === 'paid_access');
+        return interests.filter(interest => normalizeStatus(interest.status) === 'paid_access');
       default:
         return interests;
     }
