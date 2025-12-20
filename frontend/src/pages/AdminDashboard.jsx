@@ -33,11 +33,10 @@ const AdminDashboard = () => {
   const [usersPage, setUsersPage] = useState(1);
   const [usersLimit, setUsersLimit] = useState(20);
   const [usersSearch, setUsersSearch] = useState('');
+  const [usersTotal, setUsersTotal] = useState(0);
   const visibleUsers = useMemo(() => {
-    const start = (usersPage - 1) * usersLimit;
-    const end = start + usersLimit;
-    return users.slice(start, end);
-  }, [users, usersPage, usersLimit]);
+    return users;
+  }, [users]);
   const [userStats, setUserStats] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -203,6 +202,11 @@ const AdminDashboard = () => {
   }, [isLoggedIn, activeTab, activeLocationTab]);
 
   useEffect(() => {
+    if (!isLoggedIn || activeTab !== 'users') return;
+    fetchData();
+  }, [isLoggedIn, activeTab, usersPage, usersLimit]);
+
+  useEffect(() => {
     if (!isLoggedIn || activeTab !== 'reviews-management') return;
     fetchData();
   }, [isLoggedIn, activeTab, reviewsPage, reviewsLimit, reviewsMinRating, reviewsStatus, reviewsSearch]);
@@ -255,9 +259,11 @@ const AdminDashboard = () => {
         const data = await adminVerificationAPI.getPendingTradespeopleVerifications();
         setTradespeopleVerifications(data.verifications || []);
       } else if (activeTab === 'users') {
-        const data = await adminAPI.getAllUsers(0, usersLimit, null, null, usersSearch || null);
+        const skip = (usersPage - 1) * usersLimit;
+        const data = await adminAPI.getAllUsers(skip, usersLimit, null, null, usersSearch || null);
         setUsers(data.users || []);
         setUserStats(data.stats || {});
+        setUsersTotal((data.pagination && (data.pagination.total ?? 0)) || (data.users ? data.users.length : 0));
       } else if (activeTab === 'locations') {
         // Load location and trade data based on active sub-tab
         if (activeLocationTab === 'states') {
@@ -4577,7 +4583,7 @@ const AdminDashboard = () => {
                           </tbody>
                         </table>
                         <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t">
-                          <div className="text-sm text-gray-600">Page {usersPage}</div>
+                          <div className="text-sm text-gray-600">Page {usersPage} of {Math.max(1, Math.ceil(usersTotal / usersLimit))}</div>
                           <div className="flex space-x-2">
                             <button
                               className={`px-3 py-1 rounded border ${usersPage > 1 ? 'bg-white text-gray-700 hover:bg-gray-100' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
@@ -4587,8 +4593,8 @@ const AdminDashboard = () => {
                               Previous
                             </button>
                             <button
-                              className={`px-3 py-1 rounded border ${(users.length > (usersPage * usersLimit)) ? 'bg-white text-gray-700 hover:bg-gray-100' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
-                              disabled={!(users.length > (usersPage * usersLimit))}
+                              className={`px-3 py-1 rounded border ${(usersPage < Math.ceil(usersTotal / usersLimit)) ? 'bg-white text-gray-700 hover:bg-gray-100' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                              disabled={!(usersPage < Math.ceil(usersTotal / usersLimit))}
                               onClick={() => setUsersPage((p) => p + 1)}
                             >
                               Next

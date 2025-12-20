@@ -1229,12 +1229,15 @@ async def get_all_users(
     homeowners_count = await database.get_users_count_by_role("homeowner")
     tradespeople_count = await database.get_users_count_by_role("tradesperson")
     
+    filtered_total = await database.get_users_total_count_filtered(role=role, status=status, search=search)
+    pages = (filtered_total + limit - 1) // limit
     return {
         "users": users,
         "pagination": {
             "skip": skip,
             "limit": limit,
-            "total": len(users)
+            "total": filtered_total,
+            "pages": pages
         },
         "stats": {
             "total_users": total_users,

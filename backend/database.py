@@ -4446,6 +4446,27 @@ class Database:
             processed_users.append(user)
         
         return processed_users
+
+    async def get_users_total_count_filtered(self, role: str = None, status: str = None, search: str = None):
+        """Get total count of users matching filters for admin dashboard pagination"""
+        query = {}
+        if role:
+            query["role"] = role
+        if status:
+            query["status"] = status
+        else:
+            query["status"] = {"$ne": "deleted"}
+        if search:
+            query["$or"] = [
+                {"name": {"$regex": search, "$options": "i"}},
+                {"email": {"$regex": search, "$options": "i"}},
+                {"phone": {"$regex": search, "$options": "i"}},
+                {"skills": {"$regex": search, "$options": "i"}},
+                {"user_id": {"$regex": f"^{search}$", "$options": "i"}},
+                {"public_id": {"$regex": f"^{search}$", "$options": "i"}},
+                {"id": {"$regex": search, "$options": "i"}},
+            ]
+        return await self.users_collection.count_documents(query)
     
     async def get_total_users_count(self):
         """Get total number of registered users"""
