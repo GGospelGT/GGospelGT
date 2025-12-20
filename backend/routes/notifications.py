@@ -65,7 +65,7 @@ async def get_notification_history(
         
         # Count unread notifications (assuming notifications are "unread" until explicitly marked)
         all_notifications = await database.get_user_notifications(current_user.id, limit=1000)
-        unread_count = len([n for n in all_notifications if n.status == "sent"])
+        unread_count = len([n for n in all_notifications if n.status in ["sent", "pending"]])
         
         return NotificationHistory(
             notifications=notifications,

@@ -498,7 +498,7 @@ async def approve_job(
     # Send notification to homeowner
     try:
         from services.notifications import notification_service
-        from models.notifications import NotificationType
+        from ..models.notifications import NotificationType
         
         homeowner = await database.get_user_by_email(job["homeowner"]["email"])
         if homeowner:
@@ -521,7 +521,7 @@ async def approve_job(
                             recipient_phone=homeowner.get("phone")
                         )
                     except Exception as e:
-                        from models.notifications import Notification, NotificationChannel, NotificationStatus
+                        from ..models.notifications import Notification, NotificationChannel, NotificationStatus
                         notification = Notification(
                             id=str(uuid.uuid4()),
                             user_id=homeowner["id"],
@@ -559,7 +559,7 @@ async def approve_job(
                             recipient_phone=homeowner.get("phone")
                         )
                     except Exception as e:
-                        from models.notifications import Notification, NotificationChannel, NotificationStatus
+                        from ..models.notifications import Notification, NotificationChannel, NotificationStatus
                         notification = Notification(
                             id=str(uuid.uuid4()),
                             user_id=homeowner["id"],
