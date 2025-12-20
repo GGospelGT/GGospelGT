@@ -510,7 +510,7 @@ async def approve_job(
                         "approved_at": datetime.now(timezone.utc).strftime("%B %d, %Y"),
                         "admin_notes": notes
                     }
-                    await notification_service.send_notification(
+                    notification = await notification_service.send_notification(
                         user_id=homeowner["id"],
                         notification_type=NotificationType.JOB_APPROVED,
                         template_data=template_data,
@@ -518,6 +518,10 @@ async def approve_job(
                         recipient_email=homeowner.get("email"),
                         recipient_phone=homeowner.get("phone")
                     )
+                    try:
+                        await database.create_notification(notification)
+                    except Exception:
+                        pass
                 except Exception:
                     pass
             else:
@@ -529,7 +533,7 @@ async def approve_job(
                         "reviewed_at": datetime.now(timezone.utc).strftime("%B %d, %Y"),
                         "rejection_reason": notes
                     }
-                    await notification_service.send_notification(
+                    notification = await notification_service.send_notification(
                         user_id=homeowner["id"],
                         notification_type=NotificationType.JOB_REJECTED,
                         template_data=template_data,
@@ -537,6 +541,10 @@ async def approve_job(
                         recipient_email=homeowner.get("email"),
                         recipient_phone=homeowner.get("phone")
                     )
+                    try:
+                        await database.create_notification(notification)
+                    except Exception:
+                        pass
                 except Exception:
                     pass
     except Exception as e:
