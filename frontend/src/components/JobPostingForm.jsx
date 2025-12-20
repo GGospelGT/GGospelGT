@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import ValidationBanner from './ValidationBanner';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -1106,6 +1106,24 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
     </div>
   );
 
+  // Scroll management: ensure each step starts from top of the form
+  const formTopRef = useRef(null);
+  useEffect(() => {
+    try {
+      // Scroll window to top first for long pages
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    // Then ensure the card/form top is in view
+    if (formTopRef.current && typeof formTopRef.current.scrollIntoView === 'function') {
+      formTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (typeof formTopRef.current.focus === 'function') {
+        try { formTopRef.current.focus(); } catch {}
+      }
+    }
+  }, [currentStep]);
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -2090,7 +2108,7 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
 
   return (
     <>
-      <div className="max-w-2xl mx-auto p-6">
+      <div className="max-w-2xl mx-auto p-6" ref={formTopRef} tabIndex={-1}>
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
