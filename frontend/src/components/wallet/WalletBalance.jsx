@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { walletAPI } from '../../api/wallet';
 import { useToast } from '../../hooks/use-toast';
 
-const WalletBalance = ({ showFundButton = true, onFundClick }) => {
+const WalletBalance = ({ showFundButton = true, onFundClick, refreshToken = 0 }) => {
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchBalance();
-  }, []);
+  }, [refreshToken]);
 
   const fetchBalance = async () => {
     try {

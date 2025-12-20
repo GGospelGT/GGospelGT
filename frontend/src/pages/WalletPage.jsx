@@ -57,7 +57,7 @@ const WalletPage = () => {
             <div className="lg:col-span-2 space-y-8">
               {/* Wallet Balance */}
               <WalletBalance 
-                key={refreshTrigger}
+                refreshToken={refreshTrigger}
                 onFundClick={() => setShowFundModal(true)}
               />
 
@@ -92,7 +92,7 @@ const WalletPage = () => {
               </div>
 
               {/* Transaction History */}
-              <WalletTransactions key={refreshTrigger} />
+              <WalletTransactions refreshToken={refreshTrigger} />
             </div>
 
             {/* Sidebar */}

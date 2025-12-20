@@ -3,7 +3,7 @@ import { walletAPI } from '../../api/wallet';
 import { useToast } from '../../hooks/use-toast';
 import PaymentProofImage from '../common/PaymentProofImage';
 
-const WalletTransactions = () => {
+const WalletTransactions = ({ refreshToken = 0 }) => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ skip: 0, limit: 10 });
@@ -11,7 +11,7 @@ const WalletTransactions = () => {
 
   useEffect(() => {
     fetchTransactions();
-  }, [pagination.skip]);
+  }, [pagination.skip, refreshToken]);
 
   const fetchTransactions = async () => {
     try {

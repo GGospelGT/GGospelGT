@@ -1412,26 +1412,28 @@ async def get_job_question_answers(job_id: str):
 @router.get("/skills-questions/{trade_category:path}")
 async def get_public_skills_questions(
     trade_category: str,
-    limit: int = Query(7, ge=1, le=50, description="Number of questions to return"),
+    limit: int = Query(20, ge=1, le=100, description="Number of questions to return"),
 ):
     """Get skills test questions for a specific trade category (public endpoint for registration)"""
     try:
+        import random
         questions = await database.get_questions_for_trade(trade_category)
-        
-        # Format questions for frontend consumption
+
+        active_questions = [q for q in questions if q.get('is_active', True)]
+        if len(active_questions) > limit:
+            selected = random.sample(active_questions, limit)
+        else:
+            selected = active_questions
+
         formatted_questions = []
-        for question in questions:
-            if question.get('is_active', True):  # Only include active questions
-                formatted_questions.append({
-                    'question': question.get('question'),
-                    'options': question.get('options', []),
-                    'correct': question.get('correct_answer', 0),
-                    'category': question.get('category', 'General'),
-                    'explanation': question.get('explanation', '')
-                })
-                # Enforce cap on number of questions returned
-                if len(formatted_questions) >= limit:
-                    break
+        for question in selected:
+            formatted_questions.append({
+                'question': question.get('question'),
+                'options': question.get('options', []),
+                'correct': question.get('correct_answer', 0),
+                'category': question.get('category', 'General'),
+                'explanation': question.get('explanation', '')
+            })
         
         return {
             'trade_category': trade_category,

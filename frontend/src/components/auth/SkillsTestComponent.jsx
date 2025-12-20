@@ -19,8 +19,7 @@ import { calculateTestScore } from '../../data/skillsTestQuestions';
 // Add local fallback import
 import { getQuestionsForTrades } from '../../data/skillsTestQuestions';
 
-// Test all selected trades, maintain 7 questions per trade, 15 minutes per trade
-const QUESTIONS_PER_TRADE = 7;
+const QUESTIONS_PER_TRADE = 20;
 const TIME_PER_TRADE_SECONDS = 900; // 15 minutes per trade
 
 const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
@@ -50,9 +49,8 @@ const SkillsTestComponent = ({ formData, updateFormData, onTestComplete }) => {
             try {
               const response = await skillsAPI.getQuestionsForTrade(trade);
               const backendQuestions = response?.questions || [];
-              aggregated[trade] = backendQuestions.length > 0
-                ? backendQuestions.slice(0, QUESTIONS_PER_TRADE)
-                : [];
+              const shuffled = [...backendQuestions].sort(() => Math.random() - 0.5);
+              aggregated[trade] = shuffled.slice(0, QUESTIONS_PER_TRADE);
             } catch (err) {
               console.warn('Skills questions fetch failed for', trade, err);
               aggregated[trade] = [];
