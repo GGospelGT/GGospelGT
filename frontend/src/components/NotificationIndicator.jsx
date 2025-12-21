@@ -74,7 +74,8 @@ const NotificationIndicator = () => {
     setShowDropdown(false);
 
     // If unread, optimistically mark as read locally and via API
-    const isUnread = notification.status === 'sent';
+    const prevStatus = notification.status;
+    const isUnread = prevStatus === 'sent' || prevStatus === 'pending';
     if (isUnread) {
       // Optimistic UI update
       setRecentNotifications(prev =>
@@ -85,10 +86,9 @@ const NotificationIndicator = () => {
       try {
         await notificationsAPI.markAsRead(notification.id);
       } catch (err) {
-        // Revert on failure
         console.error('Failed to mark notification as read:', err);
         setRecentNotifications(prev =>
-          prev.map(n => (n.id === notification.id ? { ...n, status: 'sent' } : n))
+          prev.map(n => (n.id === notification.id ? { ...n, status: prevStatus } : n))
         );
         setUnreadCount(prev => prev + 1);
       }
@@ -158,7 +158,7 @@ const NotificationIndicator = () => {
                 recentNotifications.map((notification) => {
                   const notificationIcon = getNotificationIcon(notification.type);
                   const notificationColor = getNotificationColor(notification.type);
-                  const isUnread = notification.status === 'sent';
+                  const isUnread = notification.status === 'sent' || notification.status === 'pending';
                   
                   return (
                     <div

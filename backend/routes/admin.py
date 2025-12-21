@@ -497,7 +497,7 @@ async def approve_job(
     
     # Send notification to homeowner
     try:
-        from services.notifications import notification_service
+        from ..services.notifications import notification_service
         from ..models.notifications import NotificationType
         
         homeowner = await database.get_user_by_email(job["homeowner"]["email"])
@@ -692,21 +692,27 @@ async def edit_job_admin(
     
     # Send notification to homeowner about job update
     try:
-        from services.notifications import notification_service
-        from models.notifications import NotificationType
+        from ..services.notifications import notification_service
+        from ..models.notifications import NotificationType
         
         homeowner = await database.get_user_by_email(job["homeowner"]["email"])
         if homeowner:
             updated_fields = list(filtered_updates.keys())
+            prefs = await database.get_user_notification_preferences(homeowner["id"])
+            template_data = {
+                "homeowner_name": homeowner.get("name", "Homeowner"),
+                "job_title": job["title"],
+                "updated_fields": ", ".join(updated_fields),
+                "updated_at": datetime.utcnow().strftime("%B %d, %Y"),
+                "admin_notes": update_data.get('admin_notes', '')
+            }
             await notification_service.send_notification(
                 user_id=homeowner["id"],
                 notification_type=NotificationType.JOB_UPDATED,
-                data={
-                    "job_title": job["title"],
-                    "job_id": job_id,
-                    "updated_fields": updated_fields,
-                    "admin_notes": update_data.get('admin_notes', '')
-                }
+                template_data=template_data,
+                user_preferences=prefs,
+                recipient_email=homeowner.get("email"),
+                recipient_phone=homeowner.get("phone")
             )
     except Exception as e:
         logger.warning(f"Failed to send job update notification: {str(e)}")
