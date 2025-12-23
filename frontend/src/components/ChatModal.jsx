@@ -558,15 +558,24 @@ const ChatModal = ({
               disabled={sending}
             />
 
-            <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx" className="hidden" onChange={handleFileChange} />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,.pdf,.doc,.docx"
+              className="hidden"
+              onChange={handleFileChange}
+            />
             <Button
               type="button"
               variant="outline"
               onClick={handleAttachmentClick}
               disabled={sending}
-              className="self-end"
+              className="self-end flex items-center gap-2"
+              title="Attach file"
+              aria-label="Attach file"
             >
               <Paperclip className="w-4 h-4" />
+              <span className="text-sm">Attach</span>
             </Button>
             
             <Button
