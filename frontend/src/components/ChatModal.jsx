@@ -582,10 +582,9 @@ const ChatModal = ({
 
             <Button
               type="button"
-              variant="outline"
               onClick={handleAttachmentClick}
               disabled={sending}
-              className="self-end inline-flex items-center gap-2 bg-white border border-green-600 text-green-700 hover:bg-green-50"
+              className="self-end inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
               title="Attach file"
               aria-label="Attach file"
             >
