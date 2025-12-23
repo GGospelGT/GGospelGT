@@ -804,8 +804,8 @@ const TradeCategoryQuestionsManager = () => {
                                     className="w-full px-3 py-2 border rounded-md text-sm"
                                   >
                                     <option value="">Select trigger value</option>
-                                    <option value="yes">Yes</option>
-                                    <option value="no">No</option>
+                                    <option value="true">Yes</option>
+                                    <option value="false">No</option>
                                   </select>
                                 </div>
                               );

@@ -684,6 +684,14 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
     const parentAnswer = answers[rule.parent_question_id];
     const { trigger_condition, trigger_value, trigger_values } = rule;
 
+    const normalizeBooleanString = (val) => {
+      if (val === undefined || val === null) return val;
+      const s = String(val).toLowerCase().trim();
+      if (s === 'yes') return 'true';
+      if (s === 'no') return 'false';
+      return String(val);
+    };
+
     // Handle empty answers
     if (parentAnswer === undefined || parentAnswer === null || parentAnswer === '') {
       return trigger_condition === 'is_empty';
@@ -695,26 +703,30 @@ const JobPostingForm = ({ onClose, onJobPosted, initialCategory, initialState })
         if (trigger_values && trigger_values.length > 0) {
           // For multiple choice questions
           if (Array.isArray(parentAnswer)) {
-            return parentAnswer.some(value => trigger_values.includes(value));
+            const tvs = trigger_values.map(normalizeBooleanString);
+            return parentAnswer.some(value => tvs.includes(normalizeBooleanString(value)));
           }
-          return trigger_values.includes(String(parentAnswer));
+          const tvs2 = trigger_values.map(normalizeBooleanString);
+          return tvs2.includes(normalizeBooleanString(parentAnswer));
         }
-        return String(parentAnswer) === String(trigger_value);
+        return normalizeBooleanString(parentAnswer).toLowerCase() === normalizeBooleanString(trigger_value).toLowerCase();
 
       case 'not_equals':
         if (trigger_values && trigger_values.length > 0) {
           if (Array.isArray(parentAnswer)) {
-            return !parentAnswer.some(value => trigger_values.includes(value));
+            const tvs = trigger_values.map(normalizeBooleanString);
+            return !parentAnswer.some(value => tvs.includes(normalizeBooleanString(value)));
           }
-          return !trigger_values.includes(String(parentAnswer));
+          const tvs2 = trigger_values.map(normalizeBooleanString);
+          return !tvs2.includes(normalizeBooleanString(parentAnswer));
         }
-        return String(parentAnswer) !== String(trigger_value);
+        return normalizeBooleanString(parentAnswer).toLowerCase() !== normalizeBooleanString(trigger_value).toLowerCase();
 
       case 'contains':
-        return String(parentAnswer).toLowerCase().includes(String(trigger_value).toLowerCase());
+        return String(parentAnswer).toLowerCase().includes(normalizeBooleanString(trigger_value).toLowerCase());
 
       case 'not_contains':
-        return !String(parentAnswer).toLowerCase().includes(String(trigger_value).toLowerCase());
+        return !String(parentAnswer).toLowerCase().includes(normalizeBooleanString(trigger_value).toLowerCase());
 
       case 'greater_than':
         const numAnswer = parseFloat(parentAnswer);
