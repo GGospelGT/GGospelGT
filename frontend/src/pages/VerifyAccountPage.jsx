@@ -62,11 +62,11 @@ const VerifyAccountPage = () => {
   const [llpCertificate, setLlpCertificate] = useState(null);
   const [llpAgreement, setLlpAgreement] = useState(null);
   const [designatedPartners, setDesignatedPartners] = useState('');
-  // Inline validation errors
+  
   const [selfErrors, setSelfErrors] = useState({});
   const [refErrors, setRefErrors] = useState({});
 
-  // Derived verification flag (supports both fields used across app)
+  
   const isTradespersonVerified = !!(user?.verified_tradesperson || user?.is_verified);
 
   // Refresh user data on page load to ensure latest verification status
