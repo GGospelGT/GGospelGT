@@ -293,24 +293,51 @@ class NotificationTemplateService:
                 channel=NotificationChannel.EMAIL,
                 subject_template="New Interest in Your Job: {job_title}",
                 content_template="""
-Hello {homeowner_name},
-
-Great news! A tradesperson has shown interest in your job:
-
-📋 Job: {job_title}
-📍 Location: {job_location}
-👤 Interested Tradesperson: {tradesperson_name}
-🔧 Experience: {tradesperson_experience} years
-📧 Contact: {tradesperson_email}
-
-You can review their profile and share your contact details if you're interested in connecting.
-
-View interested tradespeople: {view_url}
-
-Best regards,
-serviceHub Team
+<html>
+<head>
+  <meta charset=\"UTF-8\" />
+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+  <style>
+    body { margin: 0; padding: 0; background: #f6f7fb; font-family: Arial, sans-serif; }
+    .container { max-width: 640px; margin: 0 auto; padding: 24px; }
+    .card { background: #ffffff; border: 1px solid #e6e8ef; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); overflow: hidden; }
+    .header { padding: 18px 20px; border-bottom: 1px solid #eef0f5; }
+    .title { margin: 0; font-size: 18px; color: #111827; }
+    .content { padding: 18px 20px; color: #374151; line-height: 1.6; }
+    .list { list-style: none; padding: 0; margin: 12px 0 0; }
+    .list li { margin: 8px 0; }
+    .label { color: #6b7280; display: inline-block; min-width: 140px; }
+    .value { color: #111827; font-weight: 600; }
+    .cta { display: inline-block; margin-top: 16px; padding: 10px 16px; background: #34D164; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; }
+    .footer { padding: 16px 20px; color: #6b7280; font-size: 12px; border-top: 1px solid #eef0f5; }
+  </style>
+  <title>New Interest</title>
+  </head>
+  <body>
+    <div class=\"container\">
+      <div class=\"card\">
+        <div class=\"header\">
+          <h2 class=\"title\">New Interest in Your Job</h2>
+        </div>
+        <div class=\"content\">
+          <p>Hello {homeowner_name},</p>
+          <p>A tradesperson has shown interest in your job. Here are the details:</p>
+          <ul class=\"list\">
+            <li><span class=\"label\">Job</span> <span class=\"value\">{job_title}</span></li>
+            <li><span class=\"label\">Location</span> <span class=\"value\">{job_location}</span></li>
+            <li><span class=\"label\">Tradesperson</span> <span class=\"value\">{tradesperson_name}</span></li>
+            <li><span class=\"label\">Experience</span> <span class=\"value\">{tradesperson_experience} years</span></li>
+          </ul>
+          <p>To review their profile and manage your job, use the button below.</p>
+          <a class=\"cta\" href=\"{view_url}\" target=\"_blank\">View Interested Tradespeople</a>
+        </div>
+        <div class=\"footer\">serviceHub Team</div>
+      </div>
+    </div>
+  </body>
+</html>
                 """,
-                variables=["homeowner_name", "job_title", "job_location", "tradesperson_name", "tradesperson_experience", "tradesperson_email", "view_url"]
+                variables=["homeowner_name", "job_title", "job_location", "tradesperson_name", "tradesperson_experience", "view_url"]
             ),
             NotificationChannel.SMS: NotificationTemplate(
                 id=str(uuid.uuid4()),

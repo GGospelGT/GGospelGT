@@ -311,7 +311,6 @@ async def _notify_homeowner_new_interest(job: dict, tradesperson: dict, interest
             "job_location": job.get("location", ""),
             "tradesperson_name": tradesperson.get("business_name") or tradesperson.get("name", "A tradesperson"),
             "tradesperson_experience": str(tradesperson.get("experience_years", "N/A")),
-            "tradesperson_email": tradesperson.get("email", ""),
             "view_url": f"{os.environ.get('FRONTEND_URL', 'https://servicehub.ng')}/my-jobs"
         }
         
