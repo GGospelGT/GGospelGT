@@ -1,9 +1,8 @@
-version: '3.9'
 services:
   backend:
     build:
       context: .
-      dockerfile: GGospelGT/backend/Dockerfile
+      dockerfile: backend/Dockerfile
     environment:
       - PORT=8000
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
@@ -19,7 +18,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - UPLOADS_DIR=/app/backend/uploads
     volumes:
-      - ./GGospelGT/backend/uploads:/app/backend/uploads
+      - ./backend/uploads:/app/backend/uploads
     expose:
       - "8000"
     restart: unless-stopped
@@ -27,9 +26,9 @@ services:
   web:
     build:
       context: .
-      dockerfile: GGospelGT/frontend/Dockerfile
+      dockerfile: frontend/Dockerfile
     depends_on:
       - backend
     ports:
-      - "80:80"
+      - "8080:80"
     restart: unless-stopped
