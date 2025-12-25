@@ -579,19 +579,7 @@ const ChatModal = ({
                 <span className="text-xs">Attach</span>
               </button>
             </div>
-
-            <Button
-              type="button"
-              onClick={handleAttachmentClick}
-              disabled={sending}
-              className="self-end inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
-              title="Attach file"
-              aria-label="Attach file"
-            >
-              <Paperclip className="w-4 h-4" />
-              <span className="text-sm">Attach</span>
-            </Button>
-
+            
             <Button
               onClick={sendMessage}
               disabled={!newMessage.trim() || sending}
