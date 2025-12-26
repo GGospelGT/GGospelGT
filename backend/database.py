@@ -2,6 +2,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime, timedelta, timezone
 import os
 from typing import List, Optional, Dict, Any
+import re
 import logging
 import uuid
 import certifi
@@ -5087,6 +5088,8 @@ class Database:
         Supports updating both custom and static categories by upserting a record when not present.
         """
         try:
+            old_name = (old_name or "").strip()
+            new_name = (new_name or "").strip()
             now = datetime.now()
             update_set = {"name": new_name, "updated_at": now}
             # Only set optional fields when provided to avoid blank overwrites
@@ -5096,7 +5099,7 @@ class Database:
                 update_set["description"] = description
 
             result = await self.database.system_trades.update_one(
-                {"name": old_name},
+                {"name": {"$regex": f"^{re.escape(old_name)}$", "$options": "i"}},
                 {
                     "$set": update_set,
                     "$setOnInsert": {
@@ -5116,7 +5119,18 @@ class Database:
             matched = getattr(result, "matched_count", 0) > 0
             modified = getattr(result, "modified_count", 0) > 0
             upserted = getattr(result, "upserted_id", None) is not None
-            return matched or modified or upserted
+            if matched or modified or upserted:
+                return True
+
+            # Fallback: try matching by new_name in case existing record already uses new label
+            result2 = await self.database.system_trades.update_one(
+                {"name": {"$regex": f"^{re.escape(new_name)}$", "$options": "i"}},
+                {"$set": update_set},
+                upsert=False
+            )
+            matched2 = getattr(result2, "matched_count", 0) > 0
+            modified2 = getattr(result2, "modified_count", 0) > 0
+            return matched2 or modified2
         except Exception as e:
             print(f"Error updating trade: {e}")
             return False
