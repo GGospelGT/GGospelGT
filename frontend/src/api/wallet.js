@@ -370,13 +370,29 @@ export const adminAPI = {
     formData.append('new_name', newName);
     formData.append('group', group);
     formData.append('description', description);
-    
-    const response = await apiClient.put('/admin/trades/update', formData, {
-      headers: {
-        'Content-Type': undefined, // Let axios set multipart/form-data with boundary
-      },
-    });
-    return response.data;
+
+    try {
+      const response = await apiClient.put('/admin/trades/update', formData, {
+        headers: { 'Content-Type': undefined },
+      });
+      return response.data;
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 404 || status === 405) {
+        try {
+          const response2 = await apiClient.put(`/admin/trades/${encodeURIComponent(oldName)}`, formData, {
+            headers: { 'Content-Type': undefined },
+          });
+          return response2.data;
+        } catch (err2) {
+          const response3 = await apiClient.put('/admin-management/trades/update', formData, {
+            headers: { 'Content-Type': undefined },
+          });
+          return response3.data;
+        }
+      }
+      throw err;
+    }
   },
 
   async deleteTrade(tradeName) {

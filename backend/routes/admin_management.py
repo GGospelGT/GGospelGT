@@ -695,3 +695,18 @@ async def get_admin_stats(admin: dict = Depends(require_permission(AdminPermissi
             "last_login": admin.get("last_login")
         }
     }
+from fastapi import Form
+
+@router.put("/trades/update")
+async def update_trade_proxy(
+    old_name: str = Form(...),
+    new_name: str = Form(...),
+    group: str = Form(""),
+    description: str = Form("")
+):
+    if not new_name.strip():
+        raise HTTPException(status_code=400, detail="Trade name is required")
+    success = await database.update_trade(old_name.strip(), new_name.strip(), group, description)
+    if not success:
+        raise HTTPException(status_code=404, detail="Trade category not found")
+    return {"message": "Trade category updated successfully", "old_name": old_name, "new_name": new_name}
