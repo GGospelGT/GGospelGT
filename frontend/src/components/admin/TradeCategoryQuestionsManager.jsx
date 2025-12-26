@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -55,6 +55,16 @@ const TradeCategoryQuestionsManager = () => {
       default_next_question_id: ''
     }
   });
+  const formTopRef = useRef(null);
+  const scrollToFormTop = () => {
+    if (formTopRef.current) {
+      try { formTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch {}
+    }
+    setTimeout(() => {
+      const el = document.getElementById('admin-question-text-input');
+      if (el) { try { el.focus(); } catch {} }
+    }, 50);
+  };
   
   const { toast } = useToast();
 
@@ -331,6 +341,7 @@ const TradeCategoryQuestionsManager = () => {
       }
     });
     setShowCreateForm(true);
+    scrollToFormTop();
   };
 
   const resetForm = () => {
@@ -455,7 +466,7 @@ const TradeCategoryQuestionsManager = () => {
           <p className="text-gray-600">Manage dynamic questions for job posting by trade category</p>
         </div>
         <Button 
-          onClick={() => setShowCreateForm(true)}
+          onClick={() => { setShowCreateForm(true); scrollToFormTop(); }}
           className="bg-green-600 hover:bg-green-700"
         >
           <Plus size={16} className="mr-2" />
@@ -493,6 +504,7 @@ const TradeCategoryQuestionsManager = () => {
 
       {/* Create/Edit Form */}
       {showCreateForm && (
+        <div ref={formTopRef}>
         <Card>
           <CardHeader>
             <CardTitle>{editingQuestion ? 'Edit Question' : 'Create New Question'}</CardTitle>
@@ -533,6 +545,7 @@ const TradeCategoryQuestionsManager = () => {
             <div>
               <label className="block text-sm font-medium mb-2">Question Text *</label>
               <Input
+                id="admin-question-text-input"
                 value={formData.question_text}
                 onChange={(e) => setFormData(prev => ({ ...prev, question_text: e.target.value }))}
                 placeholder="Enter the question text"
@@ -1013,6 +1026,7 @@ const TradeCategoryQuestionsManager = () => {
             </div>
           </CardContent>
         </Card>
+        </div>
       )}
 
       {/* Questions List */}

@@ -46,8 +46,8 @@ const JobsMap = ({
         'REACT_APP vars': Object.keys(process.env || {}).filter(key => key.startsWith('REACT_APP_'))
       });
       
-      // Access environment variable the correct way for React
-      const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+      // Support Vite and CRA environment variable conventions
+      const apiKey = (import.meta?.env?.VITE_GOOGLE_MAPS_API_KEY) || process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
       
       console.log('Google Maps API Key available:', !!apiKey, {
         host: window.location?.host,
@@ -57,7 +57,7 @@ const JobsMap = ({
       // Require a configured key; no hardcoded fallback to avoid domain-restriction mismatches
       if (!apiKey) {
         console.error('Google Maps API key not found in environment variables.');
-        setError('Google Maps API key not configured. Please set REACT_APP_GOOGLE_MAPS_API_KEY in your deployment.');
+        setError('Google Maps API key not configured. Set VITE_GOOGLE_MAPS_API_KEY (Vite) or REACT_APP_GOOGLE_MAPS_API_KEY.');
         setLoading(false);
         return;
       }
