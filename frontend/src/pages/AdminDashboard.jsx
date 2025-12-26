@@ -4748,7 +4748,8 @@ const AdminDashboard = () => {
                 setEditingItem(null);
                 fetchData();
               } catch (error) {
-                toast({ title: `Failed to update ${editingItem.type}`, variant: "destructive" });
+                const msg = error?.response?.data?.detail || `Failed to update ${editingItem.type}`;
+                toast({ title: "Error", description: msg, variant: "destructive" });
               }
             }}>
               <div className="space-y-4">

@@ -5083,21 +5083,35 @@ class Database:
             return False
     
     async def update_trade(self, old_name: str, new_name: str, group: str = "", description: str = ""):
-        """Update an existing trade category"""
+        """Update an existing trade category.
+        Supports updating both custom and static categories by upserting a record when not present.
+        """
         try:
-            update_data = {
-                "name": new_name,
-                "group": group,
-                "description": description,
-                "updated_at": datetime.now()
-            }
-            
+            now = datetime.now()
+            update_set = {"name": new_name, "updated_at": now}
+            # Only set optional fields when provided to avoid blank overwrites
+            if group:
+                update_set["group"] = group
+            if description:
+                update_set["description"] = description
+
             result = await self.database.system_trades.update_one(
                 {"name": old_name},
-                {"$set": update_data}
+                {
+                    "$set": update_set,
+                    "$setOnInsert": {
+                        "active": True,
+                        "created_at": now,
+                        # Default group if none supplied
+                        "group": group or "General Services",
+                        # Carry description if provided, else empty string
+                        "description": description or ""
+                    }
+                },
+                upsert=True
             )
-            
-            return result.modified_count > 0
+
+            return (result.modified_count > 0) or (getattr(result, "upserted_id", None) is not None)
         except Exception as e:
             print(f"Error updating trade: {e}")
             return False
