@@ -57,7 +57,7 @@ const TradeCategoryDetailPage = () => {
       averagePrice: "₦5,000 - ₦200,000",
       timeframe: "1 hour - 3 days",
       materials: ["PVC pipes", "Copper pipes", "Fittings", "Valves", "Water meters", "Pumps"],
-      whatToExpected: "Plumbers handle water supply, drainage, and sewage systems. They ensure proper installation, prevent leaks, and maintain water pressure throughout your property.",
+      whatToExpect: "Plumbers handle water supply, drainage, and sewage systems. They ensure proper installation, prevent leaks, and maintain water pressure throughout your property.",
       whenToHire: "For new installations, repairs, renovations, or when experiencing water pressure issues, leaks, or drainage problems.",
       tips: [
         "Check for proper licensing and certification",
@@ -773,7 +773,7 @@ const TradeCategoryDetailPage = () => {
       averagePrice: "₦20,000 - ₦300,000",
       timeframe: "2-10 days",
       materials: ["Plaster", "POP", "Mesh", "Primers", "Tools", "Finishing materials"],
-      whatToExpected: "Plasterers create smooth, even surfaces on walls and decorative ceiling features using traditional and modern techniques.",
+      whatToExpect: "Plasterers create smooth, even surfaces on walls and decorative ceiling features using traditional and modern techniques.",
       whenToHire: "For wall finishing, decorative ceilings, repairs, or when preparing surfaces for painting.",
       tips: [
         "Allow proper drying time",
