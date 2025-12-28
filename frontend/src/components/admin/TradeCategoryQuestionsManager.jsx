@@ -710,8 +710,8 @@ const TradeCategoryQuestionsManager = () => {
                     }))}
                   />
                   <span className="text-sm font-medium">Enable Conditional Logic</span>
-                </label>
-              </div>
+              </label>
+            </div>
 
               {formData.conditional_logic.enabled && (
                 <div className="space-y-6">
@@ -911,32 +911,7 @@ const TradeCategoryQuestionsManager = () => {
                             );
                           })()}
 
-                          <div>
-                            <label className="block text-sm font-medium mb-2">
-                              Questions to show when this rule matches
-                            </label>
-                            <div className="space-y-1 max-h-24 overflow-y-auto border rounded-md p-2">
-                              {questions
-                                .filter(q => q.id !== editingQuestion?.id && q.trade_category === formData.trade_category)
-                                .map(question => (
-                                  <label key={question.id} className="flex items-center space-x-2 text-sm">
-                                    <input
-                                      type="checkbox"
-                                      checked={rule.follow_up_questions.includes(question.id)}
-                                      onChange={(e) => {
-                                        const newQuestions = e.target.checked
-                                          ? [...rule.follow_up_questions, question.id]
-                                          : rule.follow_up_questions.filter(id => id !== question.id);
-                                        updateConditionalLogicRule(rule.id, 'follow_up_questions', newQuestions);
-                                      }}
-                                    />
-                                    <span className="truncate">
-                                      [{questionTypes.find(t => t.value === question.question_type)?.label}] {question.question_text.substring(0, 30)}...
-                                    </span>
-                                  </label>
-                                ))}
-                            </div>
-                          </div>
+                          
                         </div>
                       ))
                     )}
